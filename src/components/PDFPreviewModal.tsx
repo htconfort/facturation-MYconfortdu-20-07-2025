@@ -6,19 +6,22 @@ import html2canvas from 'html2canvas';
 import { AdvancedPDFService } from '../services/advancedPdfService';
 import { GoogleDriveService } from '../services/googleDriveService';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
+import { UnifiedPrintService, InvoiceStyle } from '../services/unifiedPrintService';
 
 interface PDFPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoice: Invoice;
   onDownload: () => Promise<void>;
+  invoiceStyle?: InvoiceStyle;
 }
 
 const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   isOpen,
   onClose,
   invoice,
-  onDownload
+  onDownload,
+  invoiceStyle = 'modern'
 }) => {
   // État unifié pour les opérations de loading
   const [isLoading, setIsLoading] = useState(false);
@@ -75,16 +78,13 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
 
   const handlePrint = async () => {
     try {
-      // Créer un aperçu temporaire pour l'impression
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        alert('Impossible d\'ouvrir la fenêtre d\'impression. Veuillez autoriser les pop-ups.');
-        return;
-      }
-
-      // Calculer le total pour l'affichage
-      const total = invoice.products.reduce((sum, product) => 
-        sum + calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType), 0);
+      // Utiliser le service unifié d'impression avec le style sélectionné
+      await UnifiedPrintService.printInvoice(invoice, invoiceStyle);
+    } catch (error) {
+      console.error('Erreur impression:', error);
+      alert('Erreur lors de l\'impression de la facture');
+    }
+  };
       
       // Créer le contenu HTML pour l'impression avec la facture sur la première page et les conditions générales sur la deuxième
       const printContent = `

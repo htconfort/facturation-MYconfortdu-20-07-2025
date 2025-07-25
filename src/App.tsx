@@ -13,6 +13,8 @@ import { PayloadDebugModal } from './components/PayloadDebugModal';
 import { DebugCenter } from './components/DebugCenter';
 import { SignaturePad } from './components/SignaturePad';
 import { InvoicePreview } from './components/InvoicePreview';
+import InvoicePreviewModern from './components/InvoicePreviewModern';
+import InvoicePreviewPremium from './components/InvoicePreviewPremium';
 import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
@@ -81,6 +83,12 @@ function App() {
   const [showDebugCenter, setShowDebugCenter] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showInvoicePreview, setShowInvoicePreview] = useState(true);
+  const [invoiceStyle, setInvoiceStyle] = useState<'classic' | 'modern' | 'premium'>('premium'); // Style premium par défaut
+
+  // Debug: Surveiller les changements de style
+  useEffect(() => {
+    console.log('🎨 Style de facture changé vers:', invoiceStyle);
+  }, [invoiceStyle]);
   const [toast, setToast] = useState({
     show: false,
     message: '',
@@ -408,6 +416,58 @@ function App() {
     showToast('Signature enregistrée - Facture prête pour envoi !', 'success');
   };
 
+  // 🆕 CRÉER UNE NOUVELLE FACTURE
+  const handleNewInvoice = () => {
+    if (window.confirm('Créer une nouvelle facture ?\n\nLes données actuelles seront perdues si elles ne sont pas sauvegardées.')) {
+      setInvoice({
+        invoiceNumber: generateInvoiceNumber(),
+        invoiceDate: new Date().toISOString().split('T')[0],
+        eventLocation: '',
+        taxRate: 20,
+        
+        // Client - Structure plate
+        clientName: '',
+        clientEmail: '',
+        clientPhone: '',
+        clientAddress: '',
+        clientPostalCode: '',
+        clientCity: '',
+        clientHousingType: '',
+        clientDoorCode: '',
+        clientSiret: '',
+        
+        // Produits et montants
+        products: [],
+        montantHT: 0,
+        montantTTC: 0,
+        montantTVA: 0,
+        montantRemise: 0,
+        
+        // Paiement
+        paymentMethod: '',
+        montantAcompte: 0,
+        montantRestant: 0,
+        
+        // Livraison
+        deliveryMethod: '',
+        deliveryNotes: '',
+        
+        // Signature
+        signature: '',
+        isSigned: false,
+        signatureDate: '',
+        
+        // Métadonnées
+        invoiceNotes: '',
+        advisorName: '',
+        termsAccepted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      showToast('✅ Nouvelle facture créée avec succès !', 'success');
+    }
+  };
+
   // 🔒 VÉRIFICATION DES CHAMPS OBLIGATOIRES POUR L'AFFICHAGE
   const validation = validateMandatoryFields();
 
@@ -458,6 +518,14 @@ function App() {
                     <span>SIGNÉE</span>
                   </div>
                 )}
+                <button
+                  onClick={handleNewInvoice}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 transition-all hover:scale-105 shadow-md"
+                  title="Créer une nouvelle facture"
+                >
+                  <span>📝</span>
+                  <span>Nouvelle facture</span>
+                </button>
               </div>
             </div>
           </div>
@@ -595,7 +663,7 @@ function App() {
 
 
 
-        {/* Aperçu de la facture - UNIFORMISÉ SANS BOUTON TÉLÉCHARGER PDF */}
+        {/* Aperçu de la facture - AVEC CHOIX DE 3 STYLES */}
         {showInvoicePreview && (
           <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between mb-4">
@@ -604,18 +672,92 @@ function App() {
                   APERÇU DE LA FACTURE
                 </span>
               </h2>
-              <button
-                onClick={() => setShowInvoicePreview(!showInvoicePreview)}
-                className="text-[#F2EFE2] hover:text-white underline text-sm font-semibold"
-              >
-                {showInvoicePreview ? 'Masquer' : 'Afficher'} l'aperçu
-              </button>
+              
+              <div className="flex items-center space-x-3">
+                {/* Sélecteur de style avec indicateur visuel amélioré */}
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg p-1">
+                  <button
+                    onClick={() => {
+                      console.log('Switching to classic style');
+                      setInvoiceStyle('classic');
+                    }}
+                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
+                      invoiceStyle === 'classic' 
+                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
+                        : 'text-[#F2EFE2] hover:bg-white/20'
+                    }`}
+                    title="Style classique"
+                  >
+                    📄 Classique
+                    {invoiceStyle === 'classic' && <span className="ml-2">✓</span>}
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Switching to modern style');
+                      setInvoiceStyle('modern');
+                    }}
+                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
+                      invoiceStyle === 'modern' 
+                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
+                        : 'text-[#F2EFE2] hover:bg-white/20'
+                    }`}
+                    title="Style moderne"
+                  >
+                    🎨 Moderne
+                    {invoiceStyle === 'modern' && <span className="ml-2">✓</span>}
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Switching to premium style');
+                      setInvoiceStyle('premium');
+                    }}
+                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
+                      invoiceStyle === 'premium' 
+                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
+                        : 'text-[#F2EFE2] hover:bg-white/20'
+                    }`}
+                    title="Style premium"
+                  >
+                    ✨ Premium
+                    {invoiceStyle === 'premium' && <span className="ml-2">✓</span>}
+                  </button>
+                </div>
+                
+                <button
+                  onClick={() => setShowInvoicePreview(!showInvoicePreview)}
+                  className="text-[#F2EFE2] hover:text-white underline text-sm font-semibold"
+                >
+                  {showInvoicePreview ? 'Masquer' : 'Afficher'} l'aperçu
+                </button>
+              </div>
             </div>
 
-            {/* Ajout de l'ID pour la référence unique */}
-            <div id="invoice-preview-section" className="bg-[#F2EFE2] rounded-lg p-4">
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <InvoicePreview invoice={invoice} />
+            {/* Aperçu avec choix de style + indicateur de style actuel */}
+            <div className="mb-2">
+              <div className="text-[#F2EFE2] text-sm font-semibold flex items-center justify-center">
+                Style actuel: 
+                {invoiceStyle === 'classic' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">📄 CLASSIQUE</span>}
+                {invoiceStyle === 'modern' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">🎨 MODERNE</span>}
+                {invoiceStyle === 'premium' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">✨ PREMIUM</span>}
+              </div>
+            </div>
+            <div id="invoice-preview-section" className={invoiceStyle === 'classic' ? "bg-[#F2EFE2] rounded-lg p-4" : "bg-transparent"}>
+              <div className={invoiceStyle === 'classic' ? "border border-gray-300 rounded-lg overflow-hidden" : ""}>
+                {invoiceStyle === 'classic' && (
+                  <div key="classic" className="transition-all duration-500">
+                    <InvoicePreview invoice={invoice} />
+                  </div>
+                )}
+                {invoiceStyle === 'modern' && (
+                  <div key="modern" className="transition-all duration-500">
+                    <InvoicePreviewModern invoice={invoice} />
+                  </div>
+                )}
+                {invoiceStyle === 'premium' && (
+                  <div key="premium" className="transition-all duration-500">
+                    <InvoicePreviewPremium invoice={invoice} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -702,6 +844,7 @@ function App() {
         invoices={invoices}
         onLoadInvoice={handleLoadInvoice}
         onDeleteInvoice={handleDeleteInvoice}
+        invoiceStyle={invoiceStyle}
       />
 
       <ProductsListModal
@@ -714,6 +857,7 @@ function App() {
         onClose={() => setShowPDFPreview(false)}
         invoice={invoice}
         onDownload={handleDownloadPDF}
+        invoiceStyle={invoiceStyle}
       />
 
       <PDFGuideModal

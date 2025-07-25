@@ -58,11 +58,11 @@ export async function generateInvoicePDF(invoiceData: CustomInvoiceData): Promis
   doc.setFont('helvetica', 'bold');
   doc.text('🌸', 22, 23);
 
-  // En-tête MYCONFORT (sans "FactuSign Pro" comme demandé)
-  doc.setTextColor(71, 122, 12);
-  doc.setFontSize(18);
+  // En-tête MyCoNfort (sans "FactuSign Pro" comme demandé)
+  doc.setTextColor(0, 0, 0); // Noir
+  doc.setFontSize(22); // Taille 22
   doc.setFont('helvetica', 'bold');
-  doc.text('MYCONFORT', 40, 20);
+  doc.text('MyCoNfort', 40, 20);
 
   // Informations facture (en haut à droite)
   doc.setTextColor(20, 40, 29);
@@ -300,12 +300,12 @@ export async function generateInvoicePDF(invoiceData: CustomInvoiceData): Promis
   doc.setDrawColor(71, 122, 12);
   doc.line(15, pageHeight - 25, 195, pageHeight - 25);
   
-  doc.setTextColor(71, 122, 12);
-  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0); // Noir
+  doc.setFontSize(22); // Taille 22
   doc.setFont('helvetica', 'bold');
-  doc.text('MYCONFORT', 105, pageHeight - 18, { align: 'center' });
+  doc.text('MyCoNfort', 105, pageHeight - 18, { align: 'center' });
   
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(0, 0, 0); // Noir pour tout le texte
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.text('Merci de votre confiance !', 105, pageHeight - 12, { align: 'center' });

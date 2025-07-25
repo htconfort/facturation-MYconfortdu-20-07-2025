@@ -93,13 +93,14 @@ export class AdvancedPDFService {
     doc.setFillColor(...this.COLORS.primary);
     doc.rect(0, 0, 210, 35, 'F');
     
-    // Titre MYCONFORT en blanc
-    doc.setTextColor(...this.COLORS.white);
-    doc.setFontSize(24);
+    // Titre MyCoNfort en noir
+    doc.setTextColor(0, 0, 0); // Noir
+    doc.setFontSize(22); // Taille 22 comme demandé
     doc.setFont('helvetica', 'bold');
-    doc.text('MYCONFORT', 20, 20);
+    doc.text('MyCoNfort', 20, 20);
     
-    // Sous-titre
+    // Sous-titre en noir
+    doc.setTextColor(0, 0, 0); // Noir
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.text('Facturation professionnelle avec signature électronique', 20, 28);
@@ -125,7 +126,7 @@ export class AdvancedPDFService {
     doc.setTextColor(...this.COLORS.dark);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('MYCONFORT', 20, 50);
+    doc.text('MyCoNfort', 20, 50);
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
@@ -162,7 +163,7 @@ export class AdvancedPDFService {
     
     // Informations client en colonnes (comme l'exemple HTML)
     doc.setTextColor(...this.COLORS.dark);
-    doc.setFontSize(9);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     
     // Première ligne
@@ -258,7 +259,7 @@ export class AdvancedPDFService {
     
     // Signature client
     doc.setFont('helvetica', 'bold');
-    doc.text('Signature client MYCONFORT:', 20, currentY);
+    doc.text('Signature client MyCoNfort:', 20, currentY);
     if (data.signature) {
       doc.setTextColor(...this.COLORS.green);
       doc.text('✓ Signature électronique enregistrée', 80, currentY);
@@ -401,15 +402,17 @@ export class AdvancedPDFService {
     doc.setFillColor(...this.COLORS.primary);
     doc.rect(0, pageHeight - 30, 210, 30, 'F');
     
-    doc.setTextColor(...this.COLORS.white);
-    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0); // Noir
+    doc.setFontSize(22); // Taille 22 comme demandé
     doc.setFont('helvetica', 'bold');
-    doc.text('🌸 MYCONFORT', 105, pageHeight - 20, { align: 'center' });
+    doc.text('MyCoNfort', 105, pageHeight - 20, { align: 'center' });
     
+    doc.setTextColor(0, 0, 0); // Noir pour tout le texte
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text('Merci pour votre confiance !', 105, pageHeight - 14, { align: 'center' });
     
+    doc.setTextColor(0, 0, 0); // Noir pour tout le texte
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.text('Votre spécialiste en matelas et literie de qualité', 105, pageHeight - 10, { align: 'center' });
@@ -481,10 +484,10 @@ export class AdvancedPDFService {
     doc.setFillColor(...this.COLORS.primary);
     doc.rect(10, 10, 190, 15, 'F');
     
-    doc.setTextColor(...this.COLORS.white);
-    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0); // Noir
+    doc.setFontSize(22); // Taille 22
     doc.setFont('helvetica', 'bold');
-    doc.text('MYCONFORT', 15, 20);
+    doc.text('MyCoNfort', 15, 20);
     
     doc.setFontSize(10);
     doc.text(`Facture: ${data.invoiceNumber}`, 150, 20);
@@ -525,9 +528,9 @@ export class AdvancedPDFService {
 
   private static addCompressedFooter(doc: jsPDF): void {
     const pageHeight = doc.internal.pageSize.height;
-    doc.setTextColor(...this.COLORS.primary);
+    doc.setTextColor(0, 0, 0); // Noir
     doc.setFontSize(8);
-    doc.text('MYCONFORT - Merci de votre confiance !', 105, pageHeight - 10, { align: 'center' });
+    doc.text('MyCoNfort - Merci de votre confiance !', 105, pageHeight - 10, { align: 'center' });
   }
 
   private static convertInvoiceData(invoice: Invoice): InvoiceData {
