@@ -354,17 +354,6 @@ function App() {
     }
   };
 
-  const handleShowPDFPreview = () => {
-    const validation = validateMandatoryFields();
-    if (!validation.isValid) {
-      showToast(`Champs obligatoires manquants: ${validation.errors.join(', ')}`, 'error');
-      return;
-    }
-    handleSave();
-    handleSaveInvoice();
-    setShowPDFPreview(true);
-  };
-
   // handlePrint function REMOVED as it relied on PDFService and html2pdf.js for printing from DOM
   // const handlePrint = () => {
   //   PDFService.printInvoice(previewRef, invoice.invoiceNumber);
@@ -419,28 +408,16 @@ function App() {
     showToast('Signature enregistrée - Facture prête pour envoi !', 'success');
   };
 
-  // 🔒 VALIDATION COMPLÈTE POUR BOUTON PDF
-  const handleValidateAndPDF = () => {
-    const validation = validateMandatoryFields();
-    if (!validation.isValid) {
-      showToast(`Champs obligatoires manquants: ${validation.errors.join(', ')}`, 'error');
-      return;
-    }
-    handleShowPDFPreview();
-  };
-
   // 🔒 VÉRIFICATION DES CHAMPS OBLIGATOIRES POUR L'AFFICHAGE
   const validation = validateMandatoryFields();
 
   return (
     <div className="min-h-screen font-['Inter'] text-gray-100" style={{ backgroundColor: '#14281D' }}>
       <Header
-        onGeneratePDF={handleValidateAndPDF}
         onShowClients={() => setShowClientsList(true)}
         onShowInvoices={() => setShowInvoicesList(true)}
         onShowProducts={() => setShowProductsList(true)}
         onShowGoogleDrive={handleSendPDF}
-        onShowDebug={() => setShowDebugCenter(true)}
       />
 
       <main className="container mx-auto px-4 py-6" id="invoice-content">
