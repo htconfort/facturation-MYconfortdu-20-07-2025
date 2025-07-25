@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PDFPreviewModal } from './components/PDFPreviewModal';
+import PDFPreviewModal from './components/PDFPreviewModal';
 import { Toast } from './components/ui/Toast';
 import { Invoice, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';

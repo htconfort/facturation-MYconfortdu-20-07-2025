@@ -4,7 +4,7 @@ import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 import { AdvancedPDFService } from '../services/advancedPdfService';
-import { PDFPreviewModal } from './PDFPreviewModal';
+import PDFPreviewModal from './PDFPreviewModal';
 import { PDFService } from '../services/pdfService';
 
 interface InvoicesListModalProps {
