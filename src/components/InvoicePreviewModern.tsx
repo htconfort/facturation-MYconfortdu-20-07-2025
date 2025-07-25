@@ -77,7 +77,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 margin: '0 0 8px 0',
                 letterSpacing: '-0.025em'
               }}>
-                MyCoNfort
+                MYCONFORT
               </h1>
               <p style={{ 
                 fontSize: '16px', 
@@ -144,7 +144,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 margin: '0 0 16px 0',
                 color: '#2D3748'
               }}>
-                MyCoNfort
+                MYCONFORT
               </h3>
               <div style={{ fontSize: '14px', lineHeight: '1.8', color: '#4A5568' }}>
                 <div style={{ marginBottom: '4px' }}>📍 88 Avenue des Ternes</div>
@@ -606,7 +606,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
             margin: '0 0 12px 0',
             letterSpacing: '-0.025em'
           }}>
-            MyCoNfort
+            MYCONFORT
           </h3>
           <p style={{ fontSize: '16px', margin: '0 0 16px 0', opacity: 0.9 }}>
             Merci pour votre confiance !

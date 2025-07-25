@@ -49,7 +49,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         {/* Header compact avec bouton SIGNÉE à droite */}
         <header className="invoice-header-compact">
           <div>
-            <h1 style={{ fontSize: '22px', margin: '0', color: '#000000' }}>MyCoNfort</h1>
+            <h1 style={{ fontSize: '22px', margin: '0', color: '#000000', fontWeight: 'bold', letterSpacing: '1px' }}>MYCONFORT</h1>
             <p style={{ fontSize: '11px', margin: '2px 0', color: '#000000' }}>Facturation professionnelle avec signature électronique</p>
           </div>
           {invoice.signature && (
@@ -60,7 +60,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         {/* Main Information - Ultra compact */}
         <section className="main-info-compact">
           <div className="company-details-compact">
-            <h3 style={{ fontSize: '12px', margin: '0 0 5px 0', color: '#000000' }}>MyCoNfort</h3>
+            <h3 style={{ fontSize: '12px', margin: '0 0 5px 0', color: '#000000', fontWeight: 'bold', letterSpacing: '1px' }}>MYCONFORT</h3>
             <p style={{ fontSize: '9px', margin: '1px 0', lineHeight: '1.2', color: '#000000' }}>
               88 Avenue des Ternes • 75017 Paris, France<br/>
               SIRET: 824 313 530 00027 • Tél: 04 68 50 41 45<br/>

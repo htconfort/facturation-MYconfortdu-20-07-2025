@@ -125,7 +125,7 @@ export const InvoicePreviewPremium: React.FC<InvoicePreviewPremiumProps> = ({
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>
-                    MyCoNfort
+                    MYCONFORT
                   </h1>
                 </div>
               </div>
@@ -205,7 +205,7 @@ export const InvoicePreviewPremium: React.FC<InvoicePreviewPremiumProps> = ({
                 position: 'relative',
                 zIndex: 2
               }}>
-                MyCoNfort
+                MYCONFORT
               </h3>
               <div style={{ fontSize: '16px', lineHeight: '2', color: '#4a5568', position: 'relative', zIndex: 2 }}>
                 <div style={{ 
@@ -845,7 +845,7 @@ export const InvoicePreviewPremium: React.FC<InvoicePreviewPremiumProps> = ({
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              MyCoNfort
+              MYCONFORT
             </h3>
             <p style={{ fontSize: '20px', margin: '0 0 24px 0', opacity: 0.9, fontWeight: '500' }}>
               Merci pour votre confiance !
