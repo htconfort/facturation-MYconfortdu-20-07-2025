@@ -44,17 +44,17 @@ export interface InvoiceData {
 export class AdvancedPDFService {
   private static readonly COLORS = {
     // Couleurs exactes de l'aperçu HTML fourni
-    primary: [104, 159, 56],     // #689f38 - Vert principal de l'exemple
-    primaryDark: [124, 179, 66], // #7cb342 - Vert dégradé
-    cream: [242, 239, 226],      // #F2EFE2 - Beige clair
-    dark: [51, 51, 51],          // #333333 - Texte foncé
-    white: [255, 255, 255],      // Blanc pur
-    grayLight: [248, 248, 248],  // #f8f8f8 - Gris très clair
-    grayBorder: [221, 221, 221], // #dddddd - Gris bordures
-    red: [220, 38, 38],          // Rouge pour alertes
-    orange: [255, 140, 0],       // Orange pour acompte
-    blue: [25, 118, 210],        // #1976d2 - Bleu pour informations
-    green: [76, 175, 80]         // #4caf50 - Vert pour succès
+    primary: [104, 159, 56] as const,     // #689f38 - Vert principal de l'exemple
+    primaryDark: [124, 179, 66] as const, // #7cb342 - Vert dégradé
+    cream: [242, 239, 226] as const,      // #F2EFE2 - Beige clair
+    dark: [51, 51, 51] as const,          // #333333 - Texte foncé
+    white: [255, 255, 255] as const,      // Blanc pur
+    grayLight: [248, 248, 248] as const,  // #f8f8f8 - Gris très clair
+    grayBorder: [221, 221, 221] as const, // #dddddd - Gris bordures
+    red: [220, 38, 38] as const,          // Rouge pour alertes
+    orange: [255, 140, 0] as const,       // Orange pour acompte
+    blue: [25, 118, 210] as const,        // #1976d2 - Bleu pour informations
+    green: [76, 175, 80] as const         // #4caf50 - Vert pour succès
   };
 
   // 🎯 MÉTHODE PRINCIPALE - PDF IDENTIQUE À L'EXEMPLE HTML
@@ -325,8 +325,8 @@ export class AdvancedPDFService {
       body: tableData,
       theme: 'grid',
       headStyles: {
-        fillColor: this.COLORS.primary,
-        textColor: this.COLORS.white,
+        fillColor: [...this.COLORS.primary],
+        textColor: [...this.COLORS.white],
         fontSize: 10,
         fontStyle: 'bold',
         halign: 'center',
@@ -538,7 +538,7 @@ export class AdvancedPDFService {
     doc.text('PRODUITS:', 15, y);
     y += 5;
     
-    data.items.forEach((item, index) => {
+    data.items.forEach((item) => {
       doc.setFont('helvetica', 'normal');
       doc.text(`${item.qty}x ${item.description} - ${formatCurrency(item.total)}`, 15, y);
       y += 5;
@@ -585,15 +585,15 @@ export class AdvancedPDFService {
     }, 0);
 
     return {
-      clientName: invoice.client.name,
-      clientAddress: invoice.client.address,
-      clientCity: invoice.client.city,
-      clientPostalCode: invoice.client.postalCode,
-      clientPhone: invoice.client.phone,
-      clientEmail: invoice.client.email,
-      clientHousingType: invoice.client.housingType,
-      clientDoorCode: invoice.client.doorCode,
-      clientSiret: invoice.client.siret,
+      clientName: invoice.clientName,
+      clientAddress: invoice.clientAddress,
+      clientCity: invoice.clientCity,
+      clientPostalCode: invoice.clientPostalCode,
+      clientPhone: invoice.clientPhone,
+      clientEmail: invoice.clientEmail,
+      clientHousingType: invoice.clientHousingType,
+      clientDoorCode: invoice.clientDoorCode,
+      clientSiret: invoice.clientSiret,
       invoiceNumber: invoice.invoiceNumber,
       invoiceDate: invoice.invoiceDate,
       eventLocation: invoice.eventLocation,
@@ -605,19 +605,19 @@ export class AdvancedPDFService {
       taxRate: invoice.taxRate,
       notes: invoice.invoiceNotes,
       advisorName: invoice.advisorName,
-      paymentMethod: invoice.payment.method,
-      depositAmount: invoice.payment.depositAmount,
-      montantRestant: totalTTC - (invoice.payment.depositAmount || 0),
+      paymentMethod: invoice.paymentMethod,
+      depositAmount: invoice.montantAcompte,
+      montantRestant: totalTTC - (invoice.montantAcompte || 0),
       signature: invoice.signature,
-      deliveryMethod: invoice.delivery.method,
-      deliveryNotes: invoice.delivery.notes
+      deliveryMethod: invoice.deliveryMethod,
+      deliveryNotes: invoice.deliveryNotes
     };
   }
 
   static async downloadPDF(invoice: Invoice): Promise<void> {
-    console.log('📥 TÉLÉCHARGEMENT PDF IDENTIQUE À L\'EXEMPLE HTML');
     const doc = await this.generateInvoicePDF(invoice);
-    doc.save(`facture_${invoice.invoiceNumber}.pdf`);
+    const filename = `facture_${invoice.invoiceNumber}.pdf`;
+    doc.save(filename);
   }
 
   static async getPDFBlob(invoice: Invoice): Promise<Blob> {

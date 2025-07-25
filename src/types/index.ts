@@ -59,7 +59,9 @@ export interface Invoice {
   clientAddress: string;
   clientPostalCode: string;
   clientCity: string;
+  clientHousingType?: string;
   clientDoorCode?: string;
+  clientSiret?: string;
   
   // Produits
   products: Product[];

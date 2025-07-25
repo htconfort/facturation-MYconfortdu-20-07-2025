@@ -35,7 +35,9 @@ function App() {
     clientAddress: '',
     clientPostalCode: '',
     clientCity: '',
+    clientHousingType: '',
     clientDoorCode: '',
+    clientSiret: '',
     
     // Produits et montants
     products: [],
@@ -88,6 +90,7 @@ function App() {
   useEffect(() => {
     setClients(loadClients());
     setInvoices(loadInvoices());
+    
     const draft = loadDraft();
     if (draft) {
       setInvoice(draft);
@@ -216,14 +219,16 @@ function App() {
       showToast(`Impossible de télécharger le PDF. Champs obligatoires manquants: ${validation.errors.join(', ')}`, 'error');
       return;
     }
+    
     handleSave();
     handleSaveInvoice();
     showToast('Génération et téléchargement du PDF MYCONFORT en cours...', 'success');
+    
     try {
-      await AdvancedPDFService.downloadPDF(invoice); // Utilise AdvancedPDFService
+      await AdvancedPDFService.downloadPDF(invoice);
       showToast(`PDF MYCONFORT téléchargé avec succès${invoice.signature ? ' (avec signature électronique)' : ''}`, 'success');
     } catch (error) {
-      console.error('PDF download error:', error);
+      console.error('❌ PDF download error:', error);
       showToast('Erreur lors du téléchargement du PDF', 'error');
     }
   };
@@ -506,6 +511,9 @@ function App() {
               city: invoice.clientCity,
               phone: invoice.clientPhone,
               email: invoice.clientEmail,
+              housingType: invoice.clientHousingType,
+              doorCode: invoice.clientDoorCode,
+              siret: invoice.clientSiret || '',
             }}
             onUpdate={(client) => setInvoice(prev => ({ 
               ...prev, 
@@ -514,7 +522,10 @@ function App() {
               clientPostalCode: client.postalCode,
               clientCity: client.city,
               clientPhone: client.phone,
-              clientEmail: client.email
+              clientEmail: client.email,
+              clientHousingType: client.housingType || '',
+              clientDoorCode: client.doorCode || '',
+              clientSiret: client.siret || ''
             }))}
           />
         </div>

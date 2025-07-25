@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { X, FileText, Eye, Download, Trash2, Search, Calendar, Euro, User, Mail, Filter, MapPin, Printer, Edit } from 'lucide-react';
+import { FileText, Eye, Trash2, Search, Calendar, User, Mail, Filter, MapPin, Printer, Edit } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
-import { AdvancedPDFService } from '../services/advancedPdfService';
-import PDFPreviewModal from './PDFPreviewModal';
-import { PDFService } from '../services/pdfService';
+import { SimpleModalPreview } from './SimpleModalPreview';
 
 interface InvoicesListModalProps {
   isOpen: boolean;
@@ -34,8 +32,8 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
     let filtered = invoices.filter(invoice => {
       const matchesSearch = 
         invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.clientEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (invoice.eventLocation && invoice.eventLocation.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesFilter = 
@@ -57,7 +55,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
           comparison = a.invoiceNumber.localeCompare(b.invoiceNumber);
           break;
         case 'client':
-          comparison = a.client.name.localeCompare(b.client.name);
+          comparison = a.clientName.localeCompare(b.clientName);
           break;
         case 'amount':
           const totalA = a.products.reduce((sum, product) => 
@@ -81,15 +79,6 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
   const handlePreviewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowPreview(true);
-  };
-
-  const handleDownloadPDF = async (invoice: Invoice) => {
-    try {
-      await AdvancedPDFService.downloadPDF(invoice);
-    } catch (error) {
-      console.error('Erreur téléchargement PDF:', error);
-      alert('Erreur lors du téléchargement du PDF');
-    }
   };
 
   const handlePrintInvoice = async (invoice: Invoice) => {
@@ -181,11 +170,11 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
             
             <div class="client-info">
               <h3>Client</h3>
-              <p><strong>${invoice.client.name}</strong></p>
-              <p>${invoice.client.address}</p>
-              <p>${invoice.client.postalCode} ${invoice.client.city}</p>
-              <p>Tél: ${invoice.client.phone}</p>
-              <p>Email: ${invoice.client.email}</p>
+              <p><strong>${invoice.clientName}</strong></p>
+              <p>${invoice.clientAddress}</p>
+              <p>${invoice.clientPostalCode} ${invoice.clientCity}</p>
+              <p>Tél: ${invoice.clientPhone}</p>
+              <p>Email: ${invoice.clientEmail}</p>
             </div>
           </div>
           
@@ -212,7 +201,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
           
           <div class="total">
             TOTAL TTC: ${formatCurrency(total)}
-            ${invoice.payment.depositAmount > 0 ? `<br>Acompte versé: ${formatCurrency(invoice.payment.depositAmount)}<br>Reste à payer: ${formatCurrency(total - invoice.payment.depositAmount)}` : ''}
+            ${invoice.montantAcompte > 0 ? `<br>Acompte versé: ${formatCurrency(invoice.montantAcompte)}<br>Reste à payer: ${formatCurrency(total - invoice.montantAcompte)}` : ''}
           </div>
           
           ${invoice.signature ? '<p><strong>✅ Facture signée électroniquement</strong></p>' : ''}
@@ -362,16 +351,16 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                       <td className="border border-gray-300 px-4 py-3">
                         <div className="flex items-center space-x-1">
                           <User className="w-4 h-4 text-gray-400" />
-                          <span className="font-bold text-black">{invoice.client.name}</span>
+                          <span className="font-bold text-black">{invoice.clientName}</span>
                         </div>
-                        {invoice.client.city && (
-                          <div className="text-xs text-gray-600 font-semibold">{invoice.client.city}</div>
+                        {invoice.clientCity && (
+                          <div className="text-xs text-gray-600 font-semibold">{invoice.clientCity}</div>
                         )}
                       </td>
                       <td className="border border-gray-300 px-4 py-3">
                         <div className="flex items-center space-x-1">
                           <Mail className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-black font-semibold">{invoice.client.email}</span>
+                          <span className="text-sm text-black font-semibold">{invoice.clientEmail}</span>
                         </div>
                       </td>
                       <td className="border border-gray-300 px-4 py-3">
@@ -388,9 +377,9 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                         <div className="font-bold text-lg text-[#477A0C]">
                           {formatCurrency(total)}
                         </div>
-                        {invoice.payment.depositAmount > 0 && (
+                        {invoice.montantAcompte > 0 && (
                           <div className="text-xs text-orange-600 font-bold">
-                            Acompte: {formatCurrency(invoice.payment.depositAmount)}
+                            Acompte: {formatCurrency(invoice.montantAcompte)}
                           </div>
                         )}
                       </td>
@@ -476,16 +465,15 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
         </div>
       </Modal>
 
-      {/* Modal d'aperçu PDF */}
+      {/* Modal d'aperçu simple et élégante */}
       {selectedInvoice && (
-        <PDFPreviewModal
+        <SimpleModalPreview
           isOpen={showPreview}
           onClose={() => {
             setShowPreview(false);
             setSelectedInvoice(null);
           }}
           invoice={selectedInvoice}
-          onDownload={() => handleDownloadPDF(selectedInvoice)}
         />
       )}
     </>
