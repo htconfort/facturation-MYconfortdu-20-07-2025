@@ -78,10 +78,8 @@ export class AdvancedPDFService {
     this.addProductsSectionLikeHTML(doc, invoiceData);
     this.addTotalsLikeHTML(doc, invoiceData);
     
-    // Signature si présente
-    if (invoiceData.signature) {
-      await this.addSignatureLikeHTML(doc, invoiceData.signature);
-    }
+    // La signature est déjà incluse dans addTotalsLikeHTML
+    // Pas besoin d'appeler addSignatureLikeHTML séparément
     
     this.addFooterLikeHTML(doc);
     
@@ -197,6 +195,14 @@ export class AdvancedPDFService {
     doc.text('Téléphone*', 20, 107);
     doc.setFont('helvetica', 'normal');
     doc.text(data.clientPhone, 50, 107);
+    
+    // Ajout du code porte s'il existe
+    if (data.clientDoorCode) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Code porte', 120, 107);
+      doc.setFont('helvetica', 'normal');
+      doc.text(data.clientDoorCode, 150, 107);
+    }
   }
 
   // 🚚 SECTION LOGISTIQUE COMME L'EXEMPLE HTML
@@ -335,11 +341,11 @@ export class AdvancedPDFService {
       bodyStyles: {
         fontSize: 9,
         cellPadding: 3,
-        textColor: this.COLORS.dark,
+        textColor: [...this.COLORS.dark],
         halign: 'center'
       },
       alternateRowStyles: {
-        fillColor: this.COLORS.grayLight
+        fillColor: [...this.COLORS.grayLight]
       },
       margin: { left: 20, right: 20 }
     });
@@ -384,41 +390,6 @@ export class AdvancedPDFService {
       doc.setTextColor(...this.COLORS.orange);
       doc.text('RESTE À PAYER:', 130, yPos);
       doc.text(formatCurrency(data.totalTTC - data.depositAmount), 180, yPos, { align: 'right' });
-    }
-  }
-
-  // ✍️ SIGNATURE COMME L'EXEMPLE HTML
-  private static async addSignatureLikeHTML(doc: jsPDF, signatureDataUrl: string): Promise<void> {
-    try {
-      const signatureY = 200;
-      
-      // Cadre signature
-      doc.setDrawColor(...this.COLORS.grayBorder);
-      doc.setLineWidth(1);
-      doc.roundedRect(130, signatureY, 60, 25, 2, 2, 'D');
-      
-      doc.setTextColor(...this.COLORS.primary);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SIGNATURE CLIENT', 160, signatureY + 6, { align: 'center' });
-      
-      // Image signature
-      doc.addImage(
-        signatureDataUrl,
-        'PNG',
-        135,
-        signatureY + 8,
-        50,
-        12,
-        undefined,
-        'FAST'
-      );
-      
-    } catch (error) {
-      console.warn('Erreur signature:', error);
-      doc.setTextColor(...this.COLORS.green);
-      doc.setFontSize(8);
-      doc.text('SIGNÉ ÉLECTRONIQUEMENT', 160, 210, { align: 'center' });
     }
   }
 
