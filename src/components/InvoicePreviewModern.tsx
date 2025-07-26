@@ -96,11 +96,11 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
               textTransform: 'uppercase',
               letterSpacing: '0.3px'
             }}>📋 Détails Facture</h3>
-            <p style={{ margin: '2px 0' }}><strong>N°:</strong> {invoice.invoiceNumber}</p>
-            <p style={{ margin: '2px 0' }}><strong>Date:</strong> {new Date(invoice.invoiceDate).toLocaleDateString('fr-FR')}</p>
-            {invoice.eventLocation && <p style={{ margin: '2px 0' }}><strong>📍 Lieu:</strong> {invoice.eventLocation}</p>}
-            {invoice.advisorName && <p style={{ margin: '2px 0' }}><strong>👤 Conseiller:</strong> {invoice.advisorName}</p>}
-            {invoice.clientHousingType && <p style={{ margin: '2px 0' }}><strong>🏠 Logement:</strong> {invoice.clientHousingType}</p>}
+            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>N°:</strong> {invoice.invoiceNumber}</p>
+            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>Date:</strong> {new Date(invoice.invoiceDate).toLocaleDateString('fr-FR')}</p>
+            {invoice.eventLocation && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>📍 Lieu:</strong> {invoice.eventLocation}</p>}
+            {invoice.advisorName && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>👤 Conseiller:</strong> {invoice.advisorName}</p>}
+            {invoice.clientHousingType && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>🏠 Logement:</strong> {invoice.clientHousingType}</p>}
           </div>
           
           <div style={{
@@ -119,12 +119,12 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
               textTransform: 'uppercase',
               letterSpacing: '0.3px'
             }}>👤 Informations Client</h3>
-            <p style={{ margin: '2px 0' }}><strong>{invoice.clientName}</strong></p>
-            <p style={{ margin: '2px 0' }}>📍 {invoice.clientAddress}</p>
-            <p style={{ margin: '2px 0' }}>{invoice.clientPostalCode} {invoice.clientCity}</p>
-            {invoice.clientDoorCode && <p style={{ margin: '2px 0' }}>🚪 Code: {invoice.clientDoorCode}</p>}
-            <p style={{ margin: '2px 0' }}>📞 {invoice.clientPhone}</p>
-            <p style={{ margin: '2px 0' }}>✉️ {invoice.clientEmail}</p>
+            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>{invoice.clientName}</strong></p>
+            <p style={{ margin: '2px 0', fontSize: '28px' }}>📍 {invoice.clientAddress}</p>
+            <p style={{ margin: '2px 0', fontSize: '28px' }}>{invoice.clientPostalCode} {invoice.clientCity}</p>
+            {invoice.clientDoorCode && <p style={{ margin: '2px 0', fontSize: '28px' }}>🚪 Code: {invoice.clientDoorCode}</p>}
+            <p style={{ margin: '2px 0', fontSize: '28px' }}>📞 {invoice.clientPhone}</p>
+            <p style={{ margin: '2px 0', fontSize: '28px' }}>✉️ {invoice.clientEmail}</p>
           </div>
         </div>
 
