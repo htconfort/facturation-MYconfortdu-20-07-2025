@@ -48,8 +48,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        padding: '15mm',
-        pageBreakAfter: 'always'
+        padding: '15mm'
       }}>
         {/* Header moderne compact - Optimisé noir et blanc */}
         <div style={{
@@ -543,7 +542,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
         </div>
       </div>
 
-      {/* PAGE 2: CONDITIONS GÉNÉRALES SÉPARÉES */}
+      {/* PAGE 2: CONDITIONS GÉNÉRALES */}
       <div style={{
         padding: '15mm',
         minHeight: '100vh',
@@ -555,7 +554,6 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           color: 'white',
           padding: '20px',
           textAlign: 'center',
-          borderRadius: '6px',
           marginBottom: '25px'
         }}>
           <h1 style={{
@@ -574,7 +572,6 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           textAlign: 'center',
           fontWeight: 'bold',
           fontSize: '12px',
-          borderRadius: '6px',
           marginBottom: '20px'
         }}>
           ⚠️ IMPORTANT : LE CONSOMMATEUR NE BÉNÉFICIE PAS D'UN DROIT DE RÉTRACTATION POUR UN ACHAT EFFECTUÉ DANS UNE FOIRE OU DANS UN SALON.
