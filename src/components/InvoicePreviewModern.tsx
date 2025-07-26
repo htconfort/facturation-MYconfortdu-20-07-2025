@@ -492,16 +492,16 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: '80px',
-              maxWidth: '100px',
-              height: '40px'
+              minWidth: '160px',
+              maxWidth: '200px',
+              height: '80px'
             }}>
               <img 
                 src={invoice.signature} 
                 alt="Signature" 
                 style={{ 
-                  maxHeight: '35px', 
-                  maxWidth: '95px',
+                  maxHeight: '70px', 
+                  maxWidth: '190px',
                   objectFit: 'contain'
                 }} 
               />
