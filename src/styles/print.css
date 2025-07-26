@@ -135,7 +135,7 @@
     background: white !important;
     box-shadow: none !important;
     border: none !important;
-    page-break-after: always !important;
+    /* page-break-after supprimé pour éviter les pages en double */
     min-height: 27cm !important;
   }
   

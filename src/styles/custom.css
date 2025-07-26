@@ -249,7 +249,7 @@
   padding: 20mm;
   background: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  page-break-after: always;
+  /* page-break-after supprimé pour éviter les pages en double */
 }
 
 /* En-tête de la facture */
@@ -675,7 +675,7 @@
     margin: 0;
     padding: 15mm;
     box-shadow: none;
-    page-break-after: always;
+    /* page-break-after supprimé pour éviter les pages en double */
   }
   
   .company-logo {
@@ -1054,7 +1054,7 @@
   
   .invoice-page {
     padding: 10mm;
-    page-break-after: always;
+    /* page-break-after supprimé pour éviter les pages en double */
   }
   
   .green-bg, .total-line-final, .footer-green, .invoice-header-box {
@@ -1294,10 +1294,7 @@
   line-height: 1.4;
 }
 
-/* Page break pour impression */
-.invoice-page {
-  page-break-after: always;
-}
+/* Page break pour impression - règles supprimées pour éviter les pages en double */
 
 /* Styles d'impression */
 @media print {
@@ -1389,7 +1386,7 @@
   min-height: 297mm;
   width: 210mm;
   box-sizing: border-box;
-  page-break-after: always;
+  /* page-break-after supprimé pour éviter les pages en double */
 }
 
 /* En-tête simple */
@@ -1676,7 +1673,7 @@
   max-width: 210mm;
   min-height: 297mm;
   box-sizing: border-box;
-  page-break-after: always;
+  /* page-break-after supprimé pour éviter les pages en double */
 }
 
 /* EN-TÊTE ORIGINAL */
