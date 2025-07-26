@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Download, Printer, FileText, Loader, UploadCloud as CloudUpload, AlertCircle } from 'lucide-react';
-import { InvoicePreview } from './InvoicePreview';
+import { InvoicePreviewModern } from './InvoicePreviewModern';
 import { Invoice } from '../types';
 import { UnifiedPrintService } from '../services/unifiedPrintService';
 
@@ -182,7 +182,7 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
         {/* Aperçu */}
         <div className="overflow-auto max-h-[60vh] bg-gray-100 p-6">
           <div className="bg-white shadow-lg rounded-lg mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
-            <InvoicePreview invoice={invoice} />
+            <InvoicePreviewModern invoice={invoice} />
           </div>
         </div>
       </div>

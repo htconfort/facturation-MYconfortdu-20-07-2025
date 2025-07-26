@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Printer } from 'lucide-react';
 import { Invoice } from '../types';
-import { InvoicePreviewSimple } from './InvoicePreviewSimple';
+import { InvoicePreviewModern } from './InvoicePreviewModern';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 
 interface SimpleModalPreviewProps {
@@ -450,7 +450,7 @@ export const SimpleModalPreview: React.FC<SimpleModalPreviewProps> = ({
 
         {/* Content avec scroll */}
         <div className="overflow-auto max-h-[calc(95vh-80px)] p-6 bg-gray-50">
-          <InvoicePreviewSimple invoice={invoice} />
+          <InvoicePreviewModern invoice={invoice} />
         </div>
       </div>
     </div>

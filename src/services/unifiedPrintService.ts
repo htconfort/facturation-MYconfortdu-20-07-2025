@@ -167,6 +167,70 @@ export class UnifiedPrintService {
             font-weight: bold;
           }
 
+          /* Styles pour les nouvelles sections */
+          .payment-method-section, .deposit-section, .notes-section {
+            margin-top: 20px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid;
+            margin-bottom: 15px;
+          }
+
+          .payment-method-section {
+            background: #E8F5E8;
+            border-left-color: #477A0C;
+          }
+
+          .deposit-section {
+            background: #FFF4E6;
+            border-left-color: #FF8C00;
+          }
+
+          .notes-section {
+            background: #F0F8FF;
+            border-left-color: #4A90E2;
+          }
+
+          .section-header {
+            font-weight: bold;
+            font-size: 12px;
+            color: #14281D;
+            margin-bottom: 8px;
+          }
+
+          .payment-badge {
+            font-size: 12px;
+            color: #477A0C;
+            font-weight: bold;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #477A0C;
+            display: inline-block;
+          }
+
+          .deposit-amount {
+            font-size: 14px;
+            color: #FF8C00;
+            font-weight: bold;
+          }
+
+          .deposit-percentage {
+            font-size: 10px;
+            margin-left: 5px;
+          }
+
+          .note-item {
+            font-size: 11px;
+            color: #14281D;
+            line-height: 1.4;
+            margin-bottom: 8px;
+          }
+
+          .note-item:last-child {
+            margin-bottom: 0;
+          }
+
           .totals {
             margin-top: 30px;
             text-align: right;
@@ -181,6 +245,16 @@ export class UnifiedPrintService {
 
           .total-final {
             background: #477A0C;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-top: 10px;
+          }
+
+          .remaining-amount {
+            background: #F55D3E;
             color: white;
             padding: 15px;
             font-size: 16px;
@@ -373,6 +447,42 @@ export class UnifiedPrintService {
             </table>
           </div>
 
+          <!-- Section Mode de Règlement -->
+          ${invoice.paymentMethod ? `
+            <div class="payment-method-section">
+              <div class="section-header">💳 Mode de règlement:</div>
+              <div class="payment-badge">${invoice.paymentMethod}</div>
+            </div>
+          ` : ''}
+
+          <!-- Section Taux d'Acompte -->
+          ${invoice.montantAcompte > 0 ? `
+            <div class="deposit-section">
+              <div class="section-header">💰 Acompte versé:</div>
+              <div class="deposit-amount">
+                ${formatCurrency(invoice.montantAcompte)}
+                <span class="deposit-percentage">(${((invoice.montantAcompte / total) * 100).toFixed(1)}% du total)</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Section Remarques -->
+          ${(invoice.invoiceNotes || invoice.deliveryNotes) ? `
+            <div class="notes-section">
+              <div class="section-header">📝 Remarques:</div>
+              ${invoice.invoiceNotes ? `
+                <div class="note-item">
+                  <strong>Notes générales:</strong> ${invoice.invoiceNotes}
+                </div>
+              ` : ''}
+              ${invoice.deliveryNotes ? `
+                <div class="note-item">
+                  <strong>Livraison:</strong> ${invoice.deliveryNotes}
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
           <!-- Totaux -->
           <div class="totals">
             <div class="total-line">
@@ -389,6 +499,14 @@ export class UnifiedPrintService {
                 <span>${formatCurrency(total)}</span>
               </div>
             </div>
+            ${invoice.montantAcompte > 0 ? `
+              <div class="remaining-amount">
+                <div class="total-line" style="border: none; color: #F55D3E; font-weight: bold; font-size: 16px;">
+                  <span>Reste à payer:</span>
+                  <span>${formatCurrency(total - invoice.montantAcompte)}</span>
+                </div>
+              </div>
+            ` : ''}
           </div>
 
           <!-- Section footer avec informations et signature -->

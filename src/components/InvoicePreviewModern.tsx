@@ -247,6 +247,109 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </tbody>
         </table>
 
+        {/* Section Mode de Règlement */}
+        {invoice.paymentMethod && (
+          <div style={{
+            marginTop: '20px',
+            padding: '12px 15px',
+            background: '#E8F5E8',
+            borderRadius: '6px',
+            borderLeft: '4px solid #477A0C',
+            marginBottom: '15px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D' }}>
+                💳 Mode de règlement:
+              </div>
+              <div style={{ 
+                fontSize: '12px', 
+                color: '#477A0C',
+                fontWeight: 'bold',
+                background: 'white',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #477A0C'
+              }}>
+                {invoice.paymentMethod}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section Taux d'Acompte */}
+        {acompteAmount > 0 && (
+          <div style={{
+            marginTop: '15px',
+            padding: '12px 15px',
+            background: '#FFF4E6',
+            borderRadius: '6px',
+            borderLeft: '4px solid #FF8C00',
+            marginBottom: '15px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D' }}>
+                💰 Acompte versé:
+              </div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#FF8C00',
+                fontWeight: 'bold'
+              }}>
+                {formatCurrency(acompteAmount)} 
+                <span style={{ fontSize: '10px', marginLeft: '5px' }}>
+                  ({((acompteAmount / totalTTC) * 100).toFixed(1)}% du total)
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section Remarques */}
+        {(invoice.invoiceNotes || invoice.deliveryNotes) && (
+          <div style={{
+            marginTop: '15px',
+            padding: '12px 15px',
+            background: '#F0F8FF',
+            borderRadius: '6px',
+            borderLeft: '4px solid #4A90E2',
+            marginBottom: '20px'
+          }}>
+            <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D', marginBottom: '8px' }}>
+              📝 Remarques:
+            </div>
+            {invoice.invoiceNotes && (
+              <div style={{ 
+                fontSize: '11px', 
+                color: '#14281D',
+                lineHeight: 1.4,
+                marginBottom: invoice.deliveryNotes ? '8px' : '0'
+              }}>
+                <strong>Notes générales:</strong> {invoice.invoiceNotes}
+              </div>
+            )}
+            {invoice.deliveryNotes && (
+              <div style={{ 
+                fontSize: '11px', 
+                color: '#14281D',
+                lineHeight: 1.4
+              }}>
+                <strong>Livraison:</strong> {invoice.deliveryNotes}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Section totaux */}
         <div style={{
           marginTop: 'auto',
@@ -294,27 +397,22 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
             
             {acompteAmount > 0 && (
               <>
-                <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D' }}>Acompte versé:</div>
-                <div style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '12px', color: '#477A0C' }}>
-                  -{formatCurrency(acompteAmount)}
-                </div>
-                
                 <div style={{ 
                   fontWeight: 'bold', 
                   fontSize: '16px', 
                   color: '#F55D3E',
-                  borderTop: '1px solid #F55D3E',
-                  paddingTop: '5px',
-                  marginTop: '5px'
+                  borderTop: '2px solid #F55D3E',
+                  paddingTop: '8px',
+                  marginTop: '8px'
                 }}>Reste à payer:</div>
                 <div style={{ 
                   textAlign: 'right', 
                   fontWeight: 'bold', 
                   fontSize: '16px', 
                   color: '#F55D3E',
-                  borderTop: '1px solid #F55D3E',
-                  paddingTop: '5px',
-                  marginTop: '5px'
+                  borderTop: '2px solid #F55D3E',
+                  paddingTop: '8px',
+                  marginTop: '8px'
                 }}>
                   {formatCurrency(montantRestant)}
                 </div>
