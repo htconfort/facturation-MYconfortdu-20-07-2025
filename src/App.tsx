@@ -579,6 +579,9 @@ function App() {
         onShowInvoices={() => setShowInvoicesList(true)}
         onShowProducts={() => setShowProductsList(true)}
         onShowGoogleDrive={handleSendPDF}
+        invoiceNumber={invoice.invoiceNumber}
+        clientName={invoice.clientName}
+        canSendToDrive={validation.isValid}
       />
 
       <main className="container mx-auto px-4 py-6" id="invoice-content">
