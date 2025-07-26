@@ -1,0 +1,115 @@
+{
+  "blueprint_info": {
+    "name": "Workflow Facture Universel",
+    "webhook_url": "https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle",
+    "format": "multipart/form-data"
+  },
+  "test_payload": {
+    "numero_facture": "TEST-BLUEPRINT-001",
+    "date_facture": "2024-01-15",
+    "date_echeance": "2024-02-14",
+    "client_nom": "Client Test Blueprint",
+    "client_email": "test-blueprint@myconfort.fr",
+    "client_telephone": "0123456789",
+    "client_adresse": "123 Avenue des Tests, 75001, Paris",
+    "client_ville": "Paris",
+    "client_code_postal": "75001",
+    "montant_ht": 832.5,
+    "montant_tva": 166.5,
+    "montant_ttc": 999,
+    "montant_acompte": 50,
+    "description_travaux": "Matelas MyConfort Premium (x1), Oreiller Flocon (x2)",
+    "mode_paiement": "Chèque",
+    "conseiller": "Bruno Priem",
+    "notes_facture": "Facture de test pour validation Blueprint N8N",
+    "statut_facture": "En attente",
+    "type_facture": "Facture standard"
+  },
+  "form_data_simulation": [
+    [
+      "data",
+      "[PDF BLOB - 507 bytes]"
+    ],
+    [
+      "numero_facture",
+      "TEST-BLUEPRINT-001"
+    ],
+    [
+      "date_facture",
+      "2024-01-15"
+    ],
+    [
+      "date_echeance",
+      "2024-02-14"
+    ],
+    [
+      "client_nom",
+      "Client Test Blueprint"
+    ],
+    [
+      "client_email",
+      "test-blueprint@myconfort.fr"
+    ],
+    [
+      "client_telephone",
+      "0123456789"
+    ],
+    [
+      "client_adresse",
+      "123 Avenue des Tests, 75001, Paris"
+    ],
+    [
+      "client_ville",
+      "Paris"
+    ],
+    [
+      "client_code_postal",
+      "75001"
+    ],
+    [
+      "montant_ht",
+      "832.5"
+    ],
+    [
+      "montant_tva",
+      "166.5"
+    ],
+    [
+      "montant_ttc",
+      "999"
+    ],
+    [
+      "montant_acompte",
+      "50"
+    ],
+    [
+      "description_travaux",
+      "Matelas MyConfort Premium (x1), Oreiller Flocon (x2)"
+    ],
+    [
+      "mode_paiement",
+      "Chèque"
+    ],
+    [
+      "conseiller",
+      "Bruno Priem"
+    ],
+    [
+      "notes_facture",
+      "Facture de test pour validation Blueprint N8N"
+    ],
+    [
+      "statut_facture",
+      "En attente"
+    ],
+    [
+      "type_facture",
+      "Facture standard"
+    ]
+  ],
+  "validation_result": {
+    "isValid": true,
+    "errors": []
+  },
+  "timestamp": "2025-07-26T10:30:54.792Z"
+}

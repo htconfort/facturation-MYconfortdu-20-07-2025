@@ -18,7 +18,7 @@ import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
 import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice, loadInvoices, deleteInvoice } from './utils/storage';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
-import { N8nWebhookService } from './services/n8nWebhookService';
+import { N8nBlueprintWebhookService } from './services/n8nBlueprintWebhookService';
 // import { PDFService } from './services/pdfService'; // REMOVED: No longer needed, using AdvancedPDFService
 
 function App() {
@@ -383,10 +383,10 @@ function App() {
         base64Preview: base64Data.substring(0, 50) + '...'
       });
       
-      showToast('🔐 Validation et envoi vers N8N...', 'success');
+      showToast('🎯 Envoi vers Blueprint N8N...', 'success');
       
-      // Utiliser le nouveau service avec validation
-      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, base64Data, pdfSizeKB);
+      // Utiliser le nouveau service Blueprint N8N
+      const result = await N8nBlueprintWebhookService.sendInvoiceToN8nBlueprint(invoice, base64Data);
 
       if (result.success) {
         showToast(result.message, "success");
@@ -394,8 +394,8 @@ function App() {
         throw new Error(result.message);
       }
     } catch (error: any) {
-      console.error('❌ Erreur envoi PDF via N8N:', error);
-      showToast(`❌ Erreur d'envoi N8N: ${error.message || 'Erreur inconnue'}`, 'error');
+      console.error('❌ Erreur envoi PDF via Blueprint N8N:', error);
+      showToast(`❌ Erreur d'envoi Blueprint N8N: ${error.message || 'Erreur inconnue'}`, 'error');
     }
   };
 
