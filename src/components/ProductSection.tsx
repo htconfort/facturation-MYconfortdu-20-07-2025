@@ -21,6 +21,9 @@ interface ProductSectionProps {
   onTermsAcceptedChange: (accepted: boolean) => void;
   signature: string;
   onShowSignaturePad: () => void;
+  // Nouveau prop pour les chèques à venir
+  nombreChequesAVenir: number;
+  onNombreChequesAVenirChange: (nombre: number) => void;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -38,7 +41,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   termsAccepted,
   onTermsAcceptedChange,
   signature,
-  onShowSignaturePad
+  onShowSignaturePad,
+  nombreChequesAVenir,
+  onNombreChequesAVenirChange
 }) => {
   const [newProduct, setNewProduct] = useState({
     category: '',
@@ -51,7 +56,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   
   // États des champs numériques en string (jamais en 0)
-  const [chequesQuantity, setChequesQuantity] = useState<string>(""); 
+  // chequesQuantity est maintenant remplacé par la prop nombreChequesAVenir
   const [totalARecevoir, setTotalARecevoir] = useState<string>("");
 
   const filteredProducts = useMemo(() => {
@@ -86,7 +91,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     // Toutes les conversions en nombre se font uniquement pour les calculs
     const acompteNum = Number(acompteAmount || 0);
     const totalARecevoirNum = Number(totalARecevoir || 0);
-    const chequesQuantityNum = Number(chequesQuantity || 0);
+    const chequesQuantityNum = Number(nombreChequesAVenir || 0);
     return {
       subtotal,
       totalWithTax,
@@ -98,7 +103,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       montantParCheque: (totalARecevoirNum && chequesQuantityNum) ? (totalARecevoirNum / chequesQuantityNum) : 0,
       totalCheques: (totalARecevoirNum && chequesQuantityNum) ? totalARecevoirNum : 0
     };
-  }, [products, taxRate, acompteAmount, totalARecevoir, chequesQuantity]);
+  }, [products, taxRate, acompteAmount, totalARecevoir, nombreChequesAVenir]);
 
   // 🔒 FONCTION POUR VÉRIFIER SI LES CHAMPS OBLIGATOIRES SONT REMPLIS
   const isPaymentMethodEmpty = () => {
@@ -133,7 +138,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   // Gère la saisie du nombre de chèques
   const handleChequesQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/^0+/, "");
-    setChequesQuantity(val);
+    onNombreChequesAVenirChange(Number(val || "0"));
   };
   const handleCategoryChange = (category: string) => {
     setNewProduct({
@@ -565,7 +570,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   min="0"
                   step="1"
                   placeholder="0"
-                  value={chequesQuantity}
+                  value={nombreChequesAVenir || 0}
                   onChange={handleChequesQuantityChange}
                   className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white text-purple-800 font-bold"
                 />
@@ -588,7 +593,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             </div>
 
             {/* Affichage du calcul automatique */}
-            {Number(totalARecevoir) > 0 && Number(chequesQuantity) > 0 && (
+            {Number(totalARecevoir) > 0 && Number(nombreChequesAVenir) > 0 && (
               <div className="mt-3 p-3 bg-purple-100 border border-purple-300 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-purple-700 font-semibold">Calcul automatique :</span>
@@ -597,7 +602,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-purple-600">
-                  {formatCurrency(Number(totalARecevoir))} ÷ {chequesQuantity} chèque{Number(chequesQuantity) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par chèque
+                  {formatCurrency(Number(totalARecevoir))} ÷ {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par chèque
                 </div>
                 <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded">
                   <div className="text-sm text-green-800 font-semibold">
@@ -735,7 +740,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-purple-600 mt-1">
-                  {chequesQuantity} chèque{Number(chequesQuantity) > 1 ? 's' : ''} de {formatCurrency(totals.montantParCheque)} chacun
+                  {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} de {formatCurrency(totals.montantParCheque)} chacun
                 </div>
               </div>
             )}

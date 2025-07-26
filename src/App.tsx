@@ -64,6 +64,9 @@ function App() {
     advisorName: '',
     termsAccepted: false,
     
+    // Chèques à venir
+    nombreChequesAVenir: 0,
+    
     // Métadonnées
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -696,6 +699,8 @@ function App() {
             onTermsAcceptedChange={(accepted) => setInvoice(prev => ({ ...prev, termsAccepted: accepted }))}
             signature={invoice.signature}
             onShowSignaturePad={() => setShowSignaturePad(true)}
+            nombreChequesAVenir={invoice.nombreChequesAVenir || 0}
+            onNombreChequesAVenirChange={(nombre) => setInvoice(prev => ({ ...prev, nombreChequesAVenir: nombre }))}
           />
         </div>
 

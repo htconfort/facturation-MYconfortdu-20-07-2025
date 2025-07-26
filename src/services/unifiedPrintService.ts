@@ -447,15 +447,7 @@ export class UnifiedPrintService {
             </table>
           </div>
 
-          <!-- Section Mode de Règlement -->
-          ${invoice.paymentMethod ? `
-            <div class="payment-method-section">
-              <div class="section-header">💳 Mode de règlement:</div>
-              <div class="payment-badge">${invoice.paymentMethod}</div>
-            </div>
-          ` : ''}
-
-          <!-- Section Taux d'Acompte -->
+          <!-- Section Taux d'Acompte - EN 2ème POSITION POUR MOBILE -->
           ${invoice.montantAcompte > 0 ? `
             <div class="deposit-section">
               <div class="section-header">💰 Acompte versé:</div>
@@ -466,7 +458,7 @@ export class UnifiedPrintService {
             </div>
           ` : ''}
 
-          <!-- Section Remarques -->
+          <!-- Section Remarques - EN 3ème POSITION POUR MOBILE -->
           ${(invoice.invoiceNotes || invoice.deliveryNotes) ? `
             <div class="notes-section">
               <div class="section-header">📝 Remarques:</div>
@@ -480,6 +472,14 @@ export class UnifiedPrintService {
                   <strong>Livraison:</strong> ${invoice.deliveryNotes}
                 </div>
               ` : ''}
+            </div>
+          ` : ''}
+
+          <!-- Section Mode de Règlement - EN 4ème POSITION POUR MOBILE -->
+          ${invoice.paymentMethod ? `
+            <div class="payment-method-section">
+              <div class="section-header">💳 Mode de règlement:</div>
+              <div class="payment-badge">${invoice.paymentMethod}</div>
             </div>
           ` : ''}
 

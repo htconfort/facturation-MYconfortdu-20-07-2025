@@ -62,13 +62,13 @@ const testInvoice = {
   updatedAt: "2025-07-26T10:00:00Z"
 };
 
-console.log("=== TEST ORDRE D'AFFICHAGE MOBILE/TABLET ===");
+console.log("=== ORDRE MOBILE/TABLET CORRIGÉ ===");
 console.log("1. Tableau des produits");
-console.log("2. Mode de règlement:", testInvoice.paymentMethod);
-console.log("3. Taux d'acompte:", testInvoice.montantAcompte + "€", "(" + ((testInvoice.montantAcompte / testInvoice.montantTTC) * 100).toFixed(1) + "% du total)");
-console.log("4. Remarques:");
+console.log("2. Taux d'acompte:", testInvoice.montantAcompte + "€", "(" + ((testInvoice.montantAcompte / testInvoice.montantTTC) * 100).toFixed(1) + "% du total)");
+console.log("3. Remarques:");
 console.log("   - Notes générales:", testInvoice.invoiceNotes);
 console.log("   - Livraison:", testInvoice.deliveryNotes);
+console.log("4. Mode de règlement:", testInvoice.paymentMethod);
 console.log("5. Totaux et reste à payer");
 
 export { testInvoice };

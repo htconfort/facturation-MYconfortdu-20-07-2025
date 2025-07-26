@@ -92,6 +92,9 @@ export interface Invoice {
   advisorName: string;
   termsAccepted: boolean;
   
+  // Chèques à venir
+  nombreChequesAVenir?: number;
+  
   // Métadonnées
   createdAt: string;
   updatedAt: string;
