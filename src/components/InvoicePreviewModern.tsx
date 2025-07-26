@@ -51,31 +51,29 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
         padding: '15mm',
         pageBreakAfter: 'always'
       }}>
-        {/* Header moderne compact */}
+        {/* Header moderne compact - Optimisé noir et blanc */}
         <div style={{
           background: '#477A0C',
           color: 'white',
           padding: '12px 15px',
           textAlign: 'center',
           marginBottom: '15px',
-          borderRadius: '4px',
-          boxShadow: '0 2px 4px rgba(71, 122, 12, 0.3)'
+          border: '2px solid #000000'
         }}>
           <h1 style={{
             margin: 0,
-            fontSize: '20px',
+            fontSize: '18px',
             fontWeight: 'bold',
             letterSpacing: '1px'
           }}>🌿 MYCONFORT</h1>
           <h2 style={{
             margin: '3px 0 0 0',
             fontSize: '14px',
-            fontWeight: 'normal',
-            opacity: 0.9
+            fontWeight: 'normal'
           }}>Facture {invoice.invoiceNumber}</h2>
         </div>
 
-        {/* Informations compactes en deux colonnes */}
+        {/* Informations compactes en deux colonnes - Encadrées noir et blanc */}
         <div style={{ 
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -83,17 +81,16 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           marginBottom: '15px'
         }}>
           <div style={{
-            background: '#F2EFE2',
+            background: 'white',
             padding: '10px 12px',
-            borderRadius: '4px',
-            borderLeft: '3px solid #477A0C',
-            fontSize: '12px'
+            border: '2px solid #000000',
+            fontSize: '14px'
           }}>
             <h3 style={{
-              color: '#477A0C',
-              fontSize: '13px',
+              color: '#000000',
+              fontSize: '14px',
               margin: '0 0 6px 0',
-              borderBottom: '1px solid #477A0C',
+              borderBottom: '2px solid #000000',
               paddingBottom: '2px',
               fontWeight: 'bold',
               textTransform: 'uppercase',
@@ -107,17 +104,16 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </div>
           
           <div style={{
-            background: '#F2EFE2',
+            background: 'white',
             padding: '10px 12px',
-            borderRadius: '4px',
-            borderLeft: '3px solid #477A0C',
-            fontSize: '12px'
+            border: '2px solid #000000',
+            fontSize: '14px'
           }}>
             <h3 style={{
-              color: '#477A0C',
-              fontSize: '13px',
+              color: '#000000',
+              fontSize: '14px',
               margin: '0 0 6px 0',
-              borderBottom: '1px solid #477A0C',
+              borderBottom: '2px solid #000000',
               paddingBottom: '2px',
               fontWeight: 'bold',
               textTransform: 'uppercase',
@@ -132,14 +128,12 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </div>
         </div>
 
-        {/* Tableau produits compact */}
+        {/* Tableau produits compact - Encadré noir et blanc */}
         <table style={{
           width: '100%',
           borderCollapse: 'collapse',
           margin: '15px 0',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(71, 122, 12, 0.2)',
+          border: '2px solid #000000',
           flexShrink: 0
         }}>
           <thead>
@@ -152,7 +146,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 padding: '6px 4px',
                 fontSize: '14px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.2px'
+                letterSpacing: '0.2px',
+                border: '1px solid #000000'
               }}>Désignation</th>
               <th style={{
                 background: '#477A0C',
@@ -162,7 +157,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 padding: '6px 4px',
                 fontSize: '14px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.2px'
+                letterSpacing: '0.2px',
+                border: '1px solid #000000'
               }}>Qté</th>
               <th style={{
                 background: '#477A0C',
@@ -172,7 +168,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 padding: '6px 4px',
                 fontSize: '14px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.2px'
+                letterSpacing: '0.2px',
+                border: '1px solid #000000'
               }}>P.U. TTC</th>
               <th style={{
                 background: '#477A0C',
@@ -182,7 +179,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 padding: '6px 4px',
                 fontSize: '14px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.2px'
+                letterSpacing: '0.2px',
+                border: '1px solid #000000'
               }}>Remise</th>
               <th style={{
                 background: '#477A0C',
@@ -192,33 +190,52 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 padding: '6px 4px',
                 fontSize: '14px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.2px'
+                letterSpacing: '0.2px',
+                border: '1px solid #000000'
               }}>Total TTC</th>
             </tr>
           </thead>
           <tbody>
             {invoice.products.map((product, index) => (
               <tr key={index} style={{
-                borderBottom: '1px solid #e0e0e0',
-                backgroundColor: index % 2 === 0 ? 'white' : '#F2EFE2'
+                backgroundColor: index % 2 === 0 ? 'white' : '#f8f8f8'
               }}>
-                <td style={{ padding: '6px 4px', textAlign: 'left', fontSize: '14px' }}>
+                <td style={{ 
+                  padding: '6px 4px', 
+                  textAlign: 'left', 
+                  fontSize: '14px',
+                  border: '1px solid #000000'
+                }}>
                   <strong>{product.name}</strong>
                 </td>
-                <td style={{ padding: '6px 4px', textAlign: 'center', fontSize: '14px' }}>
+                <td style={{ 
+                  padding: '6px 4px', 
+                  textAlign: 'center', 
+                  fontSize: '14px',
+                  border: '1px solid #000000'
+                }}>
                   {product.quantity}
                 </td>
-                <td style={{ padding: '6px 4px', textAlign: 'center', fontSize: '14px' }}>
+                <td style={{ 
+                  padding: '6px 4px', 
+                  textAlign: 'center', 
+                  fontSize: '14px',
+                  border: '1px solid #000000'
+                }}>
                   {formatCurrency(product.priceTTC)}
                 </td>
-                <td style={{ padding: '6px 4px', textAlign: 'center', fontSize: '14px' }}>
+                <td style={{ 
+                  padding: '6px 4px', 
+                  textAlign: 'center', 
+                  fontSize: '14px',
+                  border: '1px solid #000000'
+                }}>
                   {product.discount > 0 ? (
                     <span style={{ 
-                      color: '#F55D3E', 
+                      color: '#000000', 
                       fontWeight: 'bold',
-                      backgroundColor: '#ffe6e6',
+                      backgroundColor: '#e0e0e0',
                       padding: '1px 4px',
-                      borderRadius: '2px',
                       fontSize: '13px'
                     }}>
                       -{product.discount}{product.discountType === 'percent' ? '%' : '€'}
@@ -227,14 +244,20 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                     <span style={{ color: '#666', fontSize: '13px' }}>-</span>
                   )}
                 </td>
-                <td style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                <td style={{ 
+                  padding: '6px 4px', 
+                  textAlign: 'center', 
+                  fontWeight: 'bold', 
+                  fontSize: '14px',
+                  border: '1px solid #000000'
+                }}>
                   <div>
                     {formatCurrency(calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType))}
                   </div>
                   {product.discount > 0 && (
                     <div style={{ 
                       fontSize: '12px', 
-                      color: '#F55D3E',
+                      color: '#000000',
                       fontWeight: 'normal',
                       marginTop: '1px'
                     }}>
@@ -247,7 +270,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </tbody>
         </table>
 
-        {/* SECTION COMPACTE: Mode de règlement, Acompte et Remarques */}
+        {/* SECTION COMPACTE: Mode de règlement, Acompte et Remarques - Encadrées */}
         <div style={{
           marginTop: '15px',
           display: 'grid',
@@ -260,9 +283,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           {invoice.paymentMethod && (
             <div style={{
               padding: '8px 12px',
-              background: '#E8F5E8',
-              borderRadius: '4px',
-              borderLeft: '3px solid #477A0C'
+              background: 'white',
+              border: '2px solid #000000'
             }}>
               <div style={{
                 display: 'flex',
@@ -275,12 +297,11 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 </div>
                 <div style={{ 
                   fontSize: '12px', 
-                  color: '#477A0C',
+                  color: '#000000',
                   fontWeight: 'bold',
-                  background: 'white',
+                  background: '#f0f0f0',
                   padding: '2px 6px',
-                  borderRadius: '3px',
-                  border: '1px solid #477A0C'
+                  border: '1px solid #000000'
                 }}>
                   {invoice.paymentMethod}
                 </div>
@@ -292,9 +313,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           {acompteAmount > 0 && (
             <div style={{
               padding: '8px 12px',
-              background: '#FFF4E6',
-              borderRadius: '4px',
-              borderLeft: '3px solid #FF8C00'
+              background: 'white',
+              border: '2px solid #000000'
             }}>
               <div style={{
                 display: 'flex',
@@ -307,7 +327,7 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 </div>
                 <div style={{ 
                   fontSize: '12px', 
-                  color: '#FF8C00',
+                  color: '#000000',
                   fontWeight: 'bold'
                 }}>
                   {formatCurrency(acompteAmount)} 
@@ -322,9 +342,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           {/* Remarques compactes */}
           <div style={{
             padding: '8px 12px',
-            background: '#F0F8FF',
-            borderRadius: '4px',
-            borderLeft: '3px solid #4A90E2'
+            background: 'white',
+            border: '2px solid #000000'
           }}>
             <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D', marginBottom: '6px' }}>
               📝 Remarques et règlements:
@@ -351,23 +370,23 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
             {/* Adresse règlement avec chèques à venir */}
             <div style={{
               padding: '6px 8px',
-              background: '#E8F4FD',
-              borderRadius: '3px',
+              background: '#f8f8f8',
+              border: '1px solid #000000',
               fontSize: '12px',
               lineHeight: 1.2
             }}>
               <div style={{ marginBottom: '3px' }}>
-                <strong style={{ color: '#2C5530' }}>💰 Règlements à:</strong> SAV MYCONFORT • 8 rue du Grégal • 66510 Saint-Hippolyte
+                <strong style={{ color: '#000000' }}>💰 Règlements à:</strong> SAV MYCONFORT • 8 rue du Grégal • 66510 Saint-Hippolyte
               </div>
               {invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (
                 <div style={{ 
-                  color: '#2C5530', 
+                  color: '#000000', 
                   fontWeight: 'bold',
                   fontSize: '12px',
                   marginTop: '2px',
                   padding: '2px 4px',
-                  background: '#d4edda',
-                  borderRadius: '2px',
+                  background: '#e0e0e0',
+                  border: '1px solid #000000',
                   display: 'inline-block'
                 }}>
                   📅 {invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir
@@ -377,13 +396,12 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </div>
         </div>
 
-        {/* TOTAUX COMPACTS */}
+        {/* TOTAUX COMPACTS - Encadrés */}
         <div style={{
           marginTop: '15px',
           padding: '10px 12px',
-          background: '#F2EFE2',
-          borderRadius: '4px',
-          borderLeft: '3px solid #477A0C',
+          background: 'white',
+          border: '2px solid #000000',
           marginBottom: '15px'
         }}>
           <div style={{
@@ -394,20 +412,20 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
             fontSize: '11px'
           }}>
             <div style={{ fontWeight: 'bold', color: '#14281D' }}>Sous-total HT:</div>
-            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#477A0C' }}>
+            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>
               {formatCurrency(totalHT)}
             </div>
             
             <div style={{ fontWeight: 'bold', color: '#14281D' }}>TVA ({invoice.taxRate || 20}%):</div>
-            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#477A0C' }}>
+            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>
               {formatCurrency(totalTVA)}
             </div>
             
             <div style={{ 
               fontWeight: 'bold', 
               fontSize: '14px', 
-              color: '#477A0C',
-              borderTop: '1px solid #477A0C',
+              color: '#000000',
+              borderTop: '2px solid #000000',
               paddingTop: '4px',
               marginTop: '4px'
             }}>TOTAL TTC:</div>
@@ -415,8 +433,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
               textAlign: 'right', 
               fontWeight: 'bold', 
               fontSize: '14px', 
-              color: '#477A0C',
-              borderTop: '1px solid #477A0C',
+              color: '#000000',
+              borderTop: '2px solid #000000',
               paddingTop: '4px',
               marginTop: '4px'
             }}>
@@ -428,8 +446,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                 <div style={{ 
                   fontWeight: 'bold', 
                   fontSize: '12px', 
-                  color: '#F55D3E',
-                  borderTop: '1px solid #F55D3E',
+                  color: '#000000',
+                  borderTop: '1px solid #000000',
                   paddingTop: '4px',
                   marginTop: '4px'
                 }}>Reste à payer:</div>
@@ -437,8 +455,8 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
                   textAlign: 'right', 
                   fontWeight: 'bold', 
                   fontSize: '12px', 
-                  color: '#F55D3E',
-                  borderTop: '1px solid #F55D3E',
+                  color: '#000000',
+                  borderTop: '1px solid #000000',
                   paddingTop: '4px',
                   marginTop: '4px'
                 }}>
@@ -449,12 +467,11 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
           </div>
         </div>
 
-        {/* Signature compacte */}
+        {/* Signature compacte - Police 16px avec encadrement */}
         {invoice.signature && (
           <div style={{
-            background: '#d4edda',
-            borderLeft: '3px solid #477A0C',
-            borderRadius: '4px',
+            background: 'white',
+            border: '2px solid #000000',
             padding: '8px 10px',
             marginBottom: '10px',
             display: 'flex',
@@ -463,29 +480,28 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
             gap: '10px'
           }}>
             <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontWeight: 'bold', fontSize: '12px' }}>✅ Facture signée électroniquement</p>
-              <p style={{ fontSize: '10px', margin: '2px 0 0 0', lineHeight: 1.2 }}>
+              <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>✅ Facture signée électroniquement</p>
+              <p style={{ fontSize: '14px', margin: '2px 0 0 0', lineHeight: 1.2 }}>
                 Signée le {new Date(invoice.signatureDate || invoice.invoiceDate).toLocaleDateString('fr-FR')}
               </p>
             </div>
             <div style={{
               background: 'white',
-              border: '1px solid #477A0C',
-              borderRadius: '3px',
+              border: '2px solid #000000',
               padding: '4px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: '60px',
-              maxWidth: '80px',
-              height: '30px'
+              minWidth: '80px',
+              maxWidth: '100px',
+              height: '40px'
             }}>
               <img 
                 src={invoice.signature} 
                 alt="Signature" 
                 style={{ 
-                  maxHeight: '25px', 
-                  maxWidth: '75px',
+                  maxHeight: '35px', 
+                  maxWidth: '95px',
                   objectFit: 'contain'
                 }} 
               />
