@@ -1,9 +1,9 @@
+/* Import des styles d'impression */
+@import './styles/print.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import des styles d'impression */
-@import './styles/print.css';
 
 /* Styles pour le template de facture basé sur l'exemple HTML fourni */
 .facture-apercu {
@@ -556,10 +556,6 @@
 .products-table td {
   font-size: 14px;
   color: #1f2937;
-}
-
-.compact-spacing {
-  /* Styles pour l'espacement compact si nécessaire */
 }
 
 /* Barre d'information client en vert */

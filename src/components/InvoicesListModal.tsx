@@ -4,7 +4,7 @@ import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 import { SimpleModalPreview } from './SimpleModalPreview';
-import { UnifiedPrintService, InvoiceStyle } from '../services/unifiedPrintService';
+import { UnifiedPrintService } from '../services/unifiedPrintService';
 
 interface InvoicesListModalProps {
   isOpen: boolean;
@@ -12,7 +12,6 @@ interface InvoicesListModalProps {
   invoices: Invoice[];
   onDeleteInvoice: (index: number) => void;
   onLoadInvoice: (invoice: Invoice) => void;
-  invoiceStyle?: InvoiceStyle;
 }
 
 export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
@@ -20,8 +19,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
   onClose,
   invoices,
   onDeleteInvoice,
-  onLoadInvoice,
-  invoiceStyle = 'modern'
+  onLoadInvoice
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'number' | 'client' | 'amount' | 'eventLocation'>('date');
@@ -85,7 +83,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
   };
 
   const handlePrintInvoice = async (invoice: Invoice) => {
-    await UnifiedPrintService.printInvoice(invoice, invoiceStyle);
+    await UnifiedPrintService.printInvoice(invoice);
   };
 
   const handleDeleteInvoice = (index: number, invoice: Invoice) => {

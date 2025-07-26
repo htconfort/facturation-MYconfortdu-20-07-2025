@@ -2,22 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X, Download, Printer, FileText, Loader, UploadCloud as CloudUpload, AlertCircle } from 'lucide-react';
 import { InvoicePreview } from './InvoicePreview';
 import { Invoice } from '../types';
-import { UnifiedPrintService, InvoiceStyle } from '../services/unifiedPrintService';
+import { UnifiedPrintService } from '../services/unifiedPrintService';
 
 interface PDFPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoice: Invoice;
   onDownload: () => Promise<void>;
-  invoiceStyle?: InvoiceStyle;
 }
 
 export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   isOpen,
   onClose,
   invoice,
-  onDownload,
-  invoiceStyle = 'modern'
+  onDownload
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -75,7 +73,7 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   const handlePrint = async () => {
     try {
       // Utiliser le service unifié d'impression avec le style sélectionné
-      await UnifiedPrintService.printInvoice(invoice, invoiceStyle);
+      await UnifiedPrintService.printInvoice(invoice);
     } catch (error) {
       console.error('Erreur impression:', error);
       alert('Erreur lors de l\'impression de la facture');
@@ -130,7 +128,7 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
             <div>
               <h2 className="text-xl font-bold">Aperçu PDF - Facture {invoice.invoiceNumber}</h2>
               <p className="text-sm opacity-90">
-                Style: {invoiceStyle === 'classic' ? '📄 CLASSIQUE' : invoiceStyle === 'modern' ? '🎨 MODERNE' : '✨ PREMIUM'}
+                Style: 🎨 MODERNE
               </p>
             </div>
           </div>

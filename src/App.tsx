@@ -12,9 +12,7 @@ import { GoogleDriveModal } from './components/GoogleDriveModal';
 import { PayloadDebugModal } from './components/PayloadDebugModal';
 import { DebugCenter } from './components/DebugCenter';
 import { SignaturePad } from './components/SignaturePad';
-import { InvoicePreview } from './components/InvoicePreview';
-import InvoicePreviewModern from './components/InvoicePreviewModern';
-import InvoicePreviewPremium from './components/InvoicePreviewPremium';
+import { InvoicePreviewModern } from './components/InvoicePreviewModern';
 import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
@@ -83,12 +81,6 @@ function App() {
   const [showDebugCenter, setShowDebugCenter] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showInvoicePreview, setShowInvoicePreview] = useState(true);
-  const [invoiceStyle, setInvoiceStyle] = useState<'classic' | 'modern' | 'premium'>('premium'); // Style premium par défaut
-
-  // Debug: Surveiller les changements de style
-  useEffect(() => {
-    console.log('🎨 Style de facture changé vers:', invoiceStyle);
-  }, [invoiceStyle]);
   const [toast, setToast] = useState({
     show: false,
     message: '',
@@ -97,7 +89,113 @@ function App() {
 
   useEffect(() => {
     setClients(loadClients());
-    setInvoices(loadInvoices());
+    
+    const loadedInvoices = loadInvoices();
+    
+    // Si aucune facture n'existe, créer des données de test
+    if (loadedInvoices.length === 0) {
+      const testInvoices: Invoice[] = [
+        {
+          invoiceNumber: 'FAC-2025-001',
+          invoiceDate: '2025-07-20',
+          eventLocation: 'Paris 17ème',
+          clientName: 'Jean Dupont',
+          clientEmail: 'jean.dupont@email.com',
+          clientPhone: '0123456789',
+          clientAddress: '123 Rue de la Paix',
+          clientPostalCode: '75017',
+          clientCity: 'Paris',
+          clientHousingType: 'Appartement',
+          clientDoorCode: 'A1234',
+          clientSiret: '',
+          products: [
+            {
+              name: 'Installation climatisation',
+              quantity: 1,
+              priceHT: 800,
+              priceTTC: 960,
+              discount: 0,
+              discountType: 'fixed' as const,
+              totalHT: 800,
+              totalTTC: 960,
+              category: 'Installation'
+            }
+          ],
+          montantHT: 800,
+          montantTTC: 960,
+          montantTVA: 160,
+          montantRemise: 0,
+          taxRate: 20,
+          paymentMethod: 'Carte bancaire',
+          montantAcompte: 200,
+          montantRestant: 760,
+          deliveryMethod: 'Sur site',
+          deliveryNotes: 'Installation le matin',
+          signature: '',
+          isSigned: false,
+          invoiceNotes: 'Installation standard',
+          advisorName: 'Marc Martin',
+          termsAccepted: true,
+          createdAt: '2025-07-20T10:00:00.000Z',
+          updatedAt: '2025-07-20T10:00:00.000Z'
+        },
+        {
+          invoiceNumber: 'FAC-2025-002',
+          invoiceDate: '2025-07-22',
+          eventLocation: 'Neuilly-sur-Seine',
+          clientName: 'Marie Leblanc',
+          clientEmail: 'marie.leblanc@email.com',
+          clientPhone: '0987654321',
+          clientAddress: '456 Avenue Charles de Gaulle',
+          clientPostalCode: '92200',
+          clientCity: 'Neuilly-sur-Seine',
+          clientHousingType: 'Maison',
+          clientDoorCode: '',
+          clientSiret: '',
+          products: [
+            {
+              name: 'Maintenance climatisation',
+              quantity: 2,
+              priceHT: 150,
+              priceTTC: 180,
+              discount: 10,
+              discountType: 'percent' as const,
+              totalHT: 270,
+              totalTTC: 324,
+              category: 'Maintenance'
+            }
+          ],
+          montantHT: 270,
+          montantTTC: 324,
+          montantTVA: 54,
+          montantRemise: 36,
+          taxRate: 20,
+          paymentMethod: 'Virement',
+          montantAcompte: 0,
+          montantRestant: 324,
+          deliveryMethod: 'Sur site',
+          deliveryNotes: 'Maintenance annuelle',
+          signature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+          isSigned: true,
+          signatureDate: '2025-07-22T14:30:00.000Z',
+          invoiceNotes: 'Client satisfait',
+          advisorName: 'Sophie Dubois',
+          termsAccepted: true,
+          createdAt: '2025-07-22T09:00:00.000Z',
+          updatedAt: '2025-07-22T14:30:00.000Z'
+        }
+      ];
+      
+      // Sauvegarder les factures de test
+      testInvoices.forEach(invoice => {
+        saveInvoice(invoice);
+      });
+      
+      setInvoices(testInvoices);
+      showToast('Données de test initialisées - 2 factures créées', 'success');
+    } else {
+      setInvoices(loadedInvoices);
+    }
     
     const draft = loadDraft();
     if (draft) {
@@ -674,55 +772,6 @@ function App() {
               </h2>
               
               <div className="flex items-center space-x-3">
-                {/* Sélecteur de style avec indicateur visuel amélioré */}
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg p-1">
-                  <button
-                    onClick={() => {
-                      console.log('Switching to classic style');
-                      setInvoiceStyle('classic');
-                    }}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
-                      invoiceStyle === 'classic' 
-                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
-                        : 'text-[#F2EFE2] hover:bg-white/20'
-                    }`}
-                    title="Style classique"
-                  >
-                    📄 Classique
-                    {invoiceStyle === 'classic' && <span className="ml-2">✓</span>}
-                  </button>
-                  <button
-                    onClick={() => {
-                      console.log('Switching to modern style');
-                      setInvoiceStyle('modern');
-                    }}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
-                      invoiceStyle === 'modern' 
-                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
-                        : 'text-[#F2EFE2] hover:bg-white/20'
-                    }`}
-                    title="Style moderne"
-                  >
-                    🎨 Moderne
-                    {invoiceStyle === 'modern' && <span className="ml-2">✓</span>}
-                  </button>
-                  <button
-                    onClick={() => {
-                      console.log('Switching to premium style');
-                      setInvoiceStyle('premium');
-                    }}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
-                      invoiceStyle === 'premium' 
-                        ? 'bg-white text-[#477A0C] shadow-lg transform scale-105' 
-                        : 'text-[#F2EFE2] hover:bg-white/20'
-                    }`}
-                    title="Style premium"
-                  >
-                    ✨ Premium
-                    {invoiceStyle === 'premium' && <span className="ml-2">✓</span>}
-                  </button>
-                </div>
-                
                 <button
                   onClick={() => setShowInvoicePreview(!showInvoicePreview)}
                   className="text-[#F2EFE2] hover:text-white underline text-sm font-semibold"
@@ -733,31 +782,9 @@ function App() {
             </div>
 
             {/* Aperçu avec choix de style + indicateur de style actuel */}
-            <div className="mb-2">
-              <div className="text-[#F2EFE2] text-sm font-semibold flex items-center justify-center">
-                Style actuel: 
-                {invoiceStyle === 'classic' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">📄 CLASSIQUE</span>}
-                {invoiceStyle === 'modern' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">🎨 MODERNE</span>}
-                {invoiceStyle === 'premium' && <span className="ml-2 bg-white text-[#477A0C] px-2 py-1 rounded text-xs">✨ PREMIUM</span>}
-              </div>
-            </div>
-            <div id="invoice-preview-section" className={invoiceStyle === 'classic' ? "bg-[#F2EFE2] rounded-lg p-4" : "bg-transparent"}>
-              <div className={invoiceStyle === 'classic' ? "border border-gray-300 rounded-lg overflow-hidden" : ""}>
-                {invoiceStyle === 'classic' && (
-                  <div key="classic" className="transition-all duration-500">
-                    <InvoicePreview invoice={invoice} />
-                  </div>
-                )}
-                {invoiceStyle === 'modern' && (
-                  <div key="modern" className="transition-all duration-500">
-                    <InvoicePreviewModern invoice={invoice} />
-                  </div>
-                )}
-                {invoiceStyle === 'premium' && (
-                  <div key="premium" className="transition-all duration-500">
-                    <InvoicePreviewPremium invoice={invoice} />
-                  </div>
-                )}
+            <div id="invoice-preview-section" className="bg-transparent">
+              <div key="modern" className="transition-all duration-500">
+                <InvoicePreviewModern invoice={invoice} />
               </div>
             </div>
           </div>
@@ -844,7 +871,6 @@ function App() {
         invoices={invoices}
         onLoadInvoice={handleLoadInvoice}
         onDeleteInvoice={handleDeleteInvoice}
-        invoiceStyle={invoiceStyle}
       />
 
       <ProductsListModal
@@ -857,7 +883,6 @@ function App() {
         onClose={() => setShowPDFPreview(false)}
         invoice={invoice}
         onDownload={handleDownloadPDF}
-        invoiceStyle={invoiceStyle}
       />
 
       <PDFGuideModal
