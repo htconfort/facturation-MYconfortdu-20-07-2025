@@ -818,11 +818,11 @@ function App() {
                   placeholder="client@email.com"
                 />
               </div>
-              <div className="flex gap-3 justify-center">
+              <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
                 <button
                   onClick={handleSaveInvoice}
                   disabled={!invoice.clientName || !invoice.clientEmail || invoice.products.length === 0}
-                  className={`px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 disabled:hover:scale-100 ${
+                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 disabled:hover:scale-100 ${
                     invoice.clientName && invoice.clientEmail && invoice.products.length > 0
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-gray-400 text-gray-600 cursor-not-allowed'
@@ -832,29 +832,25 @@ function App() {
                     : "Complétez les informations client et ajoutez au moins un produit"}
                 >
                   <span>💾</span>
-                  <span>ENREGISTRER FACTURE</span>
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <span>⬇️</span>
-                  <span>TÉLÉCHARGER PDF</span>
+                  <span className="hidden sm:inline">ENREGISTRER FACTURE</span>
+                  <span className="sm:hidden">SAUVER</span>
                 </button>
                 <button
                   onClick={handlePrintWifi}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
+                  className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
                   title="Imprimer la facture directement"
                 >
                   <span>🖨️</span>
-                  <span>IMPRIMER</span>
+                  <span className="hidden sm:inline">IMPRIMER</span>
+                  <span className="sm:hidden">PRINT</span>
                 </button>
                 <button
                   onClick={handleSendPDF}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
+                  className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <span>📧</span>
-                  <span>ENVOYER PAR EMAIL/DRIVE</span>
+                  <span className="hidden sm:inline">ENVOYER PAR EMAIL/DRIVE</span>
+                  <span className="sm:hidden">EMAIL</span>
                 </button>
               </div>
             </div>
