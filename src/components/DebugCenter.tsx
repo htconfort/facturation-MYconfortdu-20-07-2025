@@ -33,11 +33,11 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
       console.group('📋 DONNÉES BRUTES INVOICE');
       console.log('Invoice object:', {
         invoiceNumber: invoice.invoiceNumber,
-        clientName: invoice.client.name,
-        clientEmail: invoice.client.email,
-        clientPhone: invoice.client.phone,
+        clientName: invoice.clientName,
+        clientEmail: invoice.clientEmail,
+        clientPhone: invoice.clientPhone,
         products: invoice.products.length,
-        paymentMethod: invoice.payment.method,
+        paymentMethod: invoice.paymentMethod,
         totalProducts: invoice.products.reduce((sum, p) => sum + (p.quantity * p.priceTTC), 0)
       });
       console.groupEnd();
@@ -52,22 +52,22 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
         rawInvoice: invoice,
         payloadSize: validation.payload ? JSON.stringify(validation.payload).length : 0,
         fieldMapping: {
-          'client.name → clientName': invoice.client.name,
-          'client.email → clientEmail': invoice.client.email,
-          'client.phone → clientPhone': invoice.client.phone,
-          'client.address → clientAddress': invoice.client.address,
+          'clientName → clientName': invoice.clientName,
+          'clientEmail → clientEmail': invoice.clientEmail,
+          'clientPhone → clientPhone': invoice.clientPhone,
+          'clientAddress → clientAddress': invoice.clientAddress,
           'products.length → products': invoice.products.length,
-          'payment.method → paymentMethod': invoice.payment.method,
+          'paymentMethod → paymentMethod': invoice.paymentMethod,
           'calculated totalHT': validation.payload?.totalHT,
           'calculated totalTTC': validation.payload?.totalTTC
         },
         requiredFieldsCheck: {
-          clientEmail: !!invoice.client.email,
-          clientPhone: !!invoice.client.phone,
-          clientName: !!invoice.client.name,
+          clientEmail: !!invoice.clientEmail,
+          clientPhone: !!invoice.clientPhone,
+          clientName: !!invoice.clientName,
           invoiceNumber: !!invoice.invoiceNumber,
           products: invoice.products.length > 0,
-          paymentMethod: !!invoice.payment.method
+          paymentMethod: !!invoice.paymentMethod
         },
         stats: {
           jsonSize: validation.payload ? JSON.stringify(validation.payload).length : 0,
@@ -103,6 +103,98 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
       }
     } catch (error: any) {
       onError(`❌ Erreur test connexion: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Test N8N avec payload simplifié
+  const handleTestSimplifiedPayload = async () => {
+    setIsTesting(true);
+    try {
+      const result = await N8nWebhookService.testSimplifiedPayload(invoice);
+      
+      if (result.success) {
+        onSuccess(result.message);
+      } else {
+        onError(result.message);
+      }
+    } catch (error: any) {
+      onError(`❌ Erreur test payload simplifié: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Test webhook ultra-minimal
+  const handleTestWebhookMinimal = async () => {
+    setIsTesting(true);
+    try {
+      const result = await N8nWebhookService.testWebhookMinimal();
+      
+      if (result.success) {
+        onSuccess(result.message);
+      } else {
+        onError(result.message);
+      }
+    } catch (error: any) {
+      onError(`❌ Erreur test webhook minimal: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Test direct vers production (contourne le proxy)
+  const handleTestDirectProduction = async () => {
+    setIsTesting(true);
+    try {
+      const result = await N8nWebhookService.testDirectProduction();
+      
+      if (result.success) {
+        onSuccess(result.message);
+      } else {
+        onError(result.message);
+      }
+    } catch (error: any) {
+      onError(`❌ Erreur test direct production: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Test basique pour isoler les problèmes de connectivité
+  const handleTestBasicConnectivity = async () => {
+    setIsTesting(true);
+    try {
+      const result = await N8nWebhookService.testBasicConnectivity();
+      
+      if (result.success) {
+        onSuccess(result.message);
+      } else {
+        onError(result.message);
+      }
+    } catch (error: any) {
+      onError(`❌ Erreur test basique: ${error.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Diagnostic approfondi erreur 500
+  const handleDiagnoseError500 = async () => {
+    setIsTesting(true);
+    try {
+      const result = await N8nWebhookService.diagnoseN8nError500();
+      
+      console.log('🔬 Diagnostic complet:', result);
+      
+      if (result.success) {
+        onSuccess(`${result.message} - Voir console pour détails`);
+      } else {
+        onError(`${result.message} - Voir console pour détails`);
+      }
+    } catch (error: any) {
+      onError(`❌ Erreur diagnostic: ${error.message}`);
     } finally {
       setIsTesting(false);
     }
@@ -167,6 +259,51 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
           >
             <TestTube className="w-4 h-4" />
             <span>{isTesting ? 'Test...' : 'Test N8N'}</span>
+          </button>
+          
+          <button
+            onClick={handleTestSimplifiedPayload}
+            disabled={isTesting}
+            className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
+          >
+            <TestTube className="w-4 h-4" />
+            <span>{isTesting ? 'Test...' : 'Test Simple'}</span>
+          </button>
+          
+          <button
+            onClick={handleTestWebhookMinimal}
+            disabled={isTesting}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
+          >
+            <TestTube className="w-4 h-4" />
+            <span>{isTesting ? 'Test...' : 'Test Webhook'}</span>
+          </button>
+          
+          <button
+            onClick={handleTestDirectProduction}
+            disabled={isTesting}
+            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
+          >
+            <TestTube className="w-4 h-4" />
+            <span>{isTesting ? 'Test...' : 'Direct Prod'}</span>
+          </button>
+
+          <button
+            onClick={handleTestBasicConnectivity}
+            disabled={isTesting}
+            className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
+          >
+            <TestTube className="w-4 h-4" />
+            <span>{isTesting ? 'Test...' : 'Test Connectivité'}</span>
+          </button>
+          
+          <button
+            onClick={handleDiagnoseError500}
+            disabled={isTesting}
+            className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span>{isTesting ? 'Diagnostic...' : 'Diagnostic 500'}</span>
           </button>
         </div>
       </div>

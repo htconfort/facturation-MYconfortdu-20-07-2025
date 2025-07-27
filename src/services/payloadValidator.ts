@@ -6,21 +6,21 @@ export const InvoicePayloadSchema = z.object({
   // Informations facture (obligatoires)
   invoiceNumber: z.string().min(1, "Numéro de facture obligatoire"),
   invoiceDate: z.string().min(1, "Date de facture obligatoire"),
-  eventLocation: z.string().min(1, "Lieu d'événement obligatoire"),
+  eventLocation: z.string().optional(), // Lieu optionnel
   
-  // Informations client (toutes obligatoires)
+  // Informations client (essentiels obligatoires, autres optionnels)
   clientName: z.string().min(1, "Nom client obligatoire"),
   clientEmail: z.string().email("Email client invalide"),
   clientPhone: z.string().min(1, "Téléphone client obligatoire"),
   clientAddress: z.string().min(1, "Adresse client obligatoire"),
   clientCity: z.string().min(1, "Ville client obligatoire"),
   clientPostalCode: z.string().min(1, "Code postal client obligatoire"),
-  clientHousingType: z.string().min(1, "Type de logement obligatoire"),
-  clientDoorCode: z.string().min(1, "Code porte obligatoire"),
+  clientHousingType: z.string().optional(), // Type de logement optionnel
+  clientDoorCode: z.string().optional(), // Code porte optionnel
   clientSiret: z.string().optional(),
   
   // Informations conseiller
-  advisorName: z.string().min(1, "Nom conseiller obligatoire"),
+  advisorName: z.string().optional(), // Nom conseiller optionnel - valeur par défaut appliquée dans sanitizePayload
   
   // Produits (au moins un)
   products: z.array(z.object({
@@ -379,22 +379,40 @@ export class PayloadValidator {
     try {
       console.log('🔐 VALIDATION DU PAYLOAD AVANT ENVOI N8N');
       
-      // 1. Nettoyer le payload
+      // 1. Nettoyer le payload (format interne)
       const cleanPayload = PayloadSanitizer.sanitizePayload(invoice, pdfBase64, pdfSizeKB);
       
-      // 2. Valider avec le schéma Zod
+      // 2. Valider avec le schéma Zod (format interne)
       const validationResult = InvoicePayloadSchema.safeParse(cleanPayload);
       
       if (validationResult.success) {
-        console.log('✅ VALIDATION RÉUSSIE - Payload prêt pour envoi');
-        PayloadLogger.logPayload(validationResult.data);
+        console.log('✅ VALIDATION INTERNE RÉUSSIE');
         
-        return {
-          isValid: true,
-          payload: validationResult.data
-        };
+        // 3. 🚀 TRANSFORMATION VERS FORMAT STANDARD N8N
+        const n8nPayload = N8nFormatTransformer.transformToN8nFormat(validationResult.data);
+        
+        // 4. Validation du format N8N
+        const n8nValidation = N8nFormatTransformer.validateN8nFormat(n8nPayload);
+        
+        if (n8nValidation.isValid) {
+          console.log('✅ VALIDATION FORMAT N8N RÉUSSIE - Payload prêt pour envoi');
+          PayloadLogger.logPayload(n8nPayload);
+          
+          return {
+            isValid: true,
+            payload: n8nPayload
+          };
+        } else {
+          console.error('❌ VALIDATION FORMAT N8N ÉCHOUÉE');
+          console.error('Erreurs N8N:', n8nValidation.errors);
+          
+          return {
+            isValid: false,
+            errors: n8nValidation.errors
+          };
+        }
       } else {
-        console.error('❌ VALIDATION ÉCHOUÉE');
+        console.error('❌ VALIDATION INTERNE ÉCHOUÉE');
         PayloadLogger.logPayload(cleanPayload, validationResult.error);
         
         const errors = validationResult.error.issues.map(err => 
@@ -414,5 +432,134 @@ export class PayloadValidator {
         errors: [`Erreur de validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`]
       };
     }
+  }
+}
+
+/**
+ * 🚀 TRANSFORMATION AU FORMAT STANDARD N8N
+ * Convertit notre payload interne vers le format attendu par N8N
+ */
+export class N8nFormatTransformer {
+  /**
+   * Transforme le payload MyConfort vers le format standard N8N
+   */
+  static transformToN8nFormat(cleanPayload: any): any {
+    console.log('🔄 TRANSFORMATION VERS FORMAT STANDARD N8N');
+    console.group('📤 Conversion vers format webhook standard');
+    
+    // Transformer les produits au format N8N standard
+    const items = cleanPayload.products.map((product: any, index: number) => ({
+      id: index + 1,
+      description: product.name,
+      category: product.category,
+      quantity: product.quantity,
+      unit_price: product.unitPriceTTC,
+      unit_price_ht: product.unitPriceHT,
+      discount: product.discount,
+      discount_type: product.discountType,
+      total_price: product.totalTTC
+    }));
+    
+    // Format standard N8N
+    const n8nPayload = {
+      // 🔥 FORMAT STANDARD N8N
+      invoice_number: cleanPayload.invoiceNumber,
+      invoice_date: cleanPayload.invoiceDate,
+      client_email: cleanPayload.clientEmail,
+      client_name: cleanPayload.clientName,
+      client_phone: cleanPayload.clientPhone,
+      client_address: cleanPayload.clientAddress,
+      client_city: cleanPayload.clientCity,
+      client_postal_code: cleanPayload.clientPostalCode,
+      client_housing_type: cleanPayload.clientHousingType,
+      client_door_code: cleanPayload.clientDoorCode,
+      client_siret: cleanPayload.clientSiret,
+      
+      // Montants
+      amount: cleanPayload.totalTTC,           // Montant principal (standard N8N)
+      amount_ht: cleanPayload.totalHT,         // Montant HT
+      amount_ttc: cleanPayload.totalTTC,       // Montant TTC (clarité)
+      amount_tva: cleanPayload.totalTVA,       // TVA
+      tax_rate: cleanPayload.taxRate,
+      
+      // Produits au format standard
+      items: items,
+      items_count: items.length,
+      
+      // Paiement et livraison
+      payment_method: cleanPayload.paymentMethod,
+      deposit_amount: cleanPayload.depositAmount,
+      remaining_amount: cleanPayload.remainingAmount,
+      delivery_method: cleanPayload.deliveryMethod,
+      delivery_notes: cleanPayload.deliveryNotes,
+      
+      // Commercial
+      advisor_name: cleanPayload.advisorName,
+      event_location: cleanPayload.eventLocation,
+      
+      // Notes
+      invoice_notes: cleanPayload.invoiceNotes,
+      
+      // PDF et signature
+      pdf_base64: cleanPayload.pdfBase64,
+      signature: cleanPayload.signature,
+      terms_accepted: cleanPayload.termsAccepted,
+      
+      // Métadonnées
+      date: cleanPayload.invoiceDate,          // Date standard N8N
+      created_at: new Date().toISOString(),
+      source: "MyConfort",
+      version: "1.0"
+    };
+    
+    console.log('✅ Transformation terminée');
+    console.log('📊 Statistiques:');
+    console.log(`   • Produits transformés: ${items.length}`);
+    console.log(`   • Montant principal: ${n8nPayload.amount}€`);
+    console.log(`   • Email client: ${n8nPayload.client_email}`);
+    console.log(`   • PDF présent: ${n8nPayload.pdf_base64 ? 'OUI' : 'NON'}`);
+    
+    console.groupEnd();
+    
+    return n8nPayload;
+  }
+  
+  /**
+   * Validation du format N8N
+   */
+  static validateN8nFormat(payload: any): { isValid: boolean; errors?: string[] } {
+    const errors: string[] = [];
+    
+    // Champs obligatoires standard N8N
+    const requiredFields = [
+      'invoice_number', 'client_email', 'client_name', 
+      'amount', 'items', 'date'
+    ];
+    
+    requiredFields.forEach(field => {
+      if (!payload[field]) {
+        errors.push(`Champ obligatoire manquant: ${field}`);
+      }
+    });
+    
+    // Validation email
+    if (payload.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.client_email)) {
+      errors.push('Format email invalide');
+    }
+    
+    // Validation montant
+    if (payload.amount && (typeof payload.amount !== 'number' || payload.amount <= 0)) {
+      errors.push('Montant invalide');
+    }
+    
+    // Validation items
+    if (payload.items && !Array.isArray(payload.items)) {
+      errors.push('Items doit être un tableau');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors: errors.length > 0 ? errors : undefined
+    };
   }
 }

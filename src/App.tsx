@@ -18,7 +18,7 @@ import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
 import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice, loadInvoices, deleteInvoice } from './utils/storage';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
-import { GoogleDriveService } from './services/googleDriveService';
+import { N8nWebhookService } from './services/n8nWebhookService';
 // import { PDFService } from './services/pdfService'; // REMOVED: No longer needed, using AdvancedPDFService
 
 function App() {
@@ -64,9 +64,6 @@ function App() {
     advisorName: '',
     termsAccepted: false,
     
-    // Chèques à venir
-    nombreChequesAVenir: 0,
-    
     // Métadonnées
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -84,6 +81,12 @@ function App() {
   const [showDebugCenter, setShowDebugCenter] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showInvoicePreview, setShowInvoicePreview] = useState(true);
+  const [invoiceStyle, setInvoiceStyle] = useState<'classic' | 'modern' | 'premium'>('premium'); // Style premium par défaut
+
+  // Debug: Surveiller les changements de style
+  useEffect(() => {
+    console.log('🎨 Style de facture changé vers:', invoiceStyle);
+  }, [invoiceStyle]);
   const [toast, setToast] = useState({
     show: false,
     message: '',
@@ -92,113 +95,7 @@ function App() {
 
   useEffect(() => {
     setClients(loadClients());
-    
-    const loadedInvoices = loadInvoices();
-    
-    // Si aucune facture n'existe, créer des données de test
-    if (loadedInvoices.length === 0) {
-      const testInvoices: Invoice[] = [
-        {
-          invoiceNumber: 'FAC-2025-001',
-          invoiceDate: '2025-07-20',
-          eventLocation: 'Paris 17ème',
-          clientName: 'Jean Dupont',
-          clientEmail: 'jean.dupont@email.com',
-          clientPhone: '0123456789',
-          clientAddress: '123 Rue de la Paix',
-          clientPostalCode: '75017',
-          clientCity: 'Paris',
-          clientHousingType: 'Appartement',
-          clientDoorCode: 'A1234',
-          clientSiret: '',
-          products: [
-            {
-              name: 'Installation climatisation',
-              quantity: 1,
-              priceHT: 800,
-              priceTTC: 960,
-              discount: 0,
-              discountType: 'fixed' as const,
-              totalHT: 800,
-              totalTTC: 960,
-              category: 'Installation'
-            }
-          ],
-          montantHT: 800,
-          montantTTC: 960,
-          montantTVA: 160,
-          montantRemise: 0,
-          taxRate: 20,
-          paymentMethod: 'Carte bancaire',
-          montantAcompte: 200,
-          montantRestant: 760,
-          deliveryMethod: 'Sur site',
-          deliveryNotes: 'Installation le matin',
-          signature: '',
-          isSigned: false,
-          invoiceNotes: 'Installation standard',
-          advisorName: 'Marc Martin',
-          termsAccepted: true,
-          createdAt: '2025-07-20T10:00:00.000Z',
-          updatedAt: '2025-07-20T10:00:00.000Z'
-        },
-        {
-          invoiceNumber: 'FAC-2025-002',
-          invoiceDate: '2025-07-22',
-          eventLocation: 'Neuilly-sur-Seine',
-          clientName: 'Marie Leblanc',
-          clientEmail: 'marie.leblanc@email.com',
-          clientPhone: '0987654321',
-          clientAddress: '456 Avenue Charles de Gaulle',
-          clientPostalCode: '92200',
-          clientCity: 'Neuilly-sur-Seine',
-          clientHousingType: 'Maison',
-          clientDoorCode: '',
-          clientSiret: '',
-          products: [
-            {
-              name: 'Maintenance climatisation',
-              quantity: 2,
-              priceHT: 150,
-              priceTTC: 180,
-              discount: 10,
-              discountType: 'percent' as const,
-              totalHT: 270,
-              totalTTC: 324,
-              category: 'Maintenance'
-            }
-          ],
-          montantHT: 270,
-          montantTTC: 324,
-          montantTVA: 54,
-          montantRemise: 36,
-          taxRate: 20,
-          paymentMethod: 'Virement',
-          montantAcompte: 0,
-          montantRestant: 324,
-          deliveryMethod: 'Sur site',
-          deliveryNotes: 'Maintenance annuelle',
-          signature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-          isSigned: true,
-          signatureDate: '2025-07-22T14:30:00.000Z',
-          invoiceNotes: 'Client satisfait',
-          advisorName: 'Sophie Dubois',
-          termsAccepted: true,
-          createdAt: '2025-07-22T09:00:00.000Z',
-          updatedAt: '2025-07-22T14:30:00.000Z'
-        }
-      ];
-      
-      // Sauvegarder les factures de test
-      testInvoices.forEach(invoice => {
-        saveInvoice(invoice);
-      });
-      
-      setInvoices(testInvoices);
-      showToast('Données de test initialisées - 2 factures créées', 'success');
-    } else {
-      setInvoices(loadedInvoices);
-    }
+    setInvoices(loadInvoices());
     
     const draft = loadDraft();
     if (draft) {
@@ -355,18 +252,31 @@ function App() {
 
     try {
       console.log('🔍 DIAGNOSTIC AVANT GÉNÉRATION PDF');
-      console.log('📋 Invoice data:', {
+      console.log('📋 Invoice data COMPLET:', invoice);
+      console.log('📋 Invoice data structure check:', {
         invoiceNumber: invoice.invoiceNumber,
         clientName: invoice.clientName,
         clientEmail: invoice.clientEmail,
         clientPhone: invoice.clientPhone,
+        clientAddress: invoice.clientAddress,
+        clientCity: invoice.clientCity,
+        clientPostalCode: invoice.clientPostalCode,
         productsCount: invoice.products.length,
         paymentMethod: invoice.paymentMethod,
+        montantAcompte: invoice.montantAcompte,
+        advisorName: invoice.advisorName,
+        eventLocation: invoice.eventLocation,
+        taxRate: invoice.taxRate,
+        termsAccepted: invoice.termsAccepted,
         totalCalculated: invoice.products.reduce((sum, p) => sum + (p.quantity * p.priceTTC), 0)
       });
       
       const pdfBlob = await generatePDFBlobFromPreview();
-      if (!pdfBlob) return;
+      if (!pdfBlob) {
+        console.error('❌ PDF Blob generation failed');
+        showToast('❌ Erreur lors de la génération du PDF', 'error');
+        return;
+      }
 
       const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -383,15 +293,19 @@ function App() {
         base64Preview: base64Data.substring(0, 50) + '...'
       });
       
-      showToast('🎯 Envoi vers N8N/Google Drive...', 'success');
+      showToast('🔐 Validation et envoi vers N8N...', 'success');
       
-      // Utiliser le service GoogleDrive pour l'envoi vers N8N
-      await GoogleDriveService.uploadPDFToGoogleDrive(invoice, pdfBlob);
+      // Utiliser le nouveau service avec PDF réduit pour éviter l'erreur 500
+      const result = await N8nWebhookService.sendInvoiceWithReducedPDF(invoice, base64Data, pdfSizeKB);
 
-      showToast('✅ Facture envoyée avec succès vers Google Drive via N8N !', 'success');
+      if (result.success) {
+        showToast(result.message, "success");
+      } else {
+        throw new Error(result.message);
+      }
     } catch (error: any) {
-      console.error('❌ Erreur envoi PDF via Blueprint N8N:', error);
-      showToast(`❌ Erreur d'envoi Blueprint N8N: ${error.message || 'Erreur inconnue'}`, 'error');
+      console.error('❌ Erreur envoi PDF via N8N:', error);
+      showToast(`❌ Erreur d'envoi N8N: ${error.message || 'Erreur inconnue'}`, 'error');
     }
   };
 
@@ -575,9 +489,7 @@ function App() {
         onShowInvoices={() => setShowInvoicesList(true)}
         onShowProducts={() => setShowProductsList(true)}
         onShowGoogleDrive={handleSendPDF}
-        invoiceNumber={invoice.invoiceNumber}
-        clientName={invoice.clientName}
-        canSendToDrive={validation.isValid}
+        onShowDebug={() => setShowDebugCenter(true)}
       />
 
       <main className="container mx-auto px-4 py-6" id="invoice-content">
@@ -765,34 +677,86 @@ function App() {
 
 
 
-        {/* Aperçu de la facture - AVEC CHOIX DE 3 STYLES */}
-        {showInvoicePreview && (
-          <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-[#F2EFE2] flex items-center justify-center">
-                <span className="bg-[#F2EFE2] text-[#477A0C] px-6 py-3 rounded-full font-bold">
-                  APERÇU DE LA FACTURE
-                </span>
-              </h2>
-              
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setShowInvoicePreview(!showInvoicePreview)}
-                  className="text-[#F2EFE2] hover:text-white underline text-sm font-semibold"
-                >
-                  {showInvoicePreview ? 'Masquer' : 'Afficher'} l'aperçu
-                </button>
-              </div>
-            </div>
-
-            {/* Aperçu avec choix de style + indicateur de style actuel */}
-            <div id="invoice-preview-section" className="bg-transparent">
-              <div key="modern" className="transition-all duration-500">
-                <InvoicePreviewModern invoice={invoice} />
-              </div>
-            </div>
+        {/* Section Aperçu de la facture - Style Netlify intégré */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-[#477A0C] flex items-center">
+              <span className="mr-3">📄</span>
+              APERÇU DE LA FACTURE
+            </h2>
+            <button
+              onClick={() => setShowInvoicePreview(!showInvoicePreview)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                showInvoicePreview 
+                  ? 'bg-red-500 hover:bg-red-600 text-white' 
+                  : 'bg-[#477A0C] hover:bg-green-700 text-white'
+              }`}
+            >
+              {showInvoicePreview ? 'Masquer l\'aperçu 🌸' : 'Afficher l\'aperçu 🌸'}
+            </button>
           </div>
-        )}
+
+          {showInvoicePreview && (
+            <div className="border-2 border-[#477A0C] rounded-lg p-4 bg-gray-50">
+              {/* Style switcher moderne */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-white rounded-lg p-2 shadow-md flex space-x-2">
+                  <button
+                    onClick={() => setInvoiceStyle('classic')}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                      invoiceStyle === 'classic' 
+                        ? 'bg-[#477A0C] text-white' 
+                        : 'text-[#477A0C] hover:bg-gray-100'
+                    }`}
+                  >
+                    📄 Classique
+                  </button>
+                  <button
+                    onClick={() => setInvoiceStyle('modern')}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                      invoiceStyle === 'modern' 
+                        ? 'bg-[#477A0C] text-white' 
+                        : 'text-[#477A0C] hover:bg-gray-100'
+                    }`}
+                  >
+                    🎨 Moderne
+                  </button>
+                  <button
+                    onClick={() => setInvoiceStyle('premium')}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                      invoiceStyle === 'premium' 
+                        ? 'bg-[#477A0C] text-white' 
+                        : 'text-[#477A0C] hover:bg-gray-100'
+                    }`}
+                  >
+                    ✨ Premium
+                  </button>
+                </div>
+              </div>
+
+              {/* Aperçu de la facture */}
+              <div id="invoice-preview-section" className="bg-white rounded-lg overflow-hidden">
+                <div className={invoiceStyle === 'classic' ? "border border-gray-300 rounded-lg overflow-hidden" : ""}>
+                  {invoiceStyle === 'classic' && (
+                    <div key="classic" className="transition-all duration-500">
+                      <InvoicePreviewModern invoice={invoice} />
+                    </div>
+                  )}
+                  {invoiceStyle === 'modern' && (
+                    <div key="modern" className="transition-all duration-500">
+                      <InvoicePreviewModern invoice={invoice} />
+                    </div>
+                  )}
+                  {invoiceStyle === 'premium' && (
+                    <div key="premium" className="transition-all duration-500">
+                      <InvoicePreviewModern invoice={invoice} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons - UNIFORMISÉ AVEC NOUVELLE FACTURE CLIQUABLE */}
         <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]">
@@ -817,13 +781,21 @@ function App() {
                   placeholder="client@email.com"
                 />
               </div>
-              <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setShowPDFPreview(true)}
+                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white"
+                  title="Ouvrir l'aperçu de la facture et télécharger le PDF"
+                >
+                  <span>👁️</span>
+                  <span>APERÇU & PDF</span>
+                </button>
                 <button
                   onClick={handleSaveInvoice}
                   disabled={!invoice.clientName || !invoice.clientEmail || invoice.products.length === 0}
-                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 disabled:hover:scale-100 ${
+                  className={`px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 disabled:hover:scale-100 ${
                     invoice.clientName && invoice.clientEmail && invoice.products.length > 0
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                   }`}
                   title={invoice.clientName && invoice.clientEmail && invoice.products.length > 0
@@ -831,25 +803,22 @@ function App() {
                     : "Complétez les informations client et ajoutez au moins un produit"}
                 >
                   <span>💾</span>
-                  <span className="hidden sm:inline">ENREGISTRER FACTURE</span>
-                  <span className="sm:hidden">SAUVER</span>
+                  <span>ENREGISTRER</span>
                 </button>
                 <button
                   onClick={handlePrintWifi}
-                  className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
+                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
                   title="Imprimer la facture directement"
                 >
                   <span>🖨️</span>
-                  <span className="hidden sm:inline">IMPRIMER</span>
-                  <span className="sm:hidden">PRINT</span>
+                  <span>IMPRIMER</span>
                 </button>
                 <button
                   onClick={handleSendPDF}
-                  className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 font-medium text-sm sm:text-base shadow-md transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
+                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <span>📧</span>
-                  <span className="hidden sm:inline">ENVOYER PAR EMAIL/DRIVE</span>
-                  <span className="sm:hidden">EMAIL</span>
+                  <span>ENVOYER PAR EMAIL/DRIVE</span>
                 </button>
               </div>
             </div>
@@ -940,6 +909,11 @@ function App() {
         show={toast.show}
         onClose={hideToast}
       />
+      
+      {/* Version indicator */}
+      <div className="fixed bottom-2 right-2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+        v2025.07.27-15h00
+      </div>
     </div>
   );
 }

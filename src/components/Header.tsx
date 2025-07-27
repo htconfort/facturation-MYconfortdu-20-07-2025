@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Users, Package, Building2, Archive, UploadCloud as CloudUpload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Users, Package, Building2, Archive, UploadCloud as CloudUpload, CheckCircle, AlertCircle, Loader2, Bug } from 'lucide-react';
 
 interface HeaderProps {
   onShowClients: () => void;
   onShowInvoices: () => void;
   onShowProducts: () => void;
   onShowGoogleDrive: () => Promise<void>;
+  onShowDebug?: () => void; // Ajout du bouton Debug
   onScrollToClient?: () => void;
   onScrollToProducts?: () => void;
   invoiceNumber?: string;
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onShowInvoices,
   onShowProducts,
   onShowGoogleDrive,
+  onShowDebug,
   invoiceNumber,
   clientName,
   canSendToDrive = false
@@ -163,6 +165,17 @@ export const Header: React.FC<HeaderProps> = ({
             <Users size={18} />
             <span className="hidden md:inline">Clients</span>
           </button>
+          
+          {onShowDebug && (
+            <button
+              onClick={onShowDebug}
+              className="bg-[#F59E0B] hover:bg-[#D97706] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]"
+              title="Centre de débogage N8N"
+            >
+              <Bug size={18} />
+              <span className="hidden md:inline">Debug</span>
+            </button>
+          )}
           
           <button
             onClick={handleDriveClick}
