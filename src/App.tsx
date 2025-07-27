@@ -18,7 +18,7 @@ import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
 import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice, loadInvoices, deleteInvoice } from './utils/storage';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
-import { N8nBlueprintWebhookService } from './services/n8nBlueprintWebhookService';
+import { GoogleDriveService } from './services/googleDriveService';
 // import { PDFService } from './services/pdfService'; // REMOVED: No longer needed, using AdvancedPDFService
 
 function App() {
@@ -383,16 +383,12 @@ function App() {
         base64Preview: base64Data.substring(0, 50) + '...'
       });
       
-      showToast('🎯 Envoi vers Blueprint N8N...', 'success');
+      showToast('🎯 Envoi vers N8N/Google Drive...', 'success');
       
-      // Utiliser le nouveau service Blueprint N8N
-      const result = await N8nBlueprintWebhookService.sendInvoiceToN8nBlueprint(invoice, base64Data);
+      // Utiliser le service GoogleDrive pour l'envoi vers N8N
+      await GoogleDriveService.uploadPDFToGoogleDrive(invoice, pdfBlob);
 
-      if (result.success) {
-        showToast(result.message, "success");
-      } else {
-        throw new Error(result.message);
-      }
+      showToast('✅ Facture envoyée avec succès vers Google Drive via N8N !', 'success');
     } catch (error: any) {
       console.error('❌ Erreur envoi PDF via Blueprint N8N:', error);
       showToast(`❌ Erreur d'envoi Blueprint N8N: ${error.message || 'Erreur inconnue'}`, 'error');

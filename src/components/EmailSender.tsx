@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Send, Settings, UploadCloud, Loader } from 'lucide-react';
 import { Invoice } from '../types';
 import { SeparatePdfEmailService } from '../services/separatePdfEmailService'; // Import the new service
+import { GoogleDriveService } from '../services/googleDriveService'; // Import Google Drive service
+import { PDFService } from '../services/pdfService'; // Import PDF service
 
 interface EmailSenderProps {
   invoice: Invoice;
@@ -20,16 +22,39 @@ export const EmailSender: React.FC<EmailSenderProps> = ({
   // onShowEmailJSConfig, // Removed
   invoicePreviewRef // Not directly used by SeparatePdfEmailService, but kept for consistency
 }) => {
-  const [recipientEmail, setRecipientEmail] = useState(invoice.client.email || '');
+  const [recipientEmail, setRecipientEmail] = useState(invoice.clientEmail || '');
   const [subject, setSubject] = useState(`Votre facture MYCONFORT - ${invoice.invoiceNumber}`);
-  const [message, setMessage] = useState(`Bonjour ${invoice.client.name},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`);
+  const [message, setMessage] = useState(`Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`);
   const [isSending, setIsSending] = useState(false);
+  const [isSendingToDrive, setIsSendingToDrive] = useState(false);
 
   useEffect(() => {
-    setRecipientEmail(invoice.client.email || '');
+    setRecipientEmail(invoice.clientEmail || '');
     setSubject(`Votre facture MYCONFORT - ${invoice.invoiceNumber}`);
-    setMessage(`Bonjour ${invoice.client.name},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`);
+    setMessage(`Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`);
   }, [invoice]);
+
+  const handleSendToDrive = async () => {
+    if (!invoicePreviewRef.current) {
+      onError('Impossible de trouver l\'aperçu de la facture pour générer le PDF.');
+      return;
+    }
+
+    setIsSendingToDrive(true);
+    try {
+      // Generate PDF from the invoice preview
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice, invoicePreviewRef);
+      
+      // Send to N8N/Google Drive
+      await GoogleDriveService.uploadPDFToGoogleDrive(invoice, pdfBlob);
+      
+      setIsSendingToDrive(false);
+      onSuccess('Facture envoyée avec succès vers Google Drive via N8N !');
+    } catch (error: any) {
+      setIsSendingToDrive(false);
+      onError(`Erreur lors de l'envoi vers Drive: ${error.message || 'Erreur inconnue'}`);
+    }
+  };
 
   const handleSendEmail = async () => {
     if (!recipientEmail || !subject || !message) {
@@ -137,20 +162,33 @@ export const EmailSender: React.FC<EmailSenderProps> = ({
 
         {/* Configuration Buttons */}
         <div className="flex flex-col md:flex-row justify-around items-center space-y-4 md:space-y-0 md:space-x-4 mt-6 pt-6 border-t border-gray-300">
-          {/* EmailJS config button removed as config is hardcoded in SeparatePdfEmailService */}
-          {/* <button
-            onClick={onShowEmailJSConfig}
-            className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
+          <button
+            onClick={onShowConfig}
+            className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-gray-600 hover:bg-gray-700 text-white"
           >
             <Settings className="w-5 h-5" />
-            <span>Configurer EmailJS</span>
-          </button> */}
+            <span>Configuration</span>
+          </button>
           <button
-            onClick={onShowConfig} {/* This opens Google Drive config as per App.tsx */}
-            className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={handleSendToDrive}
+            disabled={isSendingToDrive}
+            className={`px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 ${
+              isSendingToDrive
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-purple-600 hover:bg-purple-700 text-white'
+            }`}
           >
-            <UploadCloud className="w-5 h-5" />
-            <span>Configurer Google Drive</span>
+            {isSendingToDrive ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                <span>Envoi vers Drive...</span>
+              </>
+            ) : (
+              <>
+                <UploadCloud className="w-5 h-5" />
+                <span>Envoyer vers Drive</span>
+              </>
+            )}
           </button>
         </div>
       </div>

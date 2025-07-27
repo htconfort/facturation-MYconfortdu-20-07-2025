@@ -4,7 +4,7 @@ import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 
 // Configuration for Google Drive integration via n8n webhook
 const MAKE_CONFIG = {
-  WEBHOOK_URL: 'https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a', // n8n webhook URL
+  WEBHOOK_URL: 'https://n8n.srv765811.hstgr.cloud/webhook-test/facture-universelle',
   FOLDER_ID: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-' // Google Drive folder ID
 };
 
@@ -38,7 +38,7 @@ export class GoogleDriveService {
         );
       }, 0);
 
-      const acompteAmount = invoice.payment.depositAmount || 0;
+      const acompteAmount = invoice.montantAcompte || 0;
       const montantRestant = totalAmount - acompteAmount;
       
       // Prepare data for n8n webhook
@@ -48,21 +48,21 @@ export class GoogleDriveService {
         fichier_facture: pdfBase64.split(',')[1], // Remove data:application/pdf;base64, prefix
         date_creation: new Date().toISOString(),
         
-        // Invoice metadata
-        numero_facture: invoice.invoiceNumber,
+        // Invoice metadata - NOMS CORRIGÉS POUR N8N
+        numero_facture: invoice.invoiceNumber, // Sans espace en fin
         date_facture: invoice.invoiceDate,
-        montant_total: totalAmount,
+        montant_ttc: totalAmount, // Changé de montant_total à montant_ttc
         acompte: acompteAmount,
         montant_restant: montantRestant,
         
-        // Client information
-        nom_client: invoice.client.name,
-        email_client: invoice.client.email,
-        telephone_client: invoice.client.phone,
-        adresse_client: `${invoice.client.address}, ${invoice.client.postalCode} ${invoice.client.city}`,
+        // Client information - NOMS CORRIGÉS POUR N8N
+        "Nom du client": invoice.clientName, // Avec la casse exacte attendue
+        client_email: invoice.clientEmail, // Nom corrigé
+        client_telephone: invoice.clientPhone, // Nom corrigé
+        adresse_client: `${invoice.clientAddress}, ${invoice.clientPostalCode} ${invoice.clientCity}`,
         
         // Payment information
-        mode_paiement: invoice.payment.method || 'Non spécifié',
+        mode_paiement: invoice.paymentMethod || 'Non spécifié',
         signature: invoice.signature ? 'Oui' : 'Non',
         
         // Additional metadata
@@ -85,7 +85,12 @@ export class GoogleDriveService {
       
       try {
         // Send data to n8n webhook with proper error handling
-        const response = await fetch(MAKE_CONFIG.WEBHOOK_URL, {
+        const webhookUrl = MAKE_CONFIG.WEBHOOK_URL;
+          
+        console.log(`📡 Envoi vers: ${webhookUrl}`);
+        
+        // Send data to n8n webhook with proper error handling
+        const response = await fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
