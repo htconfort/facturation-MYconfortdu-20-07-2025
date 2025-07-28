@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Bug, Database, Wifi, FileText, Copy, Download, TestTube, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Bug, Database, Wifi, FileText, Copy, Download, TestTube, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { DebugSection } from './DebugSection';
 import { Invoice } from '../types';
 import { PayloadValidator } from '../services/payloadValidator';
 import { N8nWebhookService } from '../services/n8nWebhookService';
+import { PDFService } from '../services/pdfService';
+import { InvoicePreviewModern } from './InvoicePreviewModern';
 
 interface DebugCenterProps {
   invoice: Invoice;
@@ -18,7 +20,8 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
 }) => {
   const [debugData, setDebugData] = useState<any>(null);
   const [isTesting, setIsTesting] = useState(false);
-  const [activeSection, setActiveSection] = useState<'payload' | 'connection' | 'logs'>('payload');
+  const [activeSection, setActiveSection] = useState<'payload' | 'connection' | 'logs' | 'pdf'>('payload');
+  const [isTestingPDF, setIsTestingPDF] = useState(false);
 
   // Generate debug payload
   const handleGeneratePayload = async () => {
@@ -108,98 +111,6 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
     }
   };
 
-  // Test N8N avec payload simplifié
-  const handleTestSimplifiedPayload = async () => {
-    setIsTesting(true);
-    try {
-      const result = await N8nWebhookService.testSimplifiedPayload(invoice);
-      
-      if (result.success) {
-        onSuccess(result.message);
-      } else {
-        onError(result.message);
-      }
-    } catch (error: any) {
-      onError(`❌ Erreur test payload simplifié: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  // Test webhook ultra-minimal
-  const handleTestWebhookMinimal = async () => {
-    setIsTesting(true);
-    try {
-      const result = await N8nWebhookService.testWebhookMinimal();
-      
-      if (result.success) {
-        onSuccess(result.message);
-      } else {
-        onError(result.message);
-      }
-    } catch (error: any) {
-      onError(`❌ Erreur test webhook minimal: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  // Test direct vers production (contourne le proxy)
-  const handleTestDirectProduction = async () => {
-    setIsTesting(true);
-    try {
-      const result = await N8nWebhookService.testDirectProduction();
-      
-      if (result.success) {
-        onSuccess(result.message);
-      } else {
-        onError(result.message);
-      }
-    } catch (error: any) {
-      onError(`❌ Erreur test direct production: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  // Test basique pour isoler les problèmes de connectivité
-  const handleTestBasicConnectivity = async () => {
-    setIsTesting(true);
-    try {
-      const result = await N8nWebhookService.testBasicConnectivity();
-      
-      if (result.success) {
-        onSuccess(result.message);
-      } else {
-        onError(result.message);
-      }
-    } catch (error: any) {
-      onError(`❌ Erreur test basique: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  // Diagnostic approfondi erreur 500
-  const handleDiagnoseError500 = async () => {
-    setIsTesting(true);
-    try {
-      const result = await N8nWebhookService.diagnoseN8nError500();
-      
-      console.log('🔬 Diagnostic complet:', result);
-      
-      if (result.success) {
-        onSuccess(`${result.message} - Voir console pour détails`);
-      } else {
-        onError(`${result.message} - Voir console pour détails`);
-      }
-    } catch (error: any) {
-      onError(`❌ Erreur diagnostic: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
   // Copy payload to clipboard
   const handleCopyPayload = () => {
     if (debugData?.validation?.payload) {
@@ -225,6 +136,34 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
       onSuccess('📥 Fichier de debug téléchargé');
     } else {
       onError('❌ Aucune donnée de debug à télécharger');
+    }
+  };
+
+  // Test PDF generation
+  const handleTestPDF = async () => {
+    setIsTestingPDF(true);
+    try {
+      console.log('🔍 TEST PDF - Génération du PDF avec composant moderne');
+      
+      // Générer le PDF à partir de l'invoice actuelle
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice, 'facture-apercu-modern');
+      
+      // Télécharger le PDF de test
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `test-pdf-${invoice.invoiceNumber}-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      onSuccess('🔍 PDF de test généré et téléchargé !');
+    } catch (error: any) {
+      console.error('❌ Erreur test PDF:', error);
+      onError(`❌ Erreur test PDF: ${error.message}`);
+    } finally {
+      setIsTestingPDF(false);
     }
   };
 
@@ -260,60 +199,16 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
             <TestTube className="w-4 h-4" />
             <span>{isTesting ? 'Test...' : 'Test N8N'}</span>
           </button>
-          
-          <button
-            onClick={handleTestSimplifiedPayload}
-            disabled={isTesting}
-            className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
-          >
-            <TestTube className="w-4 h-4" />
-            <span>{isTesting ? 'Test...' : 'Test Simple'}</span>
-          </button>
-          
-          <button
-            onClick={handleTestWebhookMinimal}
-            disabled={isTesting}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
-          >
-            <TestTube className="w-4 h-4" />
-            <span>{isTesting ? 'Test...' : 'Test Webhook'}</span>
-          </button>
-          
-          <button
-            onClick={handleTestDirectProduction}
-            disabled={isTesting}
-            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
-          >
-            <TestTube className="w-4 h-4" />
-            <span>{isTesting ? 'Test...' : 'Direct Prod'}</span>
-          </button>
-
-          <button
-            onClick={handleTestBasicConnectivity}
-            disabled={isTesting}
-            className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
-          >
-            <TestTube className="w-4 h-4" />
-            <span>{isTesting ? 'Test...' : 'Test Connectivité'}</span>
-          </button>
-          
-          <button
-            onClick={handleDiagnoseError500}
-            disabled={isTesting}
-            className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-medium transition-all"
-          >
-            <AlertTriangle className="w-4 h-4" />
-            <span>{isTesting ? 'Diagnostic...' : 'Diagnostic 500'}</span>
-          </button>
         </div>
       </div>
 
       {/* Navigation Tabs */}
       <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-        {[
+        {        [
           { id: 'payload', label: 'Payload', icon: Database },
           { id: 'connection', label: 'Connexion', icon: Wifi },
-          { id: 'logs', label: 'Logs', icon: FileText }
+          { id: 'logs', label: 'Logs', icon: FileText },
+          { id: 'pdf', label: 'Test PDF', icon: Eye }
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -501,6 +396,61 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
                   <li>Copiez le payload pour le tester dans Postman</li>
                   <li>Dans n8n, activez "Listen for test event" pour voir les données reçues</li>
                 </ol>
+              </div>
+            </div>
+          </DebugSection>
+        )}
+
+        {/* PDF Test Section */}
+        {activeSection === 'pdf' && (
+          <DebugSection
+            title="🔍 Tests PDF Moderne"
+            icon={Eye}
+            iconColor="text-orange-600"
+            bgColor="bg-orange-50"
+            borderColor="border-orange-200"
+          >
+            <div className="space-y-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <h4 className="font-bold text-orange-800 mb-2">🔍 Test PDF avec Composant Moderne</h4>
+                <p className="text-sm text-orange-700 mb-3">
+                  Ce test génère un PDF en utilisant le composant <code>InvoicePreviewModern</code> 
+                  pour vérifier la synchronisation avec l'aperçu affiché à l'utilisateur.
+                </p>
+                <ul className="list-disc ml-5 space-y-1 text-sm text-orange-700">
+                  <li>Utilise directement le composant moderne</li>
+                  <li>Génère un PDF identique à l'aperçu</li>
+                  <li>Télécharge automatiquement le PDF de test</li>
+                  <li>Compare visuellement avec l'aperçu affiché</li>
+                </ul>
+              </div>
+              
+              <button
+                onClick={handleTestPDF}
+                disabled={isTestingPDF}
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+              >
+                <Eye className="w-5 h-5" />
+                <span>{isTestingPDF ? 'Génération du PDF test...' : '🔍 Générer PDF Test Moderne'}</span>
+              </button>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-bold text-blue-800 mb-2">💡 Instructions</h4>
+                <ol className="list-decimal ml-5 space-y-1 text-sm text-blue-700">
+                  <li>Cliquez sur "Générer PDF Test Moderne"</li>
+                  <li>Le PDF sera téléchargé automatiquement</li>
+                  <li>Comparez le PDF avec l'aperçu affiché dans l'app</li>
+                  <li>Vérifiez que les styles, couleurs et layout sont identiques</li>
+                  <li>Le PDF devrait utiliser la charte graphique moderne MyConfort</li>
+                </ol>
+              </div>
+              
+              {/* Aperçu du composant moderne pour référence */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="font-bold text-gray-800 mb-2">📋 Référence Composant</h4>
+                <p className="text-sm text-gray-700">
+                  Le PDF généré devrait être identique à l'aperçu moderne affiché dans l'application.
+                </p>
               </div>
             </div>
           </DebugSection>

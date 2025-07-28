@@ -1,4 +1,4 @@
-import React from 'react';
+import { forwardRef } from 'react';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 import { ConditionsGenerales } from './ConditionsGenerales';
@@ -8,10 +8,10 @@ interface InvoicePreviewModernProps {
   className?: string;
 }
 
-export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({ 
+export const InvoicePreviewModern = forwardRef<HTMLDivElement, InvoicePreviewModernProps>(({ 
   invoice, 
   className = "" 
-}) => {
+}, ref) => {
   // Calculer le total TTC
   const totalTTC = invoice.products.reduce((sum, product) => {
     return sum + calculateProductTotal(
@@ -29,578 +29,605 @@ export const InvoicePreviewModern: React.FC<InvoicePreviewModernProps> = ({
   // Calculer les totaux pour l'affichage
   const totalHT = totalTTC / (1 + (invoice.taxRate / 100));
   const totalTVA = totalTTC - totalHT;
+  const totalDiscount = invoice.products.reduce((sum, product) => {
+    const originalTotal = product.priceTTC * product.quantity;
+    const discountedTotal = calculateProductTotal(
+      product.quantity,
+      product.priceTTC,
+      product.discount,
+      product.discountType === 'percent' ? 'percent' : 'fixed'
+    );
+    return sum + (originalTotal - discountedTotal);
+  }, 0);
 
-  return (
-    <div 
+  return (      <div 
+      ref={ref}
       id="facture-apercu-modern" 
       className={`modern-invoice ${className}`}
       style={{
-        fontFamily: "'Arial', sans-serif",
-        lineHeight: 1.3,
-        color: '#14281D',
-        fontSize: '12px',
-        background: 'white',
-        minHeight: '100vh'
+        fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        lineHeight: 1.4,
+        color: '#2D3748',
+        background: '#ffffff',
+        minHeight: '100vh',
+        padding: '0',
+        margin: '0'
       }}
     >
-      {/* PAGE 1: FACTURE CONDENSÉE */}
+      {/* PAGE 1 - FACTURE COMPLÈTE */}
       <div style={{
+        maxWidth: '100%',
+        margin: '0',
+        background: 'white',
+        overflow: 'hidden',
+        minHeight: '297mm', // A4 height
+        pageBreakAfter: 'always',
         display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        padding: '15mm'
+        flexDirection: 'column'
       }}>
-        {/* Header moderne compact - Optimisé noir et blanc */}
-        <div style={{
+        
+        {/* HEADER MYCONFORT - VERT ENTREPRISE */}
+        <header style={{
           background: '#477A0C',
           color: 'white',
-          padding: '12px 15px',
-          textAlign: 'center',
-          marginBottom: '15px',
-          border: '2px solid #000000'
-        }}>
-          <h1 style={{
-            margin: 0,
-            fontSize: '36px',
-            fontWeight: 'bold',
-            letterSpacing: '1px'
-          }}>🌿 MYCONFORT</h1>
-          <h2 style={{
-            margin: '3px 0 0 0',
-            fontSize: '14px',
-            fontWeight: 'normal'
-          }}>Facture {invoice.invoiceNumber}</h2>
-        </div>
-
-        {/* Informations compactes en deux colonnes - Encadrées noir et blanc */}
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '15px',
-          marginBottom: '15px'
-        }}>
-          <div style={{
-            background: 'white',
-            padding: '10px 12px',
-            border: '2px solid #000000',
-            fontSize: '14px'
-          }}>
-            <h3 style={{
-              color: '#000000',
-              fontSize: '14px',
-              margin: '0 0 6px 0',
-              borderBottom: '2px solid #000000',
-              paddingBottom: '2px',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              letterSpacing: '0.3px'
-            }}>📋 Détails Facture</h3>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>N°:</strong> {invoice.invoiceNumber}</p>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>Date:</strong> {new Date(invoice.invoiceDate).toLocaleDateString('fr-FR')}</p>
-            {invoice.eventLocation && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>📍 Lieu:</strong> {invoice.eventLocation}</p>}
-            {invoice.advisorName && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>👤 Conseiller:</strong> {invoice.advisorName}</p>}
-            {invoice.clientHousingType && <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>🏠 Logement:</strong> {invoice.clientHousingType}</p>}
-          </div>
-          
-          <div style={{
-            background: 'white',
-            padding: '10px 12px',
-            border: '2px solid #000000',
-            fontSize: '14px'
-          }}>
-            <h3 style={{
-              color: '#000000',
-              fontSize: '14px',
-              margin: '0 0 6px 0',
-              borderBottom: '2px solid #000000',
-              paddingBottom: '2px',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              letterSpacing: '0.3px'
-            }}>👤 Informations Client</h3>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}><strong>{invoice.clientName}</strong></p>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}>📍 {invoice.clientAddress}</p>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}>{invoice.clientPostalCode} {invoice.clientCity}</p>
-            {invoice.clientDoorCode && <p style={{ margin: '2px 0', fontSize: '28px' }}>🚪 Code: {invoice.clientDoorCode}</p>}
-            <p style={{ margin: '2px 0', fontSize: '28px' }}>📞 {invoice.clientPhone}</p>
-            <p style={{ margin: '2px 0', fontSize: '28px' }}>✉️ {invoice.clientEmail}</p>
-          </div>
-        </div>
-
-        {/* Tableau produits compact - Encadré noir et blanc */}
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          margin: '15px 0',
-          border: '2px solid #000000',
+          padding: '20px 30px',
+          borderBottom: '3px solid #3a6509',
           flexShrink: 0
         }}>
-          <thead>
-            <tr>
-              <th style={{
-                background: '#477A0C',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                padding: '6px 4px',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2px',
-                border: '1px solid #000000'
-              }}>Désignation</th>
-              <th style={{
-                background: '#477A0C',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                padding: '6px 4px',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2px',
-                border: '1px solid #000000'
-              }}>Qté</th>
-              <th style={{
-                background: '#477A0C',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                padding: '6px 4px',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2px',
-                border: '1px solid #000000'
-              }}>P.U. TTC</th>
-              <th style={{
-                background: '#477A0C',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                padding: '6px 4px',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2px',
-                border: '1px solid #000000'
-              }}>Remise</th>
-              <th style={{
-                background: '#477A0C',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                padding: '6px 4px',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2px',
-                border: '1px solid #000000'
-              }}>Total TTC</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.products.map((product, index) => (
-              <tr key={index} style={{
-                backgroundColor: index % 2 === 0 ? 'white' : '#f8f8f8'
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1 style={{ 
+                fontSize: '28px', 
+                fontWeight: 'bold', 
+                margin: '0 0 8px 0',
+                letterSpacing: '1px'
               }}>
-                <td style={{ 
-                  padding: '6px 4px', 
-                  textAlign: 'left', 
-                  fontSize: '14px',
-                  border: '1px solid #000000'
-                }}>
-                  <strong>{product.name}</strong>
-                </td>
-                <td style={{ 
-                  padding: '6px 4px', 
-                  textAlign: 'center', 
-                  fontSize: '14px',
-                  border: '1px solid #000000'
-                }}>
-                  {product.quantity}
-                </td>
-                <td style={{ 
-                  padding: '6px 4px', 
-                  textAlign: 'center', 
-                  fontSize: '14px',
-                  border: '1px solid #000000'
-                }}>
-                  {formatCurrency(product.priceTTC)}
-                </td>
-                <td style={{ 
-                  padding: '6px 4px', 
-                  textAlign: 'center', 
-                  fontSize: '14px',
-                  border: '1px solid #000000'
-                }}>
-                  {product.discount > 0 ? (
-                    <span style={{ 
-                      color: '#000000', 
-                      fontWeight: 'bold',
-                      backgroundColor: '#e0e0e0',
-                      padding: '1px 4px',
-                      fontSize: '13px'
-                    }}>
-                      -{product.discount}{product.discountType === 'percent' ? '%' : '€'}
-                    </span>
-                  ) : (
-                    <span style={{ color: '#666', fontSize: '13px' }}>-</span>
-                  )}
-                </td>
-                <td style={{ 
-                  padding: '6px 4px', 
-                  textAlign: 'center', 
-                  fontWeight: 'bold', 
-                  fontSize: '14px',
-                  border: '1px solid #000000'
-                }}>
-                  <div>
-                    {formatCurrency(calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType))}
-                  </div>
-                  {product.discount > 0 && (
-                    <div style={{ 
-                      fontSize: '12px', 
-                      color: '#000000',
-                      fontWeight: 'normal',
-                      marginTop: '1px'
-                    }}>
-                      (-{product.discountType === 'percent' ? product.discount + '%' : formatCurrency(product.discount)})
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* SECTION COMPACTE: Mode de règlement, Acompte et Remarques - Encadrées */}
-        <div style={{
-          marginTop: '15px',
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gap: '10px',
-          marginBottom: '15px'
-        }}>
-          
-          {/* Mode de règlement */}
-          {invoice.paymentMethod && (
-            <div style={{
-              padding: '8px 12px',
-              background: 'white',
-              border: '2px solid #000000'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                flexWrap: 'wrap'
+                MYCONFORT
+              </h1>
+              <p style={{ 
+                fontSize: '14px', 
+                margin: '0', 
+                color: '#E2E8F0',
+                fontWeight: 'normal'
               }}>
-                <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D' }}>
-                  💳 Mode de règlement:
-                </div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#000000',
-                  fontWeight: 'bold',
-                  background: '#f0f0f0',
-                  padding: '2px 6px',
-                  border: '1px solid #000000'
-                }}>
-                  {invoice.paymentMethod}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Acompte */}
-          {acompteAmount > 0 && (
-            <div style={{
-              padding: '8px 12px',
-              background: 'white',
-              border: '2px solid #000000'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px'
-              }}>
-                <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D' }}>
-                  💰 Acompte versé:
-                </div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#000000',
-                  fontWeight: 'bold'
-                }}>
-                  {formatCurrency(acompteAmount)} 
-                  <span style={{ fontSize: '10px', marginLeft: '3px' }}>
-                    ({((acompteAmount / totalTTC) * 100).toFixed(1)}%)
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Remarques compactes */}
-          <div style={{
-            padding: '8px 12px',
-            background: 'white',
-            border: '2px solid #000000'
-          }}>
-            <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#14281D', marginBottom: '6px' }}>
-              📝 Remarques et règlements:
+                Votre spécialiste literie de qualité
+              </p>
             </div>
             
-            {/* Notes facture et livraison sur une ligne */}
-            {(invoice.invoiceNotes || invoice.deliveryNotes) && (
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#14281D',
-                lineHeight: 1.3,
-                marginBottom: '6px'
+            {invoice.signature && (
+              <div style={{
+                background: '#F5E6D3',
+                padding: '8px 16px',
+                border: '2px solid #D4A574',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#2D3748'
               }}>
-                {invoice.invoiceNotes && (
-                  <span><strong>Notes:</strong> {invoice.invoiceNotes.length > 50 ? invoice.invoiceNotes.substring(0, 50) + '...' : invoice.invoiceNotes}</span>
-                )}
-                {invoice.invoiceNotes && invoice.deliveryNotes && ' • '}
-                {invoice.deliveryNotes && (
-                  <span><strong>Livraison:</strong> {invoice.deliveryNotes.length > 30 ? invoice.deliveryNotes.substring(0, 30) + '...' : invoice.deliveryNotes}</span>
-                )}
+                <span style={{ color: '#477A0C' }}>✓</span>
+                FACTURE SIGNÉE
               </div>
             )}
+          </div>
+        </header>
+
+        <div style={{ padding: '40px' }}>
+          
+          {/* INFORMATIONS PRINCIPALES */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: '40px',
+            marginBottom: '40px'
+          }}>
             
-            {/* Adresse règlement avec chèques à venir */}
+            {/* Informations entreprise */}
             <div style={{
-              padding: '6px 8px',
-              background: '#f8f8f8',
-              border: '1px solid #000000',
-              fontSize: '12px',
-              lineHeight: 1.2
+              background: '#F2EFE2',
+              padding: '24px',
+              border: '2px solid #E2E8F0'
             }}>
-              <div style={{ marginBottom: '3px' }}>
-                <strong style={{ color: '#000000' }}>💰 Règlements à:</strong> SAV MYCONFORT • 8 rue du Grégal • 66510 Saint-Hippolyte
+              <h3 style={{ 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                margin: '0 0 16px 0',
+                color: '#2D3748'
+              }}>
+                MYCONFORT
+              </h3>
+              <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#4A5568' }}>
+                <div style={{ marginBottom: '4px' }}>📍 88 Avenue des Ternes</div>
+                <div style={{ marginBottom: '4px' }}>75017 Paris, France</div>
+                <div style={{ marginBottom: '4px' }}>🏢 SIRET: 824 313 530 00027</div>
+                <div style={{ marginBottom: '4px' }}>📞 Tél: 04 68 50 41 45</div>
+                <div style={{ marginBottom: '4px' }}>✉️ myconfort@gmail.com</div>
+                <div>🌐 https://www.htconfort.com</div>
               </div>
-              {invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (
-                <div style={{ 
-                  color: '#000000', 
-                  fontWeight: 'bold',
-                  fontSize: '12px',
-                  marginTop: '2px',
-                  padding: '2px 4px',
-                  background: '#e0e0e0',
-                  border: '1px solid #000000',
-                  display: 'inline-block'
+            </div>
+            
+            {/* Informations facture */}
+            <div style={{
+              textAlign: 'right'
+            }}>
+              <div style={{
+                background: '#477A0C',
+                color: 'white',
+                padding: '24px',
+                marginBottom: '20px'
+              }}>
+                <h2 style={{ 
+                  fontSize: '24px', 
+                  fontWeight: 'bold', 
+                  margin: '0 0 12px 0'
                 }}>
-                  📅 {invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir
+                  FACTURE
+                </h2>
+                <div style={{ fontSize: '16px' }}>
+                  N° {invoice.invoiceNumber}
                 </div>
+              </div>
+              
+              <div style={{ fontSize: '14px', color: '#4A5568', lineHeight: '1.8' }}>
+                <div style={{ marginBottom: '8px' }}>
+                  <strong>Date:</strong> {new Date(invoice.invoiceDate).toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+                {invoice.eventLocation && (
+                  <div style={{ marginBottom: '8px' }}>
+                    <strong>Lieu:</strong> {invoice.eventLocation}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ARTICLE LÉGAL L224-59 - CODE DE LA CONSOMMATION */}
+          <div style={{
+            marginBottom: '24px',
+            background: '#FEF2F2',
+            padding: '12px',
+            border: '1px solid #EF4444',
+            fontSize: '11px'
+          }}>
+            <div style={{ 
+              fontWeight: 'bold', 
+              marginBottom: '6px',
+              color: '#B91C1C',
+              fontSize: '12px'
+            }}>
+              ⚖️ INFORMATION LÉGALE - ARTICLE L224-59
+            </div>
+            
+            <div style={{ 
+              lineHeight: '1.4',
+              color: '#2D3748',
+              fontStyle: 'italic'
+            }}>
+              « Avant la conclusion de tout contrat entre un consommateur et un professionnel à l'occasion d'une foire, d'un salon [...] le professionnel informe le consommateur qu'il ne dispose pas d'un délai de rétractation. »
+            </div>
+          </div>
+
+          {/* INFORMATIONS CLIENT */}
+          <div style={{
+            marginBottom: '24px',
+            background: '#F2EFE2',
+            padding: '20px',
+            border: '2px solid #E2E8F0'
+          }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              margin: '0 0 20px 0',
+              color: '#2D3748',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              👤 INFORMATIONS CLIENT
+            </h3>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: '16px',
+              fontSize: '14px'
+            }}>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Nom:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientName}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Adresse:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientAddress}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Code postal:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientPostalCode}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Ville:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientCity}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Code porte:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientDoorCode || 'Non spécifié'}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Email:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientEmail}</div>
+              </div>
+              <div>
+                <strong style={{ color: '#2D3748' }}>Téléphone:</strong>
+                <div style={{ marginTop: '2px', color: '#2D3748' }}>{invoice.clientPhone}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* PAIEMENT ET LIVRAISON */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            <div style={{
+              background: '#F2EFE2',
+              padding: '20px',
+              border: '2px solid #E2E8F0'
+            }}>
+              <h4 style={{ 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                margin: '0 0 12px 0',
+                color: '#2D3748',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                💳 MODE DE RÈGLEMENT
+              </h4>
+              <div style={{ fontSize: '14px', color: '#2D3748' }}>
+                {invoice.paymentMethod || 'Non spécifié'}
+              </div>
+            </div>
+            
+            <div style={{
+              background: '#F2EFE2',
+              padding: '20px',
+              border: '2px solid #E2E8F0'
+            }}>
+              <h4 style={{ 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                margin: '0 0 12px 0',
+                color: '#2D3748',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                🚚 LIVRAISON
+              </h4>
+              <div style={{ fontSize: '14px', color: '#2D3748', marginBottom: '8px' }}>
+                {invoice.deliveryMethod || 'Non spécifié'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#6B7280', fontStyle: 'italic' }}>
+                Livraison réalisée au pied de l'immeuble ou au portail
+              </div>
+            </div>
+          </div>
+
+          {/* PRODUITS */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: '600', 
+              margin: '0 0 16px 0',
+              color: '#2D3748',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              🛏️ PRODUITS & TARIFICATION
+            </h3>
+            
+            <div style={{
+              overflow: 'hidden',
+              border: '2px solid #E2E8F0'
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{
+                    background: '#477A0C',
+                    color: 'white'
+                  }}>
+                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: 'bold' }}>Produit</th>
+                    <th style={{ padding: '16px', textAlign: 'center', fontWeight: 'bold' }}>Qté</th>
+                    <th style={{ padding: '16px', textAlign: 'right', fontWeight: 'bold' }}>Prix unitaire</th>
+                    <th style={{ padding: '16px', textAlign: 'right', fontWeight: 'bold' }}>Remise</th>
+                    <th style={{ padding: '16px', textAlign: 'right', fontWeight: 'bold' }}>Total TTC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoice.products.map((product, index) => {
+                    const productTotal = calculateProductTotal(
+                      product.quantity,
+                      product.priceTTC,
+                      product.discount,
+                      product.discountType === 'percent' ? 'percent' : 'fixed'
+                    );
+                    
+                    return (
+                      <tr key={index} style={{
+                        borderBottom: '1px solid #e2e8f0',
+                        background: index % 2 === 0 ? '#F8FAFC' : 'white'
+                      }}>
+                        <td style={{ padding: '16px' }}>
+                          <div style={{ fontWeight: '500', marginBottom: '4px' }}>{product.name}</div>
+                          {product.category && (
+                            <div style={{ fontSize: '12px', color: '#6B7280' }}>{product.category}</div>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'center', fontWeight: '500' }}>
+                          {product.quantity}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right' }}>
+                          {formatCurrency(product.priceTTC)}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right' }}>
+                          {product.discount > 0 ? (
+                            <span style={{ color: '#dc2626' }}>
+                              -{product.discount}{product.discountType === 'percent' ? '%' : '€'}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right', fontWeight: '600' }}>
+                          {formatCurrency(productTotal)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SIGNATURE ET TOTAUX */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr auto', 
+            gap: '24px',
+            marginBottom: '24px',
+            alignItems: 'flex-start'
+          }}>
+            
+            {/* Signature */}
+            {invoice.signature && (
+              <div style={{
+                background: '#F0FDF4',
+                padding: '24px',
+                border: '2px solid #22C55E'
+              }}>
+                <h4 style={{ 
+                  fontSize: '16px', 
+                  fontWeight: 'bold', 
+                  margin: '0 0 16px 0',
+                  color: '#15803D',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  ✍️ SIGNATURE CLIENT
+                </h4>
+                <div style={{
+                  background: 'white',
+                  padding: '16px',
+                  borderRadius: '4px',
+                  border: '1px solid #22c55e',
+                  textAlign: 'center',
+                  minHeight: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <img 
+                    src={invoice.signature} 
+                    alt="Signature électronique" 
+                    style={{ maxHeight: '60px', maxWidth: '200px' }} 
+                  />
+                </div>
+                <div style={{
+                  textAlign: 'center',
+                  marginTop: '12px',
+                  fontSize: '14px',
+                  color: '#15803d',
+                  fontWeight: '500'
+                }}>
+                  ✓ Signature électronique enregistrée
+                </div>
+              </div>
+            )}
+
+            {/* Totaux */}
+            <div style={{
+              minWidth: '320px',
+              background: 'white',
+              border: '2px solid #E2E8F0',
+              overflow: 'hidden'
+            }}>
+              {totalDiscount > 0 && (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  borderBottom: '1px solid #f1f5f9'
+                }}>
+                  <span>Sous-total:</span>
+                  <span>{formatCurrency(totalTTC + totalDiscount)}</span>
+                </div>
+              )}
+              
+              {totalDiscount > 0 && (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  borderBottom: '1px solid #f1f5f9',
+                  color: '#dc2626'
+                }}>
+                  <span>Remise totale:</span>
+                  <span>-{formatCurrency(totalDiscount)}</span>
+                </div>
+              )}
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '12px 20px',
+                fontSize: '14px',
+                borderBottom: '1px solid #f1f5f9'
+              }}>
+                <span>Total HT:</span>
+                <span>{formatCurrency(totalHT)}</span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '12px 20px',
+                fontSize: '14px',
+                borderBottom: '1px solid #f1f5f9'
+              }}>
+                <span>TVA ({invoice.taxRate}%):</span>
+                <span>{formatCurrency(totalTVA)}</span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                background: '#477A0C',
+                color: 'white'
+              }}>
+                <span>TOTAL TTC:</span>
+                <span>{formatCurrency(totalTTC)}</span>
+              </div>
+              
+              {acompteAmount > 0 && (
+                <>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    borderBottom: '1px solid #f1f5f9',
+                    background: '#fef3c7'
+                  }}>
+                    <span>Acompte versé:</span>
+                    <span>-{formatCurrency(acompteAmount)}</span>
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '16px 20px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    background: '#F55D3E',
+                    color: '#2D3748'
+                  }}>
+                    <span>MONTANT RESTANT:</span>
+                    <span>{formatCurrency(montantRestant)}</span>
+                  </div>
+                </>
               )}
             </div>
           </div>
-        </div>
 
-        {/* TOTAUX COMPACTS - Encadrés */}
-        <div style={{
-          marginTop: '15px',
-          padding: '10px 12px',
-          background: 'white',
-          border: '2px solid #000000',
-          marginBottom: '15px'
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: '6px',
-            alignItems: 'center',
-            fontSize: '11px'
-          }}>
-            <div style={{ fontWeight: 'bold', color: '#14281D' }}>Sous-total HT:</div>
-            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>
-              {formatCurrency(totalHT)}
-            </div>
-            
-            <div style={{ fontWeight: 'bold', color: '#14281D' }}>TVA ({invoice.taxRate || 20}%):</div>
-            <div style={{ textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>
-              {formatCurrency(totalTVA)}
-            </div>
-            
-            <div style={{ 
-              fontWeight: 'bold', 
-              fontSize: '14px', 
-              color: '#000000',
-              borderTop: '2px solid #000000',
-              paddingTop: '4px',
-              marginTop: '4px'
-            }}>TOTAL TTC:</div>
-            <div style={{ 
-              textAlign: 'right', 
-              fontWeight: 'bold', 
-              fontSize: '14px', 
-              color: '#000000',
-              borderTop: '2px solid #000000',
-              paddingTop: '4px',
-              marginTop: '4px'
-            }}>
-              {formatCurrency(totalTTC)}
-            </div>
-            
-            {acompteAmount > 0 && (
-              <>
-                <div style={{ 
-                  fontWeight: 'bold', 
-                  fontSize: '12px', 
-                  color: '#000000',
-                  borderTop: '1px solid #000000',
-                  paddingTop: '4px',
-                  marginTop: '4px'
-                }}>Reste à payer:</div>
-                <div style={{ 
-                  textAlign: 'right', 
-                  fontWeight: 'bold', 
-                  fontSize: '12px', 
-                  color: '#000000',
-                  borderTop: '1px solid #000000',
-                  paddingTop: '4px',
-                  marginTop: '4px'
-                }}>
-                  {formatCurrency(montantRestant)}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Signature compacte - Police 16px avec encadrement */}
-        {invoice.signature && (
-          <div style={{
-            background: 'white',
-            border: '2px solid #000000',
-            padding: '8px 10px',
-            marginBottom: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px'
-          }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>✅ Facture signée électroniquement</p>
-              <p style={{ fontSize: '14px', margin: '2px 0 4px 0', lineHeight: 1.2 }}>
-                Signée le {new Date(invoice.signatureDate || invoice.invoiceDate).toLocaleDateString('fr-FR')}
-              </p>
-              <p style={{ fontSize: '12px', margin: '4px 0 0 0', lineHeight: 1.2, color: '#333' }}>
-                ✅ J'ai lu et j'accepte les conditions générales de vente *
-              </p>
-            </div>
+          {/* NOTES */}
+          {invoice.invoiceNotes && (
             <div style={{
-              background: 'white',
-              border: '2px solid #000000',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '160px',
-              maxWidth: '200px',
-              height: '80px'
+              background: '#FFFBEB',
+              padding: '16px',
+              border: '2px solid #F59E0B',
+              marginBottom: '20px'
             }}>
-              <img 
-                src={invoice.signature} 
-                alt="Signature" 
-                style={{ 
-                  maxHeight: '70px', 
-                  maxWidth: '190px',
-                  objectFit: 'contain'
-                }} 
-              />
+              <h4 style={{ 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                margin: '0 0 12px 0',
+                color: '#92400E',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                📝 NOTES
+              </h4>
+              <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#2D3748' }}>
+                {invoice.invoiceNotes}
+              </div>
             </div>
+          )}
+
+          {/* CONDITIONS GÉNÉRALES */}
+          <div style={{
+            background: '#F8FAFC',
+            padding: '16px',
+            border: '2px solid #E2E8F0',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{ 
+              fontSize: '16px', 
+              fontWeight: 'bold', 
+              margin: '0 0 16px 0',
+              color: '#2D3748'
+            }}>
+              📋 CONDITIONS GÉNÉRALES
+            </h4>
+            <ConditionsGenerales />
           </div>
-        )}
-
-        {/* Article de loi compact */}
-        <div style={{
-          background: '#F55D3E',
-          color: 'white',
-          padding: '8px 10px',
-          textAlign: 'center',
-          fontWeight: 'bold',
-          fontSize: '9px',
-          borderRadius: '4px',
-          marginBottom: '10px',
-          lineHeight: 1.2
-        }}>
-          ⚠️ IMPORTANT : PAS DE DROIT DE RÉTRACTATION POUR ACHAT EN FOIRE/SALON.
         </div>
 
-        {/* Footer compact */}
-        <div style={{
-          textAlign: 'center',
-          color: '#080F0F',
-          fontSize: '9px',
-          borderTop: '1px solid #477A0C',
-          paddingTop: '8px',
-          marginTop: 'auto',
-          lineHeight: 1.2
-        }}>
-          <p style={{ margin: '1px 0', fontSize: '11px' }}><strong style={{ color: '#477A0C' }}>🌿 MYCONFORT</strong></p>
-          <p style={{ margin: '1px 0' }}>88 Avenue des Ternes, 75017 Paris • 📞 04 68 50 41 45 • ✉️ myconfort66@gmail.com</p>
-          <p style={{ margin: '1px 0' }}>SIRET: 824 313 530 00027 • Spécialiste confort et bien-être</p>
-        </div>
-      </div>
-
-      {/* PAGE 2: CONDITIONS GÉNÉRALES */}
-      <div style={{
-        padding: '15mm',
-        minHeight: '100vh',
-        background: 'white',
-        pageBreakBefore: 'always'
-      }}>
-        <div style={{
+        {/* FOOTER MODERNE */}
+        <footer style={{
           background: '#477A0C',
           color: 'white',
-          padding: '20px',
-          textAlign: 'center',
-          marginBottom: '25px'
+          padding: '32px 40px',
+          textAlign: 'center'
         }}>
-          <h1 style={{
-            margin: 0,
-            fontSize: '20px',
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          }}>📜 Conditions Générales de Vente</h1>
-        </div>
-        
-        <div style={{
-          background: '#F55D3E',
-          color: 'white',
-          padding: '12px',
-          textAlign: 'center',
-          fontWeight: 'bold',
-          fontSize: '12px',
-          marginBottom: '20px'
-        }}>
-          ⚠️ IMPORTANT : LE CONSOMMATEUR NE BÉNÉFICIE PAS D'UN DROIT DE RÉTRACTATION POUR UN ACHAT EFFECTUÉ DANS UNE FOIRE OU DANS UN SALON.
-        </div>
-        
-        <div style={{
-          fontSize: '12px',
-          lineHeight: 1.4,
-          columns: 2,
-          columnGap: '20px',
-          columnRule: '1px solid #477A0C'
-        }}>
-          <ConditionsGenerales />
-        </div>
-        
-        <div style={{
-          textAlign: 'center',
-          marginTop: '25px',
-          fontSize: '11px',
-          fontStyle: 'italic',
-          color: '#080F0F',
-          borderTop: '2px solid #477A0C',
-          paddingTop: '15px'
-        }}>
-          <p style={{ margin: '2px 0' }}>📧 Contact: myconfort66@gmail.com</p>
-          <p style={{ margin: '2px 0' }}>Les présentes Conditions Générales de Vente ont été mises à jour le 23 août 2024</p>
-          <p style={{ margin: '2px 0' }}>Version informatique générée automatiquement – 2024 • Format A4 – Usage Commercial Professionnel</p>
-        </div>
+          <h3 style={{ 
+            fontSize: '24px', 
+            fontWeight: '700', 
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.025em'
+          }}>
+            MYCONFORT
+          </h3>
+          <p style={{ fontSize: '16px', margin: '0 0 16px 0', opacity: 0.9 }}>
+            Merci pour votre confiance !
+          </p>
+          <div style={{ fontSize: '14px', opacity: 0.8, lineHeight: '1.6' }}>
+            <div style={{ marginBottom: '4px' }}>Votre spécialiste en matelas et literie de qualité</div>
+            <div style={{ marginBottom: '4px' }}>88 Avenue des Ternes, 75017 Paris - Tél: 04 68 50 41 45</div>
+            <div>Email: myconfort@gmail.com - SIRET: 824 313 530 00027</div>
+          </div>
+        </footer>
       </div>
     </div>
   );
-};
+});
+
+InvoicePreviewModern.displayName = 'InvoicePreviewModern';
+
+export default InvoicePreviewModern;
