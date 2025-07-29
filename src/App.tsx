@@ -292,7 +292,7 @@ function App() {
       showToast('🔐 Validation et envoi vers N8N...', 'success');
       
       // Utiliser le service N8N pour l'envoi
-      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, base64Data, pdfSizeKB);
+      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, base64Data);
 
       if (result.success) {
         showToast(result.message, "success");

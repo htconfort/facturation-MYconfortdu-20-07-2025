@@ -1,4 +1,3 @@
-import { ValidatedInvoicePayload, PayloadValidator, PayloadLogger } from './payloadValidator';
 import { Invoice } from '../types';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
@@ -11,55 +10,83 @@ export class N8nWebhookService {
    */
   static async sendInvoiceToN8n(
     invoice: Invoice, 
-    pdfBase64: string, 
-    pdfSizeKB: number
+    pdfBase64: string
   ): Promise<{
     success: boolean;
     message: string;
     response?: any;
-    payload?: ValidatedInvoicePayload;
+    payload?: any; // Changé de ValidatedInvoicePayload à any pour accepter la structure N8N
   }> {
     try {
       console.log('🚀 DIAGNOSTIC COMPLET AVANT ENVOI N8N');
       
-      // 1. Valider et préparer le payload
-      const validation = PayloadValidator.validateAndPrepare(invoice, pdfBase64, pdfSizeKB);
+      // 1. ✅ UTILISATION STRUCTURE PAYLOAD FONCTIONNELLE (commit e54c7f9)
+      console.log('🔧 Création payload avec structure validée du commit e54c7f9...');
       
-      if (!validation.isValid) {
-        const errorMessage = `❌ Validation échouée:\n${validation.errors?.join('\n')}`;
-        console.error(errorMessage);
+      // Calculer les totaux comme dans le commit fonctionnel
+      const totalAmount = invoice.products.reduce((sum, product) => {
+        return sum + (product.quantity * product.priceTTC);
+      }, 0);
+      
+      const acompteAmount = invoice.montantAcompte || 0;
+      const montantRestant = totalAmount - acompteAmount;
+      
+      // 2. 📦 STRUCTURE DU PAYLOAD IDENTIQUE AU COMMIT FONCTIONNEL e54c7f9
+      const webhookPayload = {
+        // PDF data
+        nom_facture: `Facture_MYCONFORT_${invoice.invoiceNumber}`,
+        fichier_facture: pdfBase64, // Base64 du PDF
+        date_creation: new Date().toISOString(),
         
-        return {
-          success: false,
-          message: errorMessage
-        };
-      }
-      
-      const validatedPayload = validation.payload!;
-      
-      // 2. 🎯 DIAGNOSTIC FINAL AVANT ENVOI (PRIORITÉ ABSOLUE)
-      PayloadLogger.logBeforeWebhookSend(validatedPayload);
-      
-      // 3. 🗺️ VÉRIFICATION MAPPING WEBHOOK
-      console.group('🗺️ MAPPING WEBHOOK N8N - VÉRIFICATION FINALE');
-      console.log('🎯 URL Webhook:', this.WEBHOOK_URL);
-      console.log('📊 Taille payload:', JSON.stringify(validatedPayload).length, 'caractères');
-      
-      // Vérification du mapping des champs critiques pour n8n
-      const webhookMapping = {
-        'clientEmail → email': validatedPayload.clientEmail,
-        'clientPhone → phone': validatedPayload.clientPhone,
-        'totalHT → montantHT': validatedPayload.totalHT,
-        'totalTTC → montantTTC': validatedPayload.totalTTC,
-        'clientName → nom_client': validatedPayload.clientName,
-        'invoiceNumber → numero_facture': validatedPayload.invoiceNumber,
-        'pdfBase64 → fichier_facture': validatedPayload.pdfBase64 ? 'PDF_PRESENT' : 'PDF_MISSING',
-        'products → produits': validatedPayload.products?.length || 0
+        // Invoice metadata - NOMS EXACTS DU COMMIT FONCTIONNEL
+        numero_facture: invoice.invoiceNumber,
+        date_facture: invoice.invoiceDate,
+        montant_ttc: totalAmount,
+        acompte: acompteAmount,
+        montant_restant: montantRestant,
+        
+        // Client information - NOMS EXACTS DU COMMIT FONCTIONNEL
+        "Nom du client": invoice.clientName,
+        client_email: invoice.clientEmail,
+        client_telephone: invoice.clientPhone,
+        adresse_client: `${invoice.clientAddress}, ${invoice.clientPostalCode} ${invoice.clientCity}`,
+        
+        // Payment information
+        mode_paiement: invoice.paymentMethod || 'Non spécifié',
+        signature: invoice.signature ? 'Oui' : 'Non',
+        
+        // Additional metadata
+        conseiller: invoice.advisorName || 'MYCONFORT',
+        lieu_evenement: invoice.eventLocation || 'Non spécifié',
+        nombre_produits: invoice.products.length,
+        produits: invoice.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+        
+        // Google Drive folder ID (du commit fonctionnel)
+        dossier_id: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-'
       };
       
-      Object.entries(webhookMapping).forEach(([mapping, value]) => {
+      console.log('📦 Payload N8N préparé (structure e54c7f9):', {
+        ...webhookPayload,
+        fichier_facture: `[${pdfBase64.length} caractères Base64]`
+      });
+      
+      // 3. 🗺️ VÉRIFICATION MAPPING WEBHOOK (Structure e54c7f9)
+      console.group('🗺️ MAPPING WEBHOOK N8N - STRUCTURE FONCTIONNELLE e54c7f9');
+      console.log('🎯 URL Webhook:', this.WEBHOOK_URL);
+      console.log('📊 Taille payload:', JSON.stringify(webhookPayload).length, 'caractères');
+      
+      const criticalFields = {
+        'nom_facture': webhookPayload.nom_facture,
+        'numero_facture': webhookPayload.numero_facture,
+        'Nom du client': webhookPayload["Nom du client"],
+        'client_email': webhookPayload.client_email,
+        'montant_ttc': webhookPayload.montant_ttc,
+        'fichier_facture (taille)': `${pdfBase64.length} chars`,
+      };
+      
+      Object.entries(criticalFields).forEach(([field, value]) => {
         const hasValue = value !== undefined && value !== null && value !== '';
-        console.log(`${hasValue ? '✅' : '❌'} ${mapping}:`, 
+        console.log(`${hasValue ? '✅' : '❌'} ${field}:`, 
           typeof value === 'string' && value.length > 30 ? `${value.substring(0, 30)}...` : value
         );
       });
@@ -81,7 +108,7 @@ export class N8nWebhookService {
             'Accept': 'application/json',
             'User-Agent': 'MYCONFORT-Invoice-System/1.0'
           },
-          body: JSON.stringify(validatedPayload),
+          body: JSON.stringify(webhookPayload),
           mode: 'cors', // Tentative CORS normale d'abord
           signal: controller.signal
         });
@@ -120,18 +147,18 @@ export class N8nWebhookService {
             success: false,
             message: errorMessage,
             response: responseData,
-            payload: validatedPayload
+            payload: webhookPayload
           };
         }
         
-        const successMessage = `✅ Facture ${validatedPayload.invoiceNumber} envoyée avec succès vers n8n`;
+        const successMessage = `✅ Facture ${webhookPayload.numero_facture} envoyée avec succès vers n8n`;
         console.log(successMessage);
         
         return {
           success: true,
           message: successMessage,
           response: responseData,
-          payload: validatedPayload
+          payload: webhookPayload
         };
         
       } catch (fetchError: any) {
@@ -144,7 +171,7 @@ export class N8nWebhookService {
           return {
             success: false,
             message: timeoutMessage,
-            payload: validatedPayload
+            payload: webhookPayload
           };
         }
         
@@ -153,13 +180,13 @@ export class N8nWebhookService {
           console.warn('⚠️ Erreur CORS détectée, tentative avec mode no-cors...');
           
           try {
-            // Tentative avec mode no-cors
-            const fallbackResponse = await fetch(this.WEBHOOK_URL, {
+            // Tentative avec mode no-cors (supprimer fallbackResponse non utilisé)
+            await fetch(this.WEBHOOK_URL, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify(validatedPayload),
+              body: JSON.stringify(webhookPayload),
               mode: 'no-cors' // Mode no-cors pour éviter CORS
             });
             
@@ -169,7 +196,7 @@ export class N8nWebhookService {
               success: true,
               message: '✅ Envoi réussi via mode no-cors (CORS configuré côté N8N requis pour les réponses)',
               response: { note: 'Mode no-cors utilisé - réponse non lisible' },
-              payload: validatedPayload
+              payload: webhookPayload
             };
             
           } catch (noCorsError) {
@@ -183,7 +210,7 @@ export class N8nWebhookService {
         return {
           success: false,
           message: networkMessage,
-          payload: validatedPayload
+          payload: webhookPayload
         };
       }
       
