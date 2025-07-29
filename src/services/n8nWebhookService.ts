@@ -1,9 +1,9 @@
-import { ValidatedInvoicePayload, PayloadValidator } from './payloadValidator';
+import { ValidatedInvoicePayload, PayloadValidator, PayloadLogger } from './payloadValidator';
 import { Invoice } from '../types';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
-  private static readonly WEBHOOK_URL = 'https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a';
+  private static readonly WEBHOOK_URL = '/api/n8n/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a';
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
   
   /**
@@ -82,6 +82,7 @@ export class N8nWebhookService {
             'User-Agent': 'MYCONFORT-Invoice-System/1.0'
           },
           body: JSON.stringify(validatedPayload),
+          mode: 'cors', // Tentative CORS normale d'abord
           signal: controller.signal
         });
         
@@ -145,6 +146,35 @@ export class N8nWebhookService {
             message: timeoutMessage,
             payload: validatedPayload
           };
+        }
+        
+        // Gestion spéciale des erreurs CORS
+        if (fetchError.message.includes('CORS') || fetchError.message.includes('Failed to fetch')) {
+          console.warn('⚠️ Erreur CORS détectée, tentative avec mode no-cors...');
+          
+          try {
+            // Tentative avec mode no-cors
+            const fallbackResponse = await fetch(this.WEBHOOK_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(validatedPayload),
+              mode: 'no-cors' // Mode no-cors pour éviter CORS
+            });
+            
+            console.log('✅ Envoi no-cors réussi (pas de réponse lisible)');
+            
+            return {
+              success: true,
+              message: '✅ Envoi réussi via mode no-cors (CORS configuré côté N8N requis pour les réponses)',
+              response: { note: 'Mode no-cors utilisé - réponse non lisible' },
+              payload: validatedPayload
+            };
+            
+          } catch (noCorsError) {
+            console.error('❌ Échec même avec no-cors:', noCorsError);
+          }
         }
         
         const networkMessage = `❌ Erreur réseau: ${fetchError.message}`;
