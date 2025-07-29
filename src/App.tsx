@@ -13,6 +13,7 @@ import { PayloadDebugModal } from './components/PayloadDebugModal';
 import { DebugCenter } from './components/DebugCenter';
 import { SignaturePad } from './components/SignaturePad';
 import { InvoicePreviewModern } from './components/InvoicePreviewModern';
+import { EmailSender } from './components/EmailSender';
 import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
@@ -81,12 +82,7 @@ function App() {
   const [showDebugCenter, setShowDebugCenter] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showInvoicePreview, setShowInvoicePreview] = useState(true);
-  const [invoiceStyle, setInvoiceStyle] = useState<'classic' | 'modern' | 'premium'>('premium'); // Style premium par défaut
 
-  // Debug: Surveiller les changements de style
-  useEffect(() => {
-    console.log('🎨 Style de facture changé vers:', invoiceStyle);
-  }, [invoiceStyle]);
   const [toast, setToast] = useState({
     show: false,
     message: '',
@@ -295,8 +291,8 @@ function App() {
       
       showToast('🔐 Validation et envoi vers N8N...', 'success');
       
-      // Utiliser le nouveau service avec PDF réduit pour éviter l'erreur 500
-      const result = await N8nWebhookService.sendInvoiceWithReducedPDF(invoice, base64Data, pdfSizeKB);
+      // Utiliser le service N8N pour l'envoi
+      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, base64Data, pdfSizeKB);
 
       if (result.success) {
         showToast(result.message, "success");
@@ -378,12 +374,15 @@ function App() {
   //   PDFService.printInvoice(previewRef, invoice.invoiceNumber);
   // };
 
-  const handleEmailJSSuccess = (message: string) => {
+
+
+  // Handlers temporaires pour compatibilité (plus d'EmailJS)
+  const handleSuccess = (message: string) => {
     handleSaveInvoice();
     showToast(message, 'success');
   };
 
-  const handleEmailJSError = (message: string) => {
+  const handleError = (message: string) => {
     showToast(message, 'error');
   };
 
@@ -548,8 +547,8 @@ function App() {
           <div className="mb-6">
             <DebugCenter
               invoice={invoice}
-              onSuccess={handleEmailJSSuccess}
-              onError={handleEmailJSError}
+              onSuccess={handleSuccess}
+              onError={handleError}
             />
           </div>
         )}
@@ -666,14 +665,8 @@ function App() {
           </div>
         </div>
 
-        {/* Communication & Actions Section - EmailSender removed */}
-        {/* <EmailSender
-          invoice={invoice}
-          onSuccess={handleEmailJSSuccess}
-          onError={handleEmailJSError}
-          onShowConfig={() => setShowGoogleDriveConfig(true)}
-          onShowEmailJSConfig={() => setShowEmailJSConfig(true)}
-        /> */}
+        {/* Communication & Actions Section */}
+        <EmailSender />
 
 
 
@@ -698,60 +691,10 @@ function App() {
 
           {showInvoicePreview && (
             <div className="border-2 border-[#477A0C] rounded-lg p-4 bg-gray-50">
-              {/* Style switcher moderne */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-white rounded-lg p-2 shadow-md flex space-x-2">
-                  <button
-                    onClick={() => setInvoiceStyle('classic')}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                      invoiceStyle === 'classic' 
-                        ? 'bg-[#477A0C] text-white' 
-                        : 'text-[#477A0C] hover:bg-gray-100'
-                    }`}
-                  >
-                    📄 Classique
-                  </button>
-                  <button
-                    onClick={() => setInvoiceStyle('modern')}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                      invoiceStyle === 'modern' 
-                        ? 'bg-[#477A0C] text-white' 
-                        : 'text-[#477A0C] hover:bg-gray-100'
-                    }`}
-                  >
-                    🎨 Moderne
-                  </button>
-                  <button
-                    onClick={() => setInvoiceStyle('premium')}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                      invoiceStyle === 'premium' 
-                        ? 'bg-[#477A0C] text-white' 
-                        : 'text-[#477A0C] hover:bg-gray-100'
-                    }`}
-                  >
-                    ✨ Premium
-                  </button>
-                </div>
-              </div>
-
-              {/* Aperçu de la facture */}
+              {/* Aperçu de la facture - Mode Premium uniquement */}
               <div id="invoice-preview-section" className="bg-white rounded-lg overflow-hidden">
-                <div className={invoiceStyle === 'classic' ? "border border-gray-300 rounded-lg overflow-hidden" : ""}>
-                  {invoiceStyle === 'classic' && (
-                    <div key="classic" className="transition-all duration-500">
-                      <InvoicePreviewModern invoice={invoice} />
-                    </div>
-                  )}
-                  {invoiceStyle === 'modern' && (
-                    <div key="modern" className="transition-all duration-500">
-                      <InvoicePreviewModern invoice={invoice} />
-                    </div>
-                  )}
-                  {invoiceStyle === 'premium' && (
-                    <div key="premium" className="transition-all duration-500">
-                      <InvoicePreviewModern invoice={invoice} />
-                    </div>
-                  )}
+                <div className="transition-all duration-500">
+                  <InvoicePreviewModern invoice={invoice} />
                 </div>
               </div>
             </div>
@@ -857,23 +800,23 @@ function App() {
       <PDFGuideModal
         isOpen={showPDFGuide}
         onClose={() => setShowPDFGuide(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={handleSuccess}
+        onError={handleError}
       />
 
       {/* EmailJSConfigurationModal removed */}
       {/* <EmailJSConfigurationModal
         isOpen={showEmailJSConfig}
         onClose={() => setShowEmailJSConfig(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={handleSuccess}
+        onError={handleError}
       /> */}
 
       <GoogleDriveModal
         isOpen={showGoogleDriveConfig}
         onClose={() => setShowGoogleDriveConfig(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={handleSuccess}
+        onError={handleError}
       />
 
       {/* Keep the original PayloadDebugModal for compatibility */}
@@ -881,8 +824,8 @@ function App() {
         isOpen={showPayloadDebug}
         onClose={() => setShowPayloadDebug(false)}
         invoice={invoice}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={handleSuccess}
+        onError={handleError}
       />
 
       {/* Add toggle for Debug Center */}

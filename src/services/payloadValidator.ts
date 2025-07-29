@@ -30,9 +30,7 @@ export const InvoicePayloadSchema = z.object({
     unitPriceHT: z.number().min(0, "Prix HT doit être >= 0"),
     unitPriceTTC: z.number().min(0, "Prix TTC doit être >= 0"),
     discount: z.number().min(0, "Remise doit être >= 0"),
-    discountType: z.enum(['percentage', 'amount'], {
-      errorMap: () => ({ message: "Type de remise doit être 'percentage' ou 'amount'" })
-    }),
+    discountType: z.enum(['percent', 'fixed']),
     totalTTC: z.number().min(0, "Total TTC doit être >= 0")
   })).min(1, "Au moins un produit obligatoire"),
   
@@ -173,7 +171,7 @@ export class PayloadLogger {
     // Log des erreurs de validation
     if (errors) {
       console.group('❌ ERREURS DE VALIDATION');
-      errors.errors.forEach(error => {
+      errors.issues.forEach(error => {
         console.error(`• ${error.path.join('.')}: ${error.message}`);
       });
       console.groupEnd();
@@ -229,7 +227,7 @@ export class PayloadLogger {
         payload: payload,
         validation: {
           isValid: !errors,
-          errors: errors?.errors || []
+          errors: errors?.issues || []
         },
         stats: {
           jsonSize: JSON.stringify(payload).length,
@@ -265,11 +263,11 @@ export class PayloadSanitizer {
     console.group('📋 DONNÉES BRUTES AVANT NETTOYAGE');
     console.log('Invoice brute:', {
       invoiceNumber: invoice.invoiceNumber,
-      clientName: invoice.client.name,
-      clientEmail: invoice.client.email,
-      clientPhone: invoice.client.phone,
+      clientName: invoice.clientName,
+      clientEmail: invoice.clientEmail,
+      clientPhone: invoice.clientPhone,
       products: invoice.products.length,
-      paymentMethod: invoice.payment.method,
+      paymentMethod: invoice.paymentMethod,
       signature: !!invoice.signature
     });
     console.log('PDF info:', { base64Length: pdfBase64.length, sizeKB: pdfSizeKB });
@@ -282,7 +280,7 @@ export class PayloadSanitizer {
       
       return {
         name: product.name.trim(),
-        category: product.category.trim(),
+        category: product.category?.trim() || '',
         quantity: product.quantity,
         unitPriceHT: Math.round(unitPriceHT * 100) / 100,
         unitPriceTTC: product.priceTTC,
@@ -295,7 +293,7 @@ export class PayloadSanitizer {
     const totalTTC = products.reduce((sum, p) => sum + p.totalTTC, 0);
     const totalHT = totalTTC / (1 + (invoice.taxRate / 100));
     const totalTVA = totalTTC - totalHT;
-    const depositAmount = invoice.payment.depositAmount || 0;
+    const depositAmount = invoice.montantAcompte || 0;
     const remainingAmount = totalTTC - depositAmount;
     
     // 🔍 LOG DES CALCULS
@@ -314,18 +312,18 @@ export class PayloadSanitizer {
       // Informations facture
       invoiceNumber: invoice.invoiceNumber.trim(),
       invoiceDate: invoice.invoiceDate,
-      eventLocation: invoice.eventLocation.trim(),
+      eventLocation: invoice.eventLocation?.trim() || '',
       
       // Informations client (nettoyées)
-      clientName: invoice.client.name.trim(),
-      clientEmail: invoice.client.email.trim().toLowerCase(),
-      clientPhone: invoice.client.phone.trim(),
-      clientAddress: invoice.client.address.trim(),
-      clientCity: invoice.client.city.trim(),
-      clientPostalCode: invoice.client.postalCode.trim(),
-      clientHousingType: invoice.client.housingType?.trim() || '',
-      clientDoorCode: invoice.client.doorCode?.trim() || '',
-      clientSiret: invoice.client.siret?.trim(),
+      clientName: invoice.clientName.trim(),
+      clientEmail: invoice.clientEmail.trim().toLowerCase(),
+      clientPhone: invoice.clientPhone.trim(),
+      clientAddress: invoice.clientAddress.trim(),
+      clientCity: invoice.clientCity.trim(),
+      clientPostalCode: invoice.clientPostalCode.trim(),
+      clientHousingType: invoice.clientHousingType?.trim() || '',
+      clientDoorCode: invoice.clientDoorCode?.trim() || '',
+      clientSiret: invoice.clientSiret?.trim(),
       
       // Conseiller
       advisorName: invoice.advisorName?.trim() || 'MYCONFORT',
@@ -340,13 +338,13 @@ export class PayloadSanitizer {
       taxRate: invoice.taxRate,
       
       // Paiement
-      paymentMethod: invoice.payment.method.trim(),
+      paymentMethod: invoice.paymentMethod.trim(),
       depositAmount: Math.round(depositAmount * 100) / 100,
       remainingAmount: Math.round(remainingAmount * 100) / 100,
       
       // Livraison
-      deliveryMethod: invoice.delivery.method?.trim(),
-      deliveryNotes: invoice.delivery.notes?.trim(),
+      deliveryMethod: invoice.deliveryMethod?.trim(),
+      deliveryNotes: invoice.deliveryNotes?.trim(),
       
       // Métadonnées
       invoiceNotes: invoice.invoiceNotes?.trim(),
@@ -399,7 +397,7 @@ export class PayloadValidator {
         console.error('❌ VALIDATION ÉCHOUÉE');
         PayloadLogger.logPayload(cleanPayload, validationResult.error);
         
-        const errors = validationResult.error.errors.map(err => 
+        const errors = validationResult.error.issues.map(err => 
           `${err.path.join('.')}: ${err.message}`
         );
         

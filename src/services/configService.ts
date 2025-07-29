@@ -6,15 +6,6 @@
  */
 
 interface AppConfig {
-  // 📧 EmailJS
-  emailjs: {
-    publicKey: string;
-    serviceId: string;
-    templateId: string;
-    fromEmail: string;
-    replyTo: string;
-  };
-  
   // ☁️ Google Drive
   googleDrive: {
     apiKey: string;
@@ -79,14 +70,6 @@ class ConfigService {
 
   private loadConfig(): AppConfig {
     return {
-      emailjs: {
-        publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
-        serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
-        templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
-        fromEmail: import.meta.env.VITE_DEFAULT_EMAIL_FROM || 'noreply@myconfort.com',
-        replyTo: import.meta.env.VITE_DEFAULT_EMAIL_REPLY_TO || 'contact@myconfort.com'
-      },
-      
       googleDrive: {
         apiKey: import.meta.env.VITE_GOOGLE_DRIVE_API_KEY || '',
         clientId: import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID || '',
@@ -131,17 +114,6 @@ class ConfigService {
   private validateConfig(): void {
     const issues: string[] = [];
 
-    // Validation EmailJS
-    if (!this.config.emailjs.publicKey) {
-      issues.push('VITE_EMAILJS_PUBLIC_KEY manquant');
-    }
-    if (!this.config.emailjs.serviceId) {
-      issues.push('VITE_EMAILJS_SERVICE_ID manquant');
-    }
-    if (!this.config.emailjs.templateId) {
-      issues.push('VITE_EMAILJS_TEMPLATE_ID manquant');
-    }
-
     // Validation Google Drive (optionnel)
     if (this.config.googleDrive.apiKey && !this.config.googleDrive.clientId) {
       issues.push('VITE_GOOGLE_DRIVE_CLIENT_ID requis si API key fournie');
@@ -159,7 +131,6 @@ class ConfigService {
   }
 
   // Getters pour accéder à la configuration
-  get emailjs() { return this.config.emailjs; }
   get googleDrive() { return this.config.googleDrive; }
   get n8n() { return this.config.n8n; }
   get company() { return this.config.company; }
@@ -168,12 +139,6 @@ class ConfigService {
   get backup() { return this.config.backup; }
 
   // Méthodes utilitaires
-  isEmailJSConfigured(): boolean {
-    return !!(this.config.emailjs.publicKey && 
-             this.config.emailjs.serviceId && 
-             this.config.emailjs.templateId);
-  }
-
   isGoogleDriveConfigured(): boolean {
     return !!(this.config.googleDrive.apiKey && 
              this.config.googleDrive.clientId);
@@ -186,7 +151,6 @@ class ConfigService {
   // Méthode pour afficher l'état de la configuration
   getConfigStatus(): { service: string; configured: boolean; required: boolean }[] {
     return [
-      { service: 'EmailJS', configured: this.isEmailJSConfigured(), required: true },
       { service: 'Google Drive', configured: this.isGoogleDriveConfigured(), required: false },
       { service: 'N8N Webhook', configured: this.isN8NConfigured(), required: true }
     ];
@@ -196,7 +160,6 @@ class ConfigService {
   logConfig(): void {
     if (this.config.app.debugMode && this.config.app.consoleLogs) {
       console.group('🔧 Configuration Application');
-      console.log('EmailJS configuré:', this.isEmailJSConfigured());
       console.log('Google Drive configuré:', this.isGoogleDriveConfigured());
       console.log('N8N configuré:', this.isN8NConfigured());
       console.log('Mode debug:', this.config.app.debugMode);
