@@ -1,0 +1,57 @@
+{
+  "invoiceNumber": "FAC-TEST-2025-001",
+  "invoiceDate": "2025-01-28",
+  "eventLocation": "Paris 15ème",
+  "taxRate": 20,
+  "clientName": "Client Test",
+  "clientEmail": "test@example.com",
+  "clientPhone": "0123456789",
+  "clientAddress": "123 Rue de Test",
+  "clientPostalCode": "75015",
+  "clientCity": "Paris",
+  "clientHousingType": "Appartement",
+  "clientDoorCode": "A123",
+  "clientSiret": "12345678901234",
+  "products": [
+    {
+      "name": "Matelas Premium King Size",
+      "category": "Literie",
+      "quantity": 2,
+      "priceTTC": 899.99,
+      "discount": 0,
+      "discountType": "percentage"
+    },
+    {
+      "name": "Sommier tapissier 160x200",
+      "category": "Literie",
+      "quantity": 1,
+      "priceTTC": 456.5,
+      "discount": 10,
+      "discountType": "percentage"
+    },
+    {
+      "name": "Oreiller mémoire de forme",
+      "category": "Accessoires",
+      "quantity": 4,
+      "priceTTC": 89.9,
+      "discount": 0,
+      "discountType": "percentage"
+    }
+  ],
+  "montantHT": 2142.025,
+  "montantTTC": 2570.43,
+  "montantTVA": 428.40499999999975,
+  "montantRemise": 0,
+  "paymentMethod": "Chèque",
+  "montantAcompte": 500,
+  "montantRestant": 2070.43,
+  "deliveryMethod": "Livraison standard",
+  "deliveryNotes": "Livraison prévue sous 2 semaines",
+  "signature": "",
+  "isSigned": false,
+  "invoiceNotes": "Facture de test pour validation du mapping des produits",
+  "advisorName": "Conseiller Test",
+  "termsAccepted": true,
+  "createdAt": "2025-07-30T02:00:27.930Z",
+  "updatedAt": "2025-07-30T02:00:27.931Z"
+}
