@@ -2,7 +2,7 @@ import { Invoice } from '../types';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
-  private static readonly WEBHOOK_URL = '/api/n8n/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a';
+  private static readonly WEBHOOK_URL = '/api/n8n/webhook/facture-universelle';
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
   
   /**
