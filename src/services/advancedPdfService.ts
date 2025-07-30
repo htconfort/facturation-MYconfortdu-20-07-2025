@@ -339,6 +339,22 @@ export class AdvancedPDFService {
     }
     
     // Tableau des produits
+    // 🚨 DEBUG CRITIQUE - DONNÉES UTILISÉES POUR LE TABLEAU PDF
+    console.log('📊 GÉNÉRATION TABLEAU PDF - data.items reçu:', data.items);
+    console.log('📊 Nombre d\'items pour le tableau:', data.items.length);
+    data.items.forEach((item, index) => {
+      console.log(`📊 Item ${index + 1} pour tableau PDF:`, {
+        description: item.description,
+        qty: item.qty,
+        unitPriceHT: item.unitPriceHT,
+        unitPriceTTC: item.unitPriceTTC,
+        discount: item.discount,
+        discountType: item.discountType,
+        total: item.total,
+        ITEM_COMPLET: item
+      });
+    });
+    
     const tableData = data.items.map(item => [
       item.qty.toString(),
       formatCurrency(item.unitPriceHT),
@@ -348,6 +364,8 @@ export class AdvancedPDFService {
         '-',
       formatCurrency(item.total)
     ]);
+
+    console.log('📊 DONNÉES FORMATÉES POUR LE TABLEAU:', tableData);
 
     autoTable(doc, {
       startY: currentY,
@@ -617,6 +635,18 @@ export class AdvancedPDFService {
           discountType
         )
       };
+    });
+
+    console.log('✅ MAPPING TERMINÉ - Items générés pour le PDF:', items);
+    console.log('📊 Résumé du mapping:', {
+      nombreItems: items.length,
+      totalCalculé: items.reduce((sum, item) => sum + item.total, 0),
+      premiersItems: items.slice(0, 3).map(item => ({
+        description: item.description,
+        qty: item.qty,
+        unitPriceTTC: item.unitPriceTTC,
+        total: item.total
+      }))
     });
 
     const totalTTC = items.reduce((sum, item) => sum + item.total, 0);
