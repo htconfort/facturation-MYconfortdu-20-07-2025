@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test Diagnostic PDF - MyConfort</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            border: 2px solid #3B82F6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .error-section {
+            border: 2px solid #EF4444;
+            background: #FEF2F2;
+        }
+        .success-section {
+            border: 2px solid #10B981;
+            background: #F0FDF4;
+        }
+        .warning-section {
+            border: 2px solid #F59E0B;
+            background: #FFFBEB;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .danger {
+            background: #EF4444;
+        }
+        .danger:hover {
+            background: #DC2626;
+        }
+        pre {
+            background: #F3F4F6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .invoice-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .product-item {
+            background: #F8FAFC;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            border-left: 4px solid #3B82F6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Diagnostic PDF vs Aperçu - MyConfort</h1>
+        
+        <div class="test-section error-section">
+            <h2>🚨 Problème Identifié</h2>
+            <p><strong>Le PDF généré affiche des montants différents de l'aperçu HTML.</strong></p>
+            <ul>
+                <li><strong>Aperçu HTML :</strong> Utilise <code>invoice.products</code> directement</li>
+                <li><strong>Service PDF :</strong> Utilise <code>convertInvoiceData()</code> pour mapper les données</li>
+                <li><strong>Conséquence :</strong> Divergence entre les deux sources de données</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Facture de Test Diagnostique</h2>
+            <p>Cette facture utilise des montants <strong>facilement identifiables</strong> pour voir exactement ce qui se passe dans le mapping.</p>
+            
+            <div class="invoice-data">
+                <div>
+                    <h3>📱 Aperçu HTML (Direct)</h3>
+                    <div class="product-item">
+                        <strong>🔍 PRODUIT TEST 1</strong><br>
+                        Quantité: 1 × Prix: 111.11€<br>
+                        <strong>Total: 111.11€</strong>
+                    </div>
+                    <div class="product-item">
+                        <strong>🔍 PRODUIT TEST 2</strong><br>
+                        Quantité: 1 × Prix: 222.22€<br>
+                        <strong>Total: 222.22€</strong>
+                    </div>
+                    <div style="background: #10B981; color: white; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold;">
+                        TOTAL ATTENDU: 333.33€
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>📄 Service PDF (Via Mapping)</h3>
+                    <p>Le service PDF va recevoir la même structure mais la traiter via <code>convertInvoiceData()</code>.</p>
+                    <button onclick="testPDFMapping()" class="danger">🧪 Tester le Mapping PDF</button>
+                    <div id="mapping-result" class="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section warning-section">
+            <h2>🔧 Instructions de Test</h2>
+            <ol>
+                <li><strong>Cliquez sur "Tester le Mapping PDF"</strong></li>
+                <li><strong>Regardez les logs</strong> dans la console (F12)</li>
+                <li><strong>Vérifiez le PDF téléchargé</strong> - doit afficher 333.33€</li>
+                <li><strong>Comparez</strong> avec les montants hardcodés précédents</li>
+            </ol>
+        </div>
+
+        <div id="test-results" class="result">
+            <h3>📊 Résultats du Test</h3>
+            <div id="results-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Facture de test avec montants identifiables
+        const diagnosticInvoice = {
+            invoiceNumber: 'DIAGNOSTIC-PDF-001',
+            invoiceDate: '2025-01-30',
+            eventLocation: 'Test Direct',
+            taxRate: 20,
+            
+            clientName: 'Client Test Mapping',
+            clientEmail: 'mapping@test.com',
+            clientPhone: '0123456789',
+            clientAddress: '123 Rue du Test',
+            clientPostalCode: '75001',
+            clientCity: 'Paris',
+            clientHousingType: 'Test',
+            clientDoorCode: '',
+            clientSiret: '',
+            
+            products: [
+                {
+                    name: '🔍 PRODUIT TEST 1 - Montant Unique',
+                    category: 'Diagnostic',
+                    quantity: 1,
+                    priceTTC: 111.11,
+                    priceHT: 92.59,
+                    totalHT: 92.59,
+                    totalTTC: 111.11,
+                    discount: 0,
+                    discountType: 'percent'
+                },
+                {
+                    name: '🔍 PRODUIT TEST 2 - Montant Unique',
+                    category: 'Diagnostic',
+                    quantity: 1,
+                    priceTTC: 222.22,
+                    priceHT: 185.18,
+                    totalHT: 185.18,
+                    totalTTC: 222.22,
+                    discount: 0,
+                    discountType: 'percent'
+                }
+            ],
+            
+            montantHT: 277.77,
+            montantTTC: 333.33,
+            montantTVA: 55.56,
+            montantRemise: 0,
+            paymentMethod: 'Test',
+            montantAcompte: 0,
+            montantRestant: 333.33,
+            deliveryMethod: '',
+            deliveryNotes: '',
+            signature: '',
+            isSigned: false,
+            invoiceNotes: 'Test de diagnostic mapping PDF',
+            advisorName: 'Diagnostic Test',
+            termsAccepted: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        function testPDFMapping() {
+            console.log('🚨 DÉMARRAGE TEST DIAGNOSTIC MAPPING PDF');
+            console.log('==========================================');
+            console.log('📋 Facture de test:', diagnosticInvoice);
+            
+            // Calcul aperçu (méthode directe)
+            let totalApercu = 0;
+            diagnosticInvoice.products.forEach(product => {
+                totalApercu += product.quantity * product.priceTTC;
+            });
+            
+            console.log('📱 TOTAL CALCULÉ APERÇU (direct):', totalApercu + '€');
+            
+            // Test si AdvancedPDFService est disponible
+            if (typeof AdvancedPDFService !== 'undefined') {
+                console.log('✅ AdvancedPDFService détecté, test du mapping...');
+                
+                // Exposer globalement pour test
+                window.diagnosticInvoice = diagnosticInvoice;
+                
+                // Lancer le test PDF
+                AdvancedPDFService.downloadPDF(diagnosticInvoice).then(() => {
+                    console.log('🎯 PDF généré ! Vérifiez le fichier téléchargé.');
+                    showResults('success', 'PDF généré avec succès ! Vérifiez que le total est 333.33€');
+                }).catch(error => {
+                    console.error('❌ Erreur génération PDF:', error);
+                    showResults('error', 'Erreur lors de la génération PDF: ' + error.message);
+                });
+                
+            } else {
+                console.error('❌ AdvancedPDFService non trouvé');
+                showResults('error', 'Service PDF non disponible. Assurez-vous d\'être sur l\'application MyConfort.');
+            }
+        }
+
+        function showResults(type, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const contentDiv = document.getElementById('results-content');
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.className = 'result ' + (type === 'success' ? 'success-section' : 'error-section');
+            
+            contentDiv.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px;">
+                    ${type === 'success' ? '✅' : '❌'} ${message}
+                </div>
+                <div style="font-size: 14px;">
+                    <strong>Vérifications à faire dans le PDF téléchargé :</strong>
+                    <ul>
+                        <li>Produit 1 : doit afficher 111.11€</li>
+                        <li>Produit 2 : doit afficher 222.22€</li>
+                        <li>Total TTC : doit afficher 333.33€</li>
+                    </ul>
+                    <p><strong>Si ces montants sont corrects → Correction réussie ! ✅</strong></p>
+                    <p><strong>Si vous voyez 375€, 1500€ ou autres → Problème persiste ❌</strong></p>
+                </div>
+            `;
+        }
+
+        // Afficher les détails au chargement
+        console.log('🔍 Page de diagnostic chargée');
+        console.log('Facture de test disponible:', diagnosticInvoice);
+    </script>
+</body>
+</html>
