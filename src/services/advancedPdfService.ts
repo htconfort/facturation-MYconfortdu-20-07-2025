@@ -39,6 +39,7 @@ export interface InvoiceData {
   signature?: string;
   deliveryMethod?: string;
   deliveryNotes?: string;
+  nombreChequesAVenir?: number;
 }
 
 export class AdvancedPDFService {
@@ -683,7 +684,8 @@ export class AdvancedPDFService {
       montantRestant: totalTTC - (invoice.montantAcompte || 0),
       signature: invoice.signature,
       deliveryMethod: invoice.deliveryMethod,
-      deliveryNotes: invoice.deliveryNotes
+      deliveryNotes: invoice.deliveryNotes,
+      nombreChequesAVenir: invoice.nombreChequesAVenir
     };
   }
 

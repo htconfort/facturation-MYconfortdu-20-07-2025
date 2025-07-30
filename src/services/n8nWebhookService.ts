@@ -2,7 +2,7 @@ import { Invoice } from '../types';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
-  private static readonly WEBHOOK_URL = '/api/n8n/webhook/facture-universelle';
+  private static readonly WEBHOOK_URL = 'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle';
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
   
   /**
@@ -45,19 +45,76 @@ export class N8nWebhookService {
         acompte: acompteAmount,
         montant_restant: montantRestant,
         
-        // Client information - NOMS EXACTS DU COMMIT FONCTIONNEL
-        "Nom du client": invoice.clientName,
-        client_email: invoice.clientEmail,
-        client_telephone: invoice.clientPhone,
+        // NOUVEAUX CHAMPS FINANCIERS DÉTAILLÉS - TOUS LES MONTANTS
+        montant_ht: invoice.montantHT || 0,
+        montant_tva: invoice.montantTVA || 0,
+        montant_remise: invoice.montantRemise || 0,
+        taux_tva: invoice.taxRate || 20,
+        
+        // Client information - CORRESPONDANCE EXACTE AVEC VOTRE JSON N8N + TOUS LES CHAMPS
+        nom_du_client: invoice.clientName,
+        email_client: invoice.clientEmail,
+        telephone_client: invoice.clientPhone,
         adresse_client: `${invoice.clientAddress}, ${invoice.clientPostalCode} ${invoice.clientCity}`,
+        
+        // NOUVEAUX CHAMPS CLIENT DÉTAILLÉS - TOUS LES CHAMPS DISPONIBLES
+        client_adresse_rue: invoice.clientAddress,
+        client_code_postal: invoice.clientPostalCode,
+        client_ville: invoice.clientCity,
+        client_type_logement: invoice.clientHousingType || '',
+        client_code_porte: invoice.clientDoorCode || '',
+        client_siret: invoice.clientSiret || '',
         
         // Payment information
         mode_paiement: invoice.paymentMethod || 'Non spécifié',
         signature: invoice.signature ? 'Oui' : 'Non',
+        signature_presente: invoice.isSigned ? 'Oui' : 'Non',
+        date_signature: invoice.signatureDate || '',
         
-        // Additional metadata
+        // NOUVEAUX CHAMPS LIVRAISON - TOUS LES CHAMPS DISPONIBLES
+        methode_livraison: invoice.deliveryMethod || '',
+        notes_livraison: invoice.deliveryNotes || '',
+        
+        // Chèques à venir - CORRESPONDANCE EXACTE AVEC VOTRE JSON N8N
+        nombre_cheques: invoice.nombreChequesAVenir || 0,
+        montant_par_cheque: invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && montantRestant > 0
+          ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2)
+          : '',
+        
+        // Mode de paiement avec détails pour email
+        mode_paiement_avec_details: invoice.paymentMethod && invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0
+          ? `${invoice.paymentMethod} - ${invoice.nombreChequesAVenir} chèque${invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir de ${invoice.nombreChequesAVenir && montantRestant > 0 ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2) : '0.00'}€ chacun`
+          : invoice.paymentMethod || 'Non spécifié',
+        
+        // NOUVEAUX CHAMPS NOTES ET MÉTADONNÉES - TOUS LES CHAMPS DISPONIBLES
+        notes_facture: invoice.invoiceNotes || '',
         conseiller: invoice.advisorName || 'MYCONFORT',
         lieu_evenement: invoice.eventLocation || 'Non spécifié',
+        conditions_acceptees: invoice.termsAccepted ? 'Oui' : 'Non',
+        date_creation_facture: invoice.createdAt || new Date().toISOString(),
+        date_modification_facture: invoice.updatedAt || new Date().toISOString(),
+        
+        // Produits formatés en HTML pour email
+        produits_html: invoice.products.map(product => {
+          const total = product.quantity * product.priceTTC;
+          return `<li><strong>${product.name}</strong><br>
+                   Quantité: ${product.quantity} × ${product.priceTTC.toFixed(2)}€ = <strong>${total.toFixed(2)}€</strong>
+                   ${product.discount > 0 ? `<br><em>Remise: -${product.discount}${product.discountType === 'percent' ? '%' : '€'}</em>` : ''}
+                   </li>`;
+        }).join(''),
+        
+        // CHAMPS PRODUITS SÉPARÉS POUR N8N - ACCÈS FACILE AUX DONNÉES
+        produits_noms: invoice.products.map(p => p.name),
+        produits_categories: invoice.products.map(p => p.category || ''),
+        produits_quantites: invoice.products.map(p => p.quantity),
+        produits_prix_unitaires: invoice.products.map(p => p.priceTTC.toFixed(2)),
+        produits_prix_ht_unitaires: invoice.products.map(p => p.priceHT.toFixed(2)),
+        produits_remises: invoice.products.map(p => p.discount || 0),
+        produits_types_remises: invoice.products.map(p => p.discountType || 'fixed'),
+        produits_totaux: invoice.products.map(p => (p.quantity * p.priceTTC).toFixed(2)),
+        produits_totaux_ht: invoice.products.map(p => (p.quantity * p.priceHT).toFixed(2)),
+        
+        // Additional metadata
         nombre_produits: invoice.products.length,
         produits: invoice.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
         
@@ -76,11 +133,59 @@ export class N8nWebhookService {
       console.log('📊 Taille payload:', JSON.stringify(webhookPayload).length, 'caractères');
       
       const criticalFields = {
+        // CHAMPS DE BASE
         'nom_facture': webhookPayload.nom_facture,
         'numero_facture': webhookPayload.numero_facture,
-        'Nom du client': webhookPayload["Nom du client"],
-        'client_email': webhookPayload.client_email,
+        'nom_du_client': webhookPayload.nom_du_client,
+        'email_client': webhookPayload.email_client,
         'montant_ttc': webhookPayload.montant_ttc,
+        
+        // CHAMPS FINANCIERS COMPLETS
+        'montant_ht': webhookPayload.montant_ht,
+        'montant_tva': webhookPayload.montant_tva,
+        'montant_remise': webhookPayload.montant_remise,
+        'taux_tva': webhookPayload.taux_tva,
+        'acompte': webhookPayload.acompte,
+        'montant_restant': webhookPayload.montant_restant,
+        
+        // CLIENT DÉTAILLÉ
+        'telephone_client': webhookPayload.telephone_client,
+        'client_adresse_rue': webhookPayload.client_adresse_rue,
+        'client_code_postal': webhookPayload.client_code_postal,
+        'client_ville': webhookPayload.client_ville,
+        'client_type_logement': webhookPayload.client_type_logement,
+        'client_code_porte': webhookPayload.client_code_porte,
+        'client_siret': webhookPayload.client_siret || 'Non renseigné',
+        
+        // PAIEMENT ET SIGNATURE
+        'mode_paiement': webhookPayload.mode_paiement,
+        'signature_presente': webhookPayload.signature_presente,
+        'date_signature': webhookPayload.date_signature || 'Non signé',
+        
+        // LIVRAISON
+        'methode_livraison': webhookPayload.methode_livraison || 'Non spécifiée',
+        'notes_livraison': webhookPayload.notes_livraison || 'Aucune',
+        
+        // CHÈQUES À VENIR
+        'nombre_cheques': webhookPayload.nombre_cheques,
+        'montant_par_cheque': webhookPayload.montant_par_cheque || 'Non applicable',
+        'mode_paiement_avec_details': webhookPayload.mode_paiement_avec_details,
+        
+        // MÉTADONNÉES
+        'notes_facture': webhookPayload.notes_facture || 'Aucune',
+        'conseiller': webhookPayload.conseiller,
+        'lieu_evenement': webhookPayload.lieu_evenement,
+        'conditions_acceptees': webhookPayload.conditions_acceptees,
+        
+        // PRODUITS
+        'produits_html (longueur)': `${webhookPayload.produits_html.length} chars`,
+        'produits_noms (nombre)': `${webhookPayload.produits_noms.length} items`,
+        'produits_categories (nombre)': `${webhookPayload.produits_categories.length} items`,
+        'produits_quantites (nombre)': `${webhookPayload.produits_quantites.length} items`,
+        'produits_prix_ht_unitaires (nombre)': `${webhookPayload.produits_prix_ht_unitaires.length} items`,
+        'nombre_produits': webhookPayload.nombre_produits,
+        
+        // PDF
         'fichier_facture (taille)': `${pdfBase64.length} chars`,
       };
       

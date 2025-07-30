@@ -769,6 +769,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 className={getPaymentMethodStyle()}
               >
                 <option value="">Sélectionner obligatoirement</option>
+                <option value="Chèques à venir">Chèques à venir</option>
                 <option value="Virement">Virement bancaire</option>
                 <option value="Carte Bleue">Carte Bleue</option>
                 <option value="Espèces">Espèces</option>

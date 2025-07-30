@@ -580,6 +580,120 @@ export const InvoicePreviewModern = forwardRef<HTMLDivElement, InvoicePreviewMod
             </div>
           )}
 
+          {/* SECTION RÈGLEMENT ET CHÈQUES À VENIR - CHARTE GRAPHIQUE MYCONFORT */}
+          <div style={{
+            background: '#F2EFE2',
+            padding: '16px',
+            border: '2px solid #477A0C',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{ 
+              fontSize: '16px', 
+              fontWeight: 'bold', 
+              margin: '0 0 12px 0',
+              color: '#477A0C',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              💰 RÈGLEMENTS ET MODE DE PAIEMENT
+            </h4>
+            
+            <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#14281D' }}>
+              <div style={{ marginBottom: '8px' }}>
+                <strong>Adresse pour règlements :</strong> SAV MYCONFORT • 8 rue du Grégal • 66510 Saint-Hippolyte
+              </div>
+              
+              {invoice.paymentMethod && (
+                <div style={{ marginBottom: '12px' }}>
+                  <strong>Mode de règlement :</strong> {invoice.paymentMethod}
+                </div>
+              )}
+              
+              {/* DÉTAIL DES CHÈQUES À VENIR - CHARTE GRAPHIQUE HARMONISÉE */}
+              {invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (
+                <div style={{ 
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: 'white',
+                  borderRadius: '6px',
+                  border: '2px solid #477A0C'
+                }}>
+                  <div style={{ 
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#477A0C',
+                    marginBottom: '8px',
+                    textAlign: 'center'
+                  }}>
+                    📅 {invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir
+                  </div>
+                  
+                  {/* CALCULS DÉTAILLÉS AVEC CHARTE GRAPHIQUE */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '12px',
+                    marginTop: '12px',
+                    fontSize: '13px'
+                  }}>
+                    {/* ACOMPTE VERSÉ */}
+                    <div style={{ 
+                      padding: '8px',
+                      background: '#F2EFE2',
+                      borderRadius: '4px',
+                      border: '1px solid #477A0C'
+                    }}>
+                      <div style={{ fontWeight: 'bold', color: '#477A0C' }}>💰 Acompte versé</div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#14281D' }}>
+                        {formatCurrency(acompteAmount)}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#477A0C' }}>
+                        ({((acompteAmount / totalTTC) * 100).toFixed(1)}% du total)
+                      </div>
+                    </div>
+                    
+                    {/* RESTE À PERCEVOIR */}
+                    <div style={{ 
+                      padding: '8px',
+                      background: '#F2EFE2',
+                      borderRadius: '4px',
+                      border: '1px solid #477A0C'
+                    }}>
+                      <div style={{ fontWeight: 'bold', color: '#477A0C' }}>📋 Reste à percevoir</div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#14281D' }}>
+                        {formatCurrency(montantRestant)}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#477A0C' }}>
+                        Réparti sur {invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* MONTANT PAR CHÈQUE - MISE EN ÉVIDENCE AVEC VERT MYCONFORT */}
+                  <div style={{ 
+                    marginTop: '12px',
+                    padding: '10px',
+                    background: '#477A0C',
+                    borderRadius: '4px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                      💳 Montant par chèque
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: 'bold', marginTop: '4px' }}>
+                      {formatCurrency(montantRestant / invoice.nombreChequesAVenir)}
+                    </div>
+                    <div style={{ fontSize: '11px', marginTop: '2px', opacity: 0.9 }}>
+                      {formatCurrency(montantRestant)} ÷ {invoice.nombreChequesAVenir} = {formatCurrency(montantRestant / invoice.nombreChequesAVenir)} par chèque
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* CONDITIONS GÉNÉRALES */}
           <div style={{
             background: '#F8FAFC',
