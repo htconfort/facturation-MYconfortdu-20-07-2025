@@ -56,8 +56,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   
   // États des champs numériques en string (jamais en 0)
-  // chequesQuantity est maintenant remplacé par la prop nombreChequesAVenir
-  const [totalARecevoir, setTotalARecevoir] = useState<string>("");
+  // ✅ SUPPRESSION : totalARecevoir local - désormais calculé automatiquement via totals.totalARecevoir
+  // const [totalARecevoir, setTotalARecevoir] = useState<string>("");
 
   const filteredProducts = useMemo(() => {
     return productCatalog.filter(p => p.category === newProduct.category);
@@ -90,7 +90,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
     // Toutes les conversions en nombre se font uniquement pour les calculs
     const acompteNum = Number(acompteAmount || 0);
-    const totalARecevoirNum = Number(totalARecevoir || 0);
+    // ✅ UTILISATION DIRECTE DU CALCUL : totals.totalARecevoir au lieu de l'état local
+    const totalARecevoirNum = Math.max(0, totalWithTax - acompteNum);
     const chequesQuantityNum = Number(nombreChequesAVenir || 0);
     return {
       subtotal,
@@ -99,11 +100,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       taxAmount: totalWithTax - (totalWithTax / (1 + (taxRate / 100))),
       totalPercu: acompteNum,
       totalARecevoir: Math.max(0, totalWithTax - acompteNum),
-      // Calcul automatique du montant par chèque
+      // Calcul automatique du montant par chèque basé sur le vrai total à recevoir
       montantParCheque: (totalARecevoirNum && chequesQuantityNum) ? (totalARecevoirNum / chequesQuantityNum) : 0,
       totalCheques: (totalARecevoirNum && chequesQuantityNum) ? totalARecevoirNum : 0
     };
-  }, [products, taxRate, acompteAmount, totalARecevoir, nombreChequesAVenir]);
+  }, [products, taxRate, acompteAmount, nombreChequesAVenir]);
 
   // 🔒 FONCTION POUR VÉRIFIER SI LES CHAMPS OBLIGATOIRES SONT REMPLIS
   const isPaymentMethodEmpty = () => {
@@ -129,11 +130,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     onAcompteChange(Number(val || "0"));
   };
 
-  // Gère la saisie du total à recevoir
-  const handleTotalARecevoirChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/^0+/, "");
-    setTotalARecevoir(val);
-  };
+  // ✅ SUPPRESSION : handleTotalARecevoirChange - Plus besoin, calcul automatique
 
   // Gère la saisie du nombre de chèques
   const handleChequesQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -542,21 +539,22 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             </div>
             
             <div className="grid grid-cols-1 gap-3">
-              {/* Total à recevoir */}
+              {/* Total à recevoir - SYNCHRONISÉ AUTOMATIQUEMENT */}
               <div>
                 <label className="block text-purple-700 font-semibold mb-1 flex items-center">
                   <Euro className="w-4 h-4 mr-1" />
-                  Total à recevoir (€)
+                  Total à recevoir (€) - Calculé automatiquement
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={totalARecevoir}
-                  onChange={handleTotalARecevoirChange}
-                  className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white text-purple-800 font-bold"
+                  type="text"
+                  value={formatCurrency(totals.totalARecevoir)}
+                  readOnly
+                  className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 bg-purple-100 text-purple-800 font-bold cursor-not-allowed"
+                  placeholder="Calculé automatiquement : Total TTC - Acompte"
                 />
+                <div className="text-xs text-purple-600 mt-1">
+                  ✨ Synchronisé avec "TOTAUX & ACOMPTE" ({formatCurrency(totals.totalWithTax)} - {formatCurrency(Number(acompteAmount || 0))})
+                </div>
               </div>
 
               {/* Quantité de chèques */}
@@ -592,8 +590,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               </div>
             </div>
 
-            {/* Affichage du calcul automatique */}
-            {Number(totalARecevoir) > 0 && Number(nombreChequesAVenir) > 0 && (
+            {/* Affichage du calcul automatique - SYNCHRONISÉ */}
+            {totals.totalARecevoir > 0 && Number(nombreChequesAVenir) > 0 && (
               <div className="mt-3 p-3 bg-purple-100 border border-purple-300 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-purple-700 font-semibold">Calcul automatique :</span>
@@ -602,7 +600,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-purple-600">
-                  {formatCurrency(Number(totalARecevoir))} ÷ {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par chèque
+                  {formatCurrency(totals.totalARecevoir)} ÷ {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par chèque
                 </div>
                 <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded">
                   <div className="text-sm text-green-800 font-semibold">
@@ -612,9 +610,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               </div>
             )}
 
-            {/* Message d'aide */}
-            <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-              💡 <strong>Calcul automatique :</strong> Saisissez le total à recevoir et le nombre de chèques. Le montant par chèque sera calculé automatiquement.
+            {/* Message d'aide - SYNCHRONISATION AUTOMATIQUE */}
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-xs text-green-700">
+              ✨ <strong>Synchronisation automatique :</strong> Le "Total à recevoir" est automatiquement calculé (Total TTC - Acompte) et synchronisé avec le bloc "TOTAUX & ACOMPTE". Saisissez uniquement le nombre de chèques pour calculer automatiquement le montant par chèque.
             </div>
           </div>
         </div>

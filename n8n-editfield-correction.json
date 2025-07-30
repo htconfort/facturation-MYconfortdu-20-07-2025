@@ -1,0 +1,17 @@
+{
+  "numero_facture": "{{$json.numero_facture}}",
+  "date_facture": "{{$json.date_facture}}",
+  "montant_ttc": "{{$json.montant_ttc}}",
+  "mode_paiement": "{{$json.mode_paiement}}",
+  "adresse_client": "{{$json.adresse_client}}",
+  "email_client": "{{$json.email_client}}",
+  "telephone_client": "{{$json.telephone_client}}",
+  "nom_du_client": "{{$json.nom_du_client}}",
+  "acompte": "{{$json.acompte}}",
+  "montant_restant": "{{$json.montant_restant}}",
+  "conseiller": "{{$json.conseiller}}",
+  "signature": "{{$json.signature}}",
+  "nombre_cheques": "{{$json.nombre_cheques}}",
+  "montant_par_cheque": "{{$json.montant_par_cheque}}",
+  "mode_paiement_avec_details": "{{$json.mode_paiement_avec_details}}"
+}

@@ -1,0 +1,44 @@
+{
+  "numero_facture": "2025-004",
+  "nom_du_client": "Pauline",
+  "email_client": "pauline@example.com",
+  "montant_ttc": 1350.00,
+  "acompte": 300.00,
+  "montant_restant": 1050.00,
+  "mode_paiement": "Chèques à venir",
+  "nombre_cheques": 3,
+  "montant_par_cheque": "350.00",
+  "produits": [
+    {
+      "nom": "Volet Roulant Alu",
+      "quantite": 2,
+      "prix_ttc": 450.00,
+      "total_ttc": 900.00,
+      "categorie": "Volets",
+      "remise": 0,
+      "type_remise": "fixed"
+    },
+    {
+      "nom": "Moustiquaire Premium",
+      "quantite": 1,
+      "prix_ttc": 250.00,
+      "total_ttc": 250.00,
+      "categorie": "Moustiquaires",
+      "remise": 10,
+      "type_remise": "percent"
+    },
+    {
+      "nom": "Installation",
+      "quantite": 1,
+      "prix_ttc": 200.00,
+      "total_ttc": 200.00,
+      "categorie": "Services",
+      "remise": 0,
+      "type_remise": "fixed"
+    }
+  ],
+  "produits_html": "<li><strong>Volet Roulant Alu</strong><br>Quantité: 2 × 450.00€ = <strong>900.00€</strong></li><li><strong>Moustiquaire Premium</strong><br>Quantité: 1 × 250.00€ = <strong>250.00€</strong><br><em>Remise: -10%</em></li><li><strong>Installation</strong><br>Quantité: 1 × 200.00€ = <strong>200.00€</strong></li>",
+  "nombre_produits": 3,
+  "date_creation": "2025-07-30T15:30:00.000Z",
+  "fichier_facture": "JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+Pgo+PgovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggMTAwCj4+CnN0cmVhbQpCVApxCjI4LjM1IDc1NyBUZApxCi9GMSA5IFRmCihGQUNUVVJFIE1ZQ09ORk9SVCApIFRqCkVUClEKNDIuNTIgNzQ1IFRkCihOdW1lcm86IDIwMjUtMDA0KSBUagpFVApxCi9GMSA5IFRmCihDbGllbnQ6IFBhdWxpbmUpIFRqCkVUClEKZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNgo8PDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA2NiAwMDAwMCBuIAowMDAwMDAwMTI0IDAwMDAwIG4gCjAwMDAwMDIzNyAwMDAwMCBuIAowMDAwMDAzMTAgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA2Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgo0NzQKJSVFT0Y="
+}

@@ -81,11 +81,6 @@ export class N8nWebhookService {
           ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2)
           : '',
         
-        // Mode de paiement avec détails pour email
-        mode_paiement_avec_details: invoice.paymentMethod && invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0
-          ? `${invoice.paymentMethod} - ${invoice.nombreChequesAVenir} chèque${invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir de ${invoice.nombreChequesAVenir && montantRestant > 0 ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2) : '0.00'}€ chacun`
-          : invoice.paymentMethod || 'Non spécifié',
-        
         // NOUVEAUX CHAMPS NOTES ET MÉTADONNÉES - TOUS LES CHAMPS DISPONIBLES
         notes_facture: invoice.invoiceNotes || '',
         conseiller: invoice.advisorName || 'MYCONFORT',
@@ -116,7 +111,22 @@ export class N8nWebhookService {
         
         // Additional metadata
         nombre_produits: invoice.products.length,
-        produits: invoice.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+        
+        // ✅ CORRECTION STRUCTURE PRODUITS - TABLEAU D'OBJETS POUR N8N
+        produits: invoice.products.map(product => ({
+          nom: product.name,
+          quantite: product.quantity,
+          prix_ttc: product.priceTTC,
+          prix_ht: product.priceHT,
+          total_ttc: product.quantity * product.priceTTC,
+          total_ht: product.quantity * product.priceHT,
+          categorie: product.category || 'Non spécifiée',
+          remise: product.discount || 0,
+          type_remise: product.discountType || 'fixed'
+        })),
+        
+        // Garder aussi le format texte pour compatibilité
+        produits_text: invoice.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
         
         // Google Drive folder ID (du commit fonctionnel)
         dossier_id: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-'
@@ -169,7 +179,6 @@ export class N8nWebhookService {
         // CHÈQUES À VENIR
         'nombre_cheques': webhookPayload.nombre_cheques,
         'montant_par_cheque': webhookPayload.montant_par_cheque || 'Non applicable',
-        'mode_paiement_avec_details': webhookPayload.mode_paiement_avec_details,
         
         // MÉTADONNÉES
         'notes_facture': webhookPayload.notes_facture || 'Aucune',

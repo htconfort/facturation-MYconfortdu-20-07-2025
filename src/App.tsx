@@ -20,10 +20,12 @@ import { generateInvoiceNumber } from './utils/calculations';
 import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice, loadInvoices, deleteInvoice } from './utils/storage';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
 import { N8nWebhookService } from './services/n8nWebhookService';
+import { generateNewInvoiceNumber } from './hooks/useInvoiceNumber'; // 🔢 Import du hook
 // import { PDFService } from './services/pdfService'; // REMOVED: No longer needed, using AdvancedPDFService
 
 function App() {
-  const [invoice, setInvoice] = useState<Invoice>({
+  // ✅ CORRECTION: Utiliser useState avec une fonction pour éviter les re-renders multiples
+  const [invoice, setInvoice] = useState<Invoice>(() => ({
     invoiceNumber: generateInvoiceNumber(),
     invoiceDate: new Date().toISOString().split('T')[0],
     eventLocation: '',
@@ -68,7 +70,7 @@ function App() {
     // Métadonnées
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
-  });
+  })); // ✅ CORRECTION: Fermeture correcte du useState avec fonction
 
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -460,7 +462,7 @@ function App() {
   const handleNewInvoice = () => {
     if (window.confirm('Créer une nouvelle facture ?\n\nLes données actuelles seront perdues si elles ne sont pas sauvegardées.')) {
       setInvoice({
-        invoiceNumber: generateInvoiceNumber(),
+        invoiceNumber: generateNewInvoiceNumber(), // ✅ CORRECTION: Utilisation explicite pour nouvelle facture
         invoiceDate: new Date().toISOString().split('T')[0],
         eventLocation: '',
         taxRate: 20,
