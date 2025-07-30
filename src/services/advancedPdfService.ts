@@ -61,6 +61,29 @@ export class AdvancedPDFService {
   static async generateInvoicePDF(invoice: Invoice): Promise<jsPDF> {
     console.log('🎨 GÉNÉRATION PDF IDENTIQUE À L\'EXEMPLE HTML FOURNI');
     
+    // 🚨 DEBUG CRITIQUE - PRODUITS REÇUS PAR LE SERVICE PDF
+    console.log('📄 PDF SERVICE - DONNÉES REÇUES:');
+    console.log('🔢 Numéro facture:', invoice.invoiceNumber);
+    console.log('👤 Client:', invoice.clientName);
+    console.log('🛒 Products originaux:', invoice.products);
+    
+    console.log('🛒 ANALYSE DÉTAILLÉE DES PRODUITS:');
+    if (!invoice.products || invoice.products.length === 0) {
+      console.error('❌ AUCUN PRODUIT REÇU PAR LE PDF SERVICE !');
+      console.error('🔍 Propriétés disponibles:', Object.keys(invoice));
+    } else {
+      invoice.products.forEach((product, index) => {
+        console.log(`🏷️ Produit ${index + 1} reçu par PDF:`, {
+          name: product.name,
+          quantity: product.quantity,
+          priceTTC: product.priceTTC,
+          discount: product.discount,
+          discountType: product.discountType,
+          TOUTES_PROPRIETES: product
+        });
+      });
+    }
+    
     const doc = new jsPDF({
       unit: 'mm',
       format: 'a4',

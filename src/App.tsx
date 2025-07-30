@@ -267,6 +267,26 @@ function App() {
         totalCalculated: invoice.products.reduce((sum, p) => sum + (p.quantity * p.priceTTC), 0)
       });
       
+      // 🚨 DEBUG CRITIQUE : VÉRIFICATION DES PRODUITS AVANT PDF
+      console.log('🛒 PRODUITS RÉELS DE LA FACTURE AVANT PDF:', {
+        products: invoice.products,
+        items: invoice.products, // Alias pour compatibilité
+        productsCount: invoice.products.length,
+        totalCalculated: invoice.products.reduce((sum, p) => sum + (p.quantity * p.priceTTC), 0),
+        STRUCTURE_COMPLETE: invoice
+      });
+      
+      // Vérifier si les produits ont les bonnes propriétés
+      invoice.products.forEach((product, index) => {
+        console.log(`🏷️ Produit ${index + 1}:`, {
+          name: product.name,
+          quantity: product.quantity,
+          priceTTC: product.priceTTC,
+          priceHT: product.priceTTC / (1 + (invoice.taxRate || 20) / 100),
+          total: product.quantity * product.priceTTC
+        });
+      });
+      
       const pdfBlob = await generatePDFBlobFromPreview();
       if (!pdfBlob) {
         console.error('❌ PDF Blob generation failed');
