@@ -557,21 +557,67 @@ export class AdvancedPDFService {
   }
 
   private static convertInvoiceData(invoice: Invoice): InvoiceData {
-    const items = invoice.products.map(product => ({
-      description: product.name,
-      category: product.category,
-      qty: product.quantity,
-      unitPriceHT: calculateHT(product.priceTTC, invoice.taxRate),
-      unitPriceTTC: product.priceTTC,
-      discount: product.discount,
-      discountType: product.discountType,
-      total: calculateProductTotal(
-        product.quantity,
-        product.priceTTC,
-        product.discount,
-        product.discountType
-      )
-    }));
+    // 🔧 CORRECTION CRITIQUE : Mapping dynamique pour gérer toutes les structures possibles
+    console.log('🔍 CONVERTINVOICEDATA - Structure reçue:', {
+      hasProducts: !!invoice.products,
+      hasItems: !!(invoice as any).items,
+      hasProduits: !!(invoice as any).produits,
+      productsLength: invoice.products?.length || 0,
+      itemsLength: (invoice as any).items?.length || 0,
+      produitsLength: (invoice as any).produits?.length || 0,
+      STRUCTURE_COMPLETE: invoice
+    });
+
+    // Déterminer la source de produits selon ce qui est disponible
+    let productsArray: any[] = [];
+    
+    if (invoice.products && Array.isArray(invoice.products) && invoice.products.length > 0) {
+      productsArray = invoice.products;
+      console.log('✅ Utilisation de invoice.products:', productsArray);
+    } else if ((invoice as any).items && Array.isArray((invoice as any).items) && (invoice as any).items.length > 0) {
+      productsArray = (invoice as any).items;
+      console.log('✅ Utilisation de invoice.items:', productsArray);
+    } else if ((invoice as any).produits && Array.isArray((invoice as any).produits) && (invoice as any).produits.length > 0) {
+      productsArray = (invoice as any).produits;
+      console.log('✅ Utilisation de invoice.produits:', productsArray);
+    } else {
+      console.warn('⚠️ Aucun tableau de produits trouvé dans la structure');
+      productsArray = [];
+    }
+
+    // Mapping des produits avec détection dynamique des propriétés
+    const items = productsArray.map((product, index) => {
+      console.log(`🏷️ Mapping produit ${index + 1}:`, {
+        name: product.name || product.description || product.titre || product.libelle,
+        quantity: product.quantity || product.qty || product.quantite || 1,
+        priceTTC: product.priceTTC || product.price || product.prix || product.unitPrice || 0,
+        STRUCTURE_PRODUIT: product
+      });
+
+      // Détection intelligente des propriétés
+      const name = product.name || product.description || product.titre || product.libelle || 'Produit sans nom';
+      const quantity = product.quantity || product.qty || product.quantite || 1;
+      const priceTTC = product.priceTTC || product.price || product.prix || product.unitPrice || 0;
+      const category = product.category || product.categorie || '';
+      const discount = product.discount || product.remise || 0;
+      const discountType = product.discountType || product.typeRemise || 'percentage';
+
+      return {
+        description: name,
+        category: category,
+        qty: quantity,
+        unitPriceHT: calculateHT(priceTTC, invoice.taxRate),
+        unitPriceTTC: priceTTC,
+        discount: discount,
+        discountType: discountType,
+        total: calculateProductTotal(
+          quantity,
+          priceTTC,
+          discount,
+          discountType
+        )
+      };
+    });
 
     const totalTTC = items.reduce((sum, item) => sum + item.total, 0);
     const totalHT = totalTTC / (1 + (invoice.taxRate / 100));

@@ -287,6 +287,16 @@ function App() {
         });
       });
       
+      // 🔧 DEBUG ULTIME : Structure envoyée au service PDF
+      console.log('📤 STRUCTURE EXACTE ENVOYÉE AU SERVICE PDF:', {
+        invoiceObject: invoice,
+        productsProperty: invoice.products,
+        hasProducts: !!invoice.products,
+        hasItems: !!(invoice as any).items,
+        hasProduits: !!(invoice as any).produits,
+        JSON_STRINGIFY: JSON.stringify(invoice, null, 2)
+      });
+      
       const pdfBlob = await generatePDFBlobFromPreview();
       if (!pdfBlob) {
         console.error('❌ PDF Blob generation failed');
