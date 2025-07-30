@@ -6,6 +6,7 @@ import { PayloadValidator } from '../services/payloadValidator';
 import { N8nWebhookService } from '../services/n8nWebhookService';
 import { PDFService } from '../services/pdfService';
 import { InvoicePreviewModern } from './InvoicePreviewModern';
+import { DiagnosticPDF } from './DiagnosticPDF';
 
 interface DebugCenterProps {
   invoice: Invoice;
@@ -404,53 +405,38 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
         {/* PDF Test Section */}
         {activeSection === 'pdf' && (
           <DebugSection
-            title="🔍 Tests PDF Moderne"
+            title="� Diagnostic PDF vs Aperçu"
             icon={Eye}
             iconColor="text-orange-600"
             bgColor="bg-orange-50"
             borderColor="border-orange-200"
           >
             <div className="space-y-4">
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <h4 className="font-bold text-orange-800 mb-2">🔍 Test PDF avec Composant Moderne</h4>
-                <p className="text-sm text-orange-700 mb-3">
-                  Ce test génère un PDF en utilisant le composant <code>InvoicePreviewModern</code> 
-                  pour vérifier la synchronisation avec l'aperçu affiché à l'utilisateur.
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 className="font-bold text-red-800 mb-2">� Problème Identifié</h4>
+                <p className="text-sm text-red-700 mb-3">
+                  Le PDF généré affiche des montants différents de l'aperçu HTML.
+                  Ce diagnostic compare les deux sources de données.
                 </p>
-                <ul className="list-disc ml-5 space-y-1 text-sm text-orange-700">
-                  <li>Utilise directement le composant moderne</li>
-                  <li>Génère un PDF identique à l'aperçu</li>
-                  <li>Télécharge automatiquement le PDF de test</li>
-                  <li>Compare visuellement avec l'aperçu affiché</li>
+                <ul className="list-disc ml-5 space-y-1 text-sm text-red-700">
+                  <li><strong>Aperçu HTML :</strong> Utilise <code>invoice.products</code> directement</li>
+                  <li><strong>Service PDF :</strong> Utilise <code>convertInvoiceData()</code> pour mapper les données</li>
+                  <li>Le problème est probablement dans le mapping des produits</li>
                 </ul>
               </div>
               
-              <button
-                onClick={handleTestPDF}
-                disabled={isTestingPDF}
-                className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
-              >
-                <Eye className="w-5 h-5" />
-                <span>{isTestingPDF ? 'Génération du PDF test...' : '🔍 Générer PDF Test Moderne'}</span>
-              </button>
+              {/* Composant de diagnostic intégré */}
+              <DiagnosticPDF />
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-bold text-blue-800 mb-2">💡 Instructions</h4>
+                <h4 className="font-bold text-blue-800 mb-2">💡 Instructions de Test</h4>
                 <ol className="list-decimal ml-5 space-y-1 text-sm text-blue-700">
-                  <li>Cliquez sur "Générer PDF Test Moderne"</li>
-                  <li>Le PDF sera téléchargé automatiquement</li>
-                  <li>Comparez le PDF avec l'aperçu affiché dans l'app</li>
-                  <li>Vérifiez que les styles, couleurs et layout sont identiques</li>
-                  <li>Le PDF devrait utiliser la charte graphique moderne MyConfort</li>
+                  <li>Comparez les montants dans les deux colonnes ci-dessus</li>
+                  <li>Cliquez sur "Tester Génération PDF" (colonne droite)</li>
+                  <li>Regardez les logs dans la console du navigateur (F12)</li>
+                  <li>Vérifiez que le PDF téléchargé a les bons montants</li>
+                  <li>Si les montants diffèrent, le problème est dans <code>convertInvoiceData()</code></li>
                 </ol>
-              </div>
-              
-              {/* Aperçu du composant moderne pour référence */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-bold text-gray-800 mb-2">📋 Référence Composant</h4>
-                <p className="text-sm text-gray-700">
-                  Le PDF généré devrait être identique à l'aperçu moderne affiché dans l'application.
-                </p>
               </div>
             </div>
           </DebugSection>
