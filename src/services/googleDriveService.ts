@@ -64,7 +64,8 @@ export class GoogleDriveService {
         
         // Payment information
         mode_paiement: invoice.paymentMethod || 'Non spécifié',
-        signature: invoice.signature ? 'Oui' : 'Non',
+        signature: invoice.isSigned ? 'Oui' : 'Non',
+        signature_image: invoice.signature || '', // ✅ SIGNATURE BASE64 COMPLÈTE
         
         // Additional metadata
         conseiller: invoice.advisorName || 'MYCONFORT',

@@ -72,8 +72,9 @@ export class N8nWebhookService {
         
         // Payment information
         mode_paiement: invoice.paymentMethod || 'Non spécifié',
-        signature: invoice.signature ? 'Oui' : 'Non',
+        signature: invoice.isSigned ? 'Oui' : 'Non',
         signature_presente: invoice.isSigned ? 'Oui' : 'Non',
+        signature_image: invoice.signature || '', // ✅ SIGNATURE BASE64 COMPLÈTE
         date_signature: invoice.signatureDate || '',
         
         // NOUVEAUX CHAMPS LIVRAISON - TOUS LES CHAMPS DISPONIBLES
@@ -191,6 +192,7 @@ export class N8nWebhookService {
         // PAIEMENT ET SIGNATURE
         'mode_paiement': webhookPayload.mode_paiement,
         'signature_presente': webhookPayload.signature_presente,
+        'signature_image': webhookPayload.signature_image ? 'Incluse (base64)' : 'Non disponible',
         'date_signature': webhookPayload.date_signature || 'Non signé',
         
         // LIVRAISON
