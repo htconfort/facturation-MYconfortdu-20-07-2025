@@ -1,11 +1,11 @@
 import { Invoice } from '../types';
 import { calculateInvoiceTotals } from '../utils/invoice-calculations';
-import { configService } from './configService';
+import WebhookUrlHelper from '../utils/webhookUrlHelper';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
   private static get WEBHOOK_URL() {
-    return configService.n8n.webhookUrl;
+    return WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
   }
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
   
