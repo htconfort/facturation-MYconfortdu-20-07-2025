@@ -115,34 +115,34 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           </div>
         </div>
 
-        {/* Informations client */}
+        {/* Informations client - CORRIGÉ */}
         <div className="p-4 border-b border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <div style={{ flex: 1 }}>
               <h3 className="text-sm font-bold text-[#477A0C] mb-2 border-b border-[#477A0C] pb-1">
                 FACTURER À
               </h3>
-              <div className="space-y-1 text-sm"> {/* Changé de text-xs à text-sm */}
-                <p className="font-bold text-base" style={{ color: '#080F0F' }}>{invoice.clientName}</p> {/* Changé de text-sm à text-base */}
-                <p style={{ color: '#080F0F' }}>{invoice.clientAddress}</p>
+              <div className="space-y-1" style={{ fontSize: '12px' }}>
+                <p className="font-bold" style={{ color: '#080F0F', fontSize: '14px' }}>{invoice.clientName}</p>
+                <p style={{ color: '#080F0F', wordBreak: 'break-word' }}>{invoice.clientAddress}</p>
                 <p style={{ color: '#080F0F' }}>{invoice.clientPostalCode} {invoice.clientCity}</p>
                 {invoice.clientSiret && <p style={{ color: '#080F0F' }}>SIRET: {invoice.clientSiret}</p>}
                 <div className="pt-1 space-y-0.5">
-                  <p style={{ color: '#080F0F' }}>
+                  <p style={{ color: '#080F0F', wordBreak: 'break-word' }}>
                     <span className="font-semibold">Tél:</span> {invoice.clientPhone}
                   </p>
-                  <p style={{ color: '#080F0F' }}>
+                  <p style={{ color: '#080F0F', wordBreak: 'break-word' }}>
                     <span className="font-semibold">Email:</span> {invoice.clientEmail}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div>
+            <div style={{ flex: 1 }}>
               <h3 className="text-sm font-bold text-[#477A0C] mb-2 border-b border-[#477A0C] pb-1">
                 INFORMATIONS COMPLÉMENTAIRES
               </h3>
-              <div className="space-y-1 text-sm"> {/* Changé de text-xs à text-sm */}
+              <div className="space-y-1" style={{ fontSize: '12px' }}>
                 {invoice.clientHousingType && (
                   <p style={{ color: '#080F0F' }}><span className="font-semibold">Type de logement:</span> {invoice.clientHousingType}</p>
                 )}
@@ -160,7 +160,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           </div>
         </div>
 
-        {/* Tableau des produits */}
+        {/* Tableau des produits - CORRIGÉ */}
         <div className="p-4">
           <h3 className="text-sm font-bold text-[#477A0C] mb-3 border-b border-[#477A0C] pb-1">
             DÉTAIL DES PRODUITS
@@ -170,12 +170,12 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
             <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
               <thead>
                 <tr className="bg-[#477A0C] text-[#F2EFE2]">
-                  <th className="border border-gray-300 px-2 py-2 text-left font-bold text-xs">DÉSIGNATION</th>
-                  <th className="border border-gray-300 px-1 py-2 text-center font-bold text-xs">QTÉ</th>
-                  <th className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">PU HT</th>
-                  <th className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">PU TTC</th>
-                  <th className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">REMISE</th>
-                  <th className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">TOTAL TTC</th>
+                  <th style={{ width: '40%' }} className="border border-gray-300 px-2 py-2 text-left font-bold text-xs">DÉSIGNATION</th>
+                  <th style={{ width: '8%' }} className="border border-gray-300 px-1 py-2 text-center font-bold text-xs">QTÉ</th>
+                  <th style={{ width: '13%' }} className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">PU HT</th>
+                  <th style={{ width: '13%' }} className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">PU TTC</th>
+                  <th style={{ width: '13%' }} className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">REMISE</th>
+                  <th style={{ width: '13%' }} className="border border-gray-300 px-1 py-2 text-right font-bold text-xs">TOTAL TTC</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,7 +222,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
             </table>
           </div>
 
-          {/* Mention légale Article L224‑59 - Fond blanc sans encadré */}
+          {/* Mention légale Article L224‑59 */}
           <div className="mt-4">
             <div className="font-bold text-xs mb-0.5" style={{ color: '#080F0F' }}>
               ⚖️ Article L224‑59 du Code de la consommation
@@ -253,15 +253,12 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                   )}
                   <div className="border-t border-gray-300 pt-1">
                     {(() => {
-                      // Logique pour déterminer si la facture est entièrement payée
                       const hasAcompte = invoice.montantAcompte && invoice.montantAcompte > 0;
                       const hasChequesAVenir = invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0;
                       const isPaymentMethodCash = ['espèces', 'carte bleue', 'carte bancaire', 'virement'].includes(
                         invoice.paymentMethod?.toLowerCase() || ''
                       );
                       
-                      // La facture est considérée comme entièrement payée si :
-                      // - Mode de paiement instantané (espèces, carte, virement) ET pas d'acompte ET pas de chèques à venir
                       const isFullyPaid = isPaymentMethodCash && !hasAcompte && !hasChequesAVenir;
 
                       return (
@@ -285,7 +282,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     </div>
                   </div>
                   
-                  {/* Gestion acompte - EXACTEMENT comme dans l'aperçu */}
+                  {/* Gestion acompte */}
                   {invoice.montantAcompte > 0 && (
                     <>
                       <div className="border-t border-gray-300 pt-1">
@@ -331,8 +328,8 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
 
         {/* Informations de paiement et notes */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <div style={{ flex: 1 }}>
               <h3 className="text-sm font-bold text-[#477A0C] mb-2">MODALITÉS DE PAIEMENT</h3>
               <div className="space-y-1 text-xs">
                 {invoice.paymentMethod && (
@@ -345,7 +342,6 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     <p className="font-semibold text-blue-800">Chèques à venir:</p>
                     <p className="text-blue-700">{invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir</p>
                     {(() => {
-                      // Calculer le montant restant après acompte
                       const montantApresAcompte = totals.totalWithTax - (invoice.montantAcompte || 0);
                       const montantParCheque = montantApresAcompte / invoice.nombreChequesAVenir;
                       
@@ -369,7 +365,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
               </div>
             </div>
 
-            <div>
+            <div style={{ flex: 1 }}>
               {invoice.invoiceNotes && (
                 <>
                   <h3 className="text-sm font-bold text-[#477A0C] mb-2">REMARQUES</h3>
@@ -410,7 +406,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           </div>
         </div>
 
-        {/* DEUXIÈME PAGE - CONDITIONS GÉNÉRALES DE VENTE (visible uniquement à l'impression) */}
+        {/* DEUXIÈME PAGE - CONDITIONS GÉNÉRALES DE VENTE */}
         <div className="hidden print:block print:page-break-before" style={{ fontFamily: 'Inter, sans-serif', color: '#080F0F', fontSize: '11px', lineHeight: '1.4' }}>
           {/* En-tête de la deuxième page */}
           <div className="p-4 border-b-2 border-[#477A0C] bg-[#477A0C] text-[#F2EFE2] text-center">

@@ -1,8 +1,39 @@
 [build]
+  # Répertoire où se trouvent les fichiers de build
   publish = "dist"
+  
+  # Commande de build
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "18"
+
+# Configuration des redirections pour les SPA (Single Page Application)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+
+# Configuration des headers de sécurité
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Configuration spéciale pour les fichiers statiques
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, immutable, max-age=31536000"
+
+# Configuration pour les API externes (N8N proxy)
+[[redirects]]
+  from = "/api/n8n/*"
+  to = "https://n8n.srv765811.hstgr.cloud/:splat"
+  status = 200
+  force = true
+  headers = {Access-Control-Allow-Origin = "*"}
