@@ -1,12 +1,16 @@
 # 🚀 DÉPLOIEMENT NETLIFY PRÊT - MYCONFORT FACTURATION
 
-## ✅ ERREUR NETLIFY CORRIGÉE
+## ✅ ERREURS NETLIFY CORRIGÉES
 
-### 🛠️ **Problème résolu :**
-- ❌ **Erreur** : `sh: 1: vite: not found` - Build failed
-- ✅ **Solution** : Modifié `netlify.toml` → `command = "npm ci && npm run build"`
-- ✅ **Ajouté** : `.nvmrc` pour version Node 18
-- ✅ **Testé** : Build réussi localement et prêt pour Netlify
+### 🛠️ **Problèmes résolus :**
+- ❌ **Erreur Build** : `sh: 1: vite: not found` → ✅ **Corrigé** avec `npm ci && npm run build`
+- ❌ **Erreur Réseau** : `Failed to fetch`, CORS errors → ✅ **Corrigé** avec proxy automatique `/api/n8n/*`
+
+### 🔧 **Solutions appliquées :**
+- ✅ Commande build corrigée → `netlify.toml`
+- ✅ Système proxy automatique → `webhookUrlHelper.ts`
+- ✅ Headers CORS complets → configuration Netlify
+- ✅ URL adaptative selon environnement (dev/prod)
 
 ## ✅ PRÉPARATION TERMINÉE
 
