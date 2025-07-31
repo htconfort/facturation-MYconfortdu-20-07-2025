@@ -1,6 +1,7 @@
 import { GoogleFile, GoogleDriveResponse } from '../types/google';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
+import { calculateInvoiceTotals } from '../utils/invoice-calculations';
 
 // Configuration for Google Drive integration via n8n webhook
 const MAKE_CONFIG = {
@@ -29,17 +30,17 @@ export class GoogleDriveService {
       const pdfBase64 = await this.blobToBase64(pdfBlob);
       
       // Calculate invoice totals for metadata
-      const totalAmount = invoice.products.reduce((sum, product) => {
-        return sum + calculateProductTotal(
-          product.quantity,
-          product.priceTTC,
-          product.discount,
-          product.discountType
-        );
-      }, 0);
-
-      const acompteAmount = invoice.montantAcompte || 0;
-      const montantRestant = totalAmount - acompteAmount;
+      // Calculate totals with correct payment logic
+      const calculatedTotals = calculateInvoiceTotals(
+        invoice.products,
+        invoice.taxRate || 20,
+        invoice.montantAcompte || 0,
+        invoice.paymentMethod || ''
+      );
+      
+      const totalAmount = calculatedTotals.montantTTC;
+      const acompteAmount = calculatedTotals.montantAcompte;
+      const montantRestant = calculatedTotals.montantRestant;
       
       // Prepare data for n8n webhook
       const webhookData = {

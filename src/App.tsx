@@ -18,6 +18,7 @@ import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
 import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice, loadInvoices, deleteInvoice } from './utils/storage';
+import { calculateInvoiceTotals } from './utils/invoice-calculations';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
 import { N8nWebhookService } from './services/n8nWebhookService';
 import { generateNewInvoiceNumber } from './hooks/useInvoiceNumber'; // 🔢 Import du hook
@@ -108,6 +109,41 @@ function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Effect to automatically recalculate invoice totals when key fields change
+  useEffect(() => {
+    // Only recalculate if we have products and essential data
+    if (invoice.products.length > 0) {
+      const calculatedTotals = calculateInvoiceTotals(
+        invoice.products,
+        invoice.taxRate || 20,
+        invoice.montantAcompte || 0,
+        invoice.paymentMethod || ''
+      );
+      
+      // Update the invoice state with calculated values if they differ
+      setInvoice(prev => {
+        const needsUpdate = 
+          prev.montantHT !== calculatedTotals.montantHT ||
+          prev.montantTTC !== calculatedTotals.montantTTC ||
+          prev.montantTVA !== calculatedTotals.montantTVA ||
+          prev.montantRestant !== calculatedTotals.montantRestant;
+          
+        if (needsUpdate) {
+          return {
+            ...prev,
+            montantHT: calculatedTotals.montantHT,
+            montantTTC: calculatedTotals.montantTTC,
+            montantTVA: calculatedTotals.montantTVA,
+            montantRemise: calculatedTotals.montantRemise,
+            montantAcompte: calculatedTotals.montantAcompte,
+            montantRestant: calculatedTotals.montantRestant
+          };
+        }
+        return prev;
+      });
+    }
+  }, [invoice.products, invoice.taxRate, invoice.montantAcompte, invoice.paymentMethod]);
 
   const showToast = (message: string, type: ToastType = 'success') => {
     setToast({ show: true, message, type });

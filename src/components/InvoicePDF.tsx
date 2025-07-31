@@ -19,7 +19,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           product.quantity,
           product.priceTTC,
           product.discount,
-          product.discountType === 'percentage' ? 'percent' : 'fixed'
+          product.discountType
         );
       }, 0);
 
@@ -29,7 +29,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           product.quantity,
           product.priceTTC,
           product.discount,
-          product.discountType === 'percentage' ? 'percent' : 'fixed'
+          product.discountType
         );
         return sum + (originalTotal - discountedTotal);
       }, 0);
@@ -110,18 +110,6 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     <span className="font-semibold" style={{ color: '#080F0F' }}>{invoice.eventLocation}</span>
                   </div>
                 )}
-                {invoice.dueDate && (
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold" style={{ color: '#080F0F' }}>Échéance:</span>
-                    <span className="font-semibold" style={{ color: '#080F0F' }}>{new Date(invoice.dueDate).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                )}
-                {invoice.status && (
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold" style={{ color: '#080F0F' }}>Statut:</span>
-                    <span className="font-semibold" style={{ color: '#080F0F' }}>{invoice.status}</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -135,16 +123,16 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 FACTURER À
               </h3>
               <div className="space-y-1 text-sm"> {/* Changé de text-xs à text-sm */}
-                <p className="font-bold text-base" style={{ color: '#080F0F' }}>{invoice.client.name}</p> {/* Changé de text-sm à text-base */}
-                <p style={{ color: '#080F0F' }}>{invoice.client.address}</p>
-                <p style={{ color: '#080F0F' }}>{invoice.client.postalCode} {invoice.client.city}</p>
-                {invoice.client.siret && <p style={{ color: '#080F0F' }}>SIRET: {invoice.client.siret}</p>}
+                <p className="font-bold text-base" style={{ color: '#080F0F' }}>{invoice.clientName}</p> {/* Changé de text-sm à text-base */}
+                <p style={{ color: '#080F0F' }}>{invoice.clientAddress}</p>
+                <p style={{ color: '#080F0F' }}>{invoice.clientPostalCode} {invoice.clientCity}</p>
+                {invoice.clientSiret && <p style={{ color: '#080F0F' }}>SIRET: {invoice.clientSiret}</p>}
                 <div className="pt-1 space-y-0.5">
                   <p style={{ color: '#080F0F' }}>
-                    <span className="font-semibold">Tél:</span> {invoice.client.phone}
+                    <span className="font-semibold">Tél:</span> {invoice.clientPhone}
                   </p>
                   <p style={{ color: '#080F0F' }}>
-                    <span className="font-semibold">Email:</span> {invoice.client.email}
+                    <span className="font-semibold">Email:</span> {invoice.clientEmail}
                   </p>
                 </div>
               </div>
@@ -155,20 +143,17 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 INFORMATIONS COMPLÉMENTAIRES
               </h3>
               <div className="space-y-1 text-sm"> {/* Changé de text-xs à text-sm */}
-                {invoice.client.housingType && (
-                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Type de logement:</span> {invoice.client.housingType}</p>
+                {invoice.clientHousingType && (
+                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Type de logement:</span> {invoice.clientHousingType}</p>
                 )}
-                {invoice.client.doorCode && (
-                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Code d'accès:</span> {invoice.client.doorCode}</p>
+                {invoice.clientDoorCode && (
+                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Code d'accès:</span> {invoice.clientDoorCode}</p>
                 )}
-                {invoice.delivery.method && (
-                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Livraison:</span> {invoice.delivery.method}</p>
+                {invoice.deliveryMethod && (
+                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Livraison:</span> {invoice.deliveryMethod}</p>
                 )}
                 {invoice.advisorName && (
                   <p style={{ color: '#080F0F' }}><span className="font-semibold">Conseiller:</span> {invoice.advisorName}</p>
-                )}
-                {invoice.description_travaux && (
-                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Description des travaux:</span> {invoice.description_travaux}</p>
                 )}
               </div>
             </div>
@@ -214,7 +199,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     <td className="border border-gray-300 px-1 py-2 text-right text-xs">
                       {product.discount > 0 ? (
                         <span className="text-red-600 font-semibold">
-                          -{product.discountType === 'percentage' 
+                          -{product.discountType === 'percent' 
                             ? `${product.discount}%` 
                             : formatCurrency(product.discount)
                           }
@@ -228,7 +213,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                         product.quantity,
                         product.priceTTC,
                         product.discount,
-                        product.discountType === 'percentage' ? 'percent' : 'fixed'
+                        product.discountType
                       ))}
                     </td>
                   </tr>
@@ -267,10 +252,27 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     </div>
                   )}
                   <div className="border-t border-gray-300 pt-1">
-                    <div className="flex justify-between text-sm font-bold">
-                      <span style={{ color: '#080F0F' }}>TOTAL TTC:</span>
-                      <span className="text-[#477A0C]">{formatCurrency(totals.totalWithTax)}</span>
-                    </div>
+                    {(() => {
+                      // Logique pour déterminer si la facture est entièrement payée
+                      const hasAcompte = invoice.montantAcompte && invoice.montantAcompte > 0;
+                      const hasChequesAVenir = invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0;
+                      const isPaymentMethodCash = ['espèces', 'carte bleue', 'carte bancaire', 'virement'].includes(
+                        invoice.paymentMethod?.toLowerCase() || ''
+                      );
+                      
+                      // La facture est considérée comme entièrement payée si :
+                      // - Mode de paiement instantané (espèces, carte, virement) ET pas d'acompte ET pas de chèques à venir
+                      const isFullyPaid = isPaymentMethodCash && !hasAcompte && !hasChequesAVenir;
+
+                      return (
+                        <div className="flex justify-between text-sm font-bold">
+                          <span style={{ color: '#080F0F' }}>
+                            {isFullyPaid ? 'MONTANT PAYÉ:' : 'TOTAL TTC:'}
+                          </span>
+                          <span className="text-[#477A0C]">{formatCurrency(totals.totalWithTax)}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   
                   {/* Conditions générales de vente */}
@@ -284,18 +286,18 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                   </div>
                   
                   {/* Gestion acompte - EXACTEMENT comme dans l'aperçu */}
-                  {invoice.payment.method === 'Acompte' && invoice.payment.depositAmount > 0 && (
+                  {invoice.montantAcompte > 0 && (
                     <>
                       <div className="border-t border-gray-300 pt-1">
                         <div className="flex justify-between text-xs">
                           <span className="font-semibold" style={{ color: '#080F0F' }}>Acompte versé:</span>
-                          <span className="font-semibold text-blue-600">{formatCurrency(invoice.payment.depositAmount)}</span>
+                          <span className="font-semibold text-blue-600">{formatCurrency(invoice.montantAcompte)}</span>
                         </div>
                       </div>
                       <div className="bg-orange-50 border border-orange-200 rounded p-2">
                         <div className="flex justify-between text-sm font-bold text-orange-600">
                           <span>RESTE À PAYER:</span>
-                          <span>{formatCurrency(totals.totalWithTax - invoice.payment.depositAmount)}</span>
+                          <span>{formatCurrency(totals.totalWithTax - invoice.montantAcompte)}</span>
                         </div>
                       </div>
                     </>
@@ -333,16 +335,29 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
             <div>
               <h3 className="text-sm font-bold text-[#477A0C] mb-2">MODALITÉS DE PAIEMENT</h3>
               <div className="space-y-1 text-xs">
-                {invoice.payment.method && (
-                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Mode de règlement:</span> {invoice.payment.method}</p>
+                {invoice.paymentMethod && (
+                  <p style={{ color: '#080F0F' }}><span className="font-semibold">Mode de règlement:</span> {invoice.paymentMethod}</p>
                 )}
                 
-                {/* Affichage spécial pour acompte */}
-                {invoice.payment.method === 'Acompte' && invoice.payment.depositAmount > 0 && (
+                {/* Affichage des chèques à venir */}
+                {invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (
                   <div className="bg-blue-50 border border-blue-200 rounded p-2 mt-2">
-                    <p className="font-semibold text-blue-800">Détails de l'acompte:</p>
-                    <p className="text-blue-700">Montant versé: <span className="font-bold">{formatCurrency(invoice.payment.depositAmount)}</span></p>
-                    <p className="text-orange-700 font-semibold">Reste à payer: <span className="font-bold">{formatCurrency(totals.totalWithTax - invoice.payment.depositAmount)}</span></p>
+                    <p className="font-semibold text-blue-800">Chèques à venir:</p>
+                    <p className="text-blue-700">{invoice.nombreChequesAVenir} chèque{invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir</p>
+                    {(() => {
+                      // Calculer le montant restant après acompte
+                      const montantApresAcompte = totals.totalWithTax - (invoice.montantAcompte || 0);
+                      const montantParCheque = montantApresAcompte / invoice.nombreChequesAVenir;
+                      
+                      if (montantApresAcompte > 0) {
+                        return (
+                          <p className="text-blue-700">
+                            Montant par chèque: <span className="font-bold">{formatCurrency(montantParCheque)}</span>
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 )}
                 
@@ -364,12 +379,12 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 </>
               )}
               
-              {invoice.delivery.notes && (
+              {invoice.deliveryNotes && (
                 <>
                   <h3 className="text-sm font-bold text-[#477A0C] mb-2 mt-3">LIVRAISON</h3>
                   <div className="text-xs bg-white p-2 rounded border">
                     <p style={{ color: '#080F0F' }}>
-                      {invoice.delivery.notes}
+                      {invoice.deliveryNotes}
                     </p>
                   </div>
                 </>

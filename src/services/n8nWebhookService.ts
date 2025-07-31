@@ -1,4 +1,5 @@
 import { Invoice } from '../types';
+import { calculateInvoiceTotals } from '../utils/invoice-calculations';
 
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
@@ -23,13 +24,17 @@ export class N8nWebhookService {
       // 1. ✅ UTILISATION STRUCTURE PAYLOAD FONCTIONNELLE (commit e54c7f9)
       console.log('🔧 Création payload avec structure validée du commit e54c7f9...');
       
-      // Calculer les totaux comme dans le commit fonctionnel
-      const totalAmount = invoice.products.reduce((sum, product) => {
-        return sum + (product.quantity * product.priceTTC);
-      }, 0);
+      // Calculer les totaux avec la logique correcte selon le mode de paiement
+      const calculatedTotals = calculateInvoiceTotals(
+        invoice.products,
+        invoice.taxRate || 20,
+        invoice.montantAcompte || 0,
+        invoice.paymentMethod || ''
+      );
       
-      const acompteAmount = invoice.montantAcompte || 0;
-      const montantRestant = totalAmount - acompteAmount;
+      const totalAmount = calculatedTotals.montantTTC;
+      const acompteAmount = calculatedTotals.montantAcompte;
+      const montantRestant = calculatedTotals.montantRestant;
       
       // 2. 📦 STRUCTURE DU PAYLOAD IDENTIQUE AU COMMIT FONCTIONNEL e54c7f9
       const webhookPayload = {
@@ -80,6 +85,22 @@ export class N8nWebhookService {
         montant_par_cheque: invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && montantRestant > 0
           ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2)
           : '',
+        
+        // ✅ CHAMP POUR AFFICHAGE EMAIL - MODE DE PAIEMENT DÉTAILLÉ
+        mode_paiement_avec_details: (() => {
+          // Si pas d'acompte ET pas de chèques à venir
+          if ((!acompteAmount || acompteAmount === 0) && (!invoice.nombreChequesAVenir || invoice.nombreChequesAVenir === 0)) {
+            return `Montant à régler : ${totalAmount.toFixed(2)}€ par ${invoice.paymentMethod || 'Non spécifié'}`;
+          }
+          // Si chèques à venir présents
+          else if (invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0) {
+            return `${invoice.paymentMethod || 'Chèques à venir'} - ${invoice.nombreChequesAVenir} chèque${invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir de ${montantRestant > 0 ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2) : '0.00'}€ chacun`;
+          }
+          // Si acompte présent mais pas de chèques
+          else {
+            return `Montant restant : ${montantRestant.toFixed(2)}€ par ${invoice.paymentMethod || 'Non spécifié'}`;
+          }
+        })(),
         
         // NOUVEAUX CHAMPS NOTES ET MÉTADONNÉES - TOUS LES CHAMPS DISPONIBLES
         notes_facture: invoice.invoiceNotes || '',
@@ -179,6 +200,7 @@ export class N8nWebhookService {
         // CHÈQUES À VENIR
         'nombre_cheques': webhookPayload.nombre_cheques,
         'montant_par_cheque': webhookPayload.montant_par_cheque || 'Non applicable',
+        'mode_paiement_avec_details': webhookPayload.mode_paiement_avec_details,
         
         // MÉTADONNÉES
         'notes_facture': webhookPayload.notes_facture || 'Aucune',
