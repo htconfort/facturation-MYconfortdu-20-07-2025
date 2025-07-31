@@ -1,15 +1,25 @@
 # 🚀 DÉPLOIEMENT NETLIFY PRÊT - MYCONFORT FACTURATION
 
+## ✅ ERREUR NETLIFY CORRIGÉE
+
+### 🛠️ **Problème résolu :**
+- ❌ **Erreur** : `sh: 1: vite: not found` - Build failed
+- ✅ **Solution** : Modifié `netlify.toml` → `command = "npm ci && npm run build"`
+- ✅ **Ajouté** : `.nvmrc` pour version Node 18
+- ✅ **Testé** : Build réussi localement et prêt pour Netlify
+
 ## ✅ PRÉPARATION TERMINÉE
 
-### 📁 Fichiers créés
-- ✅ `netlify.toml` - Configuration principale Netlify
+### 📁 Fichiers créés/corrigés
+- ✅ `netlify.toml` - Configuration principale Netlify (CORRIGÉ)
+- ✅ `.nvmrc` - Version Node 18 (NOUVEAU)
+- ✅ `NETLIFY_FIX_VITE_ERROR.md` - Documentation correction (NOUVEAU)
 - ✅ `public/_headers` - Headers de sécurité  
 - ✅ `public/_redirects` - Redirections SPA
 - ✅ `GUIDE_DEPLOIEMENT_NETLIFY.md` - Guide complet déploiement
 - ✅ `NETLIFY_ENV_VARIABLES.md` - Variables d'environnement
 - ✅ `NETLIFY_TROUBLESHOOTING.md` - Guide résolution problèmes
-- ✅ `pre-deploy-check.sh` - Script validation pré-déploiement
+- ✅ `pre-deploy-check.sh` - Script validation pré-déploiement (MIS À JOUR)
 - ✅ `test-post-deploy.sh` - Script test post-déploiement
 
 ### 🔍 Validations effectuées
