@@ -36,4 +36,12 @@
   to = "https://n8n.srv765811.hstgr.cloud/:splat"
   status = 200
   force = true
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET,POST,PUT,DELETE,OPTIONS", Access-Control-Allow-Headers = "Content-Type,Authorization"}
+
+# Headers CORS pour le proxy N8N
+[[headers]]
+  for = "/api/n8n/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+    Access-Control-Max-Age = "86400"
