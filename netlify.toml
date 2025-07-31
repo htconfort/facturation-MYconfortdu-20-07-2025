@@ -8,6 +8,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
+[[redirects]]
+  from = "/api/n8n/*"
+  to = "https://n8n.srv765811.hstgr.cloud/:splat"
+  status = 200
+  force = true
+
 # Configuration des redirections pour les SPA (Single Page Application)
 [[redirects]]
   from = "/*"
@@ -29,13 +36,6 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, immutable, max-age=31536000"
-
-# Configuration pour les API externes (N8N proxy)
-[[redirects]]
-  from = "/api/n8n/*"
-  to = "https://n8n.srv765811.hstgr.cloud/:splat"
-  status = 200
-  force = true
 
 # Headers CORS pour le proxy N8N
 [[headers]]
