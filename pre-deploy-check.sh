@@ -190,8 +190,8 @@ else
     ((errors++))
 fi
 
-if grep -q "command = \"npm run build\"" netlify.toml 2>/dev/null; then
-    print_status "Commande de build correcte" 0
+if grep -q "command = \"npm ci && npm run build\"" netlify.toml 2>/dev/null; then
+    print_status "Commande de build correcte (avec npm ci)" 0
 else
     print_status "Commande de build incorrecte" 1
     ((errors++))

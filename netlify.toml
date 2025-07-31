@@ -2,8 +2,8 @@
   # Répertoire où se trouvent les fichiers de build
   publish = "dist"
   
-  # Commande de build
-  command = "npm run build"
+  # Commande de build avec installation des dépendances
+  command = "npm ci && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
