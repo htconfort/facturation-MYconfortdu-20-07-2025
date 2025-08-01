@@ -4,6 +4,7 @@ import { Product } from '../types';
 import { productCatalog, productCategories } from '../data/products';
 import { formatCurrency, calculateHT, calculateProductTotal } from '../utils/calculations';
 import { proposerAcomptePourChequesRonds, formatMessageOptimisation, calculerGainTemps, optimisationBenefique } from '../utils/chequeOptimization';
+import AlmaLogo from '../assets/images/Alma_orange.png';
 
 interface ProductSectionProps {
   products: Product[];
@@ -163,6 +164,36 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       onAcompteChange(optimisation.acompte);
     }
   }, [paymentMethod, nombreChequesAVenir, optimisation?.acompte, optimisation?.estBenefique, optimisation?.peutOptimiser, onAcompteChange, termsAccepted, onTermsAcceptedChange]);
+
+  // ✨ NOUVEAU : Gestion automatique du virement bancaire
+  useEffect(() => {
+    // Quand "Virement" (virement bancaire) est sélectionné
+    if (paymentMethod === "Virement") {
+      // 1. Remettre à zéro le nombre de chèques à venir
+      if (nombreChequesAVenir > 0) {
+        onNombreChequesAVenirChange(0);
+      }
+      
+      // 2. Positionner automatiquement un acompte obligatoire de 20% du total TTC
+      if (totals.totalWithTax > 0) {
+        const acompteObligatoire = Math.round(totals.totalWithTax * 0.20 * 100) / 100; // Arrondi à 2 décimales
+        if (acompteAmount !== acompteObligatoire) {
+          onAcompteChange(acompteObligatoire);
+        }
+      }
+    }
+  }, [paymentMethod, totals.totalWithTax, nombreChequesAVenir, acompteAmount, onNombreChequesAVenirChange, onAcompteChange]);
+
+  // ✨ NOUVEAU : Gestion automatique d'ALMA
+  useEffect(() => {
+    // Quand "Alma" (paiement en plusieurs fois) est sélectionné
+    if (paymentMethod === "Alma") {
+      // Pré-sélection automatique de 3 fois quand ALMA est choisi (si pas déjà configuré)
+      if (nombreChequesAVenir === 0 || nombreChequesAVenir === null || nombreChequesAVenir > 4) {
+        onNombreChequesAVenirChange(3);
+      }
+    }
+  }, [paymentMethod, nombreChequesAVenir, onNombreChequesAVenirChange]);
 
   // 🔒 FONCTION POUR VÉRIFIER SI LES CHAMPS OBLIGATOIRES SONT REMPLIS
   const isPaymentMethodEmpty = () => {
@@ -604,7 +635,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
       {/* NOUVEAU: Patio avec trois bandes de lancement pour les totaux, acompte et mode de règlement */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Bande 1: Remarques avec chèques à venir AMÉLIORÉS */}
+        {/* Bande 1: Remarques avec total à recevoir AMÉLIORÉS */}
         <div className="bg-[#FFE4B5] rounded-lg p-4 border-2 border-[#477A0C]">
           <div className="flex items-center mb-3">
             <div className="bg-[#477A0C] text-[#F2EFE2] p-2 rounded-full mr-3">
@@ -624,11 +655,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             />
           </div>
 
-          {/* Section Chèques à venir AMÉLIORÉE avec calcul automatique */}
+          {/* Section Total à recevoir AMÉLIORÉE avec calcul automatique */}
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-4">
             <div className="flex items-center mb-3">
               <CreditCard className="w-5 h-5 text-purple-600 mr-2" />
-              <h4 className="font-bold text-purple-800">CHÈQUES À VENIR</h4>
+              <h4 className="font-bold text-purple-800 bg-[#F55D3E] text-white px-4 py-2 rounded-lg border-2 border-[#F55D3E]">TOTAL À RECEVOIR</h4>
             </div>
             
             <div className="grid grid-cols-1 gap-3">
@@ -642,7 +673,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   type="text"
                   value={formatCurrency(totals.totalARecevoir)}
                   readOnly
-                  className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 bg-purple-100 text-purple-800 font-bold cursor-not-allowed"
+                  className="w-full border-2 border-[#F55D3E] rounded-lg px-3 py-2 bg-[#F55D3E] text-white font-bold cursor-not-allowed"
                   placeholder="Calculé automatiquement : Total TTC - Acompte"
                 />
                 <div className="text-xs text-purple-600 mt-1">
@@ -654,7 +685,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               <div>
                 <label className="block text-purple-700 font-semibold mb-1 flex items-center">
                   <Hash className="w-4 h-4 mr-1" />
-                  Nombre de chèques
+                  {paymentMethod === "Alma" ? "Nombre de paiements ALMA" : "Nombre de chèques (à venir)"}
                 </label>
                 <input
                   type="number"
@@ -673,7 +704,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               <div>
                 <label className="block text-purple-700 font-semibold mb-1 flex items-center">
                   <Calculator className="w-4 h-4 mr-1" />
-                  Montant par chèque (calculé)
+                  {paymentMethod === "Alma" ? "Montant par paiement (calculé)" : "Montant par chèque (calculé)"}
                 </label>
                 <input
                   type="text"
@@ -695,11 +726,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-purple-600">
-                  {formatCurrency(totals.totalARecevoir)} ÷ {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par chèque
+                  {formatCurrency(totals.totalARecevoir)} ÷ {nombreChequesAVenir} {paymentMethod === "Alma" ? "paiement" : "chèque"}{Number(nombreChequesAVenir) > 1 ? 's' : ''} = {formatCurrency(totals.montantParCheque)} par {paymentMethod === "Alma" ? "paiement" : "chèque"}
                 </div>
                 <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded">
                   <div className="text-sm text-green-800 font-semibold">
-                    ✅ Total des chèques : {formatCurrency(totals.totalCheques)}
+                    ✅ Total {paymentMethod === "Alma" ? "ALMA" : "des chèques"} : {formatCurrency(totals.totalCheques)}
                   </div>
                 </div>
               </div>
@@ -779,7 +810,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
             {/* Message d'aide - SYNCHRONISATION AUTOMATIQUE */}
             <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-xs text-green-700">
-              ✨ <strong>Synchronisation automatique :</strong> Le "Total à recevoir" est automatiquement calculé (Total TTC - Acompte) et synchronisé avec le bloc "TOTAUX & ACOMPTE". Saisissez uniquement le nombre de chèques pour calculer automatiquement le montant par chèque.
+              ✨ <strong>Synchronisation automatique :</strong> Le "Total à recevoir" est automatiquement calculé (Total TTC - Acompte) et synchronisé avec le bloc "TOTAUX & ACOMPTE". Saisissez uniquement le nombre {paymentMethod === "Alma" ? "de paiements ALMA" : "de chèques"} pour calculer automatiquement le montant par {paymentMethod === "Alma" ? "paiement" : "chèque"}.
             </div>
           </div>
         </div>
@@ -901,12 +932,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </div>
 
                   {/* Total à recevoir */}
-                  <div className="bg-orange-100 border border-orange-300 rounded-lg p-3">
+                  <div className="bg-[#F55D3E] border-2 border-[#F55D3E] rounded-lg p-3">
                     <div className="flex items-center mb-1">
-                      <Calculator className="w-4 h-4 text-orange-600 mr-1" />
-                      <span className="text-orange-700 font-semibold text-sm">Total à recevoir</span>
+                      <Calculator className="w-4 h-4 text-white mr-1" />
+                      <span className="text-white font-semibold text-sm">Total à recevoir</span>
                     </div>
-                    <div className="text-orange-800 font-bold text-lg">
+                    <div className="text-white font-bold text-lg">
                       {formatCurrency(totals.totalARecevoir)}
                     </div>
                   </div>
@@ -930,21 +961,111 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               </div>
             </div>
 
-            {/* Affichage des chèques à venir dans les totaux */}
+            {/* ✨ NOUVEAU : Bloc RIB dynamique pour virement bancaire */}
+            {paymentMethod === "Virement" && (
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-[#F55D3E] rounded-lg p-3 mt-4">
+                <div className="flex items-center mb-2">
+                  <CreditCard className="w-4 h-4 text-[#F55D3E] mr-2" />
+                  <h4 className="font-bold text-black text-sm">RELEVÉ D'IDENTITÉ BANCAIRE (RIB)</h4>
+                </div>
+                
+                <div className="bg-white border-2 border-[#F55D3E] rounded-lg p-3">
+                  <div className="text-center mb-3">
+                    <h5 className="font-bold text-black text-sm">MYCONFORT</h5>
+                    <p className="text-xs text-black">Coordonnées bancaires pour virement</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-black mb-1">
+                          Titulaire du compte
+                        </label>
+                        <div className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-black">
+                          MYCONFORT SARL
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-semibold text-black mb-1">
+                          Banque
+                        </label>
+                        <div className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-black">
+                          BANQUE POPULAIRE DU SUD
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-black mb-1">
+                          IBAN
+                        </label>
+                        <div className="bg-[#F55D3E] bg-opacity-10 border-2 border-[#F55D3E] rounded px-2 py-1 text-xs font-bold text-black">
+                          FR76 1660 7000 1708 1216 3980 964
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-semibold text-black mb-1">
+                          BIC/SWIFT
+                        </label>
+                        <div className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-black">
+                          CCBPFRPPPPG
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 p-2 bg-blue-50 border border-blue-300 rounded-lg">
+                    <div className="flex items-center text-xs text-black">
+                      <div className="bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold mr-2 flex-shrink-0">
+                        i
+                      </div>
+                      <div>
+                        <p className="font-semibold text-black">Instructions de virement :</p>
+                        <p className="text-xs mt-1 text-black">
+                          • Montant à virer : <strong>{formatCurrency(totals.totalARecevoir)}</strong><br/>
+                          • Merci d'indiquer votre nom et numéro de facture en référence<br/>
+                          • Le RIB sera automatiquement joint à la facture par email
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Affichage du total à recevoir dans les totaux */}
             {totals.totalCheques > 0 && (
-              <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 mt-3">
+              <div className="bg-[#F55D3E] border-2 border-[#F55D3E] rounded-lg p-3 mt-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <CreditCard className="w-4 h-4 text-purple-600 mr-2" />
-                    <span className="text-purple-700 font-semibold">Chèques à venir:</span>
+                    <CreditCard className="w-4 h-4 text-white mr-2" />
+                    <span className="text-white font-semibold">
+                      {paymentMethod === "Alma" ? "Total ALMA :" : "Total à recevoir:"}
+                    </span>
                   </div>
-                  <span className="text-purple-800 font-bold">
+                  <span className="text-white font-bold">
                     {formatCurrency(totals.totalCheques)}
                   </span>
                 </div>
-                <div className="text-xs text-purple-600 mt-1">
-                  {nombreChequesAVenir} chèque{Number(nombreChequesAVenir) > 1 ? 's' : ''} de {formatCurrency(totals.montantParCheque)} chacun
+                <div className="text-xs text-white opacity-90 mt-1">
+                  {paymentMethod === "Alma" 
+                    ? `${nombreChequesAVenir} paiement${Number(nombreChequesAVenir) > 1 ? 's' : ''} de ${formatCurrency(totals.montantParCheque)} chacun (ALMA)`
+                    : `${nombreChequesAVenir} chèque${Number(nombreChequesAVenir) > 1 ? 's' : ''} de ${formatCurrency(totals.montantParCheque)} chacun (à venir)`
+                  }
                 </div>
+                {/* Logo Alma conditionnel */}
+                {paymentMethod === "Alma" && (
+                  <div className="flex justify-center mt-3">
+                    <img 
+                      src={AlmaLogo} 
+                      alt="Alma" 
+                      className="h-8 opacity-90 hover:opacity-100 transition-opacity"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1010,6 +1131,33 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   </select>
                   <div className="text-xs text-purple-600 mt-1">
                     🎯 Le nombre de chèques sera automatiquement appliqué dans "Chèques à venir"
+                  </div>
+                </div>
+              )}
+
+              {/* ✨ NOUVEAU : Sélecteur nombre de fois pour ALMA */}
+              {paymentMethod === "Alma" && (
+                <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <label className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      readOnly
+                      className="form-checkbox h-4 w-4 text-orange-600 rounded"
+                    />
+                    <span className="text-orange-700 font-semibold">Paiement en plusieurs fois :</span>
+                  </label>
+                  <select
+                    value={nombreChequesAVenir || 3}
+                    onChange={(e) => handleChequesQuantityFromSelector(Number(e.target.value))}
+                    className="w-full border-2 border-orange-300 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white text-orange-800 font-bold"
+                  >
+                    <option value={2}>2 fois (sans frais)</option>
+                    <option value={3}>3 fois (sans frais)</option>
+                    <option value={4}>4 fois (sans frais)</option>
+                  </select>
+                  <div className="text-xs text-orange-600 mt-1">
+                    💳 Le paiement ALMA sera divisé en {nombreChequesAVenir || 3} fois
                   </div>
                 </div>
               )}

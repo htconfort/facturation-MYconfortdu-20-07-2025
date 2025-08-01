@@ -517,9 +517,9 @@ export class UnifiedPrintService {
                   <div class="rib-header">📋 Coordonnées bancaires pour virement</div>
                   <div class="rib-info">
                     <div><strong>Bénéficiaire:</strong> MYCONFORT</div>
-                    <div><strong>IBAN:</strong> FR76 1027 8060 4100 0209 3280 165</div>
-                    <div><strong>BIC:</strong> CMCIFR2A</div>
-                    <div><strong>Banque:</strong> Crédit Mutuel du Sud-Est</div>
+                    <div><strong>IBAN:</strong> FR76 1660 7000 1708 1216 3980 964</div>
+                    <div><strong>BIC:</strong> CCBPFRPPPPG</div>
+                    <div><strong>Banque:</strong> Banque Populaire du Sud</div>
                     <div style="margin-top: 4px; font-style: italic; color: #666; font-size: 10px;">
                       Merci d'indiquer le numéro de facture en référence
                     </div>

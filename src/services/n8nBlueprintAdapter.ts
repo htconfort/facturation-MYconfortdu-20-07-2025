@@ -45,6 +45,12 @@ interface N8nCompatiblePayload {
   rib_html?: string;
   rib_texte?: string;
   
+  // ✅ NOUVEAU : Gestion ALMA avec wording correct
+  est_paiement_alma?: boolean;
+  nombre_paiements_alma?: number;
+  montant_par_paiement_alma?: string;
+  mode_paiement_avec_details?: string;
+  
   // Métadonnées
   statut_facture?: string;
   type_facture?: string;
@@ -118,9 +124,9 @@ export class N8nBlueprintAdapter {
              <h3 style="margin: 0 0 10px 0; color: #2563eb; font-size: 14px;">📋 Coordonnées bancaires pour votre virement</h3>
              <div style="font-size: 12px; line-height: 1.4;">
                <div><strong>Bénéficiaire :</strong> MYCONFORT</div>
-               <div><strong>IBAN :</strong> FR76 1027 8060 4100 0209 3280 165</div>
-               <div><strong>BIC :</strong> CMCIFR2A</div>
-               <div><strong>Banque :</strong> Crédit Mutuel du Sud-Est</div>
+               <div><strong>IBAN :</strong> FR76 1660 7000 1708 1216 3980 964</div>
+               <div><strong>BIC :</strong> CCBPFRPPPPG</div>
+               <div><strong>Banque :</strong> Banque Populaire du Sud</div>
                <div style="margin-top: 8px; font-style: italic; color: #666;">
                  Merci d'indiquer le numéro de facture <strong>${invoice.invoiceNumber}</strong> en référence de votre virement.
                </div>
@@ -128,8 +134,38 @@ export class N8nBlueprintAdapter {
            </div>`
         : '',
       rib_texte: invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement')
-        ? `COORDONNÉES BANCAIRES POUR VIREMENT\n\nBénéficiaire : MYCONFORT\nIBAN : FR76 1027 8060 4100 0209 3280 165\nBIC : CMCIFR2A\nBanque : Crédit Mutuel du Sud-Est\n\nMerci d'indiquer le numéro de facture ${invoice.invoiceNumber} en référence de votre virement.`
+        ? `COORDONNÉES BANCAIRES POUR VIREMENT\n\nBénéficiaire : MYCONFORT\nIBAN : FR76 1660 7000 1708 1216 3980 964\nBIC : CCBPFRPPPPG\nBanque : Banque Populaire du Sud\n\nMerci d'indiquer le numéro de facture ${invoice.invoiceNumber} en référence de votre virement.`
         : '',
+      
+      // ✅ NOUVEAU : GESTION ALMA AVEC WORDING CORRECT
+      est_paiement_alma: Boolean(invoice.paymentMethod && invoice.paymentMethod.includes('ALMA')),
+      nombre_paiements_alma: invoice.paymentMethod && invoice.paymentMethod.includes('ALMA') 
+        ? invoice.nombreChequesAVenir || 0 
+        : 0,
+      montant_par_paiement_alma: invoice.paymentMethod && invoice.paymentMethod.includes('ALMA') && invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (totalTTC - acompte) > 0
+        ? ((totalTTC - acompte) / invoice.nombreChequesAVenir).toFixed(2)
+        : '',
+      
+      mode_paiement_avec_details: (() => {
+        const montantRestant = totalTTC - acompte;
+        
+        // Si pas d'acompte ET pas de chèques/paiements à venir
+        if ((!acompte || acompte === 0) && (!invoice.nombreChequesAVenir || invoice.nombreChequesAVenir === 0)) {
+          return `Montant à régler : ${totalTTC.toFixed(2)}€ par ${invoice.paymentMethod || 'Non spécifié'}`;
+        }
+        // Si ALMA - utiliser "paiements"
+        else if (invoice.paymentMethod && invoice.paymentMethod.includes('ALMA') && invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0) {
+          return `${invoice.paymentMethod} - ${invoice.nombreChequesAVenir} paiement${invoice.nombreChequesAVenir > 1 ? 's' : ''} de ${montantRestant > 0 ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2) : '0.00'}€ chacun`;
+        }
+        // Si chèques classiques - utiliser "chèques"
+        else if (invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0) {
+          return `${invoice.paymentMethod || 'Chèques à venir'} - ${invoice.nombreChequesAVenir} chèque${invoice.nombreChequesAVenir > 1 ? 's' : ''} à venir de ${montantRestant > 0 ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2) : '0.00'}€ chacun`;
+        }
+        // Si acompte présent mais pas de chèques/paiements
+        else {
+          return `Montant restant : ${montantRestant.toFixed(2)}€ par ${invoice.paymentMethod || 'Non spécifié'}`;
+        }
+      })(),
       
       // Métadonnées
       statut_facture: 'En attente',
