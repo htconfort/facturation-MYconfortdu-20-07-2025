@@ -77,7 +77,7 @@ class ConfigService {
       },
       
       n8n: {
-        webhookUrl: import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a',
+        webhookUrl: import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle',
         secret: import.meta.env.VITE_N8N_WEBHOOK_SECRET
       },
       

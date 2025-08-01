@@ -353,7 +353,7 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <h4 className="font-bold text-gray-800 mb-2">Configuration Webhook</h4>
                 <div className="text-sm text-gray-600 space-y-1">
-                  <p><strong>URL:</strong> https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a</p>
+                  <p><strong>URL:</strong> https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle</p>
                   <p><strong>Méthode:</strong> POST</p>
                   <p><strong>Content-Type:</strong> application/json</p>
                 </div>
