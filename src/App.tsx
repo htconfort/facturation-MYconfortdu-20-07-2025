@@ -13,7 +13,6 @@ import { PayloadDebugModal } from './components/PayloadDebugModal';
 import { DebugCenter } from './components/DebugCenter';
 import { SignaturePad } from './components/SignaturePad';
 import { InvoicePreviewModern } from './components/InvoicePreviewModern';
-import { EmailSender } from './components/EmailSender';
 import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
@@ -187,6 +186,16 @@ function App() {
         showToast('Veuillez compléter les informations client et ajouter au moins un produit', 'error');
         return;
       }
+
+      // Debug: vérifier les données sauvegardées
+      console.log('💾 Sauvegarde facture:', {
+        invoiceNumber: invoice.invoiceNumber,
+        clientName: invoice.clientName,
+        clientEmail: invoice.clientEmail,
+        clientPhone: invoice.clientPhone,
+        clientAddress: invoice.clientAddress,
+        products: invoice.products?.length || 0
+      });
 
       saveInvoice(invoice);
       setInvoices(loadInvoices());
@@ -548,8 +557,57 @@ function App() {
   };
 
   const handleLoadInvoice = (loadedInvoice: Invoice) => {
-    setInvoice(loadedInvoice);
-    showToast(`Facture ${loadedInvoice.invoiceNumber} chargée avec succès`, 'success');
+    // Debug: vérifier les données client chargées
+    console.log('🔍 Chargement facture:', {
+      clientName: loadedInvoice.clientName,
+      clientEmail: loadedInvoice.clientEmail,
+      clientPhone: loadedInvoice.clientPhone,
+      clientAddress: loadedInvoice.clientAddress,
+      products: loadedInvoice.products?.length || 0
+    });
+    
+    // S'assurer que toutes les propriétés sont définies avec des valeurs par défaut
+    const completeInvoice: Invoice = {
+      // Copier toutes les données de la facture chargée
+      ...loadedInvoice,
+      
+      // S'assurer que les champs client existent avec des valeurs par défaut
+      clientName: loadedInvoice.clientName || '',
+      clientEmail: loadedInvoice.clientEmail || '',
+      clientPhone: loadedInvoice.clientPhone || '',
+      clientAddress: loadedInvoice.clientAddress || '',
+      clientPostalCode: loadedInvoice.clientPostalCode || '',
+      clientCity: loadedInvoice.clientCity || '',
+      clientHousingType: loadedInvoice.clientHousingType || '',
+      clientDoorCode: loadedInvoice.clientDoorCode || '',
+      clientSiret: loadedInvoice.clientSiret || '',
+      
+      // S'assurer que les produits existent
+      products: loadedInvoice.products || [],
+      
+      // S'assurer que les montants existent
+      montantHT: loadedInvoice.montantHT || 0,
+      montantTTC: loadedInvoice.montantTTC || 0,
+      montantTVA: loadedInvoice.montantTVA || 0,
+      montantRemise: loadedInvoice.montantRemise || 0,
+      montantAcompte: loadedInvoice.montantAcompte || 0,
+      montantRestant: loadedInvoice.montantRestant || 0,
+      
+      // Autres champs avec valeurs par défaut
+      taxRate: loadedInvoice.taxRate || 20,
+      paymentMethod: loadedInvoice.paymentMethod || '',
+      deliveryMethod: loadedInvoice.deliveryMethod || '',
+      deliveryNotes: loadedInvoice.deliveryNotes || '',
+      invoiceNotes: loadedInvoice.invoiceNotes || '',
+      advisorName: loadedInvoice.advisorName || '',
+      signature: loadedInvoice.signature || '',
+      isSigned: loadedInvoice.isSigned || false,
+      termsAccepted: loadedInvoice.termsAccepted || false,
+      nombreChequesAVenir: loadedInvoice.nombreChequesAVenir || 0
+    };
+    
+    setInvoice(completeInvoice);
+    showToast(`Facture ${loadedInvoice.invoiceNumber} chargée avec succès - Client: ${completeInvoice.clientName || 'Non défini'}`, 'success');
   };
 
   const handleDeleteInvoice = (index: number) => {
@@ -804,11 +862,6 @@ function App() {
             </div>
           </div>
         </div>
-
-        {/* Communication & Actions Section */}
-        <EmailSender />
-
-
 
         {/* Section Aperçu de la facture - Style Netlify intégré */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
