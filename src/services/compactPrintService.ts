@@ -288,6 +288,22 @@ export class CompactPrintService {
             color: #000;
             font-size: 9px;
             margin-top: 4px;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .signature-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 3px;
+          }
+          
+          .signature-text {
+            color: #666;
+            font-style: italic;
+            font-size: 9px;
+          }
           }
 
           /* Styles RIB pour virement bancaire */
@@ -539,7 +555,10 @@ export class CompactPrintService {
               <div class="signature-section">
                 <h3>SIGNATURE CLIENT</h3>
                 <div class="signature-box">
-                  ${invoice.signature ? 'Signé' : 'Signature requise'}
+                  ${invoice.signature && invoice.signature.trim() !== '' 
+                    ? `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />` 
+                    : '<span class="signature-text">Signature requise</span>'
+                  }
                 </div>
               </div>
             </div>
