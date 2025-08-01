@@ -13,12 +13,21 @@ export class WebhookUrlHelper {
    * Retourne l'URL du webhook adaptée à l'environnement
    */
   static getWebhookUrl(endpoint: string = 'webhook/facture-universelle'): string {
-    // En production (Netlify), utilise le proxy pour éviter CORS
-    if (import.meta.env.PROD) {
-      return `/api/n8n/${endpoint}`;
+    // 🚀 UTILISER LE PROXY NETLIFY/VITE POUR ÉVITER CORS EN DÉVELOPPEMENT ET PRODUCTION
+    console.log('🔍 WebhookUrlHelper - Environment check:', {
+      isProd: import.meta.env.PROD,
+      hostname: window.location.hostname,
+      willUseProxy: import.meta.env.PROD || window.location.hostname === 'localhost'
+    });
+    
+    // En production (Netlify) ET en développement local, utilise le proxy pour éviter CORS
+    if (import.meta.env.PROD || window.location.hostname === 'localhost') {
+      const proxyUrl = `/api/n8n/${endpoint}`;
+      console.log('✅ Using proxy URL:', proxyUrl);
+      return proxyUrl;
     }
     
-    // En développement, utilise l'URL directe
+    // Fallback pour autres environnements (très rare)
     const baseUrl = configService.n8n.webhookUrl;
     
     // Si l'endpoint est déjà dans l'URL de base, ne le dupliquer pas

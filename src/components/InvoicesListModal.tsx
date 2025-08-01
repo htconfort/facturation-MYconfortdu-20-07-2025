@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Eye, Trash2, Search, Calendar, User, Mail, Filter, MapPin, Printer, Edit } from 'lucide-react';
+import { FileText, Eye, Trash2, Search, Calendar, User, Mail, Filter, MapPin, Printer, Edit, ArrowLeft } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
@@ -332,6 +332,18 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
               </div>
             </div>
           )}
+          
+          {/* Bouton retour pour iPad */}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={onClose}
+              className="bg-[#477A0C] hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 font-bold shadow-lg transition-all hover:scale-105"
+              title="Retour au formulaire principal"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Retour</span>
+            </button>
+          </div>
         </div>
       </Modal>
 

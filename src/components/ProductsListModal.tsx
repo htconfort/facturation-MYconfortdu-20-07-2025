@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Package, Plus, Edit3, Trash2, Search, Tag, Euro, Save, AlertCircle } from 'lucide-react';
+import { Package, Plus, Edit3, Trash2, Search, Tag, Euro, Save, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { ProductCatalog } from '../types';
 import { productCatalog, productCategories } from '../data/products';
@@ -97,7 +97,24 @@ export const ProductsListModal: React.FC<ProductsListModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Gestion des Produits MYCONFORT" maxWidth="max-w-6xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="" maxWidth="max-w-6xl">
+      {/* Header personnalisé avec bouton Retour */}
+      <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-[#477A0C]">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={onClose}
+            className="bg-[#477A0C] hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transition-all hover:scale-105"
+            title="Retour au formulaire principal"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Retour</span>
+          </button>
+          <h3 className="text-2xl font-bold text-[#477A0C] flex items-center space-x-2">
+            <Package className="w-6 h-6" />
+            <span>Gestion des Produits MYCONFORT</span>
+          </h3>
+        </div>
+      </div>
       <div className="space-y-6" style={{ backgroundColor: '#F2EFE2', color: '#000000' }}>
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-lg" style={{ backgroundColor: '#F2EFE2' }}>

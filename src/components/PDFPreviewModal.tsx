@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Download, Printer, FileText, Loader, UploadCloud as CloudUpload, AlertCircle } from 'lucide-react';
+import { X, Download, Printer, FileText, Loader, AlertCircle, ArrowLeft } from 'lucide-react';
 import { InvoicePreviewModern } from './InvoicePreviewModern';
 import { Invoice } from '../types';
 import { UnifiedPrintService } from '../services/unifiedPrintService';
@@ -160,6 +160,15 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
 
         {/* Actions */}
         <div className="no-print px-6 py-4 bg-gray-50 border-b flex flex-wrap gap-3">
+          <button
+            onClick={cleanupAndClose}
+            className="flex items-center space-x-2 bg-[#477A0C] hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            title="Retour au formulaire principal"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Retour</span>
+          </button>
+          
           <button
             onClick={handleDownloadClick}
             disabled={isLoading}

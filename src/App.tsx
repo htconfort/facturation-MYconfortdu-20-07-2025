@@ -402,52 +402,48 @@ function App() {
     }
   };
 
-  // 📧 Handler pour vérifier le statut d'envoi d'email - AUTOMATIQUE
-  const handleCheckEmailStatus = async () => {
-    // Montrer la notification de vérification
-    setEmailStatus({
-      show: true,
-      message: '🔍 Checking email delivery status...',
-      type: 'info'
-    });
+  // 📧 Handler pour vérifier le statut d'envoi d'email - AUTOMATIQUE (MASQUÉ)
+  // const handleCheckEmailStatus = async () => {
+  //   setEmailStatus({
+  //     show: true,
+  //     message: '🔍 Checking email delivery status...',
+  //     type: 'info'
+  //   });
 
-    try {
-      // Vérifier les factures envoyées récemment
-      const recentInvoices = invoices.filter(inv => 
-        inv.emailSent && 
-        inv.emailSentDate && 
-        new Date().getTime() - new Date(inv.emailSentDate).getTime() < 24 * 60 * 60 * 1000 // Dernières 24h
-      );
+  //   try {
+  //     const recentInvoices = invoices.filter(inv => 
+  //       inv.emailSent && 
+  //       inv.emailSentDate && 
+  //       new Date().getTime() - new Date(inv.emailSentDate).getTime() < 24 * 60 * 60 * 1000
+  //     );
 
-      if (recentInvoices.length === 0) {
-        setEmailStatus({
-          show: true,
-          message: '📭 No recent email deliveries found in the last 24 hours.',
-          type: 'info'
-        });
-      } else {
-        // Simuler la vérification pour les factures récentes
-        await new Promise(resolve => setTimeout(resolve, 1500));
+  //     if (recentInvoices.length === 0) {
+  //       setEmailStatus({
+  //         show: true,
+  //         message: '📭 No recent email deliveries found in the last 24 hours.',
+  //         type: 'info'
+  //       });
+  //     } else {
+  //       await new Promise(resolve => setTimeout(resolve, 1500));
         
-        setEmailStatus({
-          show: true,
-          message: `✅ ${recentInvoices.length} email(s) sent successfully in the last 24 hours.`,
-          type: 'success'
-        });
-      }
-    } catch (error) {
-      setEmailStatus({
-        show: true,
-        message: '❌ Error checking email status.',
-        type: 'error'
-      });
-    }
+  //       setEmailStatus({
+  //         show: true,
+  //         message: `✅ ${recentInvoices.length} email(s) sent successfully in the last 24 hours.`,
+  //         type: 'success'
+  //       });
+  //     }
+  //   } catch (error) {
+  //     setEmailStatus({
+  //       show: true,
+  //       message: '❌ Error checking email status.',
+  //       type: 'error'
+  //     });
+  //   }
 
-    // Masquer automatiquement après 4 secondes
-    setTimeout(() => {
-      setEmailStatus({ show: false, message: '', type: 'info' });
-    }, 4000);
-  };
+  //   setTimeout(() => {
+  //     setEmailStatus({ show: false, message: '', type: 'info' });
+  //   }, 4000);
+  // };
 
   // �🖨️ IMPRESSION CONDENSÉE A4 - Version intégrée
   const handlePrintWifi = () => {
@@ -908,14 +904,6 @@ function App() {
                 >
                   <span>📧</span>
                   <span>ENVOYER PAR EMAIL/DRIVE</span>
-                </button>
-                <button
-                  onClick={handleCheckEmailStatus}
-                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-teal-600 hover:bg-teal-700 text-white text-sm"
-                  title="Vérifier le statut d'envoi de l'email"
-                >
-                  <span>📬</span>
-                  <span>EMAIL SENT</span>
                 </button>
               </div>
             </div>

@@ -316,6 +316,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 type="number"
                 min="1"
                 className="w-full border-2 border-[#477A0C] rounded-lg px-3 py-2 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all text-black"
+                onFocus={(e) => e.target.select()}
+                onTouchStart={(e) => e.currentTarget.select()}
               />
             </div>
             
@@ -328,6 +330,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 step="0.01"
                 min="0"
                 className="w-full border-2 border-[#477A0C] rounded-lg px-3 py-2 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all text-black"
+                onFocus={(e) => e.target.select()}
+                onTouchStart={(e) => e.currentTarget.select()}
               />
             </div>
             
@@ -396,6 +400,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                         className="w-16 text-center border border-gray-300 rounded px-1 py-1 text-black"
                         onBlur={stopEditing}
                         onKeyPress={(e) => e.key === 'Enter' && stopEditing()}
+                        onFocus={(e) => e.target.select()}
+                        onTouchStart={(e) => e.currentTarget.select()}
                         autoFocus
                       />
                     ) : (
@@ -424,6 +430,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                         className="w-20 text-right border border-gray-300 rounded px-1 py-1 text-black"
                         onBlur={stopEditing}
                         onKeyPress={(e) => e.key === 'Enter' && stopEditing()}
+                        onFocus={(e) => e.target.select()}
+                        onTouchStart={(e) => e.currentTarget.select()}
                       />
                     ) : (
                       <div 
@@ -456,6 +464,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                         step="0.01"
                         min="0"
                         className="w-16 border border-gray-300 rounded px-1 py-1 text-right text-black"
+                        onFocus={(e) => e.target.select()}
+                        onTouchStart={(e) => e.currentTarget.select()}
                       />
                     </div>
                   </td>
@@ -512,7 +522,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       {/* NOUVEAU: Patio avec trois bandes de lancement pour les totaux, acompte et mode de règlement */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Bande 1: Remarques avec chèques à venir AMÉLIORÉS */}
-        <div className="bg-[#F2EFE2] rounded-lg p-4 border-2 border-[#477A0C]">
+        <div className="bg-[#E8F5E8] rounded-lg p-4 border-2 border-[#477A0C]">
           <div className="flex items-center mb-3">
             <div className="bg-[#477A0C] text-[#F2EFE2] p-2 rounded-full mr-3">
               <Edit3 className="w-5 h-5" />
@@ -571,6 +581,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   value={nombreChequesAVenir || 0}
                   onChange={handleChequesQuantityChange}
                   className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white text-purple-800 font-bold"
+                  onFocus={(e) => e.target.select()}
+                  onTouchStart={(e) => e.currentTarget.select()}
                 />
               </div>
 
@@ -618,7 +630,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
 
         {/* Bande 2: Totaux et Gestion Acompte */}
-        <div className="bg-[#F2EFE2] rounded-lg p-4 border-2 border-[#477A0C]">
+        <div className="bg-[#89BBFE] rounded-lg p-4 border-2 border-[#477A0C]">
           <div className="flex items-center mb-3">
             <div className="bg-[#477A0C] text-[#F2EFE2] p-2 rounded-full mr-3">
               <Calculator className="w-5 h-5" />
@@ -679,6 +691,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                     value={acompteAmount !== undefined && acompteAmount !== null && acompteAmount !== 0 ? acompteAmount : ""}
                     onChange={handleAcompteChange}
                     className="w-full border-2 border-blue-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white text-blue-800 font-bold"
+                    onFocus={(e) => e.target.select()}
+                    onTouchStart={(e) => e.currentTarget.select()}
                   />
                 </div>
 
@@ -746,7 +760,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
 
         {/* Bande 3: MODE DE RÈGLEMENT (INTÉGRÉ) AVEC CHAMPS OBLIGATOIRES */}
-        <div className="bg-[#F2EFE2] rounded-lg p-4 border-2 border-[#477A0C]">
+        <div className="bg-[#FFE4B5] rounded-lg p-4 border-2 border-[#477A0C]">
           <div className="flex items-center mb-3">
             <div className="bg-[#477A0C] text-[#F2EFE2] p-2 rounded-full mr-3">
               <CreditCard className="w-5 h-5" />

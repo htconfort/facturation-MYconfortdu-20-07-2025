@@ -5,7 +5,9 @@ import WebhookUrlHelper from '../utils/webhookUrlHelper';
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
   private static get WEBHOOK_URL() {
-    return WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
+    const url = WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
+    console.log('🔗 N8nWebhookService - Using webhook URL:', url);
+    return url;
   }
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
   
