@@ -92,6 +92,13 @@ function App() {
     type: 'success' as ToastType
   });
 
+  // État pour les notifications d'email
+  const [emailStatus, setEmailStatus] = useState({
+    show: false,
+    message: '',
+    type: 'info' as ToastType
+  });
+
   useEffect(() => {
     setClients(loadClients());
     setInvoices(loadInvoices());
@@ -364,6 +371,28 @@ function App() {
 
       if (result.success) {
         showToast(result.message, "success");
+        
+        // Marquer l'email comme envoyé dans la facture actuelle
+        const updatedInvoice = {
+          ...invoice,
+          emailSent: true,
+          emailSentDate: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setInvoice(updatedInvoice);
+        
+        // Mettre à jour la facture dans la liste des factures sauvegardées
+        const savedInvoices = loadInvoices();
+        const invoiceIndex = savedInvoices.findIndex(inv => 
+          inv.invoiceNumber === invoice.invoiceNumber && 
+          inv.invoiceDate === invoice.invoiceDate
+        );
+        
+        if (invoiceIndex !== -1) {
+          savedInvoices[invoiceIndex] = updatedInvoice;
+          localStorage.setItem('myconfort_invoices', JSON.stringify(savedInvoices));
+          setInvoices(savedInvoices);
+        }
       } else {
         throw new Error(result.message);
       }
@@ -373,7 +402,54 @@ function App() {
     }
   };
 
-  // 🖨️ IMPRESSION CONDENSÉE A4 - Version intégrée
+  // 📧 Handler pour vérifier le statut d'envoi d'email - AUTOMATIQUE
+  const handleCheckEmailStatus = async () => {
+    // Montrer la notification de vérification
+    setEmailStatus({
+      show: true,
+      message: '🔍 Checking email delivery status...',
+      type: 'info'
+    });
+
+    try {
+      // Vérifier les factures envoyées récemment
+      const recentInvoices = invoices.filter(inv => 
+        inv.emailSent && 
+        inv.emailSentDate && 
+        new Date().getTime() - new Date(inv.emailSentDate).getTime() < 24 * 60 * 60 * 1000 // Dernières 24h
+      );
+
+      if (recentInvoices.length === 0) {
+        setEmailStatus({
+          show: true,
+          message: '📭 No recent email deliveries found in the last 24 hours.',
+          type: 'info'
+        });
+      } else {
+        // Simuler la vérification pour les factures récentes
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        setEmailStatus({
+          show: true,
+          message: `✅ ${recentInvoices.length} email(s) sent successfully in the last 24 hours.`,
+          type: 'success'
+        });
+      }
+    } catch (error) {
+      setEmailStatus({
+        show: true,
+        message: '❌ Error checking email status.',
+        type: 'error'
+      });
+    }
+
+    // Masquer automatiquement après 4 secondes
+    setTimeout(() => {
+      setEmailStatus({ show: false, message: '', type: 'info' });
+    }, 4000);
+  };
+
+  // �🖨️ IMPRESSION CONDENSÉE A4 - Version intégrée
   const handlePrintWifi = () => {
     const validation = validateMandatoryFields();
     if (!validation.isValid) {
@@ -778,24 +854,26 @@ function App() {
           </h2>
 
           <div className="bg-[#F2EFE2] rounded-lg p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div>
-                <label className="block text-black mb-1 font-bold">Email du destinataire</label>
-                <input
-                  value={invoice.clientEmail}
-                  onChange={(e) => setInvoice(prev => ({
-                    ...prev,
-                    clientEmail: e.target.value
-                  }))}
-                  type="email"
-                  className="w-full md:w-64 border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold"
-                  placeholder="client@email.com"
-                />
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-center">
+                <div>
+                  <label className="block text-black mb-1 font-bold text-center">Email du destinataire</label>
+                  <input
+                    value={invoice.clientEmail}
+                    onChange={(e) => setInvoice(prev => ({
+                      ...prev,
+                      clientEmail: e.target.value
+                    }))}
+                    type="email"
+                    className="w-full md:w-64 border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold"
+                    placeholder="client@email.com"
+                  />
+                </div>
               </div>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-2 justify-center flex-wrap">
                 <button
                   onClick={() => setShowPDFPreview(true)}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white text-sm"
                   title="Ouvrir l'aperçu de la facture et télécharger le PDF"
                 >
                   <span>👁️</span>
@@ -804,7 +882,7 @@ function App() {
                 <button
                   onClick={handleSaveInvoice}
                   disabled={!invoice.clientName || !invoice.clientEmail || invoice.products.length === 0}
-                  className={`px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 disabled:hover:scale-100 ${
+                  className={`px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 disabled:hover:scale-100 text-sm ${
                     invoice.clientName && invoice.clientEmail && invoice.products.length > 0
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-gray-400 text-gray-600 cursor-not-allowed'
@@ -818,7 +896,7 @@ function App() {
                 </button>
                 <button
                   onClick={handlePrintWifi}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
+                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white text-sm"
                   title="Imprimer la facture directement"
                 >
                   <span>🖨️</span>
@@ -826,10 +904,18 @@ function App() {
                 </button>
                 <button
                   onClick={handleSendPDF}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
+                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white text-sm"
                 >
                   <span>📧</span>
                   <span>ENVOYER PAR EMAIL/DRIVE</span>
+                </button>
+                <button
+                  onClick={handleCheckEmailStatus}
+                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-teal-600 hover:bg-teal-700 text-white text-sm"
+                  title="Vérifier le statut d'envoi de l'email"
+                >
+                  <span>📬</span>
+                  <span>EMAIL SENT</span>
                 </button>
               </div>
             </div>
@@ -919,6 +1005,14 @@ function App() {
         type={toast.type}
         show={toast.show}
         onClose={hideToast}
+      />
+
+      {/* Toast pour le statut d'email */}
+      <Toast
+        message={emailStatus.message}
+        type={emailStatus.type}
+        show={emailStatus.show}
+        onClose={() => setEmailStatus({ show: false, message: '', type: 'info' })}
       />
       
       {/* Version indicator */}

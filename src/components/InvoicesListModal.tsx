@@ -173,6 +173,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                   <th className="border border-gray-300 px-4 py-3 text-left font-bold">Lieu d'événement</th>
                   <th className="border border-gray-300 px-4 py-3 text-right font-bold">Montant TTC</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold">Statut</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-bold">Email</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold">Actions</th>
                 </tr>
               </thead>
@@ -244,6 +245,23 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                         ) : (
                           <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">
                             En attente
+                          </div>
+                        )}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        {invoice.emailSent ? (
+                          <div className="flex flex-col items-center space-y-1">
+                            <span className="text-2xl" title="Email envoyé avec succès">✅</span>
+                            {invoice.emailSentDate && (
+                              <span className="text-xs text-green-600 font-semibold">
+                                {new Date(invoice.emailSentDate).toLocaleDateString('fr-FR')}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <span className="text-2xl" title="Email non envoyé">❌</span>
+                            <span className="text-xs text-red-600 font-semibold">Non envoyé</span>
                           </div>
                         )}
                       </td>

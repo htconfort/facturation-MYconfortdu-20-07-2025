@@ -58,7 +58,7 @@ export interface Invoice {
   signature?: string;
 }
 
-export type ToastType = 'success' | 'error';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ValidationError {
   field: string;

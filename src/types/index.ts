@@ -87,6 +87,10 @@ export interface Invoice {
   isSigned: boolean;
   signatureDate?: string;
   
+  // Email status
+  emailSent?: boolean;
+  emailSentDate?: string;
+  
   // Notes et conseiller
   invoiceNotes: string;
   advisorName: string;
@@ -100,7 +104,7 @@ export interface Invoice {
   updatedAt: string;
 }
 
-export type ToastType = 'success' | 'error';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ValidationError {
   field: string;
