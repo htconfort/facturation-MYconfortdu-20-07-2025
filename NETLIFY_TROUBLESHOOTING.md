@@ -113,7 +113,7 @@ CORS error when calling N8N webhook
 - Mais pas de réception email
 
 #### Solutions
-1. **Vérifier configuration EmailJS**
+1. **Vérifier configuration N8N**
    - Clés correctes dans Netlify
    - Service activé
    - Template configuré

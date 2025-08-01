@@ -462,9 +462,9 @@ export class AdvancedPDFService {
     doc.text('Email: myconfort@gmail.com - SIRET: 824 313 530 00027', 105, pageHeight - 2, { align: 'center' });
   }
 
-  // 🗜️ PDF COMPRESSÉ POUR EMAILJS
+  // 🗜️ PDF COMPRESSÉ POUR ENVOI EMAIL
   static async getCompressedPDFForEmail(invoice: Invoice): Promise<{ blob: Blob; sizeKB: number; compressed: boolean }> {
-    console.log('🗜️ GÉNÉRATION PDF COMPRESSÉ POUR EMAILJS (MAX 50KB)');
+    console.log('🗜️ GÉNÉRATION PDF COMPRESSÉ POUR ENVOI EMAIL (MAX 50KB)');
     
     try {
       // Générer d'abord un PDF standard

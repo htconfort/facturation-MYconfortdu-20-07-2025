@@ -11,17 +11,7 @@
 ### 2️⃣ Variables requises
 
 ```bash
-# 🔐 EMAILJS CONFIGURATION
-VITE_EMAILJS_PUBLIC_KEY
-Valeur: [Votre clé publique EmailJS]
-
-VITE_EMAILJS_SERVICE_ID  
-Valeur: [Votre service ID EmailJS]
-
-VITE_EMAILJS_TEMPLATE_ID
-Valeur: [Votre template ID EmailJS]
-
-# 🔗 N8N WEBHOOK
+#  N8N WEBHOOK
 VITE_N8N_WEBHOOK_URL
 Valeur: https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a
 

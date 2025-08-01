@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Save, Download, Cloud, CloudOff, Send, Loader } from "lucide-react";
-import { initializeEmailJS } from '../utils/emailService';
 import { createHTConfortInvoice, testHTConfortInvoice, SimpleClient, SimpleItem } from '../utils/invoiceGenerator';
 import { supabase } from '../utils/supabaseClient';
 import { clientService, invoiceService, productService, testSupabaseConnection } from '../utils/supabaseService';
@@ -91,10 +90,8 @@ export default function MyComfortApp() {
   // n8n Webhook URL (CRITICAL: Replace with your actual n8n webhook URL)
   const N8N_WEBHOOK_URL = 'https://your-n8n-webhook-url.com/invoice-data';
 
-  // Initialiser EmailJS au chargement
+  // Initialisation au chargement
   useEffect(() => {
-    initializeEmailJS();
-    
     // Test de la fonction createHTConfortInvoice
     console.log('🧪 Test de création de facture HT Confort...');
     try {
@@ -347,23 +344,15 @@ export default function MyComfortApp() {
       
       console.log('📧 Envoi facture:', facture.invoiceNumber);
       
-      const { sendPDFByEmail } = await import('../utils/emailService');
-      
       // Use the full invoice object for PDF generation
       const fullInvoice = getInvoiceDataForPayload();
 
-      // Send by email using the updated service (assuming it uses PDFService internally)
-      const success = await sendPDFByEmail(fullInvoice, client.email, invoicePdfRef); // Pass ref to emailService
-      
-      if (success) {
-        alert(`✅ Facture envoyée par email à ${client.email} !`);
-      } else {
-        alert("❌ Erreur lors de l'envoi de l'email");
-      }
+      // TODO: Implémenter l'envoi direct via N8N
+      alert("⚠️ Fonctionnalité d'envoi par email non implémentée - utiliser l'application principale");
       
     } catch (error) {
       console.error('❌ Erreur envoi email:', error);
-      alert(`❌ Erreur: ${error.message}`);
+      alert(`❌ Erreur: ${(error as Error).message}`);
     }
   };
 
