@@ -845,6 +845,36 @@ function App() {
                 <label className="block text-black mb-1 font-bold">
                   Précisions de livraison
                 </label>
+                
+                {/* Affichage dynamique des produits par type de livraison */}
+                {invoice.products.length > 0 && (
+                  <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    {invoice.products.filter(p => !p.isPickupOnSite).length > 0 && (
+                      <div className="mb-2">
+                        <div className="font-bold text-red-700 mb-1">🚛 Produits à livrer :</div>
+                        <div className="text-sm text-red-600">
+                          {invoice.products
+                            .filter(p => !p.isPickupOnSite)
+                            .map(p => `${p.name} (x${p.quantity})`)
+                            .join(', ')}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {invoice.products.filter(p => p.isPickupOnSite).length > 0 && (
+                      <div>
+                        <div className="font-bold text-green-700 mb-1">📦 Produits emportés :</div>
+                        <div className="text-sm text-green-600">
+                          {invoice.products
+                            .filter(p => p.isPickupOnSite)
+                            .map(p => `${p.name} (x${p.quantity})`)
+                            .join(', ')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <textarea
                   value={invoice.deliveryNotes}
                   onChange={(e) => setInvoice(prev => ({
@@ -920,14 +950,6 @@ function App() {
                 </div>
               </div>
               <div className="flex gap-2 justify-center flex-wrap">
-                <button
-                  onClick={() => setShowPDFPreview(true)}
-                  className="px-3 py-2 rounded-lg flex items-center space-x-2 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                  title="Ouvrir l'aperçu de la facture et télécharger le PDF"
-                >
-                  <span>👁️</span>
-                  <span>APERÇU & PDF</span>
-                </button>
                 <button
                   onClick={handleSaveInvoice}
                   disabled={!invoice.clientName || !invoice.clientEmail || invoice.products.length === 0}

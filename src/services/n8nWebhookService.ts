@@ -135,9 +135,18 @@ export class N8nWebhookService {
         produits_types_remises: invoice.products.map(p => p.discountType || 'fixed'),
         produits_totaux: invoice.products.map(p => (p.quantity * p.priceTTC).toFixed(2)),
         produits_totaux_ht: invoice.products.map(p => (p.quantity * p.priceHT).toFixed(2)),
+        produits_statuts_livraison: invoice.products.map(p => p.isPickupOnSite ? 'emporte' : 'a_livrer'), // Nouveau champ pour les statuts de livraison
         
         // Additional metadata
         nombre_produits: invoice.products.length,
+        
+        // NOUVEAUX CHAMPS STATISTIQUES LIVRAISON
+        nombre_produits_a_livrer: invoice.products.filter(p => !p.isPickupOnSite).length,
+        nombre_produits_emportes: invoice.products.filter(p => p.isPickupOnSite).length,
+        noms_produits_a_livrer: invoice.products.filter(p => !p.isPickupOnSite).map(p => p.name).join(', '),
+        noms_produits_emportes: invoice.products.filter(p => p.isPickupOnSite).map(p => p.name).join(', '),
+        a_une_livraison: invoice.products.some(p => !p.isPickupOnSite) ? 'Oui' : 'Non',
+        a_des_produits_emportes: invoice.products.some(p => p.isPickupOnSite) ? 'Oui' : 'Non',
         
         // ✅ CORRECTION STRUCTURE PRODUITS - TABLEAU D'OBJETS POUR N8N
         produits: invoice.products.map(product => ({
@@ -148,6 +157,7 @@ export class N8nWebhookService {
           total_ttc: product.quantity * product.priceTTC,
           total_ht: product.quantity * product.priceHT,
           categorie: product.category || 'Non spécifiée',
+          statut_livraison: product.isPickupOnSite ? 'emporte' : 'a_livrer', // Nouveau champ pour le statut de livraison
           remise: product.discount || 0,
           type_remise: product.discountType || 'fixed'
         })),

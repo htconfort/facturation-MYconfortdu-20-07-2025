@@ -347,6 +347,7 @@ export const InvoicePreviewModern = forwardRef<HTMLDivElement, InvoicePreviewMod
                     color: 'white'
                   }}>
                     <th style={{ padding: '16px', textAlign: 'left', fontWeight: 'bold' }}>Produit</th>
+                    <th style={{ padding: '16px', textAlign: 'center', fontWeight: 'bold' }}>Emporté</th>
                     <th style={{ padding: '16px', textAlign: 'center', fontWeight: 'bold' }}>Qté</th>
                     <th style={{ padding: '16px', textAlign: 'right', fontWeight: 'bold' }}>Prix unitaire</th>
                     <th style={{ padding: '16px', textAlign: 'right', fontWeight: 'bold' }}>Remise</th>
@@ -372,6 +373,18 @@ export const InvoicePreviewModern = forwardRef<HTMLDivElement, InvoicePreviewMod
                           {product.category && (
                             <div style={{ fontSize: '12px', color: '#6B7280' }}>{product.category}</div>
                           )}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'center', fontWeight: '500' }}>
+                          <span style={{ 
+                            fontSize: '12px', 
+                            padding: '4px 8px', 
+                            borderRadius: '12px',
+                            background: product.isPickupOnSite ? '#4ADE80' : '#EF4444',
+                            color: 'white',
+                            fontWeight: 'bold'
+                          }}>
+                            {product.isPickupOnSite ? '📦 Emporté' : '🚛 À livrer'}
+                          </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center', fontWeight: '500' }}>
                           {product.quantity}

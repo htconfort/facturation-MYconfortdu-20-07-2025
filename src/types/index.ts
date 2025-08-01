@@ -26,6 +26,7 @@ export interface Product {
   totalHT: number;
   totalTTC: number;
   autoCalculateHT?: boolean;
+  isPickupOnSite?: boolean; // Nouveau champ pour indiquer si le produit est emporté sur place
 }
 
 export interface ProductCatalog {

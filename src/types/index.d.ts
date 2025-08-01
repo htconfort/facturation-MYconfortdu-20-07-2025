@@ -23,6 +23,7 @@ export interface Product {
   discount: number;
   discountType: 'percent' | 'fixed';
   autoCalculateHT?: boolean;
+  isPickupOnSite?: boolean; // Nouveau champ pour indiquer si le produit est emporté sur place
 }
 
 export interface ProductCatalog {

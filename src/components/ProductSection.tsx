@@ -192,7 +192,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       discountType: 'percent',
       totalHT: calculateHT(newProduct.priceTTC, taxRate) * newProduct.quantity,
       totalTTC: newProduct.priceTTC * newProduct.quantity,
-      autoCalculateHT: isCustomProduct ? false : (selectedCatalogProduct?.autoCalculateHT || false)
+      autoCalculateHT: isCustomProduct ? false : (selectedCatalogProduct?.autoCalculateHT || false),
+      isPickupOnSite: false // Par défaut, le produit nécessite une livraison
     };
 
     // Check if product already exists
@@ -362,6 +363,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   PRODUIT
                 </th>
                 <th className="border border-[#477A0C] px-3 py-2 text-center font-bold">
+                  EMPORTÉ
+                </th>
+                <th className="border border-[#477A0C] px-3 py-2 text-center font-bold">
                   Quantité
                 </th>
                 <th className="border border-[#477A0C] px-3 py-2 text-right font-bold">
@@ -389,6 +393,22 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                     {product.category && (
                       <div className="text-xs text-gray-600">{product.category}</div>
                     )}
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2 text-center">
+                    <select
+                      value={product.isPickupOnSite ? 'pickup' : 'delivery'}
+                      onChange={(e) => updateProduct(index, { 
+                        isPickupOnSite: e.target.value === 'pickup' 
+                      })}
+                      className={`w-full border border-gray-300 rounded px-2 py-1 text-xs text-white font-bold ${
+                        product.isPickupOnSite 
+                          ? 'bg-green-400 hover:bg-green-500' 
+                          : 'bg-red-500 hover:bg-red-600'
+                      }`}
+                    >
+                      <option value="delivery">🚛 À livrer</option>
+                      <option value="pickup">📦 Emporté</option>
+                    </select>
                   </td>
                   <td className="border border-gray-300 px-3 py-2 text-center">
                     {editingIndex === index ? (
@@ -509,7 +529,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               ))}
               {products.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
+                  <td colSpan={8} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
                     <span className="text-black font-bold">Aucun produit ajouté</span>
                   </td>
                 </tr>
@@ -522,7 +542,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       {/* NOUVEAU: Patio avec trois bandes de lancement pour les totaux, acompte et mode de règlement */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Bande 1: Remarques avec chèques à venir AMÉLIORÉS */}
-        <div className="bg-[#E8F5E8] rounded-lg p-4 border-2 border-[#477A0C]">
+        <div className="bg-[#FFE4B5] rounded-lg p-4 border-2 border-[#477A0C]">
           <div className="flex items-center mb-3">
             <div className="bg-[#477A0C] text-[#F2EFE2] p-2 rounded-full mr-3">
               <Edit3 className="w-5 h-5" />
