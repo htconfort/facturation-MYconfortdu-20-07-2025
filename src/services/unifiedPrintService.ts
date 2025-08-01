@@ -469,9 +469,13 @@ export class UnifiedPrintService {
               ` : ''}
               ${invoice.deliveryNotes ? `
                 <div class="note-item">
-                  <strong>Livraison:</strong> ${invoice.deliveryNotes}
+                  <strong>Livraison par transporteur France Express CXI:</strong> ${invoice.deliveryNotes}
                 </div>
-              ` : ''}
+              ` : `
+                <div class="note-item">
+                  <strong>Livraison:</strong> Livraison par transporteur France Express CXI
+                </div>
+              `}
             </div>
           ` : ''}
 

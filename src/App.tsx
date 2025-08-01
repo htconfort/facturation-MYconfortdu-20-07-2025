@@ -20,6 +20,7 @@ import { saveClients, loadClients, saveDraft, loadDraft, saveClient, saveInvoice
 import { calculateInvoiceTotals } from './utils/invoice-calculations';
 import { AdvancedPDFService } from './services/advancedPdfService'; // Keep this import
 import { N8nWebhookService } from './services/n8nWebhookService';
+import { CompactPrintService } from './services/compactPrintService'; // Service d'impression compacte
 import { generateNewInvoiceNumber } from './hooks/useInvoiceNumber'; // 🔢 Import du hook
 // import { PDFService } from './services/pdfService'; // REMOVED: No longer needed, using AdvancedPDFService
 
@@ -454,64 +455,24 @@ function App() {
   //   }, 4000);
   // };
 
-  // �🖨️ IMPRESSION CONDENSÉE A4 - Version intégrée
-  const handlePrintWifi = () => {
+  // 🖨️ IMPRESSION COMPACTE A4 - Utilise le CompactPrintService
+  const handlePrintWifi = async () => {
     const validation = validateMandatoryFields();
     if (!validation.isValid) {
       showToast(`Impossible d'imprimer. Champs obligatoires manquants: ${validation.errors.join(', ')}`, 'error');
       return;
     }
     
+    // Sauvegarder la facture avant impression
     handleSave();
     handleSaveInvoice();
-    showToast('📄 Préparation impression A4 condensée...', 'success');
+    
+    showToast('📄 Préparation impression compacte A4...', 'success');
     
     try {
-      const element = document.getElementById('invoice-preview-section');
-      if (!element) {
-        showToast('❌ Aperçu de facture non trouvé', 'error');
-        return;
-      }
-      
-      // Sauvegarder le contenu original
-      const originalContent = document.body.innerHTML;
-      const originalTitle = document.title;
-      
-      // CSS d'impression ULTRA-CONDENSÉ
-      const printStyles = `
-        <style>
-          @page { size: A4; margin: 8mm; }
-          body { font-family: Arial; margin: 0; padding: 5px; background: white; font-size: 10px; line-height: 1.2; }
-          .bg-\\[\\#F2EFE2\\] { background: #F2EFE2 !important; padding: 8px !important; border-radius: 4px; margin: 3px 0 !important; }
-          .bg-white { background: white !important; padding: 8px !important; border-radius: 4px; margin: 3px 0 !important; }
-          h1, .text-2xl { font-size: 16px !important; margin: 3px 0 !important; line-height: 1.1; }
-          h2, .text-lg { font-size: 14px !important; margin: 2px 0 !important; line-height: 1.1; }
-          p { margin: 2px 0 !important; font-size: 9px !important; line-height: 1.2; }
-          .mb-4, .mb-6 { margin-bottom: 4px !important; }
-          .p-4, .p-6 { padding: 4px !important; }
-          table { border-collapse: collapse; width: 100%; margin: 3px 0 !important; font-size: 8px !important; }
-          table th, table td { border: 1px solid #ddd; padding: 3px !important; line-height: 1.1; }
-          table th { background: #f5f5f5; font-weight: bold; }
-          .bg-\\[\\#F2EFE2\\]:first-child { transform: scale(0.85); transform-origin: top center; width: 117.6%; margin-left: -8.8%; }
-        </style>
-      `;
-      
-      // Remplacer le contenu
-      document.title = 'Impression Facture MyConfort - A4';
-      document.body.innerHTML = printStyles + element.outerHTML;
-      
-      // Lancer l'impression
-      setTimeout(() => {
-        window.print();
-        
-        // Restaurer après impression
-        setTimeout(() => {
-          document.body.innerHTML = originalContent;
-          document.title = originalTitle;
-          showToast('✅ Impression A4 terminée', 'success');
-        }, 1000);
-      }, 500);
-      
+      // Utiliser le service d'impression compacte
+      await CompactPrintService.printInvoice(invoice);
+      showToast('✅ Impression lancée avec succès', 'success');
     } catch (error) {
       console.error('Erreur impression:', error);
       showToast('❌ Erreur lors de l\'impression', 'error');

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { FileText, Eye, Trash2, Search, Calendar, User, Mail, Filter, MapPin, Printer, Edit, ArrowLeft } from 'lucide-react';
+import { FileText, Eye, Trash2, Search, Calendar, User, Mail, Filter, MapPin, Edit, ArrowLeft } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 import { SimpleModalPreview } from './SimpleModalPreview';
-import { UnifiedPrintService } from '../services/unifiedPrintService';
 
 interface InvoicesListModalProps {
   isOpen: boolean;
@@ -82,9 +81,6 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
     setShowPreview(true);
   };
 
-  const handlePrintInvoice = async (invoice: Invoice) => {
-    await UnifiedPrintService.printInvoice(invoice);
-  };
 
   const handleDeleteInvoice = (index: number, invoice: Invoice) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la facture ${invoice.invoiceNumber} ?\n\nCette action est irréversible.`)) {
@@ -266,35 +262,39 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                         )}
                       </td>
                       <td className="border border-gray-300 px-4 py-3">
-                        <div className="flex justify-center space-x-1">
-                          <button
-                            onClick={() => handlePreviewInvoice(invoice)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition-all"
-                            title="Aperçu de la facture"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handlePrintInvoice(invoice)}
-                            className="bg-green-500 hover:bg-green-600 text-white p-2 rounded transition-all"
-                            title="Imprimer la facture"
-                          >
-                            <Printer className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleLoadInvoice(invoice)}
-                            className="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded transition-all"
-                            title="Charger cette facture pour modification"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteInvoice(originalIndex, invoice)}
-                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-all"
-                            title="Supprimer cette facture"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="flex justify-center space-x-2">
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-blue-600 font-medium mb-1">Voir</span>
+                            <button
+                              onClick={() => handlePreviewInvoice(invoice)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded transition-all"
+                              title="Aperçu de la facture"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-purple-600 font-medium mb-1">Charger</span>
+                            <button
+                              onClick={() => handleLoadInvoice(invoice)}
+                              className="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded transition-all"
+                              title="Charger cette facture pour modification"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-red-600 font-medium mb-1">Supprimer</span>
+                            <button
+                              onClick={() => handleDeleteInvoice(originalIndex, invoice)}
+                              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-all"
+                              title="Supprimer cette facture"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

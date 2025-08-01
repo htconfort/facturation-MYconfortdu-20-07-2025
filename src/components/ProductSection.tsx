@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { ShoppingCart, Plus, Trash2, Edit3, Calculator, Euro, TrendingUp, CreditCard, Hash, User, CheckCircle } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ShoppingCart, Plus, Trash2, Edit3, Calculator, Euro, TrendingUp, CreditCard, Hash, User, CheckCircle, Lightbulb, Clock } from 'lucide-react';
 import { Product } from '../types';
 import { productCatalog, productCategories } from '../data/products';
 import { formatCurrency, calculateHT, calculateProductTotal } from '../utils/calculations';
+import { proposerAcomptePourChequesRonds, formatMessageOptimisation, calculerGainTemps, optimisationBenefique } from '../utils/chequeOptimization';
 
 interface ProductSectionProps {
   products: Product[];
@@ -106,6 +107,63 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     };
   }, [products, taxRate, acompteAmount, nombreChequesAVenir]);
 
+  // ✨ NOUVEAU : Calcul d'optimisation pour chèques sans centimes
+  const optimisation = useMemo(() => {
+    if (nombreChequesAVenir <= 0 || totals.totalWithTax <= 0) {
+      return null;
+    }
+    
+    const proposition = proposerAcomptePourChequesRonds(totals.totalWithTax, nombreChequesAVenir);
+    const estBenefique = optimisationBenefique(totals.totalWithTax, nombreChequesAVenir);
+    const gainTemps = calculerGainTemps(nombreChequesAVenir, estBenefique);
+    
+    return {
+      ...proposition,
+      message: formatMessageOptimisation(proposition),
+      gainTemps,
+      estBenefique,
+      acompteActuel: acompteAmount || 0,
+      peutOptimiser: estBenefique && proposition.acompte !== (acompteAmount || 0)
+    };
+  }, [totals.totalWithTax, nombreChequesAVenir, acompteAmount]);
+
+  // Fonction pour appliquer l'optimisation - MASQUÉE avec le bloc UI
+  // const appliquerOptimisation = () => {
+  //   if (optimisation?.acompte !== undefined) {
+  //     onAcompteChange(optimisation.acompte);
+  //   }
+  // };
+
+  // ✨ NOUVEAU : Optimisation automatique quand "Chèques à venir" est sélectionné
+  useEffect(() => {
+    // Vérifier si la méthode de paiement contient "chèque" et si des chèques sont configurés
+    const isChequesPayment = paymentMethod && 
+      (paymentMethod.toLowerCase().includes('chèque') || 
+       paymentMethod.toLowerCase().includes('cheque'));
+    
+    // ✨ NOUVEAU : Validation automatique des conditions générales pour les chèques
+    if (isChequesPayment && nombreChequesAVenir > 0 && !termsAccepted) {
+      onTermsAcceptedChange(true);
+    }
+    
+    // ✨ NOUVEAU : Pré-sélection automatique de 9 chèques quand "Chèques à venir" est choisi
+    if (paymentMethod === "Chèques à venir" && (nombreChequesAVenir === 0 || nombreChequesAVenir === null)) {
+      handleChequesQuantityFromSelector(9);
+    }
+    
+    // Si on a une méthode de paiement avec chèques, un nombre de chèques > 0, 
+    // et qu'une optimisation est possible et bénéfique
+    if (isChequesPayment && 
+        nombreChequesAVenir > 0 && 
+        optimisation && 
+        optimisation.estBenefique && 
+        optimisation.peutOptimiser) {
+      
+      // Appliquer automatiquement l'acompte optimisé
+      onAcompteChange(optimisation.acompte);
+    }
+  }, [paymentMethod, nombreChequesAVenir, optimisation?.acompte, optimisation?.estBenefique, optimisation?.peutOptimiser, onAcompteChange, termsAccepted, onTermsAcceptedChange]);
+
   // 🔒 FONCTION POUR VÉRIFIER SI LES CHAMPS OBLIGATOIRES SONT REMPLIS
   const isPaymentMethodEmpty = () => {
     return !paymentMethod || paymentMethod.trim() === '';
@@ -136,6 +194,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const handleChequesQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/^0+/, "");
     onNombreChequesAVenirChange(Number(val || "0"));
+  };
+
+  // ✨ NOUVEAU : Fonction pour changer directement le nombre de chèques depuis le sélecteur
+  const handleChequesQuantityFromSelector = (quantity: number) => {
+    onNombreChequesAVenirChange(quantity);
   };
   const handleCategoryChange = (category: string) => {
     setNewProduct({
@@ -642,6 +705,78 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               </div>
             )}
 
+            {/* ✨ BLOC D'OPTIMISATION MASQUÉ - désactivé par demande utilisateur
+            {optimisation && optimisation.estBenefique && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-lg shadow-lg">
+                <div className="flex items-center mb-3">
+                  <div className="bg-yellow-500 text-white p-2 rounded-full mr-3">
+                    <Lightbulb className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-yellow-800">💡 OPTIMISATION CHÈQUES SANS CENTIMES</h4>
+                    <p className="text-xs text-yellow-700">Gagnez un temps fou sur l'écriture des chèques !</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-white p-3 rounded-lg border border-yellow-300">
+                    <p className="text-sm font-medium text-gray-800">{optimisation.message}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <div className="flex items-center mb-2">
+                        <span className="text-red-600 font-semibold text-sm">❌ Actuellement :</span>
+                      </div>
+                      <div className="text-xs text-red-800">
+                        {nombreChequesAVenir} chèques de <strong>{formatCurrency(totals.montantParCheque)}</strong>
+                        <br />
+                        <span className="text-red-600">→ Centimes à écrire sur chaque chèque</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center mb-2">
+                        <span className="text-green-600 font-semibold text-sm">✨ Suggestion :</span>
+                      </div>
+                      <div className="text-xs text-green-800">
+                        Acompte : <strong>{formatCurrency(optimisation.acompte)}</strong>
+                        <br />
+                        {optimisation.nbCheques} chèques de <strong>{optimisation.montantCheque}€ pile</strong>
+                        <br />
+                        <span className="text-green-600">→ Aucun centime à écrire !</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {optimisation.gainTemps && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-blue-800">{optimisation.gainTemps}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {optimisation.peutOptimiser && (
+                    <button
+                      onClick={appliquerOptimisation}
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+                    >
+                      🚀 Appliquer l'optimisation (acompte → {formatCurrency(optimisation.acompte)})
+                    </button>
+                  )}
+
+                  {!optimisation.peutOptimiser && optimisation.acompte === (acompteAmount || 0) && (
+                    <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center">
+                      <span className="text-green-800 font-semibold">🎯 Déjà optimisé ! Parfait pour des chèques sans centimes.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            */}
+
             {/* Message d'aide - SYNCHRONISATION AUTOMATIQUE */}
             <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-xs text-green-700">
               ✨ <strong>Synchronisation automatique :</strong> Le "Total à recevoir" est automatiquement calculé (Total TTC - Acompte) et synchronisé avec le bloc "TOTAUX & ACOMPTE". Saisissez uniquement le nombre de chèques pour calculer automatiquement le montant par chèque.
@@ -699,9 +834,23 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               <div className="space-y-3">
                 {/* Champ acompte versé */}
                 <div>
-                  <label className="block text-blue-700 font-semibold mb-1">
+                  <label className="block text-blue-700 font-semibold mb-1 flex items-center">
                     Acompte versé (€)
+                    {optimisation && optimisation.estBenefique && (acompteAmount === optimisation.acompte) && (
+                      <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                        <Lightbulb className="w-3 h-3 mr-1" />
+                        Proposition automatique
+                      </span>
+                    )}
                   </label>
+                  {optimisation && optimisation.estBenefique && (acompteAmount === optimisation.acompte) && (
+                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-xs text-blue-700 flex items-center">
+                        <span className="mr-1">💡</span>
+                        <strong>Proposition automatique</strong> : Vous pouvez modifier ce montant si nécessaire
+                      </div>
+                    </div>
+                  )}
                   <input
                     type="number"
                     step="0.01"
@@ -710,10 +859,32 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                     placeholder="0.00"
                     value={acompteAmount !== undefined && acompteAmount !== null && acompteAmount !== 0 ? acompteAmount : ""}
                     onChange={handleAcompteChange}
-                    className="w-full border-2 border-blue-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white text-blue-800 font-bold"
+                    className={`w-full border-2 rounded-lg px-4 py-2 focus:ring-2 transition-all bg-white text-blue-800 font-bold ${
+                      optimisation && optimisation.estBenefique && (acompteAmount === optimisation.acompte)
+                        ? 'border-green-400 focus:border-green-500 focus:ring-green-200 bg-green-50'
+                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                    }`}
                     onFocus={(e) => e.target.select()}
                     onTouchStart={(e) => e.currentTarget.select()}
                   />
+                  {optimisation && optimisation.estBenefique && (acompteAmount === optimisation.acompte) && (
+                    <div className="mt-2 p-3 bg-green-100 border border-green-300 rounded-lg">
+                      <div className="flex items-center text-sm text-green-800 mb-2">
+                        <Clock className="w-4 h-4 mr-2" />
+                        <span className="font-semibold">
+                          🎯 Proposition optimale : {optimisation.nbCheques} chèques de {optimisation.montantCheque}€ pile
+                        </span>
+                      </div>
+                      {optimisation.gainTemps && (
+                        <div className="text-xs text-green-700 mb-2">
+                          {optimisation.gainTemps}
+                        </div>
+                      )}
+                      <div className="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-200">
+                        ✏️ <strong>Modifiable :</strong> Vous pouvez ajuster ce montant selon les besoins du client
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Affichage des calculs */}
@@ -810,6 +981,38 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 <option value="Chèque">Chèque</option>
                 <option value="Acompte">Acompte</option>
               </select>
+              
+              {/* ✨ NOUVEAU : Sélecteur nombre de chèques quand "Chèques à venir" est sélectionné */}
+              {paymentMethod === "Chèques à venir" && (
+                <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <label className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      readOnly
+                      className="form-checkbox h-4 w-4 text-purple-600 rounded"
+                    />
+                    <span className="text-purple-700 font-semibold">Nombre de fois :</span>
+                  </label>
+                  <select
+                    value={nombreChequesAVenir || 9}
+                    onChange={(e) => handleChequesQuantityFromSelector(Number(e.target.value))}
+                    className="w-full border-2 border-purple-300 rounded-lg px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white text-purple-800 font-bold"
+                  >
+                    <option value={9}>9 chèques</option>
+                    <option value={8}>8 chèques</option>
+                    <option value={7}>7 chèques</option>
+                    <option value={6}>6 chèques</option>
+                    <option value={5}>5 chèques</option>
+                    <option value={4}>4 chèques</option>
+                    <option value={3}>3 chèques</option>
+                    <option value={2}>2 chèques</option>
+                  </select>
+                  <div className="text-xs text-purple-600 mt-1">
+                    🎯 Le nombre de chèques sera automatiquement appliqué dans "Chèques à venir"
+                  </div>
+                </div>
+              )}
               {isPaymentMethodEmpty() && (
                 <p className="text-red-600 text-xs mt-1 font-semibold">
                   ⚠️ La méthode de paiement est obligatoire
@@ -857,6 +1060,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 <div className="mt-2 flex items-center text-green-700">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   <span className="text-sm font-semibold">✅ Conditions acceptées</span>
+                  {paymentMethod && (paymentMethod.toLowerCase().includes('chèque') || paymentMethod.toLowerCase().includes('cheque')) && nombreChequesAVenir > 0 && (
+                    <span className="ml-2 bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-bold">
+                      🚀 Auto-validé
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="mt-2 text-red-600 text-xs font-semibold">
