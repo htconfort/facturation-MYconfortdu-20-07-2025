@@ -40,6 +40,11 @@ interface N8nCompatiblePayload {
   conseiller?: string;
   notes_facture?: string;
   
+  // ✅ NOUVEAU : Coordonnées bancaires RIB
+  afficher_rib?: boolean;
+  rib_html?: string;
+  rib_texte?: string;
+  
   // Métadonnées
   statut_facture?: string;
   type_facture?: string;
@@ -105,6 +110,26 @@ export class N8nBlueprintAdapter {
       mode_paiement: invoice.paymentMethod || 'Non spécifié',
       conseiller: invoice.advisorName || 'MYCONFORT',
       notes_facture: invoice.invoiceNotes || '',
+      
+      // ✅ NOUVEAU : COORDONNÉES BANCAIRES POUR VIREMENT
+      afficher_rib: Boolean(invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement')),
+      rib_html: invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement') 
+        ? `<div style="margin-top: 20px; padding: 15px; background-color: #e1f5fe; border: 1px solid #2563eb; border-radius: 8px;">
+             <h3 style="margin: 0 0 10px 0; color: #2563eb; font-size: 14px;">📋 Coordonnées bancaires pour votre virement</h3>
+             <div style="font-size: 12px; line-height: 1.4;">
+               <div><strong>Bénéficiaire :</strong> MYCONFORT</div>
+               <div><strong>IBAN :</strong> FR76 1027 8060 4100 0209 3280 165</div>
+               <div><strong>BIC :</strong> CMCIFR2A</div>
+               <div><strong>Banque :</strong> Crédit Mutuel du Sud-Est</div>
+               <div style="margin-top: 8px; font-style: italic; color: #666;">
+                 Merci d'indiquer le numéro de facture <strong>${invoice.invoiceNumber}</strong> en référence de votre virement.
+               </div>
+             </div>
+           </div>`
+        : '',
+      rib_texte: invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement')
+        ? `COORDONNÉES BANCAIRES POUR VIREMENT\n\nBénéficiaire : MYCONFORT\nIBAN : FR76 1027 8060 4100 0209 3280 165\nBIC : CMCIFR2A\nBanque : Crédit Mutuel du Sud-Est\n\nMerci d'indiquer le numéro de facture ${invoice.invoiceNumber} en référence de votre virement.`
+        : '',
       
       // Métadonnées
       statut_facture: 'En attente',

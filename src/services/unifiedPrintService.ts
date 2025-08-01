@@ -209,6 +209,32 @@ export class UnifiedPrintService {
             display: inline-block;
           }
 
+          /* Styles RIB pour virement bancaire */
+          .rib-section {
+            margin-top: 8px;
+            padding: 8px;
+            background: #e1f5fe;
+            border: 1px solid #2563eb;
+            border-radius: 4px;
+          }
+
+          .rib-header {
+            font-size: 11px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 6px;
+          }
+
+          .rib-info {
+            font-size: 10px;
+            line-height: 1.4;
+            color: #000;
+          }
+
+          .rib-info div {
+            margin-bottom: 2px;
+          }
+
           .deposit-amount {
             font-size: 14px;
             color: #FF8C00;
@@ -484,6 +510,22 @@ export class UnifiedPrintService {
             <div class="payment-method-section">
               <div class="section-header">💳 Mode de règlement:</div>
               <div class="payment-badge">${invoice.paymentMethod}</div>
+              
+              ${invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement') ? `
+                <!-- RIB pour Virement Bancaire -->
+                <div class="rib-section">
+                  <div class="rib-header">📋 Coordonnées bancaires pour virement</div>
+                  <div class="rib-info">
+                    <div><strong>Bénéficiaire:</strong> MYCONFORT</div>
+                    <div><strong>IBAN:</strong> FR76 1027 8060 4100 0209 3280 165</div>
+                    <div><strong>BIC:</strong> CMCIFR2A</div>
+                    <div><strong>Banque:</strong> Crédit Mutuel du Sud-Est</div>
+                    <div style="margin-top: 4px; font-style: italic; color: #666; font-size: 10px;">
+                      Merci d'indiquer le numéro de facture en référence
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
             </div>
           ` : ''}
 
