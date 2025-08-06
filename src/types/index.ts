@@ -13,6 +13,9 @@ export interface Client {
   invoices?: string[];
 }
 
+// Types pour les statuts de livraison
+export type DeliveryStatus = 'pending' | 'delivered' | 'to_deliver' | 'cancelled';
+
 export interface Product {
   id?: string;
   name: string;
@@ -27,6 +30,7 @@ export interface Product {
   totalTTC: number;
   autoCalculateHT?: boolean;
   isPickupOnSite?: boolean; // Nouveau champ pour indiquer si le produit est emporté sur place
+  statut_livraison?: DeliveryStatus; // NOUVEAU : Statut de livraison du produit
 }
 
 export interface ProductCatalog {

@@ -1,9 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingCart, Plus, Trash2, Edit3, Calculator, Euro, TrendingUp, CreditCard, Hash, User, CheckCircle, Lightbulb, Clock } from 'lucide-react';
-import { Product } from '../types';
+import { Product, DeliveryStatus } from '../types';
 import { productCatalog, productCategories } from '../data/products';
 import { formatCurrency, calculateHT, calculateProductTotal } from '../utils/calculations';
 import { proposerAcomptePourChequesRonds, formatMessageOptimisation, calculerGainTemps, optimisationBenefique } from '../utils/chequeOptimization';
+import { DeliveryStatusSelector } from './delivery/DeliveryStatusSelector';
+import { StatusBadge } from './delivery/StatusBadge';
+import { DeliveryStatusSummary } from './delivery/DeliveryStatusSummary';
+import { DeliveryStatusNotificationService } from './delivery/services/DeliveryStatusNotificationService';
 import AlmaLogo from '../assets/images/Alma_orange.png';
 
 interface ProductSectionProps {
@@ -26,6 +30,8 @@ interface ProductSectionProps {
   // Nouveau prop pour les chèques à venir
   nombreChequesAVenir: number;
   onNombreChequesAVenirChange: (nombre: number) => void;
+  // NOUVEAU : Numéro de facture pour les notifications N8N
+  invoiceNumber?: string;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -45,7 +51,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   signature,
   onShowSignaturePad,
   nombreChequesAVenir,
-  onNombreChequesAVenirChange
+  onNombreChequesAVenirChange,
+  invoiceNumber
 }) => {
   const [newProduct, setNewProduct] = useState({
     category: '',
@@ -287,7 +294,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       totalHT: calculateHT(newProduct.priceTTC, taxRate) * newProduct.quantity,
       totalTTC: newProduct.priceTTC * newProduct.quantity,
       autoCalculateHT: isCustomProduct ? false : (selectedCatalogProduct?.autoCalculateHT || false),
-      isPickupOnSite: false // Par défaut, le produit nécessite une livraison
+      isPickupOnSite: false, // Par défaut, le produit nécessite une livraison
+      statut_livraison: 'pending' // Par défaut, statut en attente
     };
 
     // Check if product already exists
@@ -448,6 +456,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           )}
         </div>
         
+        {/* Résumé des statuts de livraison */}
+        {products.length > 0 && (
+          <DeliveryStatusSummary products={products} />
+        )}
+        
         {/* Products Table avec police noire pour contraste */}
         <div className="overflow-x-auto mb-6">
           <table className="w-full border-collapse">
@@ -457,7 +470,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   PRODUIT
                 </th>
                 <th className="border border-[#477A0C] px-3 py-2 text-center font-bold">
-                  EMPORTÉ
+                  STATUT DE LIVRAISON
                 </th>
                 <th className="border border-[#477A0C] px-3 py-2 text-center font-bold">
                   Quantité
@@ -489,20 +502,50 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                     )}
                   </td>
                   <td className="border border-gray-300 px-3 py-2 text-center">
-                    <select
-                      value={product.isPickupOnSite ? 'pickup' : 'delivery'}
-                      onChange={(e) => updateProduct(index, { 
-                        isPickupOnSite: e.target.value === 'pickup' 
-                      })}
-                      className={`w-full border border-gray-300 rounded px-2 py-1 text-xs text-white font-bold ${
-                        product.isPickupOnSite 
-                          ? 'bg-green-400 hover:bg-green-500' 
-                          : 'bg-red-500 hover:bg-red-600'
-                      }`}
-                    >
-                      <option value="delivery">🚛 À livrer</option>
-                      <option value="pickup">📦 Emporté</option>
-                    </select>
+                    <DeliveryStatusSelector
+                      product={{
+                        nom: product.name,
+                        quantite: product.quantity,
+                        prix_ttc: product.priceTTC,
+                        total_ttc: calculateProductTotal(
+                          product.quantity,
+                          product.priceTTC,
+                          product.discount,
+                          product.discountType
+                        ),
+                        categorie: product.category || '',
+                        remise: product.discount,
+                        type_remise: product.discountType,
+                        statut_livraison: product.statut_livraison || 'pending',
+                        emporte: product.isPickupOnSite
+                      }}
+                      productIndex={index}
+                      onStatusChange={async (productIndex: number, status: DeliveryStatus) => {
+                        const currentProduct = products[productIndex];
+                        const oldStatus = currentProduct.statut_livraison;
+                        
+                        // Mettre à jour le produit localement
+                        updateProduct(productIndex, { 
+                          statut_livraison: status,
+                          // Synchronisation avec isPickupOnSite pour compatibilité
+                          isPickupOnSite: status === 'delivered'
+                        });
+                        
+                        // Notifier N8N du changement de statut si on a un numéro de facture
+                        if (invoiceNumber && currentProduct.name) {
+                          try {
+                            await DeliveryStatusNotificationService.notifyStatusChange(
+                              invoiceNumber,
+                              currentProduct.name,
+                              status,
+                              oldStatus
+                            );
+                          } catch (error) {
+                            console.warn('⚠️ Notification N8N échouée, mais le changement local est conservé:', error);
+                          }
+                        }
+                      }}
+                    />
                   </td>
                   <td className="border border-gray-300 px-3 py-2 text-center">
                     {editingIndex === index ? (

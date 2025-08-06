@@ -770,6 +770,7 @@ function App() {
             onShowSignaturePad={() => setShowSignaturePad(true)}
             nombreChequesAVenir={invoice.nombreChequesAVenir || 0}
             onNombreChequesAVenirChange={(nombre) => setInvoice(prev => ({ ...prev, nombreChequesAVenir: nombre }))}
+            invoiceNumber={invoice.invoiceNumber}
           />
         </div>
 
