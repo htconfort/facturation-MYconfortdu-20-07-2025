@@ -121,3 +121,31 @@ export function optimiserAcomptePourChequesRonds(
   // Ajuster l'acompte pour éliminer le modulo
   return acompteInitial + modulo;
 }
+
+/**
+ * Fonctions attendues par StepPaiement (compatibilité avec l'ancienne version)
+ */
+
+/**
+ * Calcule des acomptes "amis des chèques" qui donnent des montants ronds
+ * @param totalTTC - Montant total TTC
+ * @param nombreCheques - Nombre de chèques pour le solde
+ * @returns Suggestions d'acomptes optimisées
+ */
+export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number) {
+  return suggererAcomptesMagiques(totalTTC, nombreCheques);
+}
+
+/**
+ * Convertit des pourcentages en montants cibles
+ * @param totalTTC - Montant total TTC
+ * @param percentages - Pourcentages à convertir
+ * @returns Montants correspondants
+ */
+export function targetsFromPercents(totalTTC: number, percentages: number[]) {
+  return percentages.map(pct => ({
+    percentage: pct,
+    amount: Math.round(totalTTC * pct / 100),
+    label: `${pct}%`
+  }));
+}
