@@ -77,6 +77,7 @@ export default function StepRecap({ onPrev }: StepProps) {
       montantTVA: +totalTVA.toFixed(2),
       montantRemise: +montantRemise.toFixed(2),
       taxRate: 20,
+      signature: signature.dataUrl || '',
       isSigned: !!signature.dataUrl,
       signatureDate: signature.dataUrl ? new Date().toISOString() : undefined,
     };
@@ -940,24 +941,6 @@ export default function StepRecap({ onPrev }: StepProps) {
               className='px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all'
             >
               ← Signature
-            </button>
-
-            <button
-              type='button'
-              onClick={() => (window.location.href = '/')}
-              disabled={!canProceed}
-              className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform shadow-lg ${
-                canProceed
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              title={
-                !canProceed
-                  ? "Veuillez d'abord enregistrer la facture et envoyer l'email"
-                  : ''
-              }
-            >
-              💻 Retour Mode Normal
             </button>
 
             <button

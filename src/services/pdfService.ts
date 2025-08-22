@@ -34,6 +34,9 @@ type InvoiceForPDF = {
   taxRate: number; // ex: 20
   paymentMethod?: string;
   invoiceNotes?: string;
+  signature?: string; // data URL de la signature
+  isSigned?: boolean;
+  signatureDate?: string;
 };
 
 const GREEN: [number, number, number] = [71, 122, 12]; // #477A0C
@@ -305,6 +308,47 @@ export const PDFService = {
     const thanksLines = doc.splitTextToSize(thanks, w - MARGIN * 2);
     doc.text(thanksLines, MARGIN, y + 5);
 
+    // ————— Signature client si présente —————
+    if (invoiceData.signature && invoiceData.isSigned) {
+      y += 20; // Espacement avant la signature
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Signature client :', MARGIN, y);
+      
+      try {
+        // Ajouter l'image de la signature
+        doc.addImage(invoiceData.signature, 'PNG', MARGIN, y + 5, 50, 25);
+        y += 30; // Espacement après la signature
+        
+        // Date de signature si disponible
+        if (invoiceData.signatureDate) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          const signDate = new Date(invoiceData.signatureDate).toLocaleDateString('fr-FR');
+          doc.text(`Signé le ${signDate}`, MARGIN, y);
+          y += 5;
+        }
+      } catch (error) {
+        // Fallback en cas d'erreur avec l'image
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('✓ Signature électronique enregistrée', MARGIN, y + 5);
+        y += 15;
+      }
+    }
+
+    // ————— Information légale Article L224-59 —————
+    y += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('⚖️ INFORMATION LÉGALE - ARTICLE L224-59', MARGIN, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    const legalText = '« Avant la conclusion de tout contrat entre un consommateur et un professionnel à l\'occasion d\'une foire, d\'un salon [...] le professionnel informe le consommateur qu\'il ne dispose pas d\'un délai de rétractation. »';
+    const legalLines = doc.splitTextToSize(legalText, w - MARGIN * 2);
+    doc.text(legalLines, MARGIN, y + 4);
+
     // ————— PAGE 2 — CGV (2 colonnes)
     doc.addPage('a4', 'portrait');
     doc.setFont('helvetica', 'bold');
@@ -407,6 +451,11 @@ function coerceInvoice(invoice: Invoice): InvoiceForPDF {
       : undefined,
     invoiceNotes: invoice.invoiceNotes
       ? String(invoice.invoiceNotes)
+      : undefined,
+    signature: invoice.signature ? String(invoice.signature) : undefined,
+    isSigned: Boolean(invoice.isSigned),
+    signatureDate: invoice.signatureDate
+      ? String(invoice.signatureDate)
       : undefined,
   };
 }
