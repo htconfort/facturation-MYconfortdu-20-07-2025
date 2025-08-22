@@ -78,12 +78,11 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           <section className="bg-white rounded-2xl shadow-xl p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-6">🚚 Mode de livraison</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { value: 'Livraison standard', label: '📦 Livraison standard', desc: 'Livraison à domicile sous 48-72h' },
-                { value: 'Livraison express', label: '⚡ Livraison express', desc: 'Livraison sous 24h (selon disponibilité)' },
-                { value: 'Installation complète', label: '🔧 Installation complète', desc: 'Livraison + installation par nos équipes' },
-                { value: 'À programmer', label: '📅 À programmer', desc: 'Rendez-vous à convenir avec le client' },
+                { value: 'Colissimo 48 heures', label: '📦 Colissimo 48 heures', desc: 'Livraison par La Poste sous 48h' },
+                { value: 'Livraison par transporteur', label: '🚚 Livraison par transporteur', desc: 'Livraison à domicile par transporteur' },
+                { value: 'Retrait en magasin', label: '🏪 Retrait en magasin', desc: 'Le client vient récupérer en magasin' },
               ].map((method) => {
                 const selected = livraison.deliveryMethod === method.value;
                 return (
@@ -107,30 +106,22 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           </section>
         )}
 
-        {/* Adresse de livraison/événement */}
+        {/* Adresse de livraison */}
         <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">
-            {produitsALivrer.length > 0 ? '🏠 Adresse de livraison' : '📍 Lieu de l\'événement'}
-          </h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">🏠 Adresse de livraison</h3>
           
           <div className="bg-blue-50 rounded-xl p-4 mb-4">
             <h4 className="font-semibold text-blue-800 mb-2">💡 Information</h4>
             <p className="text-blue-700 text-sm">
-              {produitsALivrer.length > 0 
-                ? "Confirmez l'adresse de livraison ou précisez si différente de l'adresse client."
-                : "Précisez le lieu où se déroulera l'événement (même si tous les produits sont à emporter)."
-              }
+              Confirmez l'adresse de livraison ou précisez si différente de l'adresse client.
             </p>
           </div>
 
           <textarea
-            value={livraison.eventLocation || ''}
-            onChange={(e) => updateLivraison({ eventLocation: e.target.value })}
+            value={livraison.deliveryAddress || ''}
+            onChange={(e) => updateLivraison({ deliveryAddress: e.target.value })}
             className="w-full h-32 rounded-xl border-2 border-gray-300 px-6 py-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all resize-none"
-            placeholder={produitsALivrer.length > 0 
-              ? "Même adresse que le client OU préciser une adresse différente..."
-              : "Lieu de l'événement : adresse, salle, précisions d'accès..."
-            }
+            placeholder="Même adresse que le client OU préciser une adresse différente..."
           />
         </section>
 

@@ -30,6 +30,7 @@ interface PaymentData {
   method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | '';
   depositRate?: number; // %
   depositAmount?: number;
+  depositPaymentMethod?: 'Carte Bleue' | 'Espèces' | 'Chèque' | ''; // Mode de règlement de l'acompte
   remainingAmount?: number;
   note?: string;
   nombreChequesAVenir?: number;
@@ -44,7 +45,7 @@ interface PaymentData {
 interface LivraisonData {
   deliveryMethod?: string;
   deliveryNotes?: string;
-  eventLocation?: string;
+  deliveryAddress?: string;
 }
 
 interface SignatureData {
@@ -198,7 +199,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       livraison: {
         deliveryMethod: invoice.deliveryMethod || '',
         deliveryNotes: invoice.deliveryNotes || '',
-        eventLocation: invoice.eventLocation || '',
+        deliveryAddress: invoice.deliveryAddress || '',
       },
       signatureDataUrl: invoice.signature || undefined,
       invoiceNotes: invoice.invoiceNotes || '',
@@ -240,10 +241,12 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       
       paymentMethod: state.paiement.method,
       montantAcompte: state.paiement.depositAmount || 0,
+      depositPaymentMethod: state.paiement.depositPaymentMethod || '',
       montantRestant: state.paiement.remainingAmount || 0,
       nombreChequesAVenir: state.paiement.nombreChequesAVenir || 0,
       
       deliveryMethod: state.livraison.deliveryMethod || '',
+      deliveryAddress: state.livraison.deliveryAddress || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
       
       signature: state.signatureDataUrl || '',

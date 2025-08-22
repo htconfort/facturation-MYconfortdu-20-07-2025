@@ -103,6 +103,23 @@ export default function StepPaiement({ onNext, onPrev }: StepProps) {
     updatePaiement({ nombreChequesAVenir: clamp(safeNumber(nombre), 1, 10) });
   };
 
+  // Validation pour le mode de règlement de l'acompte
+  const validateAndNext = () => {
+    // Vérifier si un acompte est défini et si son mode de règlement est obligatoire
+    if (depositAmount > 0 && !paiement.depositPaymentMethod) {
+      alert('Veuillez sélectionner le mode de règlement pour l\'acompte avant de continuer.');
+      return;
+    }
+    
+    // Autres validations existantes
+    if (!isValid) {
+      alert('Veuillez sélectionner un mode de paiement avant de continuer.');
+      return;
+    }
+    
+    onNext();
+  };
+
   return (
     <div className="py-8">
       <div className="text-center mb-8">
@@ -225,6 +242,37 @@ export default function StepPaiement({ onNext, onPrev }: StepProps) {
             </div>
           </div>
 
+          {/* Mode de règlement de l'acompte - OBLIGATOIRE */}
+          {depositAmount > 0 && (
+            <div className="mb-6">
+              <label className="block text-gray-700 font-semibold mb-3">
+                Mode de règlement de l&apos;acompte: <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={paiement.depositPaymentMethod || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  updatePaiement({ depositPaymentMethod: value === '' ? undefined : value as 'Carte Bleue' | 'Espèces' | 'Chèque' });
+                }}
+                className={`w-full h-16 rounded-xl border-3 px-6 text-lg font-bold focus:ring-4 transition-all ${
+                  !paiement.depositPaymentMethod
+                    ? 'border-red-500 bg-red-50 text-red-800 focus:border-red-600 focus:ring-red-200'
+                    : 'border-green-500 bg-green-50 text-green-800 focus:border-green-600 focus:ring-green-200'
+                }`}
+              >
+                <option value="" className="text-red-800 font-bold">⚠️ Sélectionner le mode de règlement</option>
+                <option value="Carte Bleue" className="text-blue-800 font-bold">💳 Carte Bleue</option>
+                <option value="Espèces" className="text-green-800 font-bold">💵 Espèces</option>
+                <option value="Chèque" className="text-purple-800 font-bold">🧾 Chèque</option>
+              </select>
+              {!paiement.depositPaymentMethod && (
+                <p className="text-red-600 text-sm font-bold mt-2 flex items-center">
+                  ⚠️ Le mode de règlement de l'acompte est obligatoire
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Récap visuel */}
           <div className="bg-gray-50 rounded-xl p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -234,6 +282,13 @@ export default function StepPaiement({ onNext, onPrev }: StepProps) {
                 <div className="text-sm text-blue-500">
                   {totalTTC > 0 ? `${Math.round((depositAmount / totalTTC) * 100)}%` : '0%'} du total
                 </div>
+                {depositAmount > 0 && paiement.depositPaymentMethod && (
+                  <div className="mt-2 text-xs text-blue-700 font-bold">
+                    {paiement.depositPaymentMethod === 'Carte Bleue' && '💳 Carte Bleue'}
+                    {paiement.depositPaymentMethod === 'Espèces' && '💵 Espèces'}
+                    {paiement.depositPaymentMethod === 'Chèque' && '🧾 Chèque'}
+                  </div>
+                )}
               </div>
               <div className="text-center p-4 bg-orange-100 rounded-xl">
                 <div className="text-2xl font-bold text-orange-800">{formatEUR(remainingAmount)}</div>
@@ -411,7 +466,7 @@ export default function StepPaiement({ onNext, onPrev }: StepProps) {
           {isValid ? (
             <button
               type="button"
-              onClick={onNext}
+              onClick={validateAndNext}
               className="bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
               Continuer vers la Livraison →
