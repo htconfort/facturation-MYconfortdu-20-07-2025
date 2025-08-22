@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Users, Package, Building2, Archive, UploadCloud as CloudUpload, CheckCircle, AlertCircle, Loader2, Bug } from 'lucide-react';
+import {
+  Users,
+  Package,
+  Building2,
+  Archive,
+  UploadCloud as CloudUpload,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Bug,
+  Tablet,
+} from 'lucide-react';
 
 interface HeaderProps {
   onShowClients: () => void;
@@ -9,6 +20,7 @@ interface HeaderProps {
   onShowDebug?: () => void; // Ajout du bouton Debug
   onScrollToClient?: () => void;
   onScrollToProducts?: () => void;
+  onGoToIpad?: () => void; // Ajout du bouton iPad
   invoiceNumber?: string;
   clientName?: string;
   canSendToDrive?: boolean;
@@ -20,9 +32,10 @@ export const Header: React.FC<HeaderProps> = ({
   onShowProducts,
   onShowGoogleDrive,
   onShowDebug,
+  onGoToIpad,
   invoiceNumber,
   clientName,
-  canSendToDrive = false
+  canSendToDrive = false,
 }) => {
   const [isDriveLoading, setIsDriveLoading] = useState(false);
   const [driveStatus, setDriveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -34,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
 
     setIsDriveLoading(true);
     setDriveStatus('idle');
-    
+
     try {
       await onShowGoogleDrive();
       setDriveStatus('success');
@@ -49,77 +62,77 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getDriveButtonClass = () => {
     if (!canSendToDrive) {
-      return "bg-gray-400 cursor-not-allowed px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md text-white opacity-60";
+      return 'bg-gray-400 cursor-not-allowed px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md text-white opacity-60';
     }
-    
+
     if (driveStatus === 'success') {
-      return "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white";
+      return 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white';
     }
-    
+
     if (driveStatus === 'error') {
-      return "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white";
+      return 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white';
     }
-    
-    return "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white";
+
+    return 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white';
   };
 
   const getDriveButtonIcon = () => {
     if (isDriveLoading) {
       return <Loader2 size={18} className="animate-spin" />;
     }
-    
+
     if (driveStatus === 'success') {
       return <CheckCircle size={18} />;
     }
-    
+
     if (driveStatus === 'error') {
       return <AlertCircle size={18} />;
     }
-    
+
     return <CloudUpload size={18} />;
   };
 
   const getDriveButtonText = () => {
     if (isDriveLoading) {
-      return "Envoi...";
+      return 'Envoi...';
     }
-    
+
     if (driveStatus === 'success') {
-      return "✅ Envoyé";
+      return '✅ Envoyé';
     }
-    
+
     if (driveStatus === 'error') {
-      return "❌ Erreur";
+      return '❌ Erreur';
     }
-    
+
     if (!canSendToDrive) {
-      return "📤 Drive";
+      return '📤 Drive';
     }
-    
-    return "📤 Drive";
+
+    return '📤 Drive';
   };
 
   const getDriveButtonTitle = () => {
     if (!canSendToDrive) {
-      return "Complétez les champs obligatoires pour envoyer vers Google Drive";
+      return 'Complétez les champs obligatoires pour envoyer vers Google Drive';
     }
-    
+
     if (isDriveLoading) {
-      return "Envoi en cours vers Google Drive...";
+      return 'Envoi en cours vers Google Drive...';
     }
-    
+
     if (driveStatus === 'success') {
-      return "PDF envoyé avec succès vers Google Drive";
+      return 'PDF envoyé avec succès vers Google Drive';
     }
-    
+
     if (driveStatus === 'error') {
       return "Erreur lors de l'envoi vers Google Drive";
     }
-    
+
     const info = [];
     if (invoiceNumber) info.push(`Facture: ${invoiceNumber}`);
     if (clientName) info.push(`Client: ${clientName}`);
-    
+
     return `Envoyer la facture vers Google Drive${info.length > 0 ? ` (${info.join(', ')})` : ''}`;
   };
   return (
@@ -130,13 +143,13 @@ export const Header: React.FC<HeaderProps> = ({
             <Building2 className="w-6 h-6 text-[#F2EFE2]" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#F2EFE2]">
-              MYCONFORT
-            </h1>
-            <p className="text-[#F2EFE2]/80 text-sm font-medium">Facturation professionnelle avec signature électronique</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#F2EFE2]">MYCONFORT</h1>
+            <p className="text-[#F2EFE2]/80 text-sm font-medium">
+              Facturation professionnelle avec signature électronique
+            </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Actions principales */}
           <button
@@ -156,7 +169,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Archive size={18} />
             <span className="hidden md:inline">Factures</span>
           </button>
-          
+
           <button
             onClick={onShowClients}
             className="bg-[#D68FD6] hover:bg-[#C67FC6] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]"
@@ -165,7 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Users size={18} />
             <span className="hidden md:inline">Clients</span>
           </button>
-          
+
           {onShowDebug && (
             <button
               onClick={onShowDebug}
@@ -176,7 +189,18 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden md:inline">Debug</span>
             </button>
           )}
-          
+
+          {onGoToIpad && (
+            <button
+              onClick={onGoToIpad}
+              className="bg-[#3B82F6] hover:bg-[#2563EB] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white"
+              title="Mode iPad tactile optimisé"
+            >
+              <Tablet size={18} />
+              <span className="hidden md:inline">Mode iPad</span>
+            </button>
+          )}
+
           <button
             onClick={handleDriveClick}
             disabled={!canSendToDrive || isDriveLoading}
