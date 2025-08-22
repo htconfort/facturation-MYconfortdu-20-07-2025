@@ -132,7 +132,11 @@ export default function StepSignature({ onNext }: StepProps) {
 
   return (
     <div className="py-8">
+      {/* Header avec code couleur harmonisé */}
       <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4">
+          6
+        </div>
         <h2 className="text-3xl font-bold text-[#477A0C] mb-2">✍️ Signature Électronique</h2>
         <p className="text-gray-600 text-lg">
           Signez numériquement pour finaliser votre commande
@@ -141,8 +145,8 @@ export default function StepSignature({ onNext }: StepProps) {
 
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Nom du conseiller */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">👤 Conseiller MyConfort</h3>
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4">👤 Conseiller MyConfort</h3>
           <div>
             <label className="block text-gray-700 font-semibold mb-3">
               Nom du conseiller *
@@ -173,8 +177,8 @@ export default function StepSignature({ onNext }: StepProps) {
         </div>
 
         {/* Zone de signature */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">✍️ Signature du client</h3>
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4">✍️ Signature du client</h3>
           
           <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
             <canvas
@@ -215,8 +219,8 @@ export default function StepSignature({ onNext }: StepProps) {
         </div>
 
         {/* Acceptation des conditions */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">📋 Conditions Générales</h3>
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4">📋 Conditions Générales</h3>
           
           <div className="bg-gray-50 rounded-xl p-6 max-h-80 overflow-y-auto mb-4">
             <div className="text-sm text-gray-700 leading-relaxed space-y-3">

@@ -19,7 +19,11 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
 
   return (
     <div className="py-8">
+      {/* Header avec code couleur harmonisé */}
       <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4">
+          5
+        </div>
         <h2 className="text-3xl font-bold text-[#477A0C] mb-2">🚚 Modalités de Livraison</h2>
         <p className="text-gray-600 text-lg">
           Organisez la livraison et l'installation des produits
@@ -29,8 +33,8 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Récapitulatif des produits */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">📋 Récapitulatif des produits</h3>
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4">📋 Récapitulatif des produits</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Produits à livrer */}
@@ -74,8 +78,8 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
         </section>
 
         {/* Mode de livraison - OBLIGATOIRE */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-6">
             🚚 Mode de livraison <span className="text-red-500">*</span>
           </h3>
 
@@ -114,8 +118,8 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           </section>
 
         {/* Adresse de livraison */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">🏠 Adresse de livraison</h3>
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-6">🏠 Adresse de livraison</h3>
           
           <div className="bg-blue-50 rounded-xl p-4 mb-4">
             <h4 className="font-semibold text-blue-800 mb-2">💡 Information</h4>
@@ -133,8 +137,8 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
         </section>
 
         {/* Notes de livraison */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">📝 Notes de livraison</h3>
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-6">📝 Notes de livraison</h3>
           
           <textarea
             value={livraison.deliveryNotes || ''}
