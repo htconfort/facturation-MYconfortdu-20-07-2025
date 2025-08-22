@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
+import StepFacture from './steps/StepFacture';
 import StepClient from './steps/StepClient';
 import StepProduits from './steps/StepProduits';
 import StepPaiement from './steps/StepPaiement';
@@ -8,12 +9,12 @@ import StepLivraison from './steps/StepLivraison';
 import StepSignature from './steps/StepSignature';
 import StepRecap from './steps/StepRecap';
 
-const steps: WizardStep[] = ['client', 'produits', 'paiement', 'livraison', 'signature', 'recap'];
+const steps: WizardStep[] = ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap'];
 
 export default function IpadWizard() {
   const navigate = useNavigate();
   const { search } = useLocation();
-  const urlStep = (new URLSearchParams(search).get('step') || 'client') as WizardStep;
+  const urlStep = (new URLSearchParams(search).get('step') || 'facture') as WizardStep;
   const setStep = useInvoiceWizard(s => s.setStep);
   const step = useInvoiceWizard(s => s.step);
 
@@ -107,12 +108,13 @@ function WizardSurface({
     };
 
     switch (step) {
+      case 'facture': return <StepFacture {...props} />;
       case 'client': return <StepClient {...props} />;
       case 'produits': return <StepProduits {...props} />;
       case 'paiement': return <StepPaiement {...props} />;
       case 'livraison': return <StepLivraison {...props} />;
       case 'signature': return <StepSignature {...props} />;
-      case 'recap': return <StepRecap onFinish={onQuit} onPrev={() => onGo('prev')} />;
+      case 'recap': return <StepRecap {...props} />;
       default: return <div>Étape inconnue</div>;
     }
   }, [step, onGo, onQuit, isFirstStep, isLastStep]);
@@ -237,11 +239,13 @@ function Stepper({ currentStep }: { currentStep: WizardStep }) {
 
 function labelFor(s: WizardStep): string {
   switch (s) {
+    case 'facture': return 'Informations Facture';
     case 'client': return 'Informations Client';
     case 'produits': return 'Produits & Services';
     case 'paiement': return 'Modalités de Paiement';
     case 'livraison': return 'Livraison & Logistique';
     case 'signature': return 'Signature Électronique';
     case 'recap': return 'Récapitulatif Final';
+    default: return 'Étape inconnue';
   }
 }

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type WizardStep = 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap';
+export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap';
 
 interface ClientData {
   name: string;
@@ -54,6 +54,12 @@ interface SignatureData {
 
 interface WizardState {
   step: WizardStep;
+  
+  // Informations facture
+  invoiceNumber: string;
+  invoiceDate: string;
+  eventLocation: string;
+  
   client: ClientData;
   produits: Produit[];
   paiement: PaymentData;
@@ -66,6 +72,7 @@ interface WizardState {
   
   // Actions
   setStep: (s: WizardStep) => void;
+  setInvoiceData: (data: { invoiceNumber?: string; invoiceDate?: string; eventLocation?: string }) => void;
   updateClient: (p: Partial<ClientData>) => void;
   addProduit: (p: Produit) => void;
   updateProduit: (id: string, p: Partial<Produit>) => void;
@@ -90,7 +97,13 @@ interface WizardState {
 }
 
 export const useInvoiceWizard = create<WizardState>((set, get) => ({
-  step: 'client',
+  step: 'facture',
+  
+  // Informations facture - valeurs par défaut
+  invoiceNumber: '',
+  invoiceDate: '',
+  eventLocation: '',
+  
   client: { name: '' },
   produits: [],
   paiement: { method: '' },
@@ -102,6 +115,12 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   termsAccepted: false,
   
   setStep: (s) => set({ step: s }),
+  
+  setInvoiceData: (data) => set((state) => ({
+    invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
+    invoiceDate: data.invoiceDate ?? state.invoiceDate,
+    eventLocation: data.eventLocation ?? state.eventLocation,
+  })),
   
   updateClient: (p) => set((st) => ({ client: { ...st.client, ...p } })),
   
@@ -130,7 +149,10 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   setTermsAccepted: (accepted) => set({ termsAccepted: accepted }),
   
   reset: () => set({
-    step: 'client',
+    step: 'facture',
+    invoiceNumber: '',
+    invoiceDate: '',
+    eventLocation: '',
     client: { name: '' },
     produits: [],
     paiement: { method: '' },
@@ -145,11 +167,15 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   // Synchroniser depuis l'état principal de App.tsx
   syncFromMainInvoice: (invoice) => {
     set({
+      invoiceNumber: invoice.invoiceNumber || '',
+      invoiceDate: invoice.invoiceDate || '',
+      eventLocation: invoice.eventLocation || '',
       client: {
         name: invoice.clientName || '',
         email: invoice.clientEmail || '',
         phone: invoice.clientPhone || '',
         address: invoice.clientAddress || '',
+        addressLine2: invoice.clientAddressLine2 || '',
         city: invoice.clientCity || '',
         postalCode: invoice.clientPostalCode || '',
         siret: invoice.clientSiret || '',
@@ -185,10 +211,15 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   syncToMainInvoice: () => {
     const state = get();
     return {
+      invoiceNumber: state.invoiceNumber,
+      invoiceDate: state.invoiceDate,
+      eventLocation: state.eventLocation,
+      
       clientName: state.client.name,
       clientEmail: state.client.email || '',
       clientPhone: state.client.phone || '',
       clientAddress: state.client.address || '',
+      clientAddressLine2: state.client.addressLine2 || '',
       clientCity: state.client.city || '',
       clientPostalCode: state.client.postalCode || '',
       clientSiret: state.client.siret || '',
@@ -214,7 +245,6 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       
       deliveryMethod: state.livraison.deliveryMethod || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
-      eventLocation: state.livraison.eventLocation || '',
       
       signature: state.signatureDataUrl || '',
       invoiceNotes: state.invoiceNotes || '',
