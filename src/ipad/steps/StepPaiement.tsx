@@ -1,0 +1,433 @@
+import { useInvoiceWizard } from '../../store/useInvoiceWizard';
+import { calculateProductTotal } from '../../utils/calculations';
+import { chequeFriendlyDeposits, targetsFromPercents } from '../../utils/chequeMath';
+import { useMemo } from 'react';
+
+interface StepProps {
+  onNext: () => void;
+  onPrev: () => void;
+  onQuit?: () => void;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+}
+
+type PaymentMethodValue =
+  | 'Chèque à venir'
+  | 'Espèces'
+  | 'Virement'
+  | 'Carte Bleue'
+  | 'Chèque'
+  | 'Acompte';
+
+const paymentMethods: Array<{
+  value: PaymentMethodValue;
+  label: string;
+  icon: string;
+  priority?: boolean;
+}> = [
+  { value: 'Chèque à venir', label: '📄 Chèque à venir', icon: '📄', priority: true },
+  { value: 'Espèces', label: '💵 Espèces', icon: '💵' },
+  { value: 'Virement', label: '🏦 Virement bancaire', icon: '🏦' },
+  { value: 'Carte Bleue', label: '💳 Carte Bleue', icon: '💳' },
+  { value: 'Chèque', label: '🧾 Chèque unique', icon: '🧾' },
+  { value: 'Acompte', label: '💰 Acompte seulement', icon: '💰' },
+];
+
+// --- helpers ---------------------------------------------------------------
+const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
+const safeNumber = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const formatEUR = (n: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
+
+// Types de remise attendus dans le projet :
+type DiscountType = 'percent' | 'fixed';
+
+// Normalisation rétro-compatibilité : certaines données anciennes peuvent encore contenir "amount"
+const normalizeDiscountType = (t: unknown): DiscountType =>
+  t === 'fixed' ? 'fixed' : t === 'percent' ? 'percent' : 'fixed'; // "amount" => "fixed" par défaut
+
+// TODO ▲ Si TVA ≠ 20 %, remplacer la ligne HT = TTC / 1.2 par un calcul TVA par ligne.
+export default function StepPaiement({ onNext, onPrev }: StepProps) {
+  const { paiement, updatePaiement, produits } = useInvoiceWizard();
+
+  // total TTC (avec remises) — mémoïsé
+  const totalTTC = useMemo(() => {
+    return produits.reduce((sum, p) => {
+      return (
+        sum +
+        calculateProductTotal(
+          p.qty,
+          p.priceTTC,
+          p.discount || 0,
+          normalizeDiscountType(p.discountType as any) // 'amount' hérité → 'fixed'
+        )
+      );
+    }, 0);
+  }, [produits]);
+
+  const depositAmount = clamp(safeNumber(paiement.depositAmount), 0, totalTTC);
+  const remainingAmount = Math.max(0, totalTTC - depositAmount);
+  const nombreCheques = clamp(safeNumber(paiement.nombreChequesAVenir || 10), 1, 10);
+  const montantParCheque = nombreCheques > 0 ? remainingAmount / nombreCheques : 0;
+
+  const isValid = Boolean(paiement.method && paiement.method.trim().length > 0);
+
+  // Suggestions pour chèques sans virgule
+  const defaultPercents = [0, 10, 20, 30, 50]; // cibles usuelles
+  const preferredDeposits = targetsFromPercents(totalTTC, defaultPercents);
+
+  const chequeSuggestions = paiement.method === 'Chèque à venir'
+    ? chequeFriendlyDeposits(totalTTC, nombreCheques, preferredDeposits, 6) // 6 suggestions max
+    : [];
+
+  const hasAnyDiscount = produits.some((p) => safeNumber(p.discount) > 0);
+  const discountsTotal = useMemo(() => {
+    return produits.reduce((sum, p) => {
+      const original = safeNumber(p.qty) * safeNumber(p.priceTTC);
+      const withDiscount = calculateProductTotal(
+        p.qty,
+        p.priceTTC,
+        p.discount || 0,
+        normalizeDiscountType(p.discountType as any)
+      );
+      return sum + (original - withDiscount);
+    }, 0);
+  }, [produits]);
+
+  const handleDepositChange = (amount: number) => {
+    const valid = clamp(safeNumber(amount), 0, totalTTC);
+    updatePaiement({
+      depositAmount: valid,
+      remainingAmount: totalTTC - valid,
+    });
+  };
+
+  const handleNombreChequesChange = (nombre: number) => {
+    updatePaiement({ nombreChequesAVenir: clamp(safeNumber(nombre), 1, 10) });
+  };
+
+  return (
+    <div className="py-8">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-[#477A0C] mb-2">💳 Modalités de Paiement</h2>
+        <p className="text-gray-600 text-lg">
+          Choisissez le mode de règlement — spécialité : paiement échelonné
+        </p>
+      </div>
+
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Montant récap */}
+        <section className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">💰 Montant de la commande</h3>
+          <div className="bg-gray-50 rounded-xl p-6">
+            <div className="flex justify-between items-center text-lg mb-2">
+              <span>Total HT</span>
+              <span className="font-semibold">{formatEUR(totalTTC / 1.2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-lg mb-2">
+              <span>TVA (20%)</span>
+              <span className="font-semibold">{formatEUR(totalTTC - totalTTC / 1.2)}</span>
+            </div>
+
+            {hasAnyDiscount && (
+              <div className="flex justify-between items-center text-lg mb-2 text-green-600">
+                <span>Remises appliquées</span>
+                <span className="font-semibold">-{formatEUR(discountsTotal)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-gray-300 pt-2">
+              <div className="flex justify-between items-center text-2xl font-bold text-[#477A0C]">
+                <span>Total TTC</span>
+                <span>{formatEUR(totalTTC)}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Mode de règlement */}
+        <section className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">💳 Mode de règlement</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paymentMethods.map((method) => {
+              const selected = paiement.method === method.value;
+              const base =
+                'p-6 rounded-xl border-2 transition-all transform hover:scale-105 focus:outline-none';
+              const priority = method.priority ? ' border-blue-500 bg-blue-50 shadow-lg' : '';
+              const state = selected
+                ? ' border-[#477A0C] bg-[#477A0C] text-white shadow-2xl ring-4 ring-[#477A0C]/30'
+                : method.priority
+                ? ' hover:border-[#477A0C] hover:bg-green-50'
+                : ' border-gray-200 hover:border-[#477A0C] hover:bg-green-50';
+
+              return (
+                <button
+                  key={method.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => updatePaiement({ method: method.value })}
+                  className={`${base}${priority}${state}`}
+                >
+                  <div className="text-3xl mb-2">{method.icon}</div>
+                  <div className={`font-semibold ${selected ? 'text-black' : 'text-gray-800'}`}>{method.label}</div>
+                  {method.priority && <div className={`mt-1 text-xs font-medium ${selected ? 'text-green-100' : 'text-blue-600'}`}>⭐ Populaire</div>}
+                  {selected && <div className="mt-2 text-green-100 font-bold">✓ Sélectionné</div>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Acompte */}
+        <section className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">💰 Acompte initial</h3>
+
+          {/* Choix rapides */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-semibold mb-3">Acompte suggéré (%)</label>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {[0, 10, 20, 30, 50].map((percentage) => {
+                const amount = (totalTTC * percentage) / 100;
+                const active = Math.abs(depositAmount - amount) < 0.5;
+                return (
+                  <button
+                    key={percentage}
+                    type="button"
+                    onClick={() => handleDepositChange(amount)}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      active
+                        ? 'border-[#477A0C] bg-green-50 ring-2 ring-green-200'
+                        : 'border-gray-200 hover:border-[#477A0C] hover:bg-green-50'
+                    }`}
+                  >
+                    <div className="font-bold text-lg">{percentage}%</div>
+                    <div className="text-sm text-gray-600">{formatEUR(amount)}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Saisie manuelle */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-semibold mb-3">Montant d&apos;acompte personnalisé</label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="number"
+                inputMode="decimal"
+                value={Number.isFinite(depositAmount) ? depositAmount : 0}
+                onChange={(e) => handleDepositChange(safeNumber(e.target.value))}
+                className="flex-1 h-16 rounded-xl border-2 border-gray-300 px-6 text-xl focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all"
+                placeholder="0"
+                max={totalTTC}
+                min={0}
+                step="0.01"
+              />
+              <span className="text-xl font-semibold text-gray-600">€</span>
+            </div>
+          </div>
+
+          {/* Récap visuel */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-center p-4 bg-blue-100 rounded-xl">
+                <div className="text-2xl font-bold text-blue-800">{formatEUR(depositAmount)}</div>
+                <div className="text-blue-600 font-semibold">Acompte à verser</div>
+                <div className="text-sm text-blue-500">
+                  {totalTTC > 0 ? `${Math.round((depositAmount / totalTTC) * 100)}%` : '0%'} du total
+                </div>
+              </div>
+              <div className="text-center p-4 bg-orange-100 rounded-xl">
+                <div className="text-2xl font-bold text-orange-800">{formatEUR(remainingAmount)}</div>
+                <div className="text-orange-600 font-semibold">Reste à régler</div>
+                <div className="text-sm text-orange-500">Selon modalités choisies</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Chèques multiples */}
+        {paiement.method === 'Chèque à venir' && (
+          <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 border-2 border-blue-300">
+            <h3 className="text-xl font-semibold text-blue-800 mb-6 flex items-center">
+              <span className="text-2xl mr-3">📄</span>
+              Paiement échelonné en chèques
+            </h3>
+
+            {/* Nombre de chèques */}
+            <div className="mb-6">
+              <label className="block text-blue-700 font-semibold mb-3">
+                Nombre de chèques (de 1 à 10 fois)
+              </label>
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-4">
+                {[1, 2, 3, 6, 9, 10].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => handleNombreChequesChange(n)}
+                    className={`p-3 rounded-xl border-2 font-bold transition-all ${
+                      nombreCheques === n
+                        ? 'border-blue-600 bg-blue-100 text-blue-800 ring-2 ring-blue-300'
+                        : 'border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50'
+                    }`}
+                  >
+                    {n}x
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  value={nombreCheques}
+                  onChange={(e) => handleNombreChequesChange(safeNumber(e.target.value))}
+                  className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={nombreCheques}
+                  onChange={(e) => handleNombreChequesChange(safeNumber(e.target.value))}
+                  className="w-20 h-12 rounded-lg border-2 border-blue-300 px-3 text-center font-bold text-blue-800 focus:border-blue-500"
+                />
+                <span className="text-blue-700 font-medium">fois</span>
+              </div>
+            </div>
+
+            {/* Acomptes magiques pour chèques sans virgule */}
+            {chequeSuggestions.length > 0 && (
+              <div className="mt-6 space-y-3">
+                <h4 className="font-semibold text-blue-800 flex items-center gap-2">
+                  🧮 Acomptes pour chèques "ronds" (sans virgule)
+                </h4>
+                <p className="text-sm text-blue-700">
+                  Choisissez un acompte qui rend chaque chèque un <strong>montant entier d'euros</strong>.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {chequeSuggestions.map((s) => {
+                    const active = Math.abs((paiement.depositAmount || 0) - s.deposit) < 0.5;
+                    return (
+                      <button
+                        key={`${s.nCheques}-${s.deposit}`}
+                        type="button"
+                        onClick={() => handleDepositChange(s.deposit)}
+                        className={`p-3 rounded-xl border-2 text-left transition ${
+                          active ? 'border-[#477A0C] bg-green-50 ring-2 ring-green-200'
+                                 : 'border-blue-200 hover:border-blue-400 hover:bg-blue-50'
+                        }`}
+                        title={`Avec cet acompte, chaque chèque = ${s.perCheque.toFixed(0)} €`}
+                      >
+                        <div className="text-xs text-blue-700">Acompte</div>
+                        <div className="font-bold text-blue-900">{s.deposit.toFixed(2)} €</div>
+                        <div className="text-xs text-blue-600">
+                          Chèque: <strong>{s.perCheque.toFixed(0)} €</strong> × {s.nCheques}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Simulation */}
+            {remainingAmount > 0 && nombreCheques > 0 && (
+              <div className="bg-white rounded-xl p-6 border border-blue-200">
+                <h4 className="font-bold text-blue-800 mb-4 flex items-center">
+                  <span className="mr-2">📊</span>
+                  Simulation de votre échéancier
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+                    <div className="text-sm font-semibold text-green-700">Acompte initial</div>
+                    <div className="text-xl font-bold text-green-800">{formatEUR(depositAmount)}</div>
+                    <div className="text-xs text-green-600">À la commande</div>
+                  </div>
+
+                  {[1, 2, 3].slice(0, Math.min(nombreCheques, 3)).map((index) => (
+                    <div key={index} className="bg-blue-100 p-4 rounded-lg border border-blue-300">
+                      <div className="text-sm font-semibold text-blue-700">Chèque #{index}</div>
+                      <div className="text-xl font-bold text-blue-800">{formatEUR(montantParCheque)}</div>
+                      <div className="text-xs text-blue-600">
+                        {index === 1 ? 'À 30j' : index === 2 ? 'À 60j' : 'À 90j'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <div className="text-sm text-blue-600">Nombre de chèques</div>
+                      <div className="text-lg font-bold text-blue-800">{nombreCheques}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-blue-600">Montant par chèque</div>
+                      <div className="text-lg font-bold text-blue-800">{formatEUR(montantParCheque)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-blue-600">Total chèques</div>
+                      <div className="text-lg font-bold text-blue-800">{formatEUR(remainingAmount)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-blue-600">Durée max</div>
+                      <div className="text-lg font-bold text-blue-800">{nombreCheques} mois</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="text-sm text-green-700">
+                    ✅ <strong>Avantage :</strong> aucun frais supplémentaire • flexibilité • confort d&apos;achat
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Notes */}
+        <section className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">📝 Remarques sur le paiement</h3>
+          <textarea
+            value={paiement.note || ''}
+            onChange={(e) => updatePaiement({ note: e.target.value })}
+            className="w-full h-24 rounded-xl border-2 border-gray-300 px-4 py-3 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all resize-none"
+            placeholder="Instructions particulières, conditions spéciales, échéances personnalisées..."
+          />
+        </section>
+
+        {/* Nav */}
+        <div className="flex gap-4 justify-center">
+          <button
+            type="button"
+            onClick={onPrev}
+            className="px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all"
+          >
+            ← Produits
+          </button>
+
+          {isValid ? (
+            <button
+              type="button"
+              onClick={onNext}
+              className="bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+            >
+              Continuer vers la Livraison →
+            </button>
+          ) : (
+            <div className="text-center p-6 bg-orange-50 rounded-2xl">
+              <div className="text-3xl mb-3">⚠️</div>
+              <h3 className="text-lg font-semibold text-orange-800 mb-2">Mode de règlement requis</h3>
+              <p className="text-orange-600">Veuillez sélectionner un mode de règlement pour continuer</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
