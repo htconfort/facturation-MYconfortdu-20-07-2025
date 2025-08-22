@@ -4,7 +4,7 @@ import { calculateProductTotal } from '../../utils/calculations';
 import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
 import { PDFService } from '../../services/pdfService';
-import { saveInvoiceToFile } from '../../utils/invoiceStorage';
+import { saveInvoice } from '../../utils/storage'; // Utiliser le même système que le mode normal
 import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
 import { Invoice } from '../../types';
 
@@ -78,34 +78,11 @@ export default function StepRecap({ onPrev }: StepProps) {
     try {
       setIsLoading(true);
       
-      // Convertir au format attendu par invoiceStorage
-      const storageInvoice = {
-        id: `invoice-${Date.now()}`,
-        clientName: invoice.clientName,
-        clientAddress: `${invoice.clientAddress}, ${invoice.clientCity} ${invoice.clientPostalCode}`,
-        clientPhone: invoice.clientPhone,
-        clientEmail: invoice.clientEmail,
-        items: invoice.products.map(p => ({
-          description: p.name,
-          quantity: p.quantity,
-          unitPrice: p.priceTTC,
-          total: p.quantity * p.priceTTC
-        })),
-        subtotal: invoice.montantHT,
-        tax: invoice.montantTVA,
-        total: invoice.montantTTC,
-        date: invoice.invoiceDate,
-        invoiceNumber: invoice.invoiceNumber,
-      };
+      // Sauvegarder directement avec le format Invoice unifié
+      // Cela sera visible dans l'onglet factures du mode normal
+      saveInvoice(invoice);
       
-      // Sauvegarder via le service de stockage
-      const success = saveInvoiceToFile(storageInvoice);
-      
-      if (success) {
-        showMessage('✅ Facture enregistrée avec succès dans l\'onglet factures');
-      } else {
-        showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
-      }
+      showMessage('✅ Facture enregistrée avec succès dans l\'onglet factures');
     } catch (error) {
       console.error('Erreur sauvegarde facture:', error);
       showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
@@ -493,6 +470,14 @@ export default function StepRecap({ onPrev }: StepProps) {
             className="px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all"
           >
             ← Signature
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.location.href = '/'}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+          >
+            💻 Retour Mode Normal
           </button>
 
           <button
