@@ -156,6 +156,22 @@ export default function StepSignature({ onNext }: StepProps) {
           </div>
         </div>
 
+        {/* Information légale - Article L224-59 */}
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-amber-800 mb-4 flex items-center">
+            <span className="mr-3">⚖️</span>
+            INFORMATION LÉGALE - ARTICLE L224-59
+          </h3>
+          <div className="bg-white rounded-xl p-4 border border-amber-200">
+            <p className="text-gray-700 text-lg leading-relaxed italic">
+              « Avant la conclusion de tout contrat entre un consommateur et un professionnel à l'occasion d'une foire, d'un salon [...] le professionnel informe le consommateur qu'il ne dispose pas d'un délai de rétractation. »
+            </p>
+            <div className="mt-3 text-sm text-amber-700 font-medium">
+              Code de la consommation - Article L224-59
+            </div>
+          </div>
+        </div>
+
         {/* Zone de signature */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">✍️ Signature du client</h3>
@@ -202,27 +218,58 @@ export default function StepSignature({ onNext }: StepProps) {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">📋 Conditions Générales</h3>
           
-          <div className="bg-gray-50 rounded-xl p-6 max-h-60 overflow-y-auto mb-4">
+          <div className="bg-gray-50 rounded-xl p-6 max-h-80 overflow-y-auto mb-4">
             <div className="text-sm text-gray-700 leading-relaxed space-y-3">
-              <h4 className="font-semibold text-lg text-gray-800">Conditions Générales de Vente MyConfort</h4>
+              <h4 className="font-semibold text-lg text-gray-800">CONDITIONS GÉNÉRALES DE VENTE</h4>
               
-              <p><strong>Article 1 - Objet</strong><br />
-              Les présentes conditions générales de vente s'appliquent à toutes les ventes de produits MyConfort.</p>
+              <p><strong>Art. 1 - Livraison</strong><br />
+              Une fois la commande expédiée, vous serez contacté par SMS ou mail pour programmer la livraison en fonction de vos disponibilités (à la journée ou demi-journée). Le transporteur livre le produit au pas de porte ou en bas de l'immeuble. Veuillez vérifier que les dimensions du produit permettent son passage dans les escaliers, couloirs et portes. Aucun service d'installation ou de reprise de l'ancienne literie n'est prévu.</p>
               
-              <p><strong>Article 2 - Prix et Paiement</strong><br />
-              Les prix sont exprimés en euros TTC. Le paiement peut s'effectuer par carte bancaire, virement, chèque ou espèces.</p>
+              <p><strong>Art. 2 - Délais de Livraison</strong><br />
+              Les délais de livraison sont donnés à titre indicatif et ne constituent pas un engagement ferme. En cas de retard, aucune indemnité ou annulation ne sera acceptée, notamment en cas de force majeure. Nous déclinons toute responsabilité en cas de délai dépassé.</p>
               
-              <p><strong>Article 3 - Livraison</strong><br />
-              Les délais de livraison sont donnés à titre indicatif. MyConfort s'engage à respecter au mieux ces délais.</p>
+              <p><strong>Art. 3 - Risques de Transport</strong><br />
+              Les marchandises voyagent aux risques du destinataire. En cas d'avarie ou de perte, il appartient au client de faire les réserves nécessaires obligatoire sur le bordereau du transporteur. En cas de non-respect de cette obligation on ne peut pas se retourner contre le transporteur.</p>
               
-              <p><strong>Article 4 - Garantie</strong><br />
-              Tous nos produits bénéficient de la garantie légale de conformité et de la garantie contre les vices cachés.</p>
+              <p><strong>Art. 4 - Acceptation des Conditions</strong><br />
+              Toute livraison implique l'acceptation des présentes conditions. Le transporteur livre à l'adresse indiquée sans monter les étages. Le client est responsable de vérifier et d'accepter les marchandises lors de la livraison.</p>
               
-              <p><strong>Article 5 - Droit de rétractation</strong><br />
-              Conformément à la loi, vous disposez d'un délai de 14 jours pour exercer votre droit de rétractation.</p>
+              <p><strong>Art. 5 - Réclamations</strong><br />
+              Les réclamations concernant la qualité des marchandises doivent être formulées par écrit dans les huit jours suivant la livraison, par lettre recommandée avec accusé de réception.</p>
               
-              <p><strong>Article 6 - Protection des données</strong><br />
-              Vos données personnelles sont collectées et traitées conformément au RGPD et à notre politique de confidentialité.</p>
+              <p><strong>Art. 6 - Retours</strong><br />
+              Aucun retour de marchandises ne sera accepté sans notre accord écrit préalable. Cet accord n'implique aucune reconnaissance.</p>
+              
+              <p><strong>Art. 7 - Tailles des Matelas</strong><br />
+              Les dimensions des matelas peuvent varier de +/- 5 cm en raison de la thermosensibilité des mousses viscoélastiques. Les tailles standards sont données à titre indicatif et ne constituent pas une obligation contractuelle. Les matelas sur mesure doivent inclure les spécifications exactes du cadre de lit.</p>
+              
+              <p><strong>Art. 8 - Odeur des Matériaux</strong><br />
+              Les mousses viscoélastiques naturelles (à base d'huile de ricin) et les matériaux de conditionnement peuvent émettre une légère odeur qui disparaît après déballage. Cela ne constitue pas un défaut.</p>
+              
+              <p><strong>Art. 9 - Règlements et Remises</strong><br />
+              Sauf accord express, aucun rabais ou escompte ne sera appliqué pour paiement comptant. La garantie couvre les mousses, mais pas les textiles et accessoires.</p>
+              
+              <p><strong>Art. 10 - Paiement</strong><br />
+              Les factures sont payables par chèque, virement, carte bancaire ou espèce à réception.</p>
+              
+              <p><strong>Art. 11 - Pénalités de Retard</strong><br />
+              En cas de non-paiement, une majoration de 10% avec un minimum de 300 € sera appliquée, sans préjudice des intérêts de retard. Nous nous réservons le droit de résilier la vente sans sommation.</p>
+              
+              <p><strong>Art. 12 - Exigibilité en Cas de Non-Paiement</strong><br />
+              Le non-paiement d'une échéance rend immédiatement exigible le solde de toutes les échéances à venir.</p>
+              
+              <p><strong>Art. 13 - Livraison Incomplète ou Non-Conforme</strong><br />
+              En cas de livraison endommagée ou non conforme, mentionnez-le sur le bon de livraison et refusez le produit. Si l'erreur est constatée après le départ du transporteur, contactez-nous sous 72h ouvrables.</p>
+              
+              <p><strong>Art. 14 - Litiges</strong><br />
+              Tout litige sera de la compétence exclusive du Tribunal de Commerce de Perpignan ou du tribunal compétent du prestataire.</p>
+              
+              <p><strong>Art. 15 - Horaires de Livraison</strong><br />
+              Les livraisons sont effectuées du lundi au vendredi (hors jours fériés). Une personne majeure doit être présente à l'adresse lors de la livraison. Toute modification d'adresse après commande doit être signalée immédiatement à myconfort66@gmail.com.</p>
+              
+              <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-300">
+                <em>Les présentes Conditions générales ont été mises à jour le 23 août 2025</em>
+              </p>
             </div>
           </div>
 

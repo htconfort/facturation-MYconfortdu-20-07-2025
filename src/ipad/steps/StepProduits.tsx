@@ -130,19 +130,23 @@ export default function StepProduits({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="max-w-6xl mx-auto py-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-[#477A0C] mb-2">📦 Produits & Services</h2>
-        <p className="text-gray-600 text-lg">
-          Ajoutez les produits de la commande avec quantités et prix
-        </p>
-      </div>
+      <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-8 mb-8 border border-gray-100">
+        <h1 className="text-3xl font-bold text-[#F2EFE2] mb-6 flex items-center justify-center">
+          <span className="bg-[#F2EFE2] text-[#477A0C] px-8 py-4 rounded-full font-bold text-2xl">
+            📦 PRODUITS & SERVICES
+          </span>
+        </h1>
+        
+        <div className="bg-[#F2EFE2] rounded-lg p-8">
+          <p className="text-center text-gray-700 text-lg mb-6">
+            Ajoutez les produits de la commande avec quantités et prix
+          </p>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full">
-        {/* Ligne d'ajout rapide avec remise */}
-        <div className="bg-[#F2EFE2] rounded-2xl p-6 mb-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-[#477A0C] mb-4">➕ Ajouter un produit</h3>
+          {/* Ligne d'ajout rapide avec remise */}
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg border-2 border-gray-200">
+            <h3 className="text-lg font-semibold text-[#477A0C] mb-4">➕ Ajouter un produit</h3>
           <div className="grid grid-cols-12 gap-4 items-end">
             {/* Catégorie en premier */}
             <div className="col-span-2">
@@ -483,6 +487,7 @@ export default function StepProduits({
           >
             Continuer vers Paiement →
           </button>
+        </div>
         </div>
       </div>
     </div>
