@@ -23,7 +23,16 @@ import { configService } from './services/configService';
 import { Invoice, Client } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
 import { AdvancedPDFService } from './services/advancedPdfService';
-import { loadClients, saveClient, loadInvoices, saveInvoice, loadDraft, saveDraft, deleteClient as removeClient, deleteInvoice as removeInvoice } from './utils/storage';
+import {
+  loadClients,
+  saveClient,
+  loadInvoices,
+  saveInvoice,
+  loadDraft,
+  saveDraft,
+  deleteClient as removeClient,
+  deleteInvoice as removeInvoice,
+} from './utils/storage';
 
 // 🎯 COMPOSANT PRINCIPAL AVEC NOUVEAU SYSTÈME D'ERREURS
 function AppContent() {
@@ -38,7 +47,7 @@ function AppContent() {
   }>({
     isOpen: false,
     title: '',
-    message: ''
+    message: '',
   });
 
   // États existants de l'application
@@ -57,19 +66,19 @@ function AppContent() {
       address: '',
       siret: '',
       housingType: '',
-      accessCode: ''
+      accessCode: '',
     },
     delivery: {
       date: '',
       method: '',
-      notes: ''
+      notes: '',
     },
     payment: {
       method: '',
-      depositAmount: 0
+      depositAmount: 0,
     },
     products: [],
-    signature: ''
+    signature: '',
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -91,19 +100,23 @@ function AppContent() {
       try {
         // Log de la configuration au démarrage
         configService.logConfig();
-        
+
         // Vérification de la configuration
         const configStatus = configService.getConfigStatus();
-        const missingRequired = configStatus.filter(s => s.required && !s.configured);
-        
+        const missingRequired = configStatus.filter(
+          s => s.required && !s.configured
+        );
+
         if (missingRequired.length > 0) {
-          warning(`Configuration incomplète: ${missingRequired.map(s => s.service).join(', ')}`);
+          warning(
+            `Configuration incomplète: ${missingRequired.map(s => s.service).join(', ')}`
+          );
         }
 
         // Chargement des données
         setClients(loadClients());
         setInvoices(loadInvoices());
-        
+
         const draft = loadDraft();
         if (draft) {
           setInvoice(draft);
@@ -116,12 +129,11 @@ function AppContent() {
         }, configService.app.autoSaveInterval);
 
         return () => clearInterval(interval);
-        
       } catch (err) {
         console.error('Erreur initialisation:', err);
         showErrorModal(
-          'Erreur d\'initialisation',
-          'Impossible de charger l\'application correctement.',
+          "Erreur d'initialisation",
+          "Impossible de charger l'application correctement.",
           err as Error,
           () => window.location.reload()
         );
@@ -132,13 +144,18 @@ function AppContent() {
   }, []);
 
   // 🆕 FONCTION UTILITAIRE POUR AFFICHER LES ERREURS
-  const showErrorModal = (title: string, message: string, error?: Error, onRetry?: () => void) => {
+  const showErrorModal = (
+    title: string,
+    message: string,
+    error?: Error,
+    onRetry?: () => void
+  ) => {
     setErrorModal({
       isOpen: true,
       title,
       message,
       error,
-      onRetry
+      onRetry,
     });
   };
 
@@ -159,8 +176,14 @@ function AppContent() {
 
   const handleSaveInvoice = () => {
     try {
-      if (!invoice.client.name || !invoice.client.email || invoice.products.length === 0) {
-        warning('Veuillez compléter les informations client et ajouter au moins un produit');
+      if (
+        !invoice.client.name ||
+        !invoice.client.email ||
+        invoice.products.length === 0
+      ) {
+        warning(
+          'Veuillez compléter les informations client et ajouter au moins un produit'
+        );
         return;
       }
 
@@ -171,7 +194,7 @@ function AppContent() {
       console.error('Erreur sauvegarde facture:', err);
       showErrorModal(
         'Erreur de sauvegarde',
-        'Impossible d\'enregistrer la facture',
+        "Impossible d'enregistrer la facture",
         err as Error,
         () => handleSaveInvoice()
       );
@@ -243,7 +266,10 @@ function AppContent() {
   };
 
   // Validation des champs obligatoires
-  const validateMandatoryFields = (): { isValid: boolean; errors: string[] } => {
+  const validateMandatoryFields = (): {
+    isValid: boolean;
+    errors: string[];
+  } => {
     const errors: string[] = [];
 
     if (!invoice.invoiceDate) errors.push('Date de facture');
@@ -256,7 +282,7 @@ function AppContent() {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   };
 
@@ -272,7 +298,10 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen font-['Inter'] text-gray-100" style={{ backgroundColor: '#14281D' }}>
+    <div
+      className="min-h-screen font-['Inter'] text-gray-100"
+      style={{ backgroundColor: '#14281D' }}
+    >
       <Header
         onGeneratePDF={handleShowPDFPreview}
         onShowClients={() => setShowClientsList(true)}
@@ -281,33 +310,47 @@ function AppContent() {
         onShowGoogleDrive={() => setShowGoogleDriveConfig(true)}
       />
 
-      <main className="container mx-auto px-4 py-6" id="invoice-content">
+      <main className='container mx-auto px-4 py-6' id='invoice-content'>
         {/* En-tête avec statut de la facture */}
-        <div className="text-white rounded-xl shadow-xl p-6 mb-6" style={{
-          background: 'linear-gradient(135deg, #477A0C 0%, #5A9A0F 50%, #477A0C 100%)'
-        }}>
-          <div className="flex items-center justify-between">
+        <div
+          className='text-white rounded-xl shadow-xl p-6 mb-6'
+          style={{
+            background:
+              'linear-gradient(135deg, #477A0C 0%, #5A9A0F 50%, #477A0C 100%)',
+          }}
+        >
+          <div className='flex items-center justify-between'>
             <div>
-              <h1 className="text-3xl font-bold text-[#F2EFE2] mb-2">MyComfort Facturation</h1>
-              <p className="text-[#F2EFE2] opacity-90">Système de facturation professionnel</p>
+              <h1 className='text-3xl font-bold text-[#F2EFE2] mb-2'>
+                MyComfort Facturation
+              </h1>
+              <p className='text-[#F2EFE2] opacity-90'>
+                Système de facturation professionnel
+              </p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className='flex items-center space-x-3'>
               {/* Indicateur de configuration */}
-              <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                configService.isEmailJSConfigured() && configService.isN8NConfigured()
-                  ? 'bg-green-500 text-white'
-                  : 'bg-yellow-500 text-white'
-              }`}>
-                {configService.isEmailJSConfigured() && configService.isN8NConfigured() ? '✅ Configuré' : '⚠️ Config incomplète'}
+              <div
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  configService.isEmailJSConfigured() &&
+                  configService.isN8NConfigured()
+                    ? 'bg-green-500 text-white'
+                    : 'bg-yellow-500 text-white'
+                }`}
+              >
+                {configService.isEmailJSConfigured() &&
+                configService.isN8NConfigured()
+                  ? '✅ Configuré'
+                  : '⚠️ Config incomplète'}
               </div>
 
               {/* Statut de la facture */}
               {validateMandatoryFields().isValid ? (
-                <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                <div className='bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1'>
                   <span>✅ COMPLÈTE</span>
                 </div>
               ) : (
-                <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                <div className='bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1'>
                   <span>⚠️ INCOMPLÈTE</span>
                 </div>
               )}
@@ -322,14 +365,14 @@ function AppContent() {
 
         {/* Aperçu de la facture */}
         {showInvoicePreview && (
-          <div className="mt-8">
+          <div className='mt-8'>
             <InvoicePreview invoice={invoice} />
           </div>
         )}
 
         {/* Debug Center (en développement) */}
         {showDebugCenter && configService.app.debugMode && (
-          <div className="mb-6">
+          <div className='mb-6'>
             <DebugCenter
               invoice={invoice}
               onSuccess={handleEmailJSSuccess}
@@ -344,7 +387,7 @@ function AppContent() {
         isOpen={showClientsList}
         onClose={() => setShowClientsList(false)}
         clients={clients}
-        onSelectClient={(client) => {
+        onSelectClient={client => {
           setInvoice(prev => ({ ...prev, client }));
           setShowClientsList(false);
           success('Client sélectionné');

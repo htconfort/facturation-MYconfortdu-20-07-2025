@@ -2,23 +2,33 @@ import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 
 export class UnifiedPrintService {
-  
   static async printInvoice(invoice: Invoice) {
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        alert('Impossible d\'ouvrir la fenêtre d\'impression. Veuillez autoriser les pop-ups.');
+        alert(
+          "Impossible d'ouvrir la fenêtre d'impression. Veuillez autoriser les pop-ups."
+        );
         return;
       }
 
-      const total = invoice.products.reduce((sum, product) => 
-        sum + calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType), 0);
+      const total = invoice.products.reduce(
+        (sum, product) =>
+          sum +
+          calculateProductTotal(
+            product.quantity,
+            product.priceTTC,
+            product.discount,
+            product.discountType
+          ),
+        0
+      );
 
       const printContent = this.generateModernPrint(invoice, total);
 
       printWindow.document.write(printContent);
       printWindow.document.close();
-      
+
       // Attendre que le contenu soit chargé puis imprimer
       printWindow.onload = () => {
         setTimeout(() => {
@@ -28,10 +38,9 @@ export class UnifiedPrintService {
           }, 1000);
         }, 500);
       };
-
     } catch (error) {
       console.error('Erreur impression:', error);
-      alert('Erreur lors de l\'impression de la facture');
+      alert("Erreur lors de l'impression de la facture");
     }
   }
 
@@ -450,13 +459,20 @@ export class UnifiedPrintService {
                 </tr>
               </thead>
               <tbody>
-                ${invoice.products.map(product => {
-                  const productTotal = calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType);
-                  const discountDisplay = product.discount > 0 ? 
-                    `<span class="discount-badge">${product.discount}${product.discountType === 'percent' ? '%' : '€'}</span>` : 
-                    '-';
-                  
-                  return `
+                ${invoice.products
+                  .map(product => {
+                    const productTotal = calculateProductTotal(
+                      product.quantity,
+                      product.priceTTC,
+                      product.discount,
+                      product.discountType
+                    );
+                    const discountDisplay =
+                      product.discount > 0
+                        ? `<span class="discount-badge">${product.discount}${product.discountType === 'percent' ? '%' : '€'}</span>`
+                        : '-';
+
+                    return `
                     <tr>
                       <td>
                         <strong>${product.name}</strong>
@@ -468,13 +484,16 @@ export class UnifiedPrintService {
                       <td><strong>${formatCurrency(productTotal)}</strong></td>
                     </tr>
                   `;
-                }).join('')}
+                  })
+                  .join('')}
               </tbody>
             </table>
           </div>
 
           <!-- Section Taux d'Acompte - EN 2ème POSITION POUR MOBILE -->
-          ${invoice.montantAcompte > 0 ? `
+          ${
+            invoice.montantAcompte > 0
+              ? `
             <div class="deposit-section">
               <div class="section-header">💰 Acompte versé:</div>
               <div class="deposit-amount">
@@ -482,36 +501,55 @@ export class UnifiedPrintService {
                 <span class="deposit-percentage">(${((invoice.montantAcompte / total) * 100).toFixed(1)}% du total)</span>
               </div>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Section Remarques - EN 3ème POSITION POUR MOBILE -->
-          ${(invoice.invoiceNotes || invoice.deliveryNotes) ? `
+          ${
+            invoice.invoiceNotes || invoice.deliveryNotes
+              ? `
             <div class="notes-section">
               <div class="section-header">📝 Remarques:</div>
-              ${invoice.invoiceNotes ? `
+              ${
+                invoice.invoiceNotes
+                  ? `
                 <div class="note-item">
                   <strong>Notes générales:</strong> ${invoice.invoiceNotes}
                 </div>
-              ` : ''}
-              ${invoice.deliveryNotes ? `
+              `
+                  : ''
+              }
+              ${
+                invoice.deliveryNotes
+                  ? `
                 <div class="note-item">
                   <strong>Livraison par transporteur France Express CXI:</strong> ${invoice.deliveryNotes}
                 </div>
-              ` : `
+              `
+                  : `
                 <div class="note-item">
                   <strong>Livraison:</strong> Livraison par transporteur France Express CXI
                 </div>
-              `}
+              `
+              }
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Section Mode de Règlement - EN 4ème POSITION POUR MOBILE -->
-          ${invoice.paymentMethod ? `
+          ${
+            invoice.paymentMethod
+              ? `
             <div class="payment-method-section">
               <div class="section-header">💳 Mode de règlement:</div>
               <div class="payment-badge">${invoice.paymentMethod}</div>
               
-              ${invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement') ? `
+              ${
+                invoice.paymentMethod &&
+                invoice.paymentMethod.toLowerCase().includes('virement')
+                  ? `
                 <!-- RIB pour Virement Bancaire -->
                 <div class="rib-section">
                   <div class="rib-header">📋 Coordonnées bancaires pour virement</div>
@@ -525,9 +563,13 @@ export class UnifiedPrintService {
                     </div>
                   </div>
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Totaux -->
           <div class="totals">
@@ -537,7 +579,7 @@ export class UnifiedPrintService {
             </div>
             <div class="total-line">
               <span>TVA (20%):</span>
-              <span>${formatCurrency(total * 0.2 / 1.2)}</span>
+              <span>${formatCurrency((total * 0.2) / 1.2)}</span>
             </div>
             <div class="total-final">
               <div class="total-line" style="border: none; color: white;">
@@ -545,32 +587,44 @@ export class UnifiedPrintService {
                 <span>${formatCurrency(total)}</span>
               </div>
             </div>
-            ${invoice.montantAcompte > 0 ? `
+            ${
+              invoice.montantAcompte > 0
+                ? `
               <div class="remaining-amount">
                 <div class="total-line" style="border: none; color: #F55D3E; font-weight: bold; font-size: 16px;">
                   <span>Reste à payer:</span>
                   <span>${formatCurrency(total - invoice.montantAcompte)}</span>
                 </div>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
 
           <!-- Section footer avec informations et signature -->
           <div class="footer-section">
             <div class="info-section">
-              ${invoice.eventLocation ? `
+              ${
+                invoice.eventLocation
+                  ? `
                 <div class="info-item">
                   <div class="info-label">LIEU D'INTERVENTION:</div>
                   ${invoice.eventLocation}
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
               
-              ${invoice.eventLocation ? `
+              ${
+                invoice.eventLocation
+                  ? `
                 <div class="info-item">
                   <div class="info-label">DATE D'INTERVENTION:</div>
                   ${new Date(invoice.invoiceDate).toLocaleDateString('fr-FR')}
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
 
               <div class="info-item">
                 <div class="info-label">CONDITIONS DE PAIEMENT:</div>
@@ -584,9 +638,10 @@ export class UnifiedPrintService {
                 Signature du client
               </div>
               <div class="signature-box">
-                ${invoice.signature ? 
-                  `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />` : 
-                  '<span style="color: #999; font-style: italic;">Signature requise</span>'
+                ${
+                  invoice.signature
+                    ? `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />`
+                    : '<span style="color: #999; font-style: italic;">Signature requise</span>'
                 }
               </div>
               <div style="font-size: 11px; color: #666;">

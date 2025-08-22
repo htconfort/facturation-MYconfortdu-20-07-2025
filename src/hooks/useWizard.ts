@@ -5,23 +5,23 @@ export function useWizard<T>(initial: T) {
   const [open, setOpen] = useState(false);
 
   const start = useCallback((next?: Partial<T>) => {
-    setValue(prev => ({ ...prev, ...next } as T));
+    setValue(prev => ({ ...prev, ...next }) as T);
     setOpen(true);
   }, []);
 
   const close = useCallback(() => setOpen(false), []);
-  
-  const apply = useCallback((v: T) => { 
-    setValue(v); 
-    setOpen(false); 
+
+  const apply = useCallback((v: T) => {
+    setValue(v);
+    setOpen(false);
   }, []);
 
-  return { 
-    value, 
-    setValue, 
-    open, 
-    start, 
-    close, 
-    apply 
+  return {
+    value,
+    setValue,
+    open,
+    start,
+    close,
+    apply,
   };
 }

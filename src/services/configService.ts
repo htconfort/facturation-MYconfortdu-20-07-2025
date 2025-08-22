@@ -12,13 +12,13 @@ interface AppConfig {
     clientId: string;
     mainFolderId: string;
   };
-  
+
   // 🔗 N8N Webhook
   n8n: {
     webhookUrl: string;
     secret?: string;
   };
-  
+
   // 🏢 Entreprise
   company: {
     name: string;
@@ -27,14 +27,14 @@ interface AppConfig {
     address: string;
     siret: string;
   };
-  
+
   // 📄 PDF
   pdf: {
     quality: number;
     maxSizeMB: number;
     compression: boolean;
   };
-  
+
   // ⚙️ Application
   app: {
     debugMode: boolean;
@@ -44,7 +44,7 @@ interface AppConfig {
     defaultTaxRate: number;
     currency: string;
   };
-  
+
   // 🔄 Sauvegarde
   backup: {
     enabled: boolean;
@@ -73,41 +73,46 @@ class ConfigService {
       googleDrive: {
         apiKey: import.meta.env.VITE_GOOGLE_DRIVE_API_KEY || '',
         clientId: import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID || '',
-        mainFolderId: import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID || ''
+        mainFolderId: import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID || '',
       },
-      
+
       n8n: {
-        webhookUrl: import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle',
-        secret: import.meta.env.VITE_N8N_WEBHOOK_SECRET
+        webhookUrl:
+          import.meta.env.VITE_N8N_WEBHOOK_URL ||
+          'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle',
+        secret: import.meta.env.VITE_N8N_WEBHOOK_SECRET,
       },
-      
+
       company: {
         name: import.meta.env.VITE_COMPANY_NAME || 'HT CONFORT',
         phone: import.meta.env.VITE_COMPANY_PHONE || '+33 X XX XX XX XX',
         email: import.meta.env.VITE_COMPANY_EMAIL || 'contact@htconfort.com',
         address: import.meta.env.VITE_COMPANY_ADDRESS || 'Adresse à configurer',
-        siret: import.meta.env.VITE_COMPANY_SIRET || 'SIRET à configurer'
+        siret: import.meta.env.VITE_COMPANY_SIRET || 'SIRET à configurer',
       },
-      
+
       pdf: {
         quality: parseFloat(import.meta.env.VITE_PDF_QUALITY) || 0.8,
         maxSizeMB: parseInt(import.meta.env.VITE_PDF_MAX_SIZE_MB) || 5,
-        compression: import.meta.env.VITE_PDF_COMPRESSION === 'true'
+        compression: import.meta.env.VITE_PDF_COMPRESSION === 'true',
       },
-      
+
       app: {
         debugMode: import.meta.env.VITE_DEBUG_MODE === 'true',
         consoleLogs: import.meta.env.VITE_CONSOLE_LOGS === 'true',
-        autoSaveInterval: parseInt(import.meta.env.VITE_AUTO_SAVE_INTERVAL) || 60000,
-        maxProductsPerInvoice: parseInt(import.meta.env.VITE_MAX_PRODUCTS_PER_INVOICE) || 50,
+        autoSaveInterval:
+          parseInt(import.meta.env.VITE_AUTO_SAVE_INTERVAL) || 60000,
+        maxProductsPerInvoice:
+          parseInt(import.meta.env.VITE_MAX_PRODUCTS_PER_INVOICE) || 50,
         defaultTaxRate: parseFloat(import.meta.env.VITE_DEFAULT_TAX_RATE) || 20,
-        currency: import.meta.env.VITE_CURRENCY || 'EUR'
+        currency: import.meta.env.VITE_CURRENCY || 'EUR',
       },
-      
+
       backup: {
         enabled: import.meta.env.VITE_BACKUP_ENABLED === 'true',
-        intervalHours: parseInt(import.meta.env.VITE_BACKUP_INTERVAL_HOURS) || 24
-      }
+        intervalHours:
+          parseInt(import.meta.env.VITE_BACKUP_INTERVAL_HOURS) || 24,
+      },
     };
   }
 
@@ -131,17 +136,30 @@ class ConfigService {
   }
 
   // Getters pour accéder à la configuration
-  get googleDrive() { return this.config.googleDrive; }
-  get n8n() { return this.config.n8n; }
-  get company() { return this.config.company; }
-  get pdf() { return this.config.pdf; }
-  get app() { return this.config.app; }
-  get backup() { return this.config.backup; }
+  get googleDrive() {
+    return this.config.googleDrive;
+  }
+  get n8n() {
+    return this.config.n8n;
+  }
+  get company() {
+    return this.config.company;
+  }
+  get pdf() {
+    return this.config.pdf;
+  }
+  get app() {
+    return this.config.app;
+  }
+  get backup() {
+    return this.config.backup;
+  }
 
   // Méthodes utilitaires
   isGoogleDriveConfigured(): boolean {
-    return !!(this.config.googleDrive.apiKey && 
-             this.config.googleDrive.clientId);
+    return !!(
+      this.config.googleDrive.apiKey && this.config.googleDrive.clientId
+    );
   }
 
   isN8NConfigured(): boolean {
@@ -149,10 +167,22 @@ class ConfigService {
   }
 
   // Méthode pour afficher l'état de la configuration
-  getConfigStatus(): { service: string; configured: boolean; required: boolean }[] {
+  getConfigStatus(): {
+    service: string;
+    configured: boolean;
+    required: boolean;
+  }[] {
     return [
-      { service: 'Google Drive', configured: this.isGoogleDriveConfigured(), required: false },
-      { service: 'N8N Webhook', configured: this.isN8NConfigured(), required: true }
+      {
+        service: 'Google Drive',
+        configured: this.isGoogleDriveConfigured(),
+        required: false,
+      },
+      {
+        service: 'N8N Webhook',
+        configured: this.isN8NConfigured(),
+        required: true,
+      },
     ];
   }
 

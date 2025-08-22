@@ -12,29 +12,32 @@ export class WebhookUrlHelper {
   /**
    * Retourne l'URL du webhook adaptée à l'environnement
    */
-  static getWebhookUrl(endpoint: string = 'webhook/facture-universelle'): string {
+  static getWebhookUrl(
+    endpoint: string = 'webhook/facture-universelle'
+  ): string {
     // 🚀 UTILISER LE PROXY NETLIFY/VITE POUR ÉVITER CORS EN DÉVELOPPEMENT ET PRODUCTION
     console.log('🔍 WebhookUrlHelper - Environment check:', {
       isProd: import.meta.env.PROD,
       hostname: window.location.hostname,
-      willUseProxy: import.meta.env.PROD || window.location.hostname === 'localhost'
+      willUseProxy:
+        import.meta.env.PROD || window.location.hostname === 'localhost',
     });
-    
+
     // En production (Netlify) ET en développement local, utilise le proxy pour éviter CORS
     if (import.meta.env.PROD || window.location.hostname === 'localhost') {
       const proxyUrl = `/api/n8n/${endpoint}`;
       console.log('✅ Using proxy URL:', proxyUrl);
       return proxyUrl;
     }
-    
+
     // Fallback pour autres environnements (très rare)
     const baseUrl = configService.n8n.webhookUrl;
-    
+
     // Si l'endpoint est déjà dans l'URL de base, ne le dupliquer pas
     if (baseUrl.includes(endpoint)) {
       return baseUrl;
     }
-    
+
     // Sinon, construire l'URL complète
     const cleanBaseUrl = baseUrl.replace(/\/$/, ''); // Enlever le / final si présent
     return `${cleanBaseUrl}/${endpoint}`;
@@ -43,13 +46,15 @@ export class WebhookUrlHelper {
   /**
    * Retourne l'URL directe (sans proxy) pour les tests
    */
-  static getDirectUrl(endpoint: string = 'webhook/facture-universelle'): string {
+  static getDirectUrl(
+    endpoint: string = 'webhook/facture-universelle'
+  ): string {
     const baseUrl = configService.n8n.webhookUrl;
-    
+
     if (baseUrl.includes(endpoint)) {
       return baseUrl;
     }
-    
+
     const cleanBaseUrl = baseUrl.replace(/\/$/, '');
     return `${cleanBaseUrl}/${endpoint}`;
   }
@@ -74,7 +79,7 @@ export class WebhookUrlHelper {
       environment: import.meta.env.PROD ? 'production' : 'development',
       usingProxy: this.isUsingProxy(),
       webhookUrl: this.getWebhookUrl(),
-      directUrl: this.getDirectUrl()
+      directUrl: this.getDirectUrl(),
     };
   }
 }

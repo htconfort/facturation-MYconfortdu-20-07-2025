@@ -22,7 +22,7 @@ export interface SuggestionAcompte {
  * @returns Tableau de chèques avec montants ronds
  */
 export function calculerChequesRonds(
-  montantTotal: number, 
+  montantTotal: number,
   nombreCheques: number
 ): ChequeRond[] {
   if (nombreCheques <= 0 || nombreCheques > 10) {
@@ -30,23 +30,23 @@ export function calculerChequesRonds(
   }
 
   const montantParCheque = Math.floor(montantTotal / nombreCheques);
-  const reste = montantTotal - (montantParCheque * nombreCheques);
-  
+  const reste = montantTotal - montantParCheque * nombreCheques;
+
   const cheques: ChequeRond[] = [];
-  
+
   // Distribuer le montant de base
   for (let i = 0; i < nombreCheques; i++) {
     cheques.push({
       montant: montantParCheque,
-      description: `Chèque ${i + 1}/${nombreCheques}`
+      description: `Chèque ${i + 1}/${nombreCheques}`,
     });
   }
-  
+
   // Distribuer le reste sur les premiers chèques (arrondi à l'euro supérieur)
   for (let i = 0; i < reste && i < nombreCheques; i++) {
     cheques[i].montant += 1;
   }
-  
+
   return cheques;
 }
 
@@ -57,30 +57,30 @@ export function calculerChequesRonds(
  * @returns Suggestions d'acomptes optimisées
  */
 export function suggererAcomptesMagiques(
-  montantTotal: number, 
+  montantTotal: number,
   nombreCheques: number = 3
 ): SuggestionAcompte[] {
   const suggestions: SuggestionAcompte[] = [];
-  
+
   // Suggestions de pourcentages courants
   const pourcentages = [20, 25, 30, 40, 50];
-  
+
   for (const pct of pourcentages) {
-    const acompte = Math.round(montantTotal * pct / 100);
+    const acompte = Math.round((montantTotal * pct) / 100);
     const reste = montantTotal - acompte;
     const montantParCheque = Math.floor(reste / nombreCheques);
     const modulo = reste % nombreCheques;
-    
+
     // Privilégier les répartitions avec peu ou pas de modulo
-    
+
     suggestions.push({
       pourcentage: pct,
       montant: acompte,
       resteApayer: reste,
-      description: `${pct}% d'acompte (${acompte}€) + ${nombreCheques} chèques de ${montantParCheque}€${modulo > 0 ? ` (+${modulo}€ à répartir)` : ''}`
+      description: `${pct}% d'acompte (${acompte}€) + ${nombreCheques} chèques de ${montantParCheque}€${modulo > 0 ? ` (+${modulo}€ à répartir)` : ''}`,
     });
   }
-  
+
   // Trier par qualité (moins de modulo = mieux)
   return suggestions.sort((a, b) => {
     const moduloA = a.resteApayer % nombreCheques;
@@ -95,8 +95,11 @@ export function suggererAcomptesMagiques(
  * @param nombreCheques - Nombre de chèques
  * @returns true si la division donne des montants entiers
  */
-export function peutDiviserEnChequesRonds(montant: number, nombreCheques: number): boolean {
-  return (montant % nombreCheques) === 0;
+export function peutDiviserEnChequesRonds(
+  montant: number,
+  nombreCheques: number
+): boolean {
+  return montant % nombreCheques === 0;
 }
 
 /**
@@ -113,11 +116,11 @@ export function optimiserAcomptePourChequesRonds(
 ): number {
   const resteInitial = montantTotal - acompteInitial;
   const modulo = resteInitial % nombreCheques;
-  
+
   if (modulo === 0) {
     return acompteInitial; // Déjà optimal
   }
-  
+
   // Ajuster l'acompte pour éliminer le modulo
   return acompteInitial + modulo;
 }
@@ -146,17 +149,20 @@ export interface ChequeSuggestion {
  * @param nombreCheques - Nombre de chèques pour le reste à payer
  * @returns Suggestions avec acompte, nombre de chèques et montant par chèque
  */
-export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number): ChequeSuggestion[] {
+export function chequeFriendlyDeposits(
+  totalTTC: number,
+  nombreCheques: number
+): ChequeSuggestion[] {
   const suggestions: ChequeSuggestion[] = [];
-  
+
   // Suggestions de pourcentages courants
   const pourcentages = [0, 10, 20, 25, 30, 40, 50];
-  
+
   for (const pct of pourcentages) {
-    const acompte = Math.round(totalTTC * pct / 100);
+    const acompte = Math.round((totalTTC * pct) / 100);
     const reste = totalTTC - acompte;
     const montantParCheque = Math.round(reste / nombreCheques);
-    
+
     // Vérifier que les montants sont cohérents
     if (montantParCheque > 0 && reste > 0) {
       suggestions.push({
@@ -164,11 +170,11 @@ export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number):
         nCheques: nombreCheques,
         perCheque: montantParCheque,
         percentage: pct,
-        description: `${pct}% d'acompte (${acompte}€) + ${nombreCheques} chèques de ${montantParCheque}€`
+        description: `${pct}% d'acompte (${acompte}€) + ${nombreCheques} chèques de ${montantParCheque}€`,
       });
     }
   }
-  
+
   return suggestions.slice(0, 6); // Maximum 6 suggestions
 }
 
@@ -181,7 +187,7 @@ export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number):
 export function targetsFromPercents(totalTTC: number, percentages: number[]) {
   return percentages.map(pct => ({
     percentage: pct,
-    amount: Math.round(totalTTC * pct / 100),
-    label: `${pct}%`
+    amount: Math.round((totalTTC * pct) / 100),
+    label: `${pct}%`,
   }));
 }

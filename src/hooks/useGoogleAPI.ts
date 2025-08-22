@@ -14,7 +14,7 @@ export const useGoogleAPI = () => {
           return;
         }
 
-        await new Promise<void>((resolve) => {
+        await new Promise<void>(resolve => {
           window.gapi.load('client:auth2', resolve);
         });
 
@@ -22,15 +22,15 @@ export const useGoogleAPI = () => {
           apiKey: GOOGLE_CONFIG.API_KEY,
           clientId: GOOGLE_CONFIG.CLIENT_ID,
           discoveryDocs: [GOOGLE_CONFIG.DISCOVERY_DOC],
-          scope: GOOGLE_CONFIG.SCOPES.join(' ')
+          scope: GOOGLE_CONFIG.SCOPES.join(' '),
         });
 
         const authInstance = window.gapi.auth2.getAuthInstance();
         setIsSignedIn(authInstance.isSignedIn.get());
-        
+
         // Écouter les changements de connexion
         authInstance.isSignedIn.listen(setIsSignedIn);
-        
+
         setIsLoaded(true);
       } catch (err) {
         setError(`Erreur initialisation Google API: ${err}`);
@@ -58,11 +58,11 @@ export const useGoogleAPI = () => {
     }
   };
 
-  return { 
-    isLoaded, 
-    error, 
-    isSignedIn, 
-    signIn, 
-    signOut 
+  return {
+    isLoaded,
+    error,
+    isSignedIn,
+    signIn,
+    signOut,
   };
 };

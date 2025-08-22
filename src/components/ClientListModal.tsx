@@ -16,7 +16,7 @@ export const ClientListModal: React.FC<ClientListModalProps> = ({
   onClose,
   clients,
   onLoadClient,
-  onDeleteClient
+  onDeleteClient,
 }) => {
   const handleDeleteClient = (index: number) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
@@ -25,52 +25,63 @@ export const ClientListModal: React.FC<ClientListModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Liste des Clients">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+    <Modal isOpen={isOpen} onClose={onClose} title='Liste des Clients'>
+      <div className='overflow-x-auto'>
+        <table className='w-full border-collapse'>
           <thead>
-            <tr className="bg-[#477A0C] text-[#F2EFE2]">
-              <th className="border px-4 py-2 text-left font-bold">Nom</th>
-              <th className="border px-4 py-2 text-left font-bold">Email</th>
-              <th className="border px-4 py-2 text-left font-bold">Téléphone</th>
-              <th className="border px-4 py-2 text-left font-bold">Adresse</th>
-              <th className="border px-4 py-2 text-center font-bold">Actions</th>
+            <tr className='bg-[#477A0C] text-[#F2EFE2]'>
+              <th className='border px-4 py-2 text-left font-bold'>Nom</th>
+              <th className='border px-4 py-2 text-left font-bold'>Email</th>
+              <th className='border px-4 py-2 text-left font-bold'>
+                Téléphone
+              </th>
+              <th className='border px-4 py-2 text-left font-bold'>Adresse</th>
+              <th className='border px-4 py-2 text-center font-bold'>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {clients.map((client, index) => (
-              <tr key={client.id || index} className="bg-white hover:bg-gray-50">
-                <td className="border px-4 py-2">
-                  <span className="text-black font-bold">{client.name}</span>
+              <tr
+                key={client.id || index}
+                className='bg-white hover:bg-gray-50'
+              >
+                <td className='border px-4 py-2'>
+                  <span className='text-black font-bold'>{client.name}</span>
                 </td>
-                <td className="border px-4 py-2">
-                  <span className="text-black font-semibold">{client.email}</span>
+                <td className='border px-4 py-2'>
+                  <span className='text-black font-semibold'>
+                    {client.email}
+                  </span>
                 </td>
-                <td className="border px-4 py-2">
-                  <span className="text-black font-semibold">{client.phone}</span>
+                <td className='border px-4 py-2'>
+                  <span className='text-black font-semibold'>
+                    {client.phone}
+                  </span>
                 </td>
-                <td className="border px-4 py-2">
-                  <span className="text-black font-semibold">
+                <td className='border px-4 py-2'>
+                  <span className='text-black font-semibold'>
                     {`${client.address}, ${client.postalCode} ${client.city}`}
                   </span>
                 </td>
-                <td className="border px-4 py-2 text-center">
-                  <div className="flex justify-center space-x-2">
+                <td className='border px-4 py-2 text-center'>
+                  <div className='flex justify-center space-x-2'>
                     <button
                       onClick={() => {
                         onLoadClient(client);
                         onClose();
                       }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center space-x-1 font-semibold"
+                      className='bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center space-x-1 font-semibold'
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className='w-4 h-4' />
                       <span>Charger</span>
                     </button>
                     <button
                       onClick={() => handleDeleteClient(index)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center space-x-1 font-semibold"
+                      className='bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center space-x-1 font-semibold'
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className='w-4 h-4' />
                       <span>Supprimer</span>
                     </button>
                   </div>
@@ -79,23 +90,25 @@ export const ClientListModal: React.FC<ClientListModalProps> = ({
             ))}
             {clients.length === 0 && (
               <tr>
-                <td colSpan={5} className="border px-4 py-4 text-center">
-                  <span className="text-black font-bold">Aucun client enregistré</span>
+                <td colSpan={5} className='border px-4 py-4 text-center'>
+                  <span className='text-black font-bold'>
+                    Aucun client enregistré
+                  </span>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      
+
       {/* Bouton retour pour iPad */}
-      <div className="flex justify-center mt-4">
+      <div className='flex justify-center mt-4'>
         <button
           onClick={onClose}
-          className="bg-[#477A0C] hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 font-bold shadow-lg transition-all hover:scale-105"
-          title="Retour au formulaire principal"
+          className='bg-[#477A0C] hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 font-bold shadow-lg transition-all hover:scale-105'
+          title='Retour au formulaire principal'
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className='w-5 h-5' />
           <span>Retour</span>
         </button>
       </div>

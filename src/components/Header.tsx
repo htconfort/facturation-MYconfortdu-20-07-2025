@@ -38,7 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
   canSendToDrive = false,
 }) => {
   const [isDriveLoading, setIsDriveLoading] = useState(false);
-  const [driveStatus, setDriveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [driveStatus, setDriveStatus] = useState<'idle' | 'success' | 'error'>(
+    'idle'
+  );
 
   const handleDriveClick = async () => {
     if (!canSendToDrive) {
@@ -78,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getDriveButtonIcon = () => {
     if (isDriveLoading) {
-      return <Loader2 size={18} className="animate-spin" />;
+      return <Loader2 size={18} className='animate-spin' />;
     }
 
     if (driveStatus === 'success') {
@@ -136,68 +138,70 @@ export const Header: React.FC<HeaderProps> = ({
     return `Envoyer la facture vers Google Drive${info.length > 0 ? ` (${info.join(', ')})` : ''}`;
   };
   return (
-    <header className="bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] shadow-xl sticky top-0 z-40">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <div className="bg-white/20 p-2 rounded-full">
-            <Building2 className="w-6 h-6 text-[#F2EFE2]" />
+    <header className='bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] shadow-xl sticky top-0 z-40'>
+      <div className='container mx-auto px-4 py-4 flex justify-between items-center'>
+        <div className='flex items-center space-x-3'>
+          <div className='bg-white/20 p-2 rounded-full'>
+            <Building2 className='w-6 h-6 text-[#F2EFE2]' />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#F2EFE2]">MYCONFORT</h1>
-            <p className="text-[#F2EFE2]/80 text-sm font-medium">
+            <h1 className='text-2xl font-extrabold tracking-tight text-[#F2EFE2]'>
+              MYCONFORT
+            </h1>
+            <p className='text-[#F2EFE2]/80 text-sm font-medium'>
               Facturation professionnelle avec signature électronique
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 md:space-x-4">
+        <div className='flex items-center space-x-2 md:space-x-4'>
           {/* Actions principales */}
           <button
             onClick={onShowProducts}
-            className="bg-[#F2EFE2] hover:bg-white px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-black"
-            title="Gérer les produits"
+            className='bg-[#F2EFE2] hover:bg-white px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-black'
+            title='Gérer les produits'
           >
             <Package size={18} />
-            <span className="hidden md:inline">Produits</span>
+            <span className='hidden md:inline'>Produits</span>
           </button>
 
           <button
             onClick={onShowInvoices}
-            className="bg-[#14281D] hover:bg-[#0F1F15] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#F2EFE2]"
-            title="Voir toutes les factures"
+            className='bg-[#14281D] hover:bg-[#0F1F15] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#F2EFE2]'
+            title='Voir toutes les factures'
           >
             <Archive size={18} />
-            <span className="hidden md:inline">Factures</span>
+            <span className='hidden md:inline'>Factures</span>
           </button>
 
           <button
             onClick={onShowClients}
-            className="bg-[#D68FD6] hover:bg-[#C67FC6] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]"
-            title="Gérer les clients"
+            className='bg-[#D68FD6] hover:bg-[#C67FC6] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]'
+            title='Gérer les clients'
           >
             <Users size={18} />
-            <span className="hidden md:inline">Clients</span>
+            <span className='hidden md:inline'>Clients</span>
           </button>
 
           {onShowDebug && (
             <button
               onClick={onShowDebug}
-              className="bg-[#F59E0B] hover:bg-[#D97706] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]"
-              title="Centre de débogage N8N"
+              className='bg-[#F59E0B] hover:bg-[#D97706] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-[#14281D]'
+              title='Centre de débogage N8N'
             >
               <Bug size={18} />
-              <span className="hidden md:inline">Debug</span>
+              <span className='hidden md:inline'>Debug</span>
             </button>
           )}
 
           {onGoToIpad && (
             <button
               onClick={onGoToIpad}
-              className="bg-[#3B82F6] hover:bg-[#2563EB] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white"
-              title="Mode iPad tactile optimisé"
+              className='bg-[#3B82F6] hover:bg-[#2563EB] px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white'
+              title='Mode iPad tactile optimisé'
             >
               <Tablet size={18} />
-              <span className="hidden md:inline">Mode iPad</span>
+              <span className='hidden md:inline'>Mode iPad</span>
             </button>
           )}
 
@@ -208,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
             title={getDriveButtonTitle()}
           >
             {getDriveButtonIcon()}
-            <span className="hidden md:inline">{getDriveButtonText()}</span>
+            <span className='hidden md:inline'>{getDriveButtonText()}</span>
           </button>
         </div>
       </div>

@@ -2,12 +2,13 @@ import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 
 export class CompactPrintService {
-  
   static async printInvoice(invoice: Invoice) {
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        alert('Impossible d\'ouvrir la fenêtre d\'impression. Veuillez autoriser les pop-ups.');
+        alert(
+          "Impossible d'ouvrir la fenêtre d'impression. Veuillez autoriser les pop-ups."
+        );
         return;
       }
 
@@ -15,7 +16,7 @@ export class CompactPrintService {
 
       printWindow.document.write(printContent);
       printWindow.document.close();
-      
+
       // Attendre que le contenu soit chargé puis imprimer
       printWindow.onload = () => {
         setTimeout(() => {
@@ -25,20 +26,29 @@ export class CompactPrintService {
           }, 1000);
         }, 500);
       };
-
     } catch (error) {
       console.error('Erreur impression:', error);
-      alert('Erreur lors de l\'impression de la facture');
+      alert("Erreur lors de l'impression de la facture");
     }
   }
 
   private static generateCompactPrint(invoice: Invoice): string {
-    const products = invoice.products.map((product) => {
-      const totalProduct = calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType);
-      const discountText = product.discount > 0 ? 
-        (product.discountType === 'percent' ? `-${product.discount}%` : `-${formatCurrency(product.discount)}`) : '';
-      
-      return `
+    const products = invoice.products
+      .map(product => {
+        const totalProduct = calculateProductTotal(
+          product.quantity,
+          product.priceTTC,
+          product.discount,
+          product.discountType
+        );
+        const discountText =
+          product.discount > 0
+            ? product.discountType === 'percent'
+              ? `-${product.discount}%`
+              : `-${formatCurrency(product.discount)}`
+            : '';
+
+        return `
         <tr>
           <td>${product.name}</td>
           <td style="text-align: center;">${product.quantity}</td>
@@ -47,7 +57,8 @@ export class CompactPrintService {
           <td style="text-align: right; font-weight: bold;">${formatCurrency(totalProduct)}</td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
 
     return `
       <!DOCTYPE html>
@@ -534,7 +545,10 @@ export class CompactPrintService {
                 ${invoice.montantAcompte > 0 ? `<div>Acompte: ${formatCurrency(invoice.montantAcompte)}</div>` : ''}
                 ${invoice.montantRestant > 0 ? `<div><strong>Reste à payer: ${formatCurrency(invoice.montantRestant)}</strong></div>` : ''}
                 
-                ${invoice.paymentMethod && invoice.paymentMethod.toLowerCase().includes('virement') ? `
+                ${
+                  invoice.paymentMethod &&
+                  invoice.paymentMethod.toLowerCase().includes('virement')
+                    ? `
                 <!-- RIB pour Virement Bancaire -->
                 <div class="rib-section">
                   <h4 style="margin: 8px 0 4px 0; font-size: 11px; font-weight: bold; color: #2563eb;">COORDONNÉES BANCAIRES</h4>
@@ -550,14 +564,17 @@ export class CompactPrintService {
                     </div>
                   </div>
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
               <div class="signature-section">
                 <h3>SIGNATURE CLIENT</h3>
                 <div class="signature-box">
-                  ${invoice.signature && invoice.signature.trim() !== '' 
-                    ? `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />` 
-                    : '<span class="signature-text">Signature requise</span>'
+                  ${
+                    invoice.signature && invoice.signature.trim() !== ''
+                      ? `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />`
+                      : '<span class="signature-text">Signature requise</span>'
                   }
                 </div>
               </div>

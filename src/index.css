@@ -18,7 +18,7 @@
   max-width: 210mm;
   margin: 0 auto;
   background: white;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -265,7 +265,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 25px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -560,7 +560,7 @@
 
 /* Barre d'information client en vert */
 .section-header-green {
-  background: linear-gradient(135deg, #477A0C, #5A8F0F);
+  background: linear-gradient(135deg, #477a0c, #5a8f0f);
   color: white;
   padding: 12px 20px;
   margin: 15px 0 10px 0;
@@ -568,7 +568,7 @@
   font-weight: bold;
   font-size: 14px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Bouton signé complètement à droite */
@@ -593,7 +593,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px;
-  border-bottom: 3px solid #477A0C;
+  border-bottom: 3px solid #477a0c;
   margin-bottom: 20px;
 }
 
@@ -605,5 +605,16 @@
   .invoice-container {
     box-shadow: none;
     max-width: none;
+  }
+  #root {
+    display: none !important;
+  }
+  body::before {
+    content: "Utilisez le bouton 'Imprimer (PDF A4)' dans l'application pour une impression correcte.";
+    display: block;
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #333;
   }
 }

@@ -9,11 +9,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/ipad" element={<IpadWizard />} />
-        <Route path="/wizard-demo" element={<WizardDemo />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
-        <Route path="/payment/cancel" element={<PaymentCancel />} />
+        <Route path='/' element={<MainApp />} />
+        <Route path='/ipad' element={<IpadWizard />} />
+        <Route path='/wizard-demo' element={<WizardDemo />} />
+        <Route path='/payment/success' element={<PaymentSuccess />} />
+        <Route path='/payment/cancel' element={<PaymentCancel />} />
       </Routes>
     </BrowserRouter>
   );

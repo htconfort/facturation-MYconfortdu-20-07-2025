@@ -6,11 +6,12 @@ import { getPDFBlob } from './pdfGenerator';
 
 // Configuration Google Drive API
 const GOOGLE_DRIVE_CONFIG = {
-  CLIENT_ID: '416673956609-ushnkvokiicp2ec0uug7dsvpb50mscr5.apps.googleusercontent.com',
+  CLIENT_ID:
+    '416673956609-ushnkvokiicp2ec0uug7dsvpb50mscr5.apps.googleusercontent.com',
   API_KEY: 'AIzaSyCHArqLOqdspuiJZsXjbJiUvz_3sKtEy8M',
   DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
   SCOPES: 'https://www.googleapis.com/auth/drive.file',
-  FOLDER_ID: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-' // Votre dossier Drive
+  FOLDER_ID: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-', // Votre dossier Drive
 };
 
 // Interface pour les métadonnées de fichier
@@ -30,31 +31,34 @@ interface DriveUploadResponse {
 
 // Fonction principale de sauvegarde sur Google Drive
 export const saveToGoogleDrive = async (
-  pdfBlob: Blob, 
+  pdfBlob: Blob,
   filename: string,
   folderId?: string
 ): Promise<DriveUploadResponse> => {
   try {
     console.log('☁️ Sauvegarde sur Google Drive:', filename);
-    
+
     // Vérifier l'authentification
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      throw new Error('Token d\'accès Google Drive manquant');
+      throw new Error("Token d'accès Google Drive manquant");
     }
 
     // Préparer les métadonnées
     const metadata: DriveFileMetadata = {
       name: filename,
       parents: [folderId || GOOGLE_DRIVE_CONFIG.FOLDER_ID],
-      description: `Facture MyComfort générée le ${new Date().toLocaleDateString('fr-FR')}`
+      description: `Facture MyComfort générée le ${new Date().toLocaleDateString('fr-FR')}`,
     };
 
     // Créer le FormData pour l'upload multipart
     const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], {
-      type: 'application/json'
-    }));
+    form.append(
+      'metadata',
+      new Blob([JSON.stringify(metadata)], {
+        type: 'application/json',
+      })
+    );
     form.append('file', pdfBlob);
 
     // Envoyer à Google Drive
@@ -63,9 +67,9 @@ export const saveToGoogleDrive = async (
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: form
+        body: form,
       }
     );
 
@@ -76,9 +80,8 @@ export const saveToGoogleDrive = async (
 
     const result: DriveUploadResponse = await response.json();
     console.log('✅ Fichier sauvegardé sur Google Drive:', result);
-    
-    return result;
 
+    return result;
   } catch (error) {
     console.error('❌ Erreur sauvegarde Google Drive:', error);
     throw error;
@@ -93,14 +96,14 @@ export const saveInvoiceToGoogleDrive = async (
   try {
     // Générer le PDF
     const pdfBlob = await getPDFBlob(invoice);
-    
+
     // Nom de fichier par défaut
-    const filename = customFilename || 
+    const filename =
+      customFilename ||
       `Facture_${invoice.invoiceNumber}_${invoice.clientName.replace(/\s+/g, '_')}.pdf`;
-    
+
     // Sauvegarder sur Google Drive
     return await saveToGoogleDrive(pdfBlob, filename);
-    
   } catch (error) {
     console.error('❌ Erreur sauvegarde facture Google Drive:', error);
     throw error;
@@ -119,21 +122,20 @@ export const authenticateGoogleDrive = async (): Promise<boolean> => {
     await window.gapi.load('auth2', async () => {
       await window.gapi.auth2.init({
         client_id: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
-        scope: GOOGLE_DRIVE_CONFIG.SCOPES
+        scope: GOOGLE_DRIVE_CONFIG.SCOPES,
       });
     });
 
     // Authentifier l'utilisateur
     const authInstance = window.gapi.auth2.getAuthInstance();
     const user = await authInstance.signIn();
-    
+
     if (user.isSignedIn()) {
       console.log('✅ Authentification Google Drive réussie');
       return true;
     }
-    
-    return false;
 
+    return false;
   } catch (error) {
     console.error('❌ Erreur authentification Google Drive:', error);
     return false;
@@ -150,13 +152,12 @@ const getAccessToken = async (): Promise<string | null> => {
 
     const authInstance = window.gapi.auth2.getAuthInstance();
     const user = authInstance.currentUser.get();
-    
+
     if (user.isSignedIn()) {
       return user.getAuthResponse().access_token;
     }
-    
-    return null;
 
+    return null;
   } catch (error) {
     console.error('❌ Erreur récupération token:', error);
     return null;
@@ -174,7 +175,8 @@ const loadGoogleAPI = (): Promise<void> => {
     const script = document.createElement('script');
     script.src = 'https://apis.google.com/js/api.js';
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Impossible de charger l\'API Google'));
+    script.onerror = () =>
+      reject(new Error("Impossible de charger l'API Google"));
     document.head.appendChild(script);
   });
 };
@@ -184,22 +186,22 @@ export const createMyComfortFolder = async (): Promise<string> => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      throw new Error('Token d\'accès manquant');
+      throw new Error("Token d'accès manquant");
     }
 
     const metadata = {
       name: 'MyComfort Factures',
       mimeType: 'application/vnd.google-apps.folder',
-      description: 'Dossier automatique pour les factures MyComfort'
+      description: 'Dossier automatique pour les factures MyComfort',
     };
 
     const response = await fetch('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(metadata)
+      body: JSON.stringify(metadata),
     });
 
     if (!response.ok) {
@@ -208,9 +210,8 @@ export const createMyComfortFolder = async (): Promise<string> => {
 
     const result = await response.json();
     console.log('✅ Dossier MyComfort créé:', result.id);
-    
-    return result.id;
 
+    return result.id;
   } catch (error) {
     console.error('❌ Erreur création dossier:', error);
     throw error;
@@ -222,7 +223,7 @@ export const listInvoicesFromGoogleDrive = async (): Promise<any[]> => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      throw new Error('Token d\'accès manquant');
+      throw new Error("Token d'accès manquant");
     }
 
     const query = `parents in '${GOOGLE_DRIVE_CONFIG.FOLDER_ID}' and name contains 'Facture_'`;
@@ -230,8 +231,8 @@ export const listInvoicesFromGoogleDrive = async (): Promise<any[]> => {
       `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime,webViewLink)`,
       {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
     );
 
@@ -241,7 +242,6 @@ export const listInvoicesFromGoogleDrive = async (): Promise<any[]> => {
 
     const result = await response.json();
     return result.files || [];
-
   } catch (error) {
     console.error('❌ Erreur listage Google Drive:', error);
     return [];
@@ -252,7 +252,7 @@ export const listInvoicesFromGoogleDrive = async (): Promise<any[]> => {
 export const testGoogleDriveConfiguration = async (): Promise<boolean> => {
   try {
     console.log('🧪 Test configuration Google Drive...');
-    
+
     // Test d'authentification
     const isAuthenticated = await authenticateGoogleDrive();
     if (!isAuthenticated) {
@@ -263,10 +263,9 @@ export const testGoogleDriveConfiguration = async (): Promise<boolean> => {
     // Test de création d'un fichier de test
     const testBlob = new Blob(['Test MyComfort'], { type: 'text/plain' });
     const result = await saveToGoogleDrive(testBlob, 'test-mycomfort.txt');
-    
+
     console.log('✅ Test Google Drive réussi:', result.id);
     return true;
-
   } catch (error) {
     console.error('❌ Test Google Drive échoué:', error);
     return false;

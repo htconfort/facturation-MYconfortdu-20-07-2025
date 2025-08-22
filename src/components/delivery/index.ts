@@ -7,4 +7,7 @@ export { useProductsWithDeliveryStatus } from './hooks/useProductsWithDeliverySt
 export { DeliveryStatusNotificationService } from './services/DeliveryStatusNotificationService';
 
 // Export des types
-export type { DeliveryStatus, ProductWithDeliveryStatus } from './DeliveryStatusSelector';
+export type {
+  DeliveryStatus,
+  ProductWithDeliveryStatus,
+} from './DeliveryStatusSelector';

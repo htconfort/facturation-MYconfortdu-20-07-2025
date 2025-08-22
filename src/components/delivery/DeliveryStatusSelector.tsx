@@ -2,7 +2,11 @@ import React from 'react';
 import './styles/delivery-status.css';
 
 // Types pour les statuts de livraison
-export type DeliveryStatus = 'pending' | 'delivered' | 'to_deliver' | 'cancelled';
+export type DeliveryStatus =
+  | 'pending'
+  | 'delivered'
+  | 'to_deliver'
+  | 'cancelled';
 
 // Interface pour les produits avec statuts
 export interface ProductWithDeliveryStatus {
@@ -13,7 +17,7 @@ export interface ProductWithDeliveryStatus {
   categorie: string;
   remise: number;
   type_remise: 'percent' | 'fixed';
-  
+
   // NOUVEAUX CHAMPS
   statut_livraison: DeliveryStatus;
   emporte?: boolean | string; // Maintient la compatibilité
@@ -27,49 +31,53 @@ export const DeliveryStatusSelector: React.FC<{
   disabled?: boolean;
 }> = ({ product, productIndex, onStatusChange, disabled = false }) => {
   const statusOptions = [
-    { 
-      value: 'pending' as DeliveryStatus, 
-      label: '⏳ En attente', 
+    {
+      value: 'pending' as DeliveryStatus,
+      label: '⏳ En attente',
       color: '#FF9800',
-      bgColor: '#FFF3E0' 
+      bgColor: '#FFF3E0',
     },
-    { 
-      value: 'delivered' as DeliveryStatus, 
-      label: '✅ Emporté', 
+    {
+      value: 'delivered' as DeliveryStatus,
+      label: '✅ Emporté',
       color: '#4CAF50',
-      bgColor: '#E8F5E8' 
+      bgColor: '#E8F5E8',
     },
-    { 
-      value: 'to_deliver' as DeliveryStatus, 
-      label: '📦 À livrer', 
+    {
+      value: 'to_deliver' as DeliveryStatus,
+      label: '📦 À livrer',
       color: '#2196F3',
-      bgColor: '#E3F2FD' 
+      bgColor: '#E3F2FD',
     },
-    { 
-      value: 'cancelled' as DeliveryStatus, 
-      label: '❌ Annulé', 
+    {
+      value: 'cancelled' as DeliveryStatus,
+      label: '❌ Annulé',
       color: '#f44336',
-      bgColor: '#FFEBEE' 
-    }
+      bgColor: '#FFEBEE',
+    },
   ];
-  
-  const currentOption = statusOptions.find(opt => opt.value === product.statut_livraison) || statusOptions[0];
-  
+
+  const currentOption =
+    statusOptions.find(opt => opt.value === product.statut_livraison) ||
+    statusOptions[0];
+
   return (
-    <div className="delivery-status-selector">
-      <label htmlFor={`status-${productIndex}`} className="status-label">
+    <div className='delivery-status-selector'>
+      <label htmlFor={`status-${productIndex}`} className='status-label'>
         Statut de livraison :
       </label>
-      <select 
+      <select
         id={`status-${productIndex}`}
         value={product.statut_livraison}
-        onChange={(e) => onStatusChange(productIndex, e.target.value as DeliveryStatus)}
+        onChange={e =>
+          onStatusChange(productIndex, e.target.value as DeliveryStatus)
+        }
         disabled={disabled}
-        className="status-select"
-        style={{ 
+        className='status-select'
+        style={{
           backgroundColor: currentOption.bgColor,
           color: currentOption.color,
-          borderColor: currentOption.color
+          borderColor: currentOption.color,
         }}
       >
         {statusOptions.map(option => (
@@ -78,8 +86,8 @@ export const DeliveryStatusSelector: React.FC<{
           </option>
         ))}
       </select>
-      
-      <div className="status-indicator" style={{ color: currentOption.color }}>
+
+      <div className='status-indicator' style={{ color: currentOption.color }}>
         {currentOption.label}
       </div>
     </div>

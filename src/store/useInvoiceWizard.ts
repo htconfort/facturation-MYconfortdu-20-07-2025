@@ -229,7 +229,8 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       
       products: state.produits.map(p => ({
         id: p.id,
-        designation: p.designation,
+        name: p.designation, // ✅ CORRECTION: mapper designation vers name pour compatibilité N8N
+        designation: p.designation, // Garder aussi designation pour compatibilité
         quantity: p.qty,
         priceTTC: p.priceTTC,
         category: p.category || '',
@@ -237,6 +238,10 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         priceHT: +(p.priceTTC / 1.2).toFixed(2),
         totalHT: +(p.qty * p.priceTTC / 1.2).toFixed(2),
         totalTTC: +(p.qty * p.priceTTC).toFixed(2),
+        // Champs requis par l'interface Product
+        unitPrice: p.priceTTC,
+        discount: 0,
+        discountType: 'fixed' as const,
       })),
       
       paymentMethod: state.paiement.method,
@@ -249,7 +254,9 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       deliveryAddress: state.livraison.deliveryAddress || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
       
-      signature: state.signatureDataUrl || '',
+      signature: state.signature.dataUrl || '',
+      isSigned: !!state.signature.dataUrl,
+      signatureDate: state.signature.dataUrl ? state.signature.timestamp || new Date().toISOString() : undefined,
       invoiceNotes: state.invoiceNotes || '',
       advisorName: state.advisorName || '',
       termsAccepted: state.termsAccepted,

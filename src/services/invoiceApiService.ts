@@ -31,20 +31,28 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
  * @param pdfBlob Le Blob du PDF généré.
  * @returns Une promesse qui résout avec l'objet JSON prêt à être envoyé.
  */
-export const prepareInvoicePayload = async (invoice: Invoice, pdfBlob: Blob): Promise<any> => {
+export const prepareInvoicePayload = async (
+  invoice: Invoice,
+  pdfBlob: Blob
+): Promise<any> => {
   const fichier_facture_base64 = await blobToBase64(pdfBlob);
 
   // Recalculer les totaux pour s'assurer de la cohérence avec le JSON
   const montant_ht = invoice.products.reduce((sum, product) => {
-    return sum + (product.quantity * calculateHT(product.priceTTC, invoice.taxRate));
+    return (
+      sum + product.quantity * calculateHT(product.priceTTC, invoice.taxRate)
+    );
   }, 0);
 
   const montant_ttc = invoice.products.reduce((sum, product) => {
-    return sum + calculateProductTotal(
-      product.quantity,
-      product.priceTTC,
-      product.discount,
-      product.discountType
+    return (
+      sum +
+      calculateProductTotal(
+        product.quantity,
+        product.priceTTC,
+        product.discount,
+        product.discountType
+      )
     );
   }, 0);
 
@@ -83,7 +91,10 @@ export const prepareInvoicePayload = async (invoice: Invoice, pdfBlob: Blob): Pr
  * @param webhookUrl L'URL du webhook (par exemple, votre workflow n8n).
  * @returns Une promesse qui résout avec la réponse de la requête.
  */
-export const sendInvoice = async (payload: any, webhookUrl: string): Promise<Response> => {
+export const sendInvoice = async (
+  payload: any,
+  webhookUrl: string
+): Promise<Response> => {
   console.log('📤 Envoi de la facture au webhook:', webhookUrl);
   console.log('📦 Payload envoyé:', payload); // This console.log is already here!
 
@@ -98,14 +109,21 @@ export const sendInvoice = async (payload: any, webhookUrl: string): Promise<Res
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Erreur lors de l\'envoi de la facture:', response.status, errorText);
+      console.error(
+        "❌ Erreur lors de l'envoi de la facture:",
+        response.status,
+        errorText
+      );
       throw new Error(`Erreur HTTP ${response.status}: ${errorText}`);
     }
 
     console.log('✅ Facture envoyée avec succès !', response.statusText);
     return response;
   } catch (error) {
-    console.error('❌ Erreur réseau ou autre lors de l\'envoi de la facture:', error);
+    console.error(
+      "❌ Erreur réseau ou autre lors de l'envoi de la facture:",
+      error
+    );
     throw error;
   }
 };

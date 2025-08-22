@@ -28,6 +28,7 @@ import {
   deleteInvoice,
 } from './utils/storage';
 
+import { PDFService } from './services/pdfService';
 import { N8nWebhookService } from './services/n8nWebhookService';
 
 function MainApp() {
@@ -60,15 +61,18 @@ function MainApp() {
     // Paiement
     paymentMethod: '',
     montantAcompte: 0,
+    depositPaymentMethod: '', // Ajout pour compatibilité wizard/N8N
     montantRestant: 0,
 
     // Livraison
     deliveryMethod: '',
+    deliveryAddress: '', // Ajout pour compatibilité wizard/N8N
     deliveryNotes: '',
 
     // Signature
     signature: '',
     isSigned: false,
+    signatureDate: undefined, // Ajout pour compatibilité wizard/N8N
 
     // Notes et conseiller
     invoiceNotes: '',
@@ -154,17 +158,24 @@ function MainApp() {
 
   const handleSaveInvoice = () => {
     try {
-      if (!invoice.clientName || !invoice.clientEmail || invoice.products.length === 0) {
+      if (
+        !invoice.clientName ||
+        !invoice.clientEmail ||
+        invoice.products.length === 0
+      ) {
         showToast(
           'Veuillez compléter les informations client et ajouter au moins un produit',
-          'error',
+          'error'
         );
         return;
       }
 
       saveInvoice(invoice);
       setInvoices(loadInvoices());
-      showToast(`Facture ${invoice.invoiceNumber} enregistrée avec succès`, 'success');
+      showToast(
+        `Facture ${invoice.invoiceNumber} enregistrée avec succès`,
+        'success'
+      );
     } catch (error) {
       showToast("Erreur lors de l'enregistrement de la facture", 'error');
     }
@@ -208,9 +219,14 @@ function MainApp() {
     const suspiciousPatterns = ['@', 'rue', 'avenue', 'boulevard'];
     if (
       cleanedData.name &&
-      suspiciousPatterns.some(pattern => cleanedData.name.toLowerCase().includes(pattern))
+      suspiciousPatterns.some(pattern =>
+        cleanedData.name.toLowerCase().includes(pattern)
+      )
     ) {
-      console.warn('⚠️ Le nom contient des données suspectes:', cleanedData.name);
+      console.warn(
+        '⚠️ Le nom contient des données suspectes:',
+        cleanedData.name
+      );
       // Ne pas écraser automatiquement, juste alerter
     }
 
@@ -219,7 +235,10 @@ function MainApp() {
   };
 
   // 🔒 VALIDATION OBLIGATOIRE RENFORCÉE AVEC DATE ET NETTOYAGE
-  const validateMandatoryFields = (): { isValid: boolean; errors: string[] } => {
+  const validateMandatoryFields = (): {
+    isValid: boolean;
+    errors: string[];
+  } => {
     const errors: string[] = [];
 
     // Validation date (OBLIGATOIRE)
@@ -258,7 +277,10 @@ function MainApp() {
     }
 
     // Validation email format
-    if (invoice.clientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invoice.clientEmail)) {
+    if (
+      invoice.clientEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invoice.clientEmail)
+    ) {
       errors.push("Format d'email invalide");
     }
 
@@ -273,107 +295,31 @@ function MainApp() {
     };
   };
 
-  // 🟢 Helper universel pour générer le PDF Blob à partir de l'aperçu HTML visible
+  // 🟢 Helper universel pour générer le PDF Blob avec le service unifié
   const generatePDFBlobFromPreview = async () => {
-    console.log("🚀 DÉBUT GÉNÉRATION PDF À PARTIR DE L'APERÇU HTML VISUEL");
-
-    // CORRECTION : Utiliser l'aperçu HTML visible au lieu des données JSON brutes
-    const element = document.getElementById('invoice-preview-section');
-    if (!element) {
-      throw new Error("Aperçu de facture non trouvé - Vérifiez que l'aperçu est affiché");
-    }
-
-    console.log('✅ Élément aperçu trouvé:', element);
+    console.log('🚀 DÉBUT GÉNÉRATION PDF AVEC SERVICE UNIFIÉ');
 
     try {
-      // Importer dynamiquement html2pdf
-      const html2pdf = (await import('html2pdf.js')).default;
-      console.log('✅ html2pdf importé avec succès');
+      // Utiliser le nouveau service PDF unifié
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
 
-      // Options optimisées pour EXACTEMENT 2 pages (facture + conditions générales)
-      const options = {
-        margin: 5, // Marges très réduites pour éviter les débordements
-        filename: `facture-${invoice.invoiceNumber}.pdf`,
-        image: {
-          type: 'jpeg',
-          quality: 0.9, // Qualité réduite pour optimiser la taille
-        },
-        html2canvas: {
-          scale: 1.2, // Scale encore plus réduit pour tenir sur 2 pages
-          useCORS: true,
-          letterRendering: true,
-          logging: false,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          height: 1680, // Hauteur fixe pour éviter les débordements (A4 * 2 pages)
-          width: 1190, // Largeur fixe A4
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-          compress: true,
-          putOnlyUsedFonts: true, // Optimisation fonts
-        },
-        pagebreak: {
-          mode: ['avoid-all', 'css', 'legacy'],
-          before: '.page-break-before',
-          after: '.page-break-after',
-          avoid: ['tr', 'td', 'img'], // Évite les coupures sur ces éléments
-        },
-        enableLinks: false, // Désactiver les liens pour éviter les pages supplémentaires
-      };
+      const sizeKB = Math.round(pdfBlob.size / 1024);
 
-      console.log('📄 Génération PDF optimisée pour EXACTEMENT 2 pages (Facture + Conditions)');
-
-      // Générer le PDF à partir de l'HTML visible (même méthode que pdfService.ts)
-      const blob = await html2pdf().set(options).from(element).outputPdf('blob');
-
-      const sizeKB = Math.round(blob.size / 1024);
-
-      // Vérification du nombre de pages (approximative par la taille)
-      let estimatedPages = Math.ceil(sizeKB / 40); // Approximation: ~40KB par page
-      if (sizeKB > 120) estimatedPages = 3; // Si > 120KB, probablement 3+ pages
-
-      // Analyse plus précise de la structure PDF
-      const htmlStructure = {
-        hasPageBreak: element?.innerHTML?.includes("pageBreakBefore: 'always'") || false,
-        hasConditionsSection: element?.innerHTML?.includes('CONDITIONS GÉNÉRALES') || false,
-        hasInvoiceSection: element?.innerHTML?.includes('FACTURE') || false,
-        contentLength: element?.innerHTML?.length || 0,
-      };
-
-      console.log('🎉 PDF généré - Analyse détaillée:', {
+      console.log('🎉 PDF généré avec service unifié - Analyse:', {
         taille: sizeKB + 'KB',
-        pagesEstimees: estimatedPages,
-        targetPages: '2 pages (Facture + Conditions générales)',
+        pages: '2 pages (Facture + CGV)',
+        source: 'PDFService unifié (jsPDF + autotable)',
+        format: 'A4 professionnel',
         contientLogo: true,
-        contientStyle: true,
-        contientMyConfort: true,
-        source: 'Aperçu HTML visible avec InvoicePreviewModern',
-        structure: htmlStructure,
+        contientCGV: true,
       });
 
-      // Warning si plus de 2 pages détectées
-      if (estimatedPages > 2) {
-        console.warn(
-          `⚠️ ATTENTION: PDF semble contenir ${estimatedPages} pages au lieu de 2. Taille: ${sizeKB}KB`,
-        );
-      } else {
-        console.log(`✅ PDF optimisé: ${estimatedPages} pages détectées (objectif: 2 pages)`);
-      }
-
-      // Vérification que le PDF est bien celui avec le style
-      if (sizeKB < 50) {
-        console.warn('⚠️ PDF semble trop petit, possible problème de génération');
-      } else {
-        console.log('✅ PDF a une taille correcte, contient probablement le style complet');
-      }
-
-      return blob;
+      return pdfBlob;
     } catch (error: any) {
       console.error('❌ Erreur lors de la génération PDF:', error);
-      throw new Error(`Erreur génération PDF: ${error?.message || 'Erreur inconnue'}`);
+      throw new Error(
+        `Erreur génération PDF: ${error?.message || 'Erreur inconnue'}`
+      );
     }
   };
 
@@ -383,17 +329,22 @@ function MainApp() {
     if (!validation.isValid) {
       showToast(
         `Impossible de télécharger le PDF. Champs obligatoires manquants: ${validation.errors.join(', ')}`,
-        'error',
+        'error'
       );
       return;
     }
 
     handleSave();
     handleSaveInvoice();
-    showToast('Génération et téléchargement du PDF MYCONFORT en cours...', 'success');
+    showToast(
+      'Génération et téléchargement du PDF MYCONFORT en cours...',
+      'success'
+    );
 
     try {
-      console.log('🔍 TÉLÉCHARGEMENT PDF - Utilisation du même PDF que webhook (HTML-based)');
+      console.log(
+        '🔍 TÉLÉCHARGEMENT PDF - Utilisation du même PDF que webhook (HTML-based)'
+      );
 
       // Utiliser la même fonction que pour le webhook
       const pdfBlob = await generatePDFBlobFromPreview();
@@ -426,13 +377,13 @@ function MainApp() {
 
       showToast(
         `PDF MYCONFORT téléchargé avec succès${invoice.signature ? ' (avec signature électronique)' : ''} - ${sizeKB}KB`,
-        'success',
+        'success'
       );
     } catch (error: any) {
       console.error('❌ PDF download error:', error);
       showToast(
         `Erreur lors du téléchargement du PDF: ${error?.message || 'Erreur inconnue'}`,
-        'error',
+        'error'
       );
     }
   };
@@ -443,7 +394,7 @@ function MainApp() {
     if (!validation.isValid) {
       showToast(
         `Impossible d'envoyer le PDF. Champs obligatoires manquants: ${validation.errors.join(', ')}`,
-        'error',
+        'error'
       );
       return;
     }
@@ -458,8 +409,11 @@ function MainApp() {
       const cleanedInvoice = {
         ...invoice,
         clientName: sanitizeClientData({ name: invoice.clientName }).name,
-        clientAddress: sanitizeClientData({ address: invoice.clientAddress }).address,
-        clientAddressLine2: sanitizeClientData({ addressLine2: invoice.clientAddressLine2 }).addressLine2,
+        clientAddress: sanitizeClientData({ address: invoice.clientAddress })
+          .address,
+        clientAddressLine2: sanitizeClientData({
+          addressLine2: invoice.clientAddressLine2,
+        }).addressLine2,
         clientCity: sanitizeClientData({ city: invoice.clientCity }).city,
         clientEmail: sanitizeClientData({ email: invoice.clientEmail }).email,
         clientPhone: sanitizeClientData({ phone: invoice.clientPhone }).phone,
@@ -483,7 +437,7 @@ function MainApp() {
         termsAccepted: cleanedInvoice.termsAccepted,
         totalCalculated: cleanedInvoice.products.reduce(
           (sum, p) => sum + p.quantity * p.priceTTC,
-          0,
+          0
         ),
       });
 
@@ -497,14 +451,18 @@ function MainApp() {
       const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve((reader.result as string).split(',')[1]);
-        reader.onerror = () => reject(new Error('Erreur conversion PDF en Base64'));
+        reader.onerror = () =>
+          reject(new Error('Erreur conversion PDF en Base64'));
         reader.readAsDataURL(pdfBlob);
       });
 
       const pdfSizeKB = Math.round(pdfBlob.size / 1024);
 
       // ✅ Validation préalable avant envoi N8N
-      if (!cleanedInvoice.clientEmail || cleanedInvoice.clientEmail.trim() === '') {
+      if (
+        !cleanedInvoice.clientEmail ||
+        cleanedInvoice.clientEmail.trim() === ''
+      ) {
         showToast("❌ Email client obligatoire pour l'envoi N8N", 'error');
         return;
       }
@@ -522,11 +480,10 @@ function MainApp() {
 
       showToast('🔐 Validation et envoi vers N8N...', 'success');
 
-      // Utiliser le nouveau service avec PDF réduit pour éviter l'erreur 500
-      const result = await N8nWebhookService.sendInvoiceWithReducedPDF(
+      // Utiliser la méthode standard sendInvoiceToN8n (même que le wizard)
+      const result = await N8nWebhookService.sendInvoiceToN8n(
         cleanedInvoice,
-        base64Data,
-        pdfSizeKB,
+        base64Data
       );
 
       if (result.success) {
@@ -534,9 +491,13 @@ function MainApp() {
       } else {
         throw new Error(result.message);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       console.error('❌ Erreur envoi PDF via N8N:', error);
-      showToast(`❌ Erreur d'envoi N8N: ${error.message || 'Erreur inconnue'}`, 'error');
+      showToast(
+        `❌ Erreur d'envoi N8N: ${errorMessage}`,
+        'error'
+      );
     }
   };
 
@@ -546,14 +507,17 @@ function MainApp() {
     if (!validation.isValid) {
       showToast(
         `Impossible d'imprimer. Champs obligatoires manquants: ${validation.errors.join(', ')}`,
-        'error',
+        'error'
       );
       return;
     }
 
     handleSave();
     handleSaveInvoice();
-    showToast('📄 Préparation impression A4 professionnelle (2 pages)...', 'success');
+    showToast(
+      '📄 Préparation impression A4 professionnelle (2 pages)...',
+      'success'
+    );
 
     try {
       // ✅ CIBLE LA FACTURE COMPLÈTE (2 pages : facture + conditions générales)
@@ -641,7 +605,8 @@ function MainApp() {
       `;
 
       // Remplacer le contenu avec wrapper A4 professionnel
-      document.title = 'Impression Facture MyConfort - A4 Professionnel (2 pages)';
+      document.title =
+        'Impression Facture MyConfort - A4 Professionnel (2 pages)';
 
       // Wrapper le contenu dans une structure A4 professionnelle
       const wrappedContent = `
@@ -660,7 +625,10 @@ function MainApp() {
         setTimeout(() => {
           document.body.innerHTML = originalContent;
           document.title = originalTitle;
-          showToast('✅ Impression A4 terminée (format professionnel)', 'success');
+          showToast(
+            '✅ Impression A4 terminée (format professionnel)',
+            'success'
+          );
         }, 1000);
       }, 500);
     } catch (error) {
@@ -712,7 +680,10 @@ function MainApp() {
 
   const handleLoadInvoice = (loadedInvoice: Invoice) => {
     setInvoice(loadedInvoice);
-    showToast(`Facture ${loadedInvoice.invoiceNumber} chargée avec succès`, 'success');
+    showToast(
+      `Facture ${loadedInvoice.invoiceNumber} chargée avec succès`,
+      'success'
+    );
   };
 
   const handleDeleteInvoice = (index: number) => {
@@ -720,7 +691,10 @@ function MainApp() {
     if (invoiceToDelete) {
       deleteInvoice(invoiceToDelete.invoiceNumber);
       setInvoices(loadInvoices());
-      showToast(`Facture ${invoiceToDelete.invoiceNumber} supprimée`, 'success');
+      showToast(
+        `Facture ${invoiceToDelete.invoiceNumber} supprimée`,
+        'success'
+      );
     }
   };
 
@@ -733,7 +707,7 @@ function MainApp() {
   const handleNewInvoice = () => {
     if (
       window.confirm(
-        'Créer une nouvelle facture ?\n\nLes données actuelles seront perdues si elles ne sont pas sauvegardées.',
+        'Créer une nouvelle facture ?\n\nLes données actuelles seront perdues si elles ne sont pas sauvegardées.'
       )
     ) {
       setInvoice({
@@ -807,51 +781,51 @@ function MainApp() {
         onGoToIpad={() => navigate('/ipad?step=client')}
       />
 
-      <main className="container mx-auto px-4 py-6" id="invoice-content">
+      <main className='container mx-auto px-4 py-6' id='invoice-content'>
         {/* En-tête MYCONFORT avec dégradé basé sur #477A0C */}
         <div
-          className="text-white rounded-xl shadow-xl p-6 mb-6"
+          className='text-white rounded-xl shadow-xl p-6 mb-6'
           style={{
             background:
               'linear-gradient(135deg, #477A0C 0%, #5A8F0F 25%, #3A6A0A 50%, #6BA015 75%, #477A0C 100%)',
           }}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/20 p-3 rounded-full">
-                <span className="text-2xl">🌸</span>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center space-x-4'>
+              <div className='bg-white/20 p-3 rounded-full'>
+                <span className='text-2xl'>🌸</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold">MYCONFORT</h1>
-                <p className="text-green-100">
+                <h1 className='text-3xl font-bold'>MYCONFORT</h1>
+                <p className='text-green-100'>
                   Facturation professionnelle avec signature électronique
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-blue-100">Statut de la facture</div>
-              <div className="flex items-center space-x-2 mt-1">
+            <div className='text-right'>
+              <div className='text-sm text-blue-100'>Statut de la facture</div>
+              <div className='flex items-center space-x-2 mt-1'>
                 {validation.isValid ? (
-                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                  <div className='bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1'>
                     <span>✅</span>
                     <span>COMPLÈTE</span>
                   </div>
                 ) : (
-                  <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                  <div className='bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1'>
                     <span>⚠️</span>
                     <span>INCOMPLÈTE</span>
                   </div>
                 )}
                 {invoice.signature && (
-                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                  <div className='bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1'>
                     <span>🔒</span>
                     <span>SIGNÉE</span>
                   </div>
                 )}
                 <button
                   onClick={handleNewInvoice}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 transition-all hover:scale-105 shadow-md"
-                  title="Créer une nouvelle facture"
+                  className='bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 transition-all hover:scale-105 shadow-md'
+                  title='Créer une nouvelle facture'
                 >
                   <span>📝</span>
                   <span>Nouvelle facture</span>
@@ -863,7 +837,7 @@ function MainApp() {
 
         {/* Debug Center Section */}
         {showDebugCenter && (
-          <div className="mb-6">
+          <div className='mb-6'>
             <DebugCenter
               invoice={invoice}
               onSuccess={handleEmailJSSuccess}
@@ -877,7 +851,7 @@ function MainApp() {
           onUpdate={updates => setInvoice(prev => ({ ...prev, ...updates }))}
         />
 
-        <div id="client-section">
+        <div id='client-section'>
           <ClientSection
             client={{
               name: invoice.clientName,
@@ -909,13 +883,15 @@ function MainApp() {
           />
         </div>
 
-        <div id="products-section">
+        <div id='products-section'>
           <ProductSection
             products={invoice.products}
             onUpdate={products => setInvoice(prev => ({ ...prev, products }))}
             taxRate={invoice.taxRate}
             invoiceNotes={invoice.invoiceNotes}
-            onNotesChange={invoiceNotes => setInvoice(prev => ({ ...prev, invoiceNotes }))}
+            onNotesChange={invoiceNotes =>
+              setInvoice(prev => ({ ...prev, invoiceNotes }))
+            }
             acompteAmount={invoice.montantAcompte}
             onAcompteChange={amount =>
               setInvoice(prev => ({
@@ -931,7 +907,9 @@ function MainApp() {
               }))
             }
             advisorName={invoice.advisorName}
-            onAdvisorNameChange={name => setInvoice(prev => ({ ...prev, advisorName: name }))}
+            onAdvisorNameChange={name =>
+              setInvoice(prev => ({ ...prev, advisorName: name }))
+            }
             termsAccepted={invoice.termsAccepted}
             onTermsAcceptedChange={accepted =>
               setInvoice(prev => ({ ...prev, termsAccepted: accepted }))
@@ -947,19 +925,21 @@ function MainApp() {
 
         {/* Delivery Section - UNIFORMISÉ */}
         <div
-          id="delivery-section"
-          className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]"
+          id='delivery-section'
+          className='bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]'
         >
-          <h2 className="text-xl font-bold text-[#F2EFE2] mb-4 flex items-center justify-center">
-            <span className="bg-[#F2EFE2] text-[#477A0C] px-6 py-3 rounded-full font-bold">
+          <h2 className='text-xl font-bold text-[#F2EFE2] mb-4 flex items-center justify-center'>
+            <span className='bg-[#F2EFE2] text-[#477A0C] px-6 py-3 rounded-full font-bold'>
               INFORMATIONS LOGISTIQUES
             </span>
           </h2>
 
-          <div className="bg-[#F2EFE2] rounded-lg p-6 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='bg-[#F2EFE2] rounded-lg p-6 mt-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="block text-black mb-1 font-bold">Mode de livraison</label>
+                <label className='block text-black mb-1 font-bold'>
+                  Mode de livraison
+                </label>
                 <select
                   value={invoice.deliveryMethod}
                   onChange={e =>
@@ -968,17 +948,23 @@ function MainApp() {
                       deliveryMethod: e.target.value,
                     }))
                   }
-                  className="w-full border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold"
+                  className='w-full border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold'
                 >
-                  <option value="">Sélectionner</option>
-                  <option value="Colissimo 48 heures">Colissimo 48 heures</option>
-                  <option value="Livraison par transporteur">Livraison par transporteur</option>
-                  <option value="Retrait en magasin">Retrait en magasin</option>
+                  <option value=''>Sélectionner</option>
+                  <option value='Colissimo 48 heures'>
+                    Colissimo 48 heures
+                  </option>
+                  <option value='Livraison par transporteur'>
+                    Livraison par transporteur
+                  </option>
+                  <option value='Retrait en magasin'>Retrait en magasin</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-black mb-1 font-bold">Précisions de livraison</label>
+                <label className='block text-black mb-1 font-bold'>
+                  Précisions de livraison
+                </label>
                 <textarea
                   value={invoice.deliveryNotes}
                   onChange={e =>
@@ -987,16 +973,16 @@ function MainApp() {
                       deliveryNotes: e.target.value,
                     }))
                   }
-                  className="w-full border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold h-20"
+                  className='w-full border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold h-20'
                   placeholder="Instructions spéciales, étage, code d'accès..."
                 />
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-black italic font-semibold">
+            <div className='mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-black italic font-semibold'>
               <p>
-                📦 Livraison estimée sous 48 heures. Les délais sont donnés à titre indicatif et ne
-                sont pas contractuels.
+                📦 Livraison estimée sous 48 heures. Les délais sont donnés à
+                titre indicatif et ne sont pas contractuels.
               </p>
             </div>
           </div>
@@ -1012,10 +998,10 @@ function MainApp() {
         /> */}
 
         {/* Section Aperçu de la facture - Style Netlify intégré */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-[#477A0C] flex items-center">
-              <span className="mr-3">📄</span>
+        <div className='bg-white rounded-xl shadow-lg p-6 mb-6'>
+          <div className='flex items-center justify-between mb-4'>
+            <h2 className='text-2xl font-bold text-[#477A0C] flex items-center'>
+              <span className='mr-3'>📄</span>
               APERÇU DE LA FACTURE
             </h2>
             <button
@@ -1026,15 +1012,20 @@ function MainApp() {
                   : 'bg-[#477A0C] hover:bg-green-700 text-white'
               }`}
             >
-              {showInvoicePreview ? "Masquer l'aperçu 🌸" : "Afficher l'aperçu 🌸"}
+              {showInvoicePreview
+                ? "Masquer l'aperçu 🌸"
+                : "Afficher l'aperçu 🌸"}
             </button>
           </div>
 
           {showInvoicePreview && (
-            <div className="border-2 border-[#477A0C] rounded-lg p-4 bg-gray-50">
+            <div className='border-2 border-[#477A0C] rounded-lg p-4 bg-gray-50'>
               {/* FORMAT FIGÉ: Premium uniquement - Aperçu de la facture au format premium */}
-              <div id="invoice-preview-section" className="bg-white rounded-lg overflow-hidden">
-                <div className="transition-all duration-500">
+              <div
+                id='invoice-preview-section'
+                className='bg-white rounded-lg overflow-hidden'
+              >
+                <div className='transition-all duration-500'>
                   <InvoicePreviewModern invoice={invoice} />
                 </div>
               </div>
@@ -1043,17 +1034,19 @@ function MainApp() {
         </div>
 
         {/* Action Buttons - UNIFORMISÉ AVEC NOUVELLE FACTURE CLIQUABLE */}
-        <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]">
-          <h2 className="text-xl font-bold text-[#F2EFE2] mb-4 flex items-center justify-center">
-            <span className="bg-[#F2EFE2] text-[#477A0C] px-6 py-3 rounded-full font-bold">
+        <div className='bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-6 mb-6 transform transition-all hover:scale-[1.005] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)]'>
+          <h2 className='text-xl font-bold text-[#F2EFE2] mb-4 flex items-center justify-center'>
+            <span className='bg-[#F2EFE2] text-[#477A0C] px-6 py-3 rounded-full font-bold'>
               ACTIONS PRINCIPALES
             </span>
           </h2>
 
-          <div className="bg-[#F2EFE2] rounded-lg p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className='bg-[#F2EFE2] rounded-lg p-6'>
+            <div className='flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'>
               <div>
-                <label className="block text-black mb-1 font-bold">Email du destinataire</label>
+                <label className='block text-black mb-1 font-bold'>
+                  Email du destinataire
+                </label>
                 <input
                   value={invoice.clientEmail}
                   onChange={e =>
@@ -1062,15 +1055,15 @@ function MainApp() {
                       clientEmail: e.target.value,
                     }))
                   }
-                  type="email"
-                  className="w-full md:w-64 border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold"
-                  placeholder="client@email.com"
+                  type='email'
+                  className='w-full md:w-64 border-2 border-[#477A0C] rounded-lg px-4 py-3 focus:border-[#F55D3E] focus:ring-2 focus:ring-[#89BBFE] transition-all bg-white text-black font-bold'
+                  placeholder='client@email.com'
                 />
               </div>
-              <div className="flex gap-3 justify-center">
+              <div className='flex gap-3 justify-center'>
                 <button
                   onClick={() => setShowPDFPreview(true)}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white"
+                  className='px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white'
                   title="Ouvrir l'aperçu de la facture et télécharger le PDF"
                 >
                   <span>👁️</span>
@@ -1079,15 +1072,21 @@ function MainApp() {
                 <button
                   onClick={handleSaveInvoice}
                   disabled={
-                    !invoice.clientName || !invoice.clientEmail || invoice.products.length === 0
+                    !invoice.clientName ||
+                    !invoice.clientEmail ||
+                    invoice.products.length === 0
                   }
                   className={`px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 disabled:hover:scale-100 ${
-                    invoice.clientName && invoice.clientEmail && invoice.products.length > 0
+                    invoice.clientName &&
+                    invoice.clientEmail &&
+                    invoice.products.length > 0
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                   }`}
                   title={
-                    invoice.clientName && invoice.clientEmail && invoice.products.length > 0
+                    invoice.clientName &&
+                    invoice.clientEmail &&
+                    invoice.products.length > 0
                       ? "Enregistrer la facture dans l'onglet Factures"
                       : 'Complétez les informations client et ajoutez au moins un produit'
                   }
@@ -1097,15 +1096,15 @@ function MainApp() {
                 </button>
                 <button
                   onClick={handlePrintWifi}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white"
-                  title="Imprimer la facture complète (2 pages : facture + conditions générales)"
+                  className='px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-orange-600 hover:bg-orange-700 text-white'
+                  title='Imprimer la facture complète (2 pages : facture + conditions générales)'
                 >
                   <span>🖨️</span>
                   <span>IMPRIMER (2 PAGES)</span>
                 </button>
                 <button
                   onClick={handleSendPDF}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white"
+                  className='px-6 py-3 rounded-xl flex items-center space-x-3 font-bold shadow-lg transform transition-all hover:scale-105 bg-purple-600 hover:bg-purple-700 text-white'
                 >
                   <span>📧</span>
                   <span>ENVOYER PAR EMAIL/DRIVE</span>
@@ -1132,7 +1131,10 @@ function MainApp() {
         onDeleteInvoice={handleDeleteInvoice}
       />
 
-      <ProductsListModal isOpen={showProductsList} onClose={() => setShowProductsList(false)} />
+      <ProductsListModal
+        isOpen={showProductsList}
+        onClose={() => setShowProductsList(false)}
+      />
 
       <PDFPreviewModal
         isOpen={showPDFPreview}
@@ -1174,10 +1176,10 @@ function MainApp() {
 
       {/* Add toggle for Debug Center */}
       {showDebugCenter && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className='fixed top-4 right-4 z-50'>
           <button
             onClick={() => setShowDebugCenter(false)}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium"
+            className='bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium'
           >
             Fermer Debug
           </button>
@@ -1190,10 +1192,15 @@ function MainApp() {
         onSave={handleSaveSignature}
       />
 
-      <Toast message={toast.message} type={toast.type} show={toast.show} onClose={hideToast} />
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        show={toast.show}
+        onClose={hideToast}
+      />
 
       {/* Version indicator */}
-      <div className="fixed bottom-2 right-2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+      <div className='fixed bottom-2 right-2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded'>
         v2025.07.27-15h00
       </div>
     </div>

@@ -20,20 +20,20 @@ export const loadDraft = (): Invoice | null => {
 
 export const saveClient = (client: Client): void => {
   const clients = loadClients();
-  const existingIndex = clients.findIndex(c => 
-    c.email === client.email && c.name === client.name
+  const existingIndex = clients.findIndex(
+    c => c.email === client.email && c.name === client.name
   );
-  
+
   if (existingIndex >= 0) {
     clients[existingIndex] = { ...clients[existingIndex], ...client };
   } else {
     clients.push({
       ...client,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   }
-  
+
   saveClients(clients);
 };
 
@@ -49,30 +49,32 @@ export const loadInvoices = (): Invoice[] => {
 
 export const saveInvoice = (invoice: Invoice): void => {
   const invoices = loadInvoices();
-  const existingIndex = invoices.findIndex(inv => 
-    inv.invoiceNumber === invoice.invoiceNumber
+  const existingIndex = invoices.findIndex(
+    inv => inv.invoiceNumber === invoice.invoiceNumber
   );
-  
+
   if (existingIndex >= 0) {
     // Mettre à jour la facture existante
-    invoices[existingIndex] = { 
-      ...invoice, 
-      updatedAt: new Date().toISOString() 
+    invoices[existingIndex] = {
+      ...invoice,
+      updatedAt: new Date().toISOString(),
     };
   } else {
     // Ajouter une nouvelle facture
     invoices.push({
       ...invoice,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   }
-  
+
   saveInvoices(invoices);
 };
 
 export const deleteInvoice = (invoiceNumber: string): void => {
   const invoices = loadInvoices();
-  const filteredInvoices = invoices.filter(inv => inv.invoiceNumber !== invoiceNumber);
+  const filteredInvoices = invoices.filter(
+    inv => inv.invoiceNumber !== invoiceNumber
+  );
   saveInvoices(filteredInvoices);
 };
 
@@ -86,14 +88,16 @@ export const cleanupOldInvoices = (daysToKeep: number = 365): void => {
   const invoices = loadInvoices();
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-  
+
   const filteredInvoices = invoices.filter(invoice => {
     const invoiceDate = new Date(invoice.invoiceDate);
     return invoiceDate >= cutoffDate;
   });
-  
+
   if (filteredInvoices.length !== invoices.length) {
     saveInvoices(filteredInvoices);
-    console.log(`Nettoyage: ${invoices.length - filteredInvoices.length} factures anciennes supprimées`);
+    console.log(
+      `Nettoyage: ${invoices.length - filteredInvoices.length} factures anciennes supprimées`
+    );
   }
 };
