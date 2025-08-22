@@ -1,6 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
+import { UnifiedPrintService } from '../../services/unifiedPrintService';
+import { N8nWebhookService } from '../../services/n8nWebhookService';
+import { PDFService } from '../../services/pdfService';
+import { saveInvoiceToFile } from '../../utils/invoiceStorage';
+import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
+import { Invoice } from '../../types';
 
 interface StepProps {
   onNext: () => void;
@@ -11,9 +17,17 @@ interface StepProps {
 }
 
 export default function StepRecap({ onPrev }: StepProps) {
-  const { client, produits, paiement, livraison, signature } = useInvoiceWizard();
+  const { client, produits, paiement, livraison, signature, syncToMainInvoice } = useInvoiceWizard();
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const invoicePreviewRef = useRef<HTMLDivElement>(null);
 
-  const totals = useMemo(() => {
+  // Construction de l'objet Invoice depuis le store Zustand
+  const invoice: Invoice = useMemo(() => {
+    const baseInvoice = syncToMainInvoice();
+    
+    // Calculs financiers
     const totalTTC = produits.reduce((sum, p) => {
       return sum + calculateProductTotal(
         Number(p.qty || 0),
@@ -25,9 +39,136 @@ export default function StepRecap({ onPrev }: StepProps) {
 
     const totalHT = totalTTC / 1.2; // TVA 20%
     const totalTVA = totalTTC - totalHT;
+    const montantRemise = produits.reduce((sum, p) => {
+      const originalTotal = p.priceTTC * p.qty;
+      const discountedTotal = calculateProductTotal(p.qty, p.priceTTC, p.discount, p.discountType);
+      return sum + (originalTotal - discountedTotal);
+    }, 0);
 
-    return { totalHT, totalTVA, totalTTC };
-  }, [produits]);
+    return {
+      ...baseInvoice,
+      montantHT: +totalHT.toFixed(2),
+      montantTTC: +totalTTC.toFixed(2),
+      montantTVA: +totalTVA.toFixed(2),
+      montantRemise: +montantRemise.toFixed(2),
+      taxRate: 20,
+      isSigned: !!signature.dataUrl,
+      signatureDate: signature.dataUrl ? new Date().toISOString() : undefined,
+    };
+  }, [produits, paiement, client, livraison, signature, syncToMainInvoice]);
+
+  // Fonction pour afficher un message temporaire
+  const showMessage = (message: string, isError = false) => {
+    if (isError) {
+      setErrorMessage(message);
+      setSuccessMessage(null);
+    } else {
+      setSuccessMessage(message);
+      setErrorMessage(null);
+    }
+    
+    setTimeout(() => {
+      setSuccessMessage(null);
+      setErrorMessage(null);
+    }, 5000);
+  };
+
+  // Action 1: Enregistrer la facture dans l'onglet factures
+  const handleSaveInvoice = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Convertir au format attendu par invoiceStorage
+      const storageInvoice = {
+        id: `invoice-${Date.now()}`,
+        clientName: invoice.clientName,
+        clientAddress: `${invoice.clientAddress}, ${invoice.clientCity} ${invoice.clientPostalCode}`,
+        clientPhone: invoice.clientPhone,
+        clientEmail: invoice.clientEmail,
+        items: invoice.products.map(p => ({
+          description: p.name,
+          quantity: p.quantity,
+          unitPrice: p.priceTTC,
+          total: p.quantity * p.priceTTC
+        })),
+        subtotal: invoice.montantHT,
+        tax: invoice.montantTVA,
+        total: invoice.montantTTC,
+        date: invoice.invoiceDate,
+        invoiceNumber: invoice.invoiceNumber,
+      };
+      
+      // Sauvegarder via le service de stockage
+      const success = saveInvoiceToFile(storageInvoice);
+      
+      if (success) {
+        showMessage('✅ Facture enregistrée avec succès dans l\'onglet factures');
+      } else {
+        showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde facture:', error);
+      showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Action 2: Imprimer les deux pages (facture + CGV)
+  const handlePrintInvoice = async () => {
+    try {
+      setIsLoading(true);
+      showMessage('🖨️ Préparation de l\'impression...');
+      
+      // Utiliser le service d'impression unifié
+      await UnifiedPrintService.printInvoice(invoice);
+      
+      showMessage('✅ Impression lancée avec succès');
+    } catch (error) {
+      console.error('Erreur impression:', error);
+      showMessage('❌ Erreur lors de l\'impression', true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Action 3: Envoyer par email et drive via N8N
+  const handleSendEmailAndDrive = async () => {
+    try {
+      setIsLoading(true);
+      showMessage('📧 Génération du PDF et envoi en cours...');
+      
+      // Générer le PDF depuis l'aperçu
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice, invoicePreviewRef);
+      
+      // Convertir le blob en base64
+      const reader = new FileReader();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Extraire seulement la partie base64 (après la virgule)
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error('Erreur conversion PDF'));
+        reader.readAsDataURL(pdfBlob);
+      });
+      
+      // Envoyer via N8N
+      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
+      
+      if (result.success) {
+        showMessage('✅ Facture envoyée par email et sauvegardée sur Drive avec succès');
+      } else {
+        showMessage(`❌ Erreur lors de l'envoi: ${result.message}`, true);
+      }
+    } catch (error) {
+      console.error('Erreur envoi email/drive:', error);
+      showMessage('❌ Erreur lors de l\'envoi par email et drive', true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const formatEUR = (amount: number) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -37,7 +178,11 @@ export default function StepRecap({ onPrev }: StepProps) {
 
   return (
     <div className="py-8">
+      {/* Header avec code couleur harmonisé */}
       <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4">
+          7
+        </div>
         <h2 className="text-3xl font-bold text-[#477A0C] mb-2">📋 Récapitulatif Final</h2>
         <p className="text-gray-600 text-lg">
           Vérification complète avant génération de la facture
@@ -46,9 +191,36 @@ export default function StepRecap({ onPrev }: StepProps) {
 
       <div className="max-w-6xl mx-auto space-y-6">
 
+        {/* Messages d'état */}
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl text-center">
+            {successMessage}
+          </div>
+        )}
+        
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-center">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Aperçu de la facture */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            📄 Aperçu de la facture
+          </h3>
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <InvoicePreviewModern 
+              ref={invoicePreviewRef}
+              invoice={invoice}
+              className="bg-white"
+            />
+          </div>
+        </section>
+
         {/* Informations client */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
             <span className="mr-2">👤</span>
             Informations Client
           </h3>
@@ -86,8 +258,8 @@ export default function StepRecap({ onPrev }: StepProps) {
         </section>
 
         {/* Produits commandés */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
             <span className="mr-2">📦</span>
             Produits Commandés
           </h3>
@@ -150,22 +322,22 @@ export default function StepRecap({ onPrev }: StepProps) {
           <div className="bg-gray-50 rounded-xl p-4 mt-4">
             <div className="flex justify-between py-2">
               <span>Total HT :</span>
-              <span className="font-semibold">{formatEUR(totals.totalHT)}</span>
+              <span className="font-semibold">{formatEUR(invoice.montantHT)}</span>
             </div>
             <div className="flex justify-between py-2">
               <span>TVA (20%) :</span>
-              <span className="font-semibold">{formatEUR(totals.totalTVA)}</span>
+              <span className="font-semibold">{formatEUR(invoice.montantTVA)}</span>
             </div>
             <div className="flex justify-between py-3 border-t-2 border-gray-300 text-xl font-bold text-[#477A0C]">
               <span>Total TTC :</span>
-              <span>{formatEUR(totals.totalTTC)}</span>
+              <span>{formatEUR(invoice.montantTTC)}</span>
             </div>
           </div>
         </section>
 
         {/* Modalités de paiement */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
             <span className="mr-2">💳</span>
             Modalités de Paiement
           </h3>
@@ -199,8 +371,8 @@ export default function StepRecap({ onPrev }: StepProps) {
         </section>
 
         {/* Modalités de livraison */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
             <span className="mr-2">🚚</span>
             Modalités de Livraison
           </h3>
@@ -239,12 +411,6 @@ export default function StepRecap({ onPrev }: StepProps) {
             </div>
           )}
 
-          {livraison.eventLocation && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <strong>Lieu/Adresse :</strong> {livraison.eventLocation}
-            </div>
-          )}
-
           {livraison.deliveryNotes && (
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
               <strong>Notes de livraison :</strong> {livraison.deliveryNotes}
@@ -253,8 +419,8 @@ export default function StepRecap({ onPrev }: StepProps) {
         </section>
 
         {/* Signature */}
-        <section className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
             <span className="mr-2">✍️</span>
             Signature Client
           </h3>
@@ -275,11 +441,11 @@ export default function StepRecap({ onPrev }: StepProps) {
           )}
         </section>
 
-        {/* Actions finales */}
-        <section className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-6 border-2 border-green-300">
-          <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center">
-            <span className="mr-2">🎉</span>
-            Commande Finalisée
+        {/* Actions principales */}
+        <section className="bg-gradient-to-r from-[#477A0C]/10 to-[#477A0C]/20 rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">�</span>
+            Actions Principales
           </h3>
           
           <p className="text-green-700 mb-6">
@@ -289,26 +455,32 @@ export default function StepRecap({ onPrev }: StepProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               type="button"
-              className="bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
+              onClick={handleSaveInvoice}
+              disabled={isLoading}
+              className="bg-[#477A0C] hover:bg-[#5A8F0F] disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
             >
-              <span className="mr-2">📄</span>
-              Générer la Facture PDF
+              <span className="mr-2">�</span>
+              {isLoading ? 'Enregistrement...' : 'Enregistrer Facture'}
             </button>
             
             <button
               type="button"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
+              onClick={handlePrintInvoice}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
             >
-              <span className="mr-2">📧</span>
-              Envoyer par Email
+              <span className="mr-2">�️</span>
+              {isLoading ? 'Impression...' : 'Imprimer les 2 Pages'}
             </button>
             
             <button
               type="button"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
+              onClick={handleSendEmailAndDrive}
+              disabled={isLoading}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
             >
-              <span className="mr-2">💾</span>
-              Sauvegarder
+              <span className="mr-2">�</span>
+              {isLoading ? 'Envoi en cours...' : 'Envoyer Email & Drive'}
             </button>
           </div>
         </section>
