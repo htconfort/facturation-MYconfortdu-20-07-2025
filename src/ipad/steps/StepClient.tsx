@@ -16,6 +16,9 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
   // État pour suivre quels champs ont été édités
   const [editedFields, setEditedFields] = useState<Record<string, boolean>>({});
   
+  // État pour la checkbox "Pas de digicode"
+  const [noDigicode, setNoDigicode] = useState<boolean>(false);
+  
   useEffect(() => { 
     nameRef.current?.focus(); 
   }, []);
@@ -33,6 +36,8 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
     address: client.address && client.address.trim().length > 0,
     city: client.city && client.city.trim().length > 0,
     postalCode: client.postalCode && client.postalCode.trim().length > 0,
+    housingType: client.housingType && client.housingType.trim().length > 0,
+    doorCode: noDigicode || (client.doorCode && client.doorCode.trim().length > 0),
   };
 
   const isAllRequiredValid = Object.values(requiredFields).every(Boolean);
@@ -75,6 +80,8 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
         address: true,
         city: true,
         postalCode: true,
+        housingType: true,
+        doorCode: true,
       });
       return;
     }
@@ -237,16 +244,19 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
               />
             </div>
 
-            {/* Type de logement - OPTIONNEL */}
+            {/* Type de logement - OBLIGATOIRE */}
             <div>
               <label className="block text-black font-bold mb-3 text-lg flex items-center justify-between">
-                <span>Type de logement: <span className="text-green-600">Optionnel</span></span>
-                <span className="text-blue-600 font-bold text-lg">💡 Facultatif</span>
+                <span>Type de logement</span>
+                {getValidationIndicator('housingType')}
               </label>
               <select
                 value={client.housingType || ''}
-                onChange={(e) => updateClient({ housingType: e.target.value })}
-                className="w-full h-16 rounded-xl border-3 border-blue-300 bg-blue-50 px-6 text-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all font-bold"
+                onChange={(e) => {
+                  updateClient({ housingType: e.target.value });
+                  markAsEdited('housingType');
+                }}
+                className={getFieldClass('housingType')}
               >
                 <option value="">Sélectionner</option>
                 <option value="Appartement">Appartement</option>
@@ -256,18 +266,50 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
               </select>
             </div>
 
-            {/* Code porte - OPTIONNEL */}
+            {/* Code porte - OBLIGATOIRE */}
             <div className="lg:col-span-2">
               <label className="block text-black font-bold mb-3 text-lg flex items-center justify-between">
-                <span>Code porte / Digicode: <span className="text-green-600">Optionnel</span></span>
-                <span className="text-blue-600 font-bold text-lg">💡 Facultatif</span>
+                <span>Code porte / Digicode</span>
+                {getValidationIndicator('doorCode')}
               </label>
-              <input 
-                value={client.doorCode || ''}
-                onChange={(e) => updateClient({ doorCode: e.target.value })}
-                className="w-full h-16 rounded-xl border-3 border-blue-300 bg-blue-50 px-6 text-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all font-bold"
-                placeholder="A1234, Étage 3, Porte gauche..."
-              />
+              
+              <div className="space-y-3">
+                <input 
+                  value={client.doorCode || ''}
+                  onChange={(e) => {
+                    updateClient({ doorCode: e.target.value });
+                    markAsEdited('doorCode');
+                    if (e.target.value) setNoDigicode(false);
+                  }}
+                  disabled={noDigicode}
+                  className={noDigicode ? 
+                    "w-full h-16 rounded-xl border-3 border-gray-300 bg-gray-100 px-6 text-xl font-bold opacity-50" :
+                    getFieldClass('doorCode')
+                  }
+                  placeholder="A1234, Étage 3, Porte gauche..."
+                />
+                
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="noDigicode"
+                    checked={noDigicode}
+                    onChange={(e) => {
+                      setNoDigicode(e.target.checked);
+                      markAsEdited('doorCode');
+                      if (e.target.checked) {
+                        updateClient({ doorCode: 'Pas de digicode' });
+                      } else {
+                        updateClient({ doorCode: '' });
+                      }
+                    }}
+                    className="w-5 h-5 text-[#477A0C] bg-gray-100 border-gray-300 rounded focus:ring-[#477A0C] focus:ring-2"
+                  />
+                  <label htmlFor="noDigicode" className="text-lg font-medium text-gray-700">
+                    ✓ Pas de digicode
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -280,10 +322,11 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
           <div>
             <h3 className="text-xl font-bold text-blue-800 mb-2">Instructions iPad</h3>
             <ul className="text-blue-700 space-y-1">
-              <li>• 🔴 Champs obligatoires: Nom, Email, Téléphone, Adresse, Code postal, Ville</li>
-              <li>• 🔵 Champs optionnels: Adresse ligne 2, SIRET, Type logement, Code porte</li>
+              <li>• 🔴 Champs obligatoires: Nom, Email, Téléphone, Adresse, Code postal, Ville, Type logement, Digicode</li>
+              <li>• 🔵 Champs optionnels: Adresse ligne 2, SIRET</li>
               <li>• 🔴➡️🟢 Les cadres rouges deviennent verts quand remplis correctement</li>
-              <li>• 🚫 Impossible de continuer tant que les 6 champs obligatoires ne sont pas remplis</li>
+              <li>• ✅ Pour le digicode: remplir le champ OU cocher "Pas de digicode"</li>
+              <li>• 🚫 Impossible de continuer tant que les 8 champs obligatoires ne sont pas remplis</li>
             </ul>
           </div>
         </div>
@@ -297,7 +340,7 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
           </div>
         ) : (
           <div className="inline-flex items-center px-8 py-4 bg-red-100 text-red-800 rounded-2xl text-xl font-bold">
-            📝 {6 - Object.values(requiredFields).filter(Boolean).length} champ(s) obligatoire(s) manquant(s)
+            📝 {8 - Object.values(requiredFields).filter(Boolean).length} champ(s) obligatoire(s) manquant(s)
           </div>
         )}
       </div>
