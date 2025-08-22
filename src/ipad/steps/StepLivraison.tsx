@@ -73,16 +73,24 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           </div>
         </section>
 
-        {/* Mode de livraison - Seulement si il y a des produits à livrer */}
-        {produitsALivrer.length > 0 && (
-          <section className="bg-white rounded-2xl shadow-xl p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">🚚 Mode de livraison</h3>
+        {/* Mode de livraison - OBLIGATOIRE */}
+        <section className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">
+            🚚 Mode de livraison <span className="text-red-500">*</span>
+          </h3>
+
+          <div className="bg-red-50 rounded-xl p-4 mb-6">
+            <h4 className="font-semibold text-red-800 mb-2">⚠️ Obligatoire</h4>
+            <p className="text-red-700 text-sm">
+              Vous devez sélectionner un mode de livraison pour continuer.
+            </p>
+          </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { value: 'Colissimo 48 heures', label: '📦 Colissimo 48 heures', desc: 'Livraison par La Poste sous 48h' },
                 { value: 'Livraison par transporteur', label: '🚚 Livraison par transporteur', desc: 'Livraison à domicile par transporteur' },
-                { value: 'Retrait en magasin', label: '🏪 Retrait en magasin', desc: 'Le client vient récupérer en magasin' },
+                { value: 'Retrait sur place à la fin de l\'événement', label: '📍 Retrait sur place à la fin de l\'événement', desc: 'Le client récupère à la fin de l\'événement' },
               ].map((method) => {
                 const selected = livraison.deliveryMethod === method.value;
                 return (
@@ -104,7 +112,6 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
               })}
             </div>
           </section>
-        )}
 
         {/* Adresse de livraison */}
         <section className="bg-white rounded-2xl shadow-xl p-6">
@@ -158,8 +165,8 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
             ← Paiement
           </button>
 
-          {/* Si pas de produits à livrer, on peut passer même sans mode de livraison */}
-          {(isValid || produitsALivrer.length === 0) ? (
+          {/* Mode de livraison OBLIGATOIRE */}
+          {isValid ? (
             <button
               type="button"
               onClick={onNext}
@@ -171,7 +178,7 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
             <div className="text-center p-6 bg-orange-50 rounded-2xl">
               <div className="text-3xl mb-3">⚠️</div>
               <h3 className="text-lg font-semibold text-orange-800 mb-2">Mode de livraison requis</h3>
-              <p className="text-orange-600">Veuillez sélectionner un mode de livraison pour les produits à livrer</p>
+              <p className="text-orange-600">Veuillez sélectionner un mode de livraison pour continuer</p>
             </div>
           )}
         </div>
