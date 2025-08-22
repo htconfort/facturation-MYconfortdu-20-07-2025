@@ -1,6 +1,6 @@
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
-import { chequeFriendlyDeposits, targetsFromPercents } from '../../utils/chequeMath';
+import { chequeFriendlyDeposits } from '../../utils/chequeMath';
 import { useMemo } from 'react';
 
 interface StepProps {
@@ -73,11 +73,8 @@ export default function StepPaiement({ onNext, onPrev }: StepProps) {
   const isValid = Boolean(paiement.method && paiement.method.trim().length > 0);
 
   // Suggestions pour chèques sans virgule
-  const defaultPercents = [0, 10, 20, 30, 50]; // cibles usuelles
-  const preferredDeposits = targetsFromPercents(totalTTC, defaultPercents);
-
   const chequeSuggestions = paiement.method === 'Chèque à venir'
-    ? chequeFriendlyDeposits(totalTTC, nombreCheques, preferredDeposits, 6) // 6 suggestions max
+    ? chequeFriendlyDeposits(totalTTC, nombreCheques)
     : [];
 
   const hasAnyDiscount = produits.some((p) => safeNumber(p.discount) > 0);

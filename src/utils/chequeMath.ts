@@ -132,8 +132,44 @@ export function optimiserAcomptePourChequesRonds(
  * @param nombreCheques - Nombre de chèques pour le solde
  * @returns Suggestions d'acomptes optimisées
  */
-export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number) {
-  return suggererAcomptesMagiques(totalTTC, nombreCheques);
+export interface ChequeSuggestion {
+  deposit: number;
+  nCheques: number;
+  perCheque: number;
+  percentage: number;
+  description: string;
+}
+
+/**
+ * Génère des suggestions d'acomptes optimisées pour les chèques ronds
+ * @param totalTTC - Montant total TTC
+ * @param nombreCheques - Nombre de chèques pour le reste à payer
+ * @returns Suggestions avec acompte, nombre de chèques et montant par chèque
+ */
+export function chequeFriendlyDeposits(totalTTC: number, nombreCheques: number): ChequeSuggestion[] {
+  const suggestions: ChequeSuggestion[] = [];
+  
+  // Suggestions de pourcentages courants
+  const pourcentages = [0, 10, 20, 25, 30, 40, 50];
+  
+  for (const pct of pourcentages) {
+    const acompte = Math.round(totalTTC * pct / 100);
+    const reste = totalTTC - acompte;
+    const montantParCheque = Math.round(reste / nombreCheques);
+    
+    // Vérifier que les montants sont cohérents
+    if (montantParCheque > 0 && reste > 0) {
+      suggestions.push({
+        deposit: acompte,
+        nCheques: nombreCheques,
+        perCheque: montantParCheque,
+        percentage: pct,
+        description: `${pct}% d'acompte (${acompte}€) + ${nombreCheques} chèques de ${montantParCheque}€`
+      });
+    }
+  }
+  
+  return suggestions.slice(0, 6); // Maximum 6 suggestions
 }
 
 /**
