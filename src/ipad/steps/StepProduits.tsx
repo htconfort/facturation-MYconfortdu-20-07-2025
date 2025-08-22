@@ -26,7 +26,9 @@ export default function StepProduits({
 
   const taxRate = 20; // TVA fixe à 20%
 
-  // Produits filtrés selon la catégorie sélectionnée
+  // Validation : tous les produits doivent avoir un mode de livraison défini
+  const canProceed = produits.length > 0 && produits.every(p => p.isPickupOnSite !== undefined);
+
   const filteredProducts = useMemo(() => {
     if (!draft.category || draft.category === 'Diverse') return [];
     return productCatalog.filter(p => p.category === draft.category);
@@ -107,9 +109,24 @@ export default function StepProduits({
       priceTTC: Number(draft.priceTTC || 0),
       discount: Number(draft.discount || 0),
       discountType: draft.discountType,
-      isPickupOnSite: false, // Par défaut, le produit nécessite une livraison
+      isPickupOnSite: undefined, // À définir obligatoirement (rouge=livrer, vert=emporter)
     });
     setDraft({ category: "", designation: "", qty: 1, priceTTC: 0, discount: 0, discountType: 'percent' });
+  };
+
+  const validateAndNext = () => {
+    if (produits.length === 0) {
+      alert('Veuillez ajouter au moins un produit avant de continuer.');
+      return;
+    }
+
+    const productsWithoutDeliveryMode = produits.filter(p => p.isPickupOnSite === undefined);
+    if (productsWithoutDeliveryMode.length > 0) {
+      alert(`Veuillez définir le mode de livraison pour tous les produits.\n${productsWithoutDeliveryMode.length} produit(s) sans mode de livraison défini.`);
+      return;
+    }
+
+    onNext();
   };
 
   return (
@@ -357,12 +374,25 @@ export default function StepProduits({
                       </td>
                       <td className="px-3 py-2 text-center">
                         <select
-                          className="w-24 h-10 rounded-lg border-2 border-gray-300 px-2 text-sm font-semibold focus:border-[#477A0C] focus:ring-2 focus:ring-[#477A0C]/20 bg-white"
-                          value={p.isPickupOnSite ? 'emporter' : 'livrer'}
-                          onChange={(e) => updateProduit(p.id, { isPickupOnSite: e.target.value === 'emporter' })}
+                          className={`w-28 h-12 rounded-lg border-3 px-2 text-sm font-bold focus:ring-4 transition-all ${
+                            p.isPickupOnSite === undefined
+                              ? 'border-orange-500 bg-orange-50 text-orange-800 focus:border-orange-600 focus:ring-orange-200'
+                              : p.isPickupOnSite 
+                                ? 'border-green-500 bg-green-50 text-green-800 focus:border-green-600 focus:ring-green-200'
+                                : 'border-red-500 bg-red-50 text-red-800 focus:border-red-600 focus:ring-red-200'
+                          }`}
+                          value={p.isPickupOnSite === undefined ? '' : (p.isPickupOnSite ? 'emporter' : 'livrer')}
+                          onChange={(e) => {
+                            if (e.target.value === '') {
+                              updateProduit(p.id, { isPickupOnSite: undefined });
+                            } else {
+                              updateProduit(p.id, { isPickupOnSite: e.target.value === 'emporter' });
+                            }
+                          }}
                         >
-                          <option value="livrer">📦 À livrer</option>
-                          <option value="emporter">🚗 Emporter</option>
+                          <option value="" className="text-orange-800 font-bold">⚠️ À choisir</option>
+                          <option value="livrer" className="text-red-800 font-bold">� À livrer</option>
+                          <option value="emporter" className="text-green-800 font-bold">🚗 À emporter</option>
                         </select>
                       </td>
                       <td className="px-3 py-2 text-right">
@@ -443,8 +473,13 @@ export default function StepProduits({
             ← Client
           </button>
           <button 
-            onClick={onNext} 
-            className="px-8 py-4 rounded-xl bg-[#477A0C] text-white text-lg font-semibold hover:bg-green-700 transition-all shadow-lg"
+            onClick={validateAndNext} 
+            disabled={!canProceed}
+            className={`px-8 py-4 rounded-xl text-lg font-semibold transition-all shadow-lg ${
+              !canProceed
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                : 'bg-[#477A0C] text-white hover:bg-green-700'
+            }`}
           >
             Continuer vers Paiement →
           </button>
