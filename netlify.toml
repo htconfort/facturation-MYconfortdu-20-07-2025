@@ -2,11 +2,8 @@
   # Répertoire où se trouvent les fichiers de build
   publish = "dist"
   
-  # Commande de build avec Node 22 et npx vite
-  command = "npm install && npx vite build"
-
-[build.environment]
-  NODE_VERSION = "22"
+  # Installation propre avec suppression cache + build compatible Node 18
+  command = "rm -rf node_modules package-lock.json && npm install && npm run build"
 
 # Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
 [[redirects]]
