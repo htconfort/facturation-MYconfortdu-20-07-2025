@@ -27,6 +27,7 @@ export interface Product {
   totalHT: number;
   totalTTC: number;
   autoCalculateHT?: boolean;
+  isPickupOnSite?: boolean; // true = emporter, false = à livrer
 }
 
 export interface ProductCatalog {

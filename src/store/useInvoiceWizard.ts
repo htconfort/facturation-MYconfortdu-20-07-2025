@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { calculateProductTotal } from '../utils/calculations';
 
 export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap';
 
@@ -228,22 +229,33 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       clientHousingType: state.client.housingType || '',
       clientDoorCode: state.client.doorCode || '',
       
-      products: state.produits.map(p => ({
-        id: p.id,
-        name: p.designation, // ✅ CORRECTION: mapper designation vers name pour compatibilité N8N
-        designation: p.designation, // Garder aussi designation pour compatibilité
-        quantity: p.qty,
-        priceTTC: p.priceTTC,
-        category: p.category || '',
-        // Calculer automatiquement les prix HT avec TVA 20%
-        priceHT: +(p.priceTTC / 1.2).toFixed(2),
-        totalHT: +(p.qty * p.priceTTC / 1.2).toFixed(2),
-        totalTTC: +(p.qty * p.priceTTC).toFixed(2),
-        // Champs requis par l'interface Product
-        unitPrice: p.priceTTC,
-        discount: 0,
-        discountType: 'fixed' as const,
-      })),
+      products: state.produits.map(p => {
+        // Calculer le total TTC avec remises appliquées
+        const totalTTCWithDiscount = calculateProductTotal(
+          p.qty,
+          p.priceTTC,
+          p.discount || 0,
+          p.discountType || 'percent'
+        );
+        
+        return {
+          id: p.id,
+          name: p.designation, // ✅ CORRECTION: mapper designation vers name pour compatibilité N8N
+          designation: p.designation, // Garder aussi designation pour compatibilité
+          quantity: p.qty,
+          priceTTC: p.priceTTC,
+          category: p.category || '',
+          // Calculer automatiquement les prix HT avec TVA 20% et remises
+          priceHT: +(p.priceTTC / 1.2).toFixed(2),
+          totalHT: +(totalTTCWithDiscount / 1.2).toFixed(2), // ✅ CORRECTION: avec remises
+          totalTTC: +totalTTCWithDiscount.toFixed(2), // ✅ CORRECTION: avec remises
+          // Champs requis par l'interface Product
+          unitPrice: p.priceTTC,
+          discount: p.discount || 0, // ✅ CORRECTION: utiliser la vraie remise
+          discountType: p.discountType || 'percent', // ✅ CORRECTION: utiliser le vrai type de remise
+          isPickupOnSite: p.isPickupOnSite, // ✅ CORRECTION: ajouter l'info livraison/emporter
+        };
+      }),
       
       paymentMethod: state.paiement.method,
       montantAcompte: state.paiement.depositAmount || 0,

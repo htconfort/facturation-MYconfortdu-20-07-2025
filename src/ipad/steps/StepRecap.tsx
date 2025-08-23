@@ -572,6 +572,26 @@ export default function StepRecap({ onPrev }: StepProps) {
 
           {/* Totaux */}
           <div className='bg-gray-50 rounded-xl p-4 mt-4'>
+            {/* Sous-total avant remises */}
+            {invoice.montantRemise > 0 && (
+              <div className='flex justify-between py-2 text-gray-600'>
+                <span>Sous-total avant remises :</span>
+                <span className='font-semibold'>
+                  {formatEUR(invoice.montantTTC + invoice.montantRemise)}
+                </span>
+              </div>
+            )}
+            
+            {/* Total des remises */}
+            {invoice.montantRemise > 0 && (
+              <div className='flex justify-between py-2 text-green-600'>
+                <span>Total des remises :</span>
+                <span className='font-semibold'>
+                  -{formatEUR(invoice.montantRemise)}
+                </span>
+              </div>
+            )}
+            
             <div className='flex justify-between py-2'>
               <span>Total HT :</span>
               <span className='font-semibold'>
