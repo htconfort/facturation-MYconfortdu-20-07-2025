@@ -26,19 +26,46 @@ const paymentMethods: Array<{
   value: PaymentMethodValue;
   label: string;
   icon: string;
+  iconType?: 'emoji' | 'svg' | 'png';
   priority?: boolean;
 }> = [
   {
     value: 'Chèque à venir',
-    label: '📄 Chèque à venir',
-    icon: '📄',
+    label: 'Chèque à venir',
+    icon: '/payment-icons/cheque.svg',
+    iconType: 'svg',
     priority: true,
   },
-  { value: 'Espèces', label: '💵 Espèces', icon: '💵' },
-  { value: 'Virement', label: '🏦 Virement bancaire', icon: '🏦' },
-  { value: 'Carte Bleue', label: '💳 Carte Bleue', icon: '💳' },
-  { value: 'Chèque', label: '🧾 Chèque unique', icon: '🧾' },
-  { value: 'Acompte', label: '💰 Acompte seulement', icon: '💰' },
+  { 
+    value: 'Espèces', 
+    label: 'Espèces', 
+    icon: '/payment-icons/especes.svg',
+    iconType: 'svg'
+  },
+  { 
+    value: 'Virement', 
+    label: 'Virement bancaire', 
+    icon: '/payment-icons/virement.svg',
+    iconType: 'svg'
+  },
+  { 
+    value: 'Carte Bleue', 
+    label: 'Carte Bleue', 
+    icon: '/payment-icons/carte-bleue.svg',
+    iconType: 'svg'
+  },
+  { 
+    value: 'Chèque', 
+    label: 'Chèque unique', 
+    icon: '/payment-icons/cheque.svg',
+    iconType: 'svg'
+  },
+  { 
+    value: 'Acompte', 
+    label: 'Alma', 
+    icon: '/Alma_orange.png',
+    iconType: 'png'
+  },
 ];
 
 // --- helpers ---------------------------------------------------------------
@@ -239,12 +266,28 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                       aria-pressed={selected}
                       aria-label={method.label}
                       title={method.label}
-                      onClick={() => updatePaiement({ method: method.value })}
+                      onClick={() => {
+                        updatePaiement({ method: method.value });
+                        // Si Alma est sélectionnée, définir automatiquement le mode de règlement sur Carte Bleue
+                        if (method.value === 'Acompte') {
+                          updatePaiement({ depositPaymentMethod: 'Carte Bleue' });
+                        }
+                      }}
                       className={`${base}${priority}${state}`}
                     >
-                      <div className='text-3xl mb-2'>{method.icon}</div>
+                      <div className='mb-2 flex justify-center'>
+                        {method.iconType === 'svg' || method.iconType === 'png' ? (
+                          <img 
+                            src={method.icon} 
+                            alt={method.label} 
+                            className="h-12 w-auto" 
+                          />
+                        ) : (
+                          <div className='text-3xl'>{method.icon}</div>
+                        )}
+                      </div>
                       <div
-                        className={`font-semibold ${selected ? 'text-black' : 'text-gray-800'}`}
+                        className={`font-semibold ${selected ? 'text-white' : 'text-gray-800'}`}
                       >
                         {method.label}
                       </div>

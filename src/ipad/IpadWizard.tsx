@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepFacture from './steps/StepFacture';
@@ -97,10 +97,96 @@ function WizardSurface({
   const stepIndex = steps.indexOf(step);
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === steps.length - 1;
+  const { invoiceNumber, invoiceDate, eventLocation, client, produits, paiement } = useInvoiceWizard();
+  
+  // Fonction de validation qui retourne le statut (pour les couleurs)
+  const validateCurrentStep = useCallback((): { isValid: boolean; errorMessage: string } => {
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (step) {
+      case 'facture':
+        if (!invoiceNumber.trim()) {
+          errorMessage = 'Le numéro de facture est obligatoire';
+          isValid = false;
+        } else if (!invoiceDate) {
+          errorMessage = 'La date de facture est obligatoire';
+          isValid = false;
+        } else if (!eventLocation.trim()) {
+          errorMessage = 'Le lieu de l\'événement est obligatoire';
+          isValid = false;
+        }
+        break;
+        
+      case 'client':
+        if (!client.name?.trim() || client.name.trim().length < 3) {
+          errorMessage = 'Le nom du client est obligatoire (minimum 3 caractères)';
+          isValid = false;
+        } else if (!client.email?.trim() || !client.email.includes('@')) {
+          errorMessage = 'Un email valide est obligatoire';
+          isValid = false;
+        } else if (!client.phone?.trim()) {
+          errorMessage = 'Le téléphone du client est obligatoire';
+          isValid = false;
+        } else if (!client.address?.trim()) {
+          errorMessage = 'L\'adresse du client est obligatoire';
+          isValid = false;
+        } else if (!client.city?.trim()) {
+          errorMessage = 'La ville du client est obligatoire';
+          isValid = false;
+        } else if (!client.postalCode?.trim()) {
+          errorMessage = 'Le code postal est obligatoire';
+          isValid = false;
+        } else if (!client.housingType?.trim()) {
+          errorMessage = 'Le type de logement est obligatoire';
+          isValid = false;
+        } else if (!client.doorCode?.trim() && client.doorCode !== 'Pas de digicode') {
+          errorMessage = 'Le code porte/digicode est obligatoire (ou cochez "Pas de digicode")';
+          isValid = false;
+        }
+        break;
+        
+      case 'produits':
+        if (produits.length === 0) {
+          errorMessage = 'Au moins un produit est obligatoire';
+          isValid = false;
+        } else if (produits.some(p => p.isPickupOnSite === undefined)) {
+          errorMessage = 'Veuillez définir le mode de livraison pour tous les produits';
+          isValid = false;
+        }
+        break;
+        
+      case 'paiement':
+        if (!paiement.method) {
+          errorMessage = 'Veuillez sélectionner un mode de paiement';
+          isValid = false;
+        }
+        break;
+        
+      case 'livraison':
+      case 'signature':
+      case 'recap':
+        // Ces steps n'ont pas de validation obligatoire
+        break;
+    }
+
+    return { isValid, errorMessage };
+  }, [step, invoiceNumber, invoiceDate, eventLocation, client.name, client.email, client.phone, client.address, client.city, client.postalCode, client.housingType, client.doorCode, produits, paiement]);
+
+  // Fonction de validation et navigation
+  const validateAndGoNext = useCallback(() => {
+    const { isValid, errorMessage } = validateCurrentStep();
+    
+    if (isValid) {
+      onGo('next');
+    } else {
+      alert(errorMessage);
+    }
+  }, [validateCurrentStep, onGo]);
 
   const StepComponent = useMemo(() => {
     const props = {
-      onNext: () => onGo('next'),
+      onNext: validateAndGoNext, // Le bouton interne du step utilisera aussi la validation
       onPrev: () => onGo('prev'),
       onQuit,
       isFirstStep,
@@ -117,7 +203,7 @@ function WizardSurface({
       case 'recap': return <StepRecap {...props} />;
       default: return <div>Étape inconnue</div>;
     }
-  }, [step, onGo, onQuit, isFirstStep, isLastStep]);
+  }, [step, onGo, onQuit, isFirstStep, isLastStep, validateAndGoNext]);
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-gray-50 to-white">
@@ -159,11 +245,16 @@ function WizardSurface({
           
           {/* Bouton Suivant / Terminer */}
           {!isLastStep ? (
-            <NavButton 
-              onClick={() => onGo('next')} 
-              label="Suivant →" 
-              variant="primary"
-            />
+            (() => {
+              const { isValid } = validateCurrentStep();
+              return (
+                <NavButton 
+                  onClick={validateAndGoNext} 
+                  label="Suivant →" 
+                  variant={isValid ? "primary" : "danger"}
+                />
+              );
+            })()
           ) : (
             <NavButton 
               onClick={onQuit} 
@@ -187,7 +278,7 @@ function NavButton({
 }: { 
   onClick: () => void; 
   label: string; 
-  variant?: 'primary' | 'secondary' | 'success';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger';
 }) {
   const baseClasses = "px-6 py-3 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg";
   
@@ -195,6 +286,7 @@ function NavButton({
     primary: "bg-[#477A0C] hover:bg-[#5A8F0F] text-white",
     secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
     success: "bg-green-600 hover:bg-green-700 text-white",
+    danger: "bg-red-500 hover:bg-red-600 text-white",
   };
 
   return (

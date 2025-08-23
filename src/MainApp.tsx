@@ -778,7 +778,7 @@ function MainApp() {
         onShowProducts={() => setShowProductsList(true)}
         onShowGoogleDrive={handleSendPDF}
         onShowDebug={() => setShowDebugCenter(true)}
-        onGoToIpad={() => navigate('/ipad?step=client')}
+        onGoToIpad={() => navigate('/ipad?step=facture')}
       />
 
       <main className='container mx-auto px-4 py-6' id='invoice-content'>
