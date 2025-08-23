@@ -50,9 +50,7 @@ const COMPANY = {
   phone: '+33 6 61 48 60 23',
   email: 'htconfort@gmail.com',
   website: 'htconfort.com',
-  siret: 'XXXX XXX XXX',
-  tva: 'FRXX XXXXXXXXX',
-  rcs: 'RCS Paris XXXXX',
+  siret: '824 313 530 00027',
   iban: 'FR76 1234 5678 9012 3456 7890 123',
   bic: 'PSSTFRPPXXX',
 };
@@ -124,13 +122,18 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
 /** Charge un logo en dataURL (optionnel) */
 async function toDataURL(url?: string) {
   if (!url) return undefined;
-  const blob = await fetch(url).then(r => r.blob());
-  return await new Promise<string>((res, rej) => {
-    const fr = new FileReader();
-    fr.onload = () => res(fr.result as string);
-    fr.onerror = () => rej(new Error('logo load error'));
-    fr.readAsDataURL(blob);
-  });
+  try {
+    const blob = await fetch(url).then(r => r.blob());
+    return await new Promise<string>((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result as string);
+      fr.onerror = () => rej(new Error('logo load error'));
+      fr.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.warn('Logo loading failed:', error);
+    return undefined;
+  }
 }
 
 /** Footer commun (mentions + pagination) */
@@ -170,10 +173,15 @@ export const PDFService = {
     const w = doc.internal.pageSize.getWidth();
 
     // ————— PAGE 1 — Facture
-    const logo = await toDataURL(
-      opts?.logoUrl || (window as any).__MYCONFORT_LOGO__
-    );
-    if (logo) doc.addImage(logo, 'PNG', MARGIN, 10, 28, 12);
+    const logoUrl = opts?.logoUrl || '/HT-Confort_Full_Green.png';
+    
+    // Charger le logo PNG
+    const logo = await toDataURL(logoUrl);
+    
+    if (logo) {
+      // Logo avec dimensions optimisées pour un rendu professionnel
+      doc.addImage(logo, 'PNG', MARGIN, 10, 40, 20);
+    }
 
     // Titre
     doc.setFont('helvetica', 'bold');
@@ -190,8 +198,7 @@ export const PDFService = {
       `Tél : ${COMPANY.phone}`,
       `Email : ${COMPANY.email}`,
       `Web : ${COMPANY.website}`,
-      `SIRET : ${COMPANY.siret} — TVA : ${COMPANY.tva}`,
-      `RCS : ${COMPANY.rcs}`,
+      `SIRET : ${COMPANY.siret}`,
       `IBAN : ${COMPANY.iban}`,
       `BIC : ${COMPANY.bic}`,
     ];
