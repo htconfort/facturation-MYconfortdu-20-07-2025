@@ -119,16 +119,125 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
   },
 ];
 
-/** Charge un logo en dataURL (optionnel) */
+/** Optimise une signature (dataURL) pour réduire sa taille */
+async function optimizeSignature(signatureDataUrl: string): Promise<string> {
+  try {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Dimensions optimales pour signature (max 300x150px)
+          const maxWidth = 300;
+          const maxHeight = 150;
+          let { width, height } = img;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Fond blanc pour signature
+          ctx!.fillStyle = 'white';
+          ctx!.fillRect(0, 0, width, height);
+          
+          // Dessiner la signature
+          ctx!.drawImage(img, 0, 0, width, height);
+          
+          // Convertir en JPEG avec compression (0.8 = 80% qualité)
+          const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          
+          console.log('🔧 Signature optimisée:', {
+            originalSize: signatureDataUrl.length,
+            optimizedSize: optimizedDataUrl.length,
+            reduction: `${((1 - optimizedDataUrl.length / signatureDataUrl.length) * 100).toFixed(1)}%`,
+            dimensions: `${width}x${height}px`
+          });
+          
+          resolve(optimizedDataUrl);
+        } catch (error) {
+          console.warn('Signature optimization failed, using original:', error);
+          resolve(signatureDataUrl);
+        }
+      };
+      img.onerror = () => {
+        console.warn('Failed to load signature for optimization, using original');
+        resolve(signatureDataUrl);
+      };
+      img.src = signatureDataUrl;
+    });
+  } catch (error) {
+    console.warn('Signature optimization error:', error);
+    return signatureDataUrl;
+  }
+}
+
+/** Charge un logo en dataURL avec compression optimisée */
 async function toDataURL(url?: string) {
   if (!url) return undefined;
   try {
     const blob = await fetch(url).then(r => r.blob());
+    
+    // 🔧 OPTIMISATION: Compresser l'image pour réduire la taille du PDF
     return await new Promise<string>((res, rej) => {
-      const fr = new FileReader();
-      fr.onload = () => res(fr.result as string);
-      fr.onerror = () => rej(new Error('logo load error'));
-      fr.readAsDataURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // Créer un canvas avec dimensions raisonnables (max 200x100px)
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Calculer les dimensions optimales (max 200x100, garde proportions)
+          const maxWidth = 200;
+          const maxHeight = 100;
+          let { width, height } = img;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Dessiner l'image redimensionnée avec compression
+          ctx!.drawImage(img, 0, 0, width, height);
+          
+          // Convertir en JPEG avec compression aggressive (0.7 = 70% qualité)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          
+          console.log('🔧 Logo compressé:', {
+            originalSize: blob.size,
+            compressedSize: compressedDataUrl.length,
+            reduction: `${((1 - compressedDataUrl.length / blob.size) * 100).toFixed(1)}%`,
+            dimensions: `${width}x${height}px`
+          });
+          
+          res(compressedDataUrl);
+        } catch (error) {
+          console.warn('Logo compression failed, using original:', error);
+          // Fallback: utiliser l'image originale si compression échoue
+          const fr = new FileReader();
+          fr.onload = () => res(fr.result as string);
+          fr.onerror = () => rej(new Error('logo load error'));
+          fr.readAsDataURL(blob);
+        }
+      };
+      img.onerror = () => rej(new Error('logo load error'));
+      img.src = URL.createObjectURL(blob);
     });
   } catch (error) {
     console.warn('Logo loading failed:', error);
@@ -324,8 +433,9 @@ export const PDFService = {
       doc.text('Signature client :', MARGIN, y);
       
       try {
-        // Ajouter l'image de la signature
-        doc.addImage(invoiceData.signature, 'PNG', MARGIN, y + 5, 50, 25);
+        // 🔧 OPTIMISATION: Compresser la signature avant ajout au PDF
+        const optimizedSignature = await optimizeSignature(invoiceData.signature);
+        doc.addImage(optimizedSignature, 'JPEG', MARGIN, y + 5, 50, 25);
         y += 30; // Espacement après la signature
         
         // Date de signature si disponible
@@ -402,7 +512,26 @@ export const PDFService = {
 
     drawFooter(doc, 2);
 
-    return new Blob([doc.output('arraybuffer')], { type: 'application/pdf' });
+    // ————— Génération finale avec monitoring de taille —————
+    const pdfOutput = new Blob([doc.output('arraybuffer')], { type: 'application/pdf' });
+    const pdfSizeMB = pdfOutput.size / (1024 * 1024);
+    
+    console.log('📄 PDF généré:', {
+      pages: 2,
+      size: `${pdfSizeMB.toFixed(2)} MB`,
+      sizeBytes: pdfOutput.size,
+      invoiceNumber: invoiceData.invoiceNumber,
+      hasLogo: !!logo,
+      hasSignature: !!(invoiceData.signature && invoiceData.isSigned)
+    });
+    
+    // ⚠️ ALERTE si le PDF est trop volumineux (> 5MB)
+    if (pdfSizeMB > 5) {
+      console.warn(`⚠️ PDF très volumineux (${pdfSizeMB.toFixed(2)}MB) - Cela peut causer des problèmes d'envoi!`);
+      console.warn('💡 Conseil: Vérifiez la taille des images (logo/signature) ou utilisez des formats plus compressés');
+    }
+
+    return pdfOutput;
   },
 
   /**
