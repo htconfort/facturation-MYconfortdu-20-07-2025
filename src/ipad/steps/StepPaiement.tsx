@@ -113,12 +113,23 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
     1,
     10
   );
+  
+  // Variables pour Alma (paiement en plusieurs fois)
+  const nombreFoisAlma = clamp(
+    safeNumber(paiement.nombreFoisAlma || 3),
+    2,
+    4
+  );
+  
   const montantParCheque =
     nombreCheques > 0 
       ? paiement.method === 'Chèque à venir'
         ? Math.round(remainingAmount / nombreCheques) // ✨ Montant ROND pour les chèques à venir
         : remainingAmount / nombreCheques 
       : 0;
+
+  // Calcul pour Alma (division du total par le nombre de fois)
+  const montantParFoisAlma = nombreFoisAlma > 0 ? totalTTC / nombreFoisAlma : 0;
 
   // Validation plus sûre (type guard)
   const isValid =
@@ -154,6 +165,10 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
 
   const handleNombreChequesChange = (nombre: number) => {
     updatePaiement({ nombreChequesAVenir: clamp(safeNumber(nombre), 1, 10) });
+  };
+
+  const handleNombreFoisAlmaChange = (nombreFois: number) => {
+    updatePaiement({ nombreFoisAlma: clamp(safeNumber(nombreFois), 2, 4) });
   };
 
   // Validation pour le mode de règlement de l'acompte
@@ -658,6 +673,134 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                       <div className='text-sm text-green-700'>
                         ✅ <strong>Avantage :</strong> aucun frais
                         supplémentaire • flexibilité • confort d&apos;achat
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Section Alma - Paiement en plusieurs fois */}
+            {paiement.method === 'Acompte' && (
+              <section className='bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl shadow-xl p-6 border-2 border-orange-300'>
+                <h3 className='text-xl font-semibold text-orange-800 mb-6 flex items-center'>
+                  <img 
+                    src="/Alma_orange.png" 
+                    alt="Alma" 
+                    className="h-8 w-auto mr-3" 
+                  />
+                  Paiement Alma en plusieurs fois
+                </h3>
+
+                {/* Choix du nombre de fois */}
+                <div className='mb-6'>
+                  <label className='block text-orange-700 font-semibold mb-3'>
+                    Paiement en plusieurs fois (2, 3 ou 4 fois)
+                  </label>
+                  <div className='grid grid-cols-3 gap-4 mb-4'>
+                    {[2, 3, 4].map(n => (
+                      <button
+                        key={n}
+                        type='button'
+                        onClick={() => handleNombreFoisAlmaChange(n)}
+                        className={`p-4 rounded-xl border-2 font-bold transition-all ${
+                          nombreFoisAlma === n
+                            ? 'border-orange-600 bg-orange-100 text-orange-800 ring-2 ring-orange-300'
+                            : 'border-orange-200 text-orange-600 hover:border-orange-400 hover:bg-orange-50'
+                        }`}
+                      >
+                        <div className="text-2xl font-bold">{n}x</div>
+                        <div className="text-sm">{n === 2 ? 'En 2 fois' : n === 3 ? 'En 3 fois' : 'En 4 fois'}</div>
+                        <div className="text-lg font-bold text-green-600">
+                          {formatEUR(totalTTC / n)}
+                        </div>
+                        <div className="text-xs text-gray-600">par versement</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Simulation Alma */}
+                {totalTTC > 0 && nombreFoisAlma > 0 && (
+                  <div className='bg-white rounded-xl p-6 border border-orange-200'>
+                    <h4 className='font-bold text-orange-800 mb-4 flex items-center'>
+                      <span className='mr-2'>📊</span>
+                      Simulation de votre échéancier Alma
+                    </h4>
+
+                    <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-4'>
+                      {Array.from({ length: nombreFoisAlma }, (_, index) => (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border ${
+                            index === 0 
+                              ? 'bg-green-100 border-green-300' 
+                              : 'bg-orange-100 border-orange-300'
+                          }`}
+                        >
+                          <div className={`text-sm font-semibold ${
+                            index === 0 ? 'text-green-700' : 'text-orange-700'
+                          }`}>
+                            {index === 0 ? 'Aujourd\'hui' : `Dans ${index * 30} jours`}
+                          </div>
+                          <div className={`text-xl font-bold ${
+                            index === 0 ? 'text-green-800' : 'text-orange-800'
+                          }`}>
+                            {formatEUR(montantParFoisAlma)}
+                          </div>
+                          <div className={`text-xs ${
+                            index === 0 ? 'text-green-600' : 'text-orange-600'
+                          }`}>
+                            {index === 0 ? 'À la commande' : `Versement ${index + 1}`}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className='bg-orange-50 rounded-lg p-4 border border-orange-200'>
+                      <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-center'>
+                        <div>
+                          <div className='text-sm text-orange-600'>
+                            Nombre de versements
+                          </div>
+                          <div className='text-lg font-bold text-orange-800'>
+                            {nombreFoisAlma}
+                          </div>
+                        </div>
+                        <div>
+                          <div className='text-sm text-orange-600'>
+                            Montant par versement
+                          </div>
+                          <div className='text-lg font-bold text-orange-800'>
+                            {formatEUR(montantParFoisAlma)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className='text-sm text-orange-600'>
+                            Total
+                          </div>
+                          <div className='text-lg font-bold text-orange-800'>
+                            {formatEUR(totalTTC)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className='text-sm text-orange-600'>Durée max</div>
+                          <div className='text-lg font-bold text-orange-800'>
+                            {nombreFoisAlma * 30} jours
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200'>
+                      <div className='text-sm text-blue-700'>
+                        ✅ <strong>Avantage Alma :</strong> paiement sécurisé • frais transparents • validation instantanée
+                      </div>
+                    </div>
+
+                    <div className='mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200'>
+                      <div className='text-sm text-yellow-700'>
+                        ℹ️ <strong>Information :</strong> Le premier versement est prélevé immédiatement, les suivants à intervalles de 30 jours.
                       </div>
                     </div>
                   </div>

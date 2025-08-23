@@ -34,6 +34,7 @@ interface PaymentData {
   remainingAmount?: number;
   note?: string;
   nombreChequesAVenir?: number;
+  nombreFoisAlma?: number; // Nombre de fois pour Alma (2, 3, ou 4)
   // 💳 Mollie payment state
   paymentStatus?: 'idle' | 'processing' | 'succeeded' | 'failed' | 'cancelled';
   paymentId?: string;
