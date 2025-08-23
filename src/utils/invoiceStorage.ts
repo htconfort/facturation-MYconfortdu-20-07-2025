@@ -25,17 +25,20 @@ export const saveInvoiceToFile = (invoice: Invoice) => {
     const invoices = JSON.parse(localStorage.getItem('factures') || '[]');
     invoices.push(invoice);
     localStorage.setItem('factures', JSON.stringify(invoices));
-    
+
     // Utiliser l'API File System de Bolt si disponible
     if (typeof window !== 'undefined' && (window as any).fs) {
       try {
-        (window as any).fs.writeFile('factures.json', JSON.stringify(invoices, null, 2));
+        (window as any).fs.writeFile(
+          'factures.json',
+          JSON.stringify(invoices, null, 2)
+        );
         console.log('Facture sauvegardée dans le fichier factures.json');
       } catch (fsError) {
         console.warn('Erreur API File System:', fsError);
       }
     }
-    
+
     console.log('Facture sauvegardée avec succès:', invoice.invoiceNumber);
     return true;
   } catch (error) {
@@ -71,7 +74,7 @@ export const deleteInvoice = (invoiceId: string): boolean => {
 export const generateInvoiceNumber = (): string => {
   const invoices = getAllInvoices();
   const currentYear = new Date().getFullYear();
-  const yearInvoices = invoices.filter(inv => 
+  const yearInvoices = invoices.filter(inv =>
     inv.invoiceNumber.startsWith(`${currentYear}`)
   );
   const nextNumber = yearInvoices.length + 1;

@@ -22,37 +22,37 @@ export interface SimpleItem {
 
 // Fonction principale de création de facture HT Confort
 export const createHTConfortInvoice = (
-  client: SimpleClient, 
+  client: SimpleClient,
   items: SimpleItem[]
 ): Invoice => {
   try {
     console.log('🏗️ Création facture HT Confort pour:', client.nom);
-    
+
     // Génération du numéro de facture unique
     const invoiceNumber = generateInvoiceNumber();
     const currentDate = new Date().toLocaleDateString('fr-FR');
-    
+
     // Conversion des articles simples en articles de facture
     const invoiceItems: InvoiceItem[] = items.map((item, index) => {
       const remise = item.remise || 0;
       const prixApresRemise = item.prixUnitaire - remise;
       const total = item.quantite * prixApresRemise;
-      
+
       return {
         id: `item-${Date.now()}-${index}`,
         description: item.description,
         quantity: item.quantite,
         unitPrice: prixApresRemise,
-        total: total
+        total: total,
       };
     });
-    
+
     // Calcul des totaux
     const totals = calculateInvoiceTotals(invoiceItems);
-    
+
     // Construction de l'adresse client complète
     const clientAddress = buildClientAddress(client);
-    
+
     // Création de la facture complète
     const invoice: Invoice = {
       id: `INV-${Date.now()}`,
@@ -67,14 +67,13 @@ export const createHTConfortInvoice = (
       tax: totals.tax,
       total: totals.total,
       status: 'ready',
-      eventLocation: 'HT Confort - Solutions de chauffage'
+      eventLocation: 'HT Confort - Solutions de chauffage',
     };
-    
+
     console.log('✅ Facture HT Confort créée:', invoice.invoiceNumber);
     console.log('💰 Total TTC:', invoice.total.toFixed(2), '€');
-    
+
     return invoice;
-    
   } catch (error) {
     console.error('❌ Erreur création facture:', error);
     throw new Error(`Impossible de créer la facture: ${error.message}`);
@@ -91,13 +90,13 @@ const generateInvoiceNumber = (): string => {
 // Fonction de calcul des totaux
 const calculateInvoiceTotals = (items: InvoiceItem[]) => {
   const subtotal = items.reduce((acc, item) => acc + item.total, 0);
-  const tax = subtotal * 0.20; // TVA 20%
+  const tax = subtotal * 0.2; // TVA 20%
   const total = subtotal + tax;
-  
+
   return {
     subtotal: Number(subtotal.toFixed(2)),
     tax: Number(tax.toFixed(2)),
-    total: Number(total.toFixed(2))
+    total: Number(total.toFixed(2)),
   };
 };
 
@@ -105,9 +104,11 @@ const calculateInvoiceTotals = (items: InvoiceItem[]) => {
 const buildClientAddress = (client: SimpleClient): string => {
   const addressParts = [
     client.adresse,
-    client.codePostal && client.ville ? `${client.codePostal} ${client.ville}` : client.ville || client.codePostal
+    client.codePostal && client.ville
+      ? `${client.codePostal} ${client.ville}`
+      : client.ville || client.codePostal,
   ].filter(part => part && part.trim());
-  
+
   return addressParts.join('\n');
 };
 
@@ -122,54 +123,59 @@ export const createQuickInvoice = (
     nom: clientName,
     email: clientEmail,
     adresse: 'Adresse à compléter',
-    telephone: 'Téléphone à compléter'
+    telephone: 'Téléphone à compléter',
   };
-  
-  const items: SimpleItem[] = [{
-    description: serviceDescription,
-    quantite: 1,
-    prixUnitaire: price
-  }];
-  
+
+  const items: SimpleItem[] = [
+    {
+      description: serviceDescription,
+      quantite: 1,
+      prixUnitaire: price,
+    },
+  ];
+
   return createHTConfortInvoice(client, items);
 };
 
 // Fonction de validation des données
-export const validateInvoiceData = (client: SimpleClient, items: SimpleItem[]): string[] => {
+export const validateInvoiceData = (
+  client: SimpleClient,
+  items: SimpleItem[]
+): string[] => {
   const errors: string[] = [];
-  
+
   // Validation client
   if (!client.nom || client.nom.trim() === '') {
     errors.push('Le nom du client est obligatoire');
   }
-  
+
   if (!client.email || !isValidEmail(client.email)) {
     errors.push('Un email valide est obligatoire');
   }
-  
+
   if (!client.adresse || client.adresse.trim() === '') {
-    errors.push('L\'adresse du client est obligatoire');
+    errors.push("L'adresse du client est obligatoire");
   }
-  
+
   // Validation articles
   if (!items || items.length === 0) {
     errors.push('Au moins un article est obligatoire');
   }
-  
+
   items.forEach((item, index) => {
     if (!item.description || item.description.trim() === '') {
       errors.push(`Description manquante pour l'article ${index + 1}`);
     }
-    
+
     if (!item.quantite || item.quantite <= 0) {
       errors.push(`Quantité invalide pour l'article ${index + 1}`);
     }
-    
+
     if (!item.prixUnitaire || item.prixUnitaire <= 0) {
       errors.push(`Prix unitaire invalide pour l'article ${index + 1}`);
     }
   });
-  
+
   return errors;
 };
 
@@ -182,27 +188,27 @@ const isValidEmail = (email: string): boolean => {
 // Fonction de test avec vos données d'exemple
 export const testHTConfortInvoice = (): Invoice => {
   const client: SimpleClient = {
-    nom: "Dupont SA",
-    email: "dupont@example.com",
-    adresse: "123 rue Test",
-    ville: "Paris",
-    codePostal: "75001",
-    telephone: "01 23 45 67 89"
+    nom: 'Dupont SA',
+    email: 'dupont@example.com',
+    adresse: '123 rue Test',
+    ville: 'Paris',
+    codePostal: '75001',
+    telephone: '01 23 45 67 89',
   };
-  
+
   const items: SimpleItem[] = [
     {
-      description: "Installation chauffage",
+      description: 'Installation chauffage',
       quantite: 1,
-      prixUnitaire: 2500
+      prixUnitaire: 2500,
     },
     {
-      description: "Maintenance annuelle",
+      description: 'Maintenance annuelle',
       quantite: 1,
-      prixUnitaire: 350
-    }
+      prixUnitaire: 350,
+    },
   ];
-  
+
   return createHTConfortInvoice(client, items);
 };
 

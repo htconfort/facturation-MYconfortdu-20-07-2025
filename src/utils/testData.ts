@@ -24,8 +24,8 @@ export const createTestInvoices = () => {
           discountType: 'fixed' as const,
           totalHT: 800,
           totalTTC: 960,
-          category: 'Installation'
-        }
+          category: 'Installation',
+        },
       ],
       montantHT: 800,
       montantTTC: 960,
@@ -43,7 +43,7 @@ export const createTestInvoices = () => {
       advisorName: 'Marc Martin',
       termsAccepted: true,
       createdAt: '2025-07-20T10:00:00.000Z',
-      updatedAt: '2025-07-20T10:00:00.000Z'
+      updatedAt: '2025-07-20T10:00:00.000Z',
     },
     {
       invoiceNumber: 'FAC-2025-002',
@@ -65,8 +65,8 @@ export const createTestInvoices = () => {
           discountType: 'percent' as const,
           totalHT: 270,
           totalTTC: 324,
-          category: 'Maintenance'
-        }
+          category: 'Maintenance',
+        },
       ],
       montantHT: 270,
       montantTTC: 324,
@@ -78,15 +78,16 @@ export const createTestInvoices = () => {
       montantRestant: 324,
       deliveryMethod: 'Sur site',
       deliveryNotes: 'Maintenance annuelle',
-      signature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+      signature:
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
       isSigned: true,
       signatureDate: '2025-07-22T14:30:00.000Z',
       invoiceNotes: 'Client satisfait',
       advisorName: 'Sophie Dubois',
       termsAccepted: true,
       createdAt: '2025-07-22T09:00:00.000Z',
-      updatedAt: '2025-07-22T14:30:00.000Z'
-    }
+      updatedAt: '2025-07-22T14:30:00.000Z',
+    },
   ];
 
   // Sauvegarder chaque facture de test

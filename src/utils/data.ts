@@ -36,8 +36,12 @@ export interface Invoice {
   eventLocation?: string;
 }
 
-export const productCategories = ['Matelas', 'Oreillers', 'Couettes', 'Sur-matelas'];
-
+export const productCategories = [
+  'Matelas',
+  'Oreillers',
+  'Couettes',
+  'Sur-matelas',
+];
 
 // Données d'exemple pour les clients
 export const mockClients: ClientInfo[] = [
@@ -48,7 +52,7 @@ export const mockClients: ClientInfo[] = [
     city: 'Paris',
     postalCode: '75001',
     phone: '01 23 45 67 89',
-    email: 'jean.dupont@email.com'
+    email: 'jean.dupont@email.com',
   },
   {
     id: '2',
@@ -57,8 +61,8 @@ export const mockClients: ClientInfo[] = [
     city: 'Lyon',
     postalCode: '69000',
     phone: '04 56 78 90 12',
-    email: 'marie.martin@email.com'
-  }
+    email: 'marie.martin@email.com',
+  },
 ];
 
 // Données d'exemple pour les factures
@@ -76,29 +80,29 @@ export const mockInvoices: Invoice[] = [
         id: '1',
         description: 'Matelas MyComfort Premium 160x200',
         quantity: 1,
-        unitPrice: 899.00,
-        total: 899.00
+        unitPrice: 899.0,
+        total: 899.0,
       },
       {
         id: '2',
         description: 'Oreiller ergonomique',
         quantity: 2,
-        unitPrice: 79.00,
-        total: 158.00
-      }
+        unitPrice: 79.0,
+        total: 158.0,
+      },
     ],
-    subtotal: 1057.00,
-    tax: 211.40,
-    total: 1268.40,
-    status: 'draft'
-  }
+    subtotal: 1057.0,
+    tax: 211.4,
+    total: 1268.4,
+    status: 'draft',
+  },
 ];
 
 // Fonction pour créer une nouvelle facture vide
 export function createNewInvoice(): Invoice {
   const currentDate = new Date();
   const invoiceNumber = `FAC-${currentDate.getFullYear()}-${String(Date.now()).slice(-3)}`;
-  
+
   return {
     id: `FAC-${Date.now()}`,
     invoiceNumber: invoiceNumber,
@@ -112,19 +116,19 @@ export function createNewInvoice(): Invoice {
     tax: 0,
     total: 0,
     status: 'draft',
-    eventLocation: ''
+    eventLocation: '',
   };
 }
 
 // Fonction pour calculer les totaux d'une facture
 export function calculateTotals(items: InvoiceItem[]) {
   const subtotal = items.reduce((acc, item) => acc + item.total, 0);
-  const tax = subtotal * 0.20; // TVA 20%
+  const tax = subtotal * 0.2; // TVA 20%
   const total = subtotal + tax;
-  
+
   return {
     subtotal: Number(subtotal.toFixed(2)),
     tax: Number(tax.toFixed(2)),
-    total: Number(total.toFixed(2))
+    total: Number(total.toFixed(2)),
   };
 }

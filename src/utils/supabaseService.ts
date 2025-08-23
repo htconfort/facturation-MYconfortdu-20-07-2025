@@ -7,7 +7,8 @@ type ClientInsert = Database['public']['Tables']['clients']['Insert'];
 type Invoice = Database['public']['Tables']['invoices']['Row'];
 type InvoiceInsert = Database['public']['Tables']['invoices']['Insert'];
 type InvoiceItem = Database['public']['Tables']['invoice_items']['Row'];
-type InvoiceItemInsert = Database['public']['Tables']['invoice_items']['Insert'];
+type InvoiceItemInsert =
+  Database['public']['Tables']['invoice_items']['Insert'];
 type Product = Database['public']['Tables']['products']['Row'];
 
 // ===== GESTION DES CLIENTS =====
@@ -71,28 +72,33 @@ export const clientService = {
 
     if (error) {
       console.error('Erreur mise à jour client:', error);
-      throw new Error(`Impossible de mettre à jour le client: ${error.message}`);
+      throw new Error(
+        `Impossible de mettre à jour le client: ${error.message}`
+      );
     }
 
     return data;
-  }
+  },
 };
 
 // ===== GESTION DES FACTURES =====
 
 export const invoiceService = {
   // Créer une nouvelle facture avec ses articles
-  async create(invoiceData: InvoiceInsert, items: InvoiceItemInsert[]): Promise<Invoice> {
+  async create(
+    invoiceData: InvoiceInsert,
+    items: InvoiceItemInsert[]
+  ): Promise<Invoice> {
     try {
       // Générer un numéro de facture unique
       const invoiceNumber = await this.generateInvoiceNumber();
-      
+
       // Créer la facture
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
           ...invoiceData,
-          invoice_number: invoiceNumber
+          invoice_number: invoiceNumber,
         })
         .select()
         .single();
@@ -105,7 +111,7 @@ export const invoiceService = {
       if (items.length > 0) {
         const itemsWithInvoiceId = items.map(item => ({
           ...item,
-          invoice_id: invoice.id
+          invoice_id: invoice.id,
         }));
 
         const { error: itemsError } = await supabase
@@ -121,7 +127,6 @@ export const invoiceService = {
 
       console.log('✅ Facture créée avec succès:', invoice.invoice_number);
       return invoice;
-
     } catch (error) {
       console.error('❌ Erreur création facture complète:', error);
       throw error;
@@ -132,7 +137,7 @@ export const invoiceService = {
   async generateInvoiceNumber(): Promise<string> {
     const currentYear = new Date().getFullYear();
     const prefix = `HTC-${currentYear}`;
-    
+
     // Compter les factures de l'année
     const { count } = await supabase
       .from('invoices')
@@ -147,10 +152,12 @@ export const invoiceService = {
   async getAll(): Promise<(Invoice & { items: InvoiceItem[] })[]> {
     const { data: invoices, error } = await supabase
       .from('invoices')
-      .select(`
+      .select(
+        `
         *,
         invoice_items (*)
-      `)
+      `
+      )
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -158,20 +165,26 @@ export const invoiceService = {
       throw new Error(`Impossible de récupérer les factures: ${error.message}`);
     }
 
-    return invoices?.map(invoice => ({
-      ...invoice,
-      items: invoice.invoice_items || []
-    })) || [];
+    return (
+      invoices?.map(invoice => ({
+        ...invoice,
+        items: invoice.invoice_items || [],
+      })) || []
+    );
   },
 
   // Récupérer une facture par ID
-  async getById(id: string): Promise<(Invoice & { items: InvoiceItem[] }) | null> {
+  async getById(
+    id: string
+  ): Promise<(Invoice & { items: InvoiceItem[] }) | null> {
     const { data, error } = await supabase
       .from('invoices')
-      .select(`
+      .select(
+        `
         *,
         invoice_items (*)
-      `)
+      `
+      )
       .eq('id', id)
       .single();
 
@@ -182,7 +195,7 @@ export const invoiceService = {
 
     return {
       ...data,
-      items: data.invoice_items || []
+      items: data.invoice_items || [],
     };
   },
 
@@ -197,11 +210,13 @@ export const invoiceService = {
 
     if (error) {
       console.error('Erreur mise à jour statut:', error);
-      throw new Error(`Impossible de mettre à jour le statut: ${error.message}`);
+      throw new Error(
+        `Impossible de mettre à jour le statut: ${error.message}`
+      );
     }
 
     return data;
-  }
+  },
 };
 
 // ===== GESTION DES PRODUITS =====
@@ -257,7 +272,7 @@ export const productService = {
     // Retourner les catégories uniques
     const categories = [...new Set(data?.map(item => item.category) || [])];
     return categories;
-  }
+  },
 };
 
 // ===== FONCTIONS UTILITAIRES =====
@@ -284,4 +299,12 @@ export const testSupabaseConnection = async (): Promise<boolean> => {
 };
 
 // Export des types pour utilisation externe
-export type { Client, ClientInsert, Invoice, InvoiceInsert, InvoiceItem, InvoiceItemInsert, Product };
+export type {
+  Client,
+  ClientInsert,
+  Invoice,
+  InvoiceInsert,
+  InvoiceItem,
+  InvoiceItemInsert,
+  Product,
+};

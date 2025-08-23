@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Envoi Facture N8N - Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .button:hover { background: #2563eb; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .info { background: #dbeafe; color: #1e40af; border: 1px solid #3b82f6; }
+        pre { background: #f3f4f6; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .logs { max-height: 400px; overflow-y: auto; background: #1f2937; color: #e5e7eb; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Debug Envoi Facture N8N</h1>
+    
+    <div>
+        <button class="button" onclick="testWebhookConnection()">Test Connexion N8N</button>
+        <button class="button" onclick="testInvoiceSend()">Test Envoi Facture Complète</button>
+        <button class="button" onclick="debugEnvironment()">Debug Environnement</button>
+        <button class="button" onclick="clearLogs()">Effacer Logs</button>
+    </div>
+
+    <div id="results"></div>
+    
+    <div>
+        <h3>📊 Logs en Temps Réel</h3>
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+        // Intercept console.log to display in UI
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addLog(message, type = 'log') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'warn' ? '#f59e0b' : '#10b981';
+            logsDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+
+        function showResult(message, type) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Test de connexion basic au webhook
+        async function testWebhookConnection() {
+            console.log('🧪 TEST DE CONNEXION N8N...');
+            showResult('Test en cours...', 'info');
+            
+            try {
+                const testPayload = {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    source: 'MYCONFORT-Debug-Page'
+                };
+
+                console.log('📤 Envoi payload test:', testPayload);
+
+                const response = await fetch('/api/n8n/webhook/facture-universelle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+
+                console.log('📥 Réponse reçue:', response.status, response.statusText);
+
+                if (response.ok) {
+                    const data = await response.text();
+                    console.log('✅ Données réponse:', data);
+                    showResult('✅ Connexion N8N réussie! Webhook accessible via proxy.', 'success');
+                } else {
+                    console.error('❌ Erreur HTTP:', response.status);
+                    showResult(`❌ Erreur connexion: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erreur réseau:', error);
+                showResult(`❌ Erreur réseau: ${error.message}`, 'error');
+            }
+        }
+
+        // Test d'envoi d'une facture complète (comme dans l'app)
+        async function testInvoiceSend() {
+            console.log('🧪 TEST ENVOI FACTURE COMPLÈTE...');
+            showResult('Envoi facture test en cours...', 'info');
+            
+            try {
+                // Facture de test simplifiée mais complète
+                const testInvoice = {
+                    invoiceNumber: 'DEBUG_001',
+                    invoiceDate: new Date().toISOString().split('T')[0],
+                    clientName: 'Client Debug',
+                    clientEmail: 'debug@myconfort.com',
+                    clientPhone: '0123456789',
+                    clientAddress: '123 Rue Debug',
+                    clientPostalCode: '75001',
+                    clientCity: 'Paris',
+                    paymentMethod: 'Chèque',
+                    products: [
+                        {
+                            name: 'Produit Test',
+                            quantity: 1,
+                            priceTTC: 100,
+                            priceHT: 83.33,
+                            category: 'Test'
+                        }
+                    ],
+                    taxRate: 20,
+                    isSigned: true,
+                    signature: 'data:image/png;base64,test',
+                    signatureDate: new Date().toISOString()
+                };
+
+                // PDF de test minimal
+                const testPdfBase64 = 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVGl0bGUgKFRFU1QpCi9Qcm9kdWNlciAoTXlDb21mb3J0KQo+PgplbmRvYmoKMiAwIG9iago8PAovUGFnZXMgMyAwIFIKL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0tpZHMgWzQgMCBSXQovQ291bnQgMQovVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1BhcmVudCAzIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovVHlwZSAvUGFnZQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCAzMwo+PgpzdHJlYW0KQJRMXHJ3IDEgai6ItCDo5aSAMAr5/t9JCG9PUENVKGZFCkVORFNUUkVBTQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAxMTYgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMjMwIDAwMDAwIG4gCjAwMDAwMDAzMjggMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA2Ci9Sb290IDIgMCBSCj4+CnN0YXJ0eHJlZgo0MDkKJSVFT0YK';
+
+                console.log('📦 Données facture test:', {
+                    numero: testInvoice.invoiceNumber,
+                    client: testInvoice.clientName,
+                    email: testInvoice.clientEmail,
+                    produits: testInvoice.products.length
+                });
+
+                // Simuler l'appel au service N8N (structure identique)
+                const payload = {
+                    nom_facture: `Facture_MYCONFORT_${testInvoice.invoiceNumber}`,
+                    fichier_facture: testPdfBase64,
+                    date_creation: new Date().toISOString(),
+                    numero_facture: testInvoice.invoiceNumber,
+                    date_facture: testInvoice.invoiceDate,
+                    montant_ttc: 100,
+                    nom_du_client: testInvoice.clientName,
+                    email_client: testInvoice.clientEmail,
+                    telephone_client: testInvoice.clientPhone,
+                    adresse_client: `${testInvoice.clientAddress}, ${testInvoice.clientPostalCode} ${testInvoice.clientCity}`,
+                    mode_paiement: testInvoice.paymentMethod,
+                    signature_presente: 'Oui',
+                    produits_text: '1x Produit Test',
+                    dossier_id: '1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-'
+                };
+
+                console.log('📤 Envoi payload facture via proxy...');
+
+                const response = await fetch('/api/n8n/webhook/facture-universelle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'User-Agent': 'MYCONFORT-Debug-Test/1.0'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log('📥 Réponse N8N:', response.status, response.statusText);
+
+                if (response.ok) {
+                    const data = await response.text();
+                    console.log('✅ Facture envoyée avec succès:', data);
+                    showResult('✅ Facture test envoyée avec succès! Email doit être envoyé.', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Erreur envoi facture:', response.status, errorText);
+                    showResult(`❌ Erreur envoi facture: HTTP ${response.status} - ${errorText}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'envoi:', error);
+                showResult(`❌ Erreur envoi: ${error.message}`, 'error');
+            }
+        }
+
+        // Debug des variables d'environnement et configuration
+        function debugEnvironment() {
+            console.log('🔍 DEBUG ENVIRONNEMENT...');
+            
+            const envInfo = {
+                'Hostname': window.location.hostname,
+                'Port': window.location.port,
+                'Protocol': window.location.protocol,
+                'URL complète': window.location.href,
+                'User Agent': navigator.userAgent,
+                'Mode Vite': typeof import.meta !== 'undefined' ? (import.meta.env?.PROD ? 'Production' : 'Development') : 'Inconnu'
+            };
+
+            console.log('📊 Informations environnement:');
+            Object.entries(envInfo).forEach(([key, value]) => {
+                console.log(`  ${key}: ${value}`);
+            });
+
+            // Test des variables d'environnement côté client
+            if (typeof import.meta !== 'undefined' && import.meta.env) {
+                console.log('🔧 Variables d\'environnement Vite disponibles:');
+                Object.entries(import.meta.env).forEach(([key, value]) => {
+                    if (key.startsWith('VITE_')) {
+                        console.log(`  ${key}: ${value}`);
+                    }
+                });
+            }
+
+            showResult('Debug environnement terminé - voir logs', 'info');
+        }
+
+        // Auto-start debug
+        window.addEventListener('load', () => {
+            console.log('🚀 Page de debug chargée');
+            debugEnvironment();
+        });
+    </script>
+</body>
+</html>

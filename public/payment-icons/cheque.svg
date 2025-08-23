@@ -1,0 +1,33 @@
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chèque avec signature -->
+  
+  <!-- Fond du chèque -->
+  <rect x="5" y="10" width="90" height="40" rx="3" fill="white" stroke="#2c3e50" stroke-width="2"/>
+  
+  <!-- En-tête du chèque -->
+  <text x="10" y="22" font-family="Arial, sans-serif" font-size="6" fill="#2c3e50">CHÈQUE</text>
+  <text x="85" y="22" font-family="Arial, sans-serif" font-size="5" fill="#666">N°</text>
+  
+  <!-- Montant -->
+  <rect x="60" y="25" width="30" height="8" fill="none" stroke="#2c3e50" stroke-width="0.5"/>
+  <text x="62" y="30" font-family="Arial, sans-serif" font-size="4" fill="#2c3e50">€</text>
+  
+  <!-- Ligne "Payez contre ce chèque" -->
+  <line x1="10" y1="35" x2="55" y2="35" stroke="#2c3e50" stroke-width="0.5"/>
+  <text x="10" y="33" font-family="Arial, sans-serif" font-size="3" fill="#666">Payez contre ce chèque</text>
+  
+  <!-- Zone signature -->
+  <line x1="10" y1="42" x2="40" y2="42" stroke="#2c3e50" stroke-width="0.5"/>
+  <text x="10" y="48" font-family="Arial, sans-serif" font-size="3" fill="#666">Signature</text>
+  
+  <!-- Signature stylisée -->
+  <path d="M 12 40 Q 20 38 25 40 Q 30 42 35 40" 
+        stroke="#1e40af" 
+        stroke-width="1.5" 
+        fill="none" 
+        stroke-linecap="round"/>
+  
+  <!-- Coin avec symbole $ -->
+  <circle cx="85" cy="40" r="8" fill="#f0f0f0" stroke="#2c3e50" stroke-width="1"/>
+  <text x="85" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#2c3e50">$</text>
+</svg>

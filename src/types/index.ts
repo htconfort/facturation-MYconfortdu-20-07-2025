@@ -2,6 +2,7 @@ export interface Client {
   id?: string;
   name: string;
   address: string;
+  addressLine2?: string;
   postalCode: string;
   city: string;
   housingType?: string;
@@ -12,9 +13,6 @@ export interface Client {
   createdAt?: string;
   invoices?: string[];
 }
-
-// Types pour les statuts de livraison
-export type DeliveryStatus = 'pending' | 'delivered' | 'to_deliver' | 'cancelled';
 
 export interface Product {
   id?: string;
@@ -29,8 +27,7 @@ export interface Product {
   totalHT: number;
   totalTTC: number;
   autoCalculateHT?: boolean;
-  isPickupOnSite?: boolean; // Nouveau champ pour indiquer si le produit est emporté sur place
-  statut_livraison?: DeliveryStatus; // NOUVEAU : Statut de livraison du produit
+  isPickupOnSite?: boolean; // true = emporter, false = à livrer
 }
 
 export interface ProductCatalog {
@@ -56,60 +53,59 @@ export interface Invoice {
   invoiceNumber: string;
   invoiceDate: string;
   eventLocation?: string;
-  
+
   // Client - Structure plate pour compatibilité webhook
   clientName: string;
   clientEmail: string;
   clientPhone: string;
   clientAddress: string;
+  clientAddressLine2?: string;
   clientPostalCode: string;
   clientCity: string;
   clientHousingType?: string;
   clientDoorCode?: string;
   clientSiret?: string;
-  
+
   // Produits
   products: Product[];
-  
+
   // Montants (calculés et stockés)
   montantHT: number;
   montantTTC: number;
   montantTVA: number;
   montantRemise: number;
   taxRate: number;
-  
+
   // Paiement
   paymentMethod: string;
   montantAcompte: number;
+  depositPaymentMethod?: string; // Mode de règlement de l'acompte
   montantRestant: number;
-  
+
   // Livraison
   deliveryMethod: string;
+  deliveryAddress?: string;
   deliveryNotes: string;
-  
+
   // Signature
   signature: string;
   isSigned: boolean;
   signatureDate?: string;
-  
-  // Email status
-  emailSent?: boolean;
-  emailSentDate?: string;
-  
+
   // Notes et conseiller
   invoiceNotes: string;
   advisorName: string;
   termsAccepted: boolean;
-  
+
   // Chèques à venir
   nombreChequesAVenir?: number;
-  
+
   // Métadonnées
   createdAt: string;
   updatedAt: string;
 }
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error';
 
 export interface ValidationError {
   field: string;

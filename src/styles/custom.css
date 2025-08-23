@@ -2,13 +2,13 @@
 
 /* Variables CSS étendues */
 :root {
-  --mycomfort-green: #477A0C;
+  --mycomfort-green: #477a0c;
   --mycomfort-green-light: #5a9610;
   --mycomfort-green-dark: #3a6509;
-  --mycomfort-light: #F2EFE2;
-  --mycomfort-dark: #14281D;
-  --mycomfort-gray: #6B7280;
-  --mycomfort-gray-light: #F9FAFB;
+  --mycomfort-light: #f2efe2;
+  --mycomfort-dark: #14281d;
+  --mycomfort-gray: #6b7280;
+  --mycomfort-gray-light: #f9fafb;
 }
 
 /* Overrides Tailwind pour MyComfort */
@@ -106,11 +106,11 @@
   .no-print {
     display: none !important;
   }
-  
+
   .print-only {
     display: block !important;
   }
-  
+
   .invoice-container {
     box-shadow: none !important;
     border: none !important;
@@ -160,11 +160,11 @@
   .mobile-stack {
     @apply flex-col space-y-4 space-x-0;
   }
-  
+
   .mobile-full {
     @apply w-full;
   }
-  
+
   .mobile-hidden {
     @apply hidden;
   }
@@ -248,7 +248,7 @@
   margin: 0 auto;
   padding: 20mm;
   background: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   /* page-break-after supprimé pour éviter les pages en double */
 }
 
@@ -370,18 +370,21 @@
   border-radius: 8px;
 }
 
-.payment-info, .delivery-info {
+.payment-info,
+.delivery-info {
   flex: 1;
 }
 
-.payment-info h4, .delivery-info h4 {
+.payment-info h4,
+.delivery-info h4 {
   font-size: 14px;
   font-weight: bold;
   color: var(--mycomfort-green);
   margin: 0 0 8px 0;
 }
 
-.payment-info p, .delivery-info p {
+.payment-info p,
+.delivery-info p {
   margin: 4px 0;
   font-size: 13px;
 }
@@ -401,7 +404,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .products-table th {
@@ -522,21 +525,21 @@
   background: #ffffff;
   padding: 20px;
   border-radius: 8px;
-  border: 2px solid #4CAF50;
+  border: 2px solid #4caf50;
   margin-bottom: 20px;
   width: 100%;
   box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .signature-payment-header {
   font-weight: bold;
   font-size: 14px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 15px;
   text-align: center;
   padding-bottom: 10px;
-  border-bottom: 2px solid #4CAF50;
+  border-bottom: 2px solid #4caf50;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -552,7 +555,7 @@
 .signature-payment-image {
   max-width: 150px;
   max-height: 60px;
-  border: 2px solid #4CAF50;
+  border: 2px solid #4caf50;
   border-radius: 4px;
   margin-bottom: 10px;
   background: white;
@@ -561,7 +564,7 @@
 
 .signature-payment-status {
   font-size: 13px;
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: bold;
   margin-bottom: 5px;
 }
@@ -669,7 +672,7 @@
   .professional-invoice {
     font-size: 12px;
   }
-  
+
   .invoice-page {
     max-width: none;
     margin: 0;
@@ -677,38 +680,38 @@
     box-shadow: none;
     /* page-break-after supprimé pour éviter les pages en double */
   }
-  
+
   .company-logo {
     max-width: 100px;
     max-height: 60px;
   }
-  
+
   .company-info h1 {
     font-size: 24px;
   }
-  
+
   .invoice-info h2 {
     font-size: 20px;
   }
-  
+
   .products-table {
     box-shadow: none;
   }
-  
+
   .products-table th {
     background: var(--mycomfort-green) !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .total-row.final {
     background: var(--mycomfort-green) !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .legal-notice {
     background: #f8f9fa !important;
     -webkit-print-color-adjust: exact;
@@ -770,7 +773,7 @@
 
 /* CADRE FACTURE VERT */
 .invoice-header-box {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 15px;
   border-radius: 5px;
@@ -799,7 +802,7 @@
   text-align: left;
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* SECTION PRINCIPALE (2 colonnes) */
@@ -809,7 +812,8 @@
   margin-bottom: 20px;
 }
 
-.client-section, .additional-info-section {
+.client-section,
+.additional-info-section {
   flex: 1;
 }
 
@@ -822,16 +826,18 @@
 }
 
 .green-bg {
-  background: #7CB342;
+  background: #7cb342;
 }
 
-.client-info, .additional-info {
+.client-info,
+.additional-info {
   font-size: 11px;
   line-height: 1.4;
   padding: 5px;
 }
 
-.client-info strong, .additional-info strong {
+.client-info strong,
+.additional-info strong {
   font-weight: bold;
 }
 
@@ -848,7 +854,7 @@
 }
 
 .table-header th {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 8px 5px;
   text-align: center;
@@ -914,11 +920,11 @@
   font-size: 11px;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #7CB342;
+  color: #7cb342;
 }
 
 .signature-box-dashed {
-  border: 2px dashed #7CB342;
+  border: 2px dashed #7cb342;
   min-height: 120px;
   padding: 10px;
   background: #f8fdf4;
@@ -932,7 +938,7 @@
 
 .signature-placeholder {
   text-align: center;
-  color: #7CB342;
+  color: #7cb342;
 }
 
 .signature-text {
@@ -970,7 +976,7 @@
 }
 
 .total-line-final {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   font-weight: bold;
   font-size: 12px;
@@ -980,7 +986,7 @@
   background: #f0f8e8;
   padding: 8px 10px;
   font-size: 10px;
-  color: #7CB342;
+  color: #7cb342;
   text-align: center;
 }
 
@@ -991,11 +997,13 @@
   margin-bottom: 20px;
 }
 
-.payment-section, .delivery-section {
+.payment-section,
+.delivery-section {
   flex: 1;
 }
 
-.payment-info, .delivery-info {
+.payment-info,
+.delivery-info {
   font-size: 11px;
   line-height: 1.4;
   padding: 8px;
@@ -1005,7 +1013,7 @@
 
 /* FOOTER VERT */
 .footer-green {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 15px;
   margin-top: 20px;
@@ -1022,7 +1030,7 @@
   width: 60px;
   height: 60px;
   background: white;
-  color: #7CB342;
+  color: #7cb342;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1051,21 +1059,24 @@
     max-width: none;
     margin: 0;
   }
-  
+
   .invoice-page {
     padding: 10mm;
     /* page-break-after supprimé pour éviter les pages en double */
   }
-  
-  .green-bg, .total-line-final, .footer-green, .invoice-header-box {
-    background: #7CB342 !important;
+
+  .green-bg,
+  .total-line-final,
+  .footer-green,
+  .invoice-header-box {
+    background: #7cb342 !important;
     color: white !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  
+
   .signature-box-dashed {
-    border: 2px dashed #7CB342 !important;
+    border: 2px dashed #7cb342 !important;
     background: #f8fdf4 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -1091,7 +1102,7 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 30px;
-  border-bottom: 2px solid #4CAF50;
+  border-bottom: 2px solid #4caf50;
   padding-bottom: 20px;
 }
 
@@ -1103,7 +1114,7 @@
 
 .invoice-info {
   text-align: right;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 15px 20px;
   border-radius: 8px;
@@ -1132,7 +1143,7 @@
 .company h3,
 .client h3,
 .infos h3 {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 8px 12px;
   margin: 0 0 15px 0;
@@ -1150,7 +1161,7 @@
 }
 
 .company a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
 }
 
@@ -1170,7 +1181,7 @@
 }
 
 .product-details th {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 12px 8px;
   text-align: left;
@@ -1204,7 +1215,7 @@
 
 .signature {
   flex: 1;
-  border: 2px dashed #4CAF50;
+  border: 2px dashed #4caf50;
   padding: 20px;
   border-radius: 8px;
   background: #f8fff8;
@@ -1212,12 +1223,12 @@
 
 .signature h4 {
   margin: 0 0 15px 0;
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 16px;
 }
 
 .signature .electronic {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: bold;
   margin: 10px 0;
 }
@@ -1248,7 +1259,7 @@
 }
 
 .totals p:last-child {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 10px;
   margin: 15px -20px -20px -20px;
@@ -1263,12 +1274,12 @@
   background: #f8f9fa;
   padding: 20px;
   border-radius: 8px;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #4caf50;
 }
 
 .payment h4 {
   margin: 0 0 15px 0;
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 16px;
 }
 
@@ -1280,7 +1291,7 @@
 
 /* Footer */
 .footer {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   text-align: center;
   padding: 20px;
@@ -1304,62 +1315,62 @@
     padding: 15mm;
     font-size: 12px;
   }
-  
+
   .header {
-    border-bottom: 2px solid #4CAF50 !important;
+    border-bottom: 2px solid #4caf50 !important;
   }
-  
+
   .invoice-info {
-    background: #4CAF50 !important;
+    background: #4caf50 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .company h3,
   .client h3,
   .infos h3 {
-    background: #4CAF50 !important;
+    background: #4caf50 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .product-details th {
-    background: #4CAF50 !important;
+    background: #4caf50 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .signature {
-    border: 2px dashed #4CAF50 !important;
+    border: 2px dashed #4caf50 !important;
     background: #f8fff8 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .totals p:last-child {
-    background: #4CAF50 !important;
+    background: #4caf50 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .payment {
     background: #f8f9fa !important;
-    border-left: 4px solid #4CAF50 !important;
+    border-left: 4px solid #4caf50 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .footer {
-    background: #4CAF50 !important;
+    background: #4caf50 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   /* Masquer les éléments d'interface */
   .no-print,
   button,
@@ -1395,12 +1406,12 @@
   justify-content: space-between;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #477A0C;
+  border-bottom: 2px solid #477a0c;
 }
 
 .company-info h1 {
   font-size: 28px;
-  color: #477A0C;
+  color: #477a0c;
   margin: 0 0 5px 0;
   font-weight: bold;
 }
@@ -1424,7 +1435,7 @@
 
 .invoice-info h2 {
   font-size: 24px;
-  color: #477A0C;
+  color: #477a0c;
   margin: 0 0 15px 0;
 }
 
@@ -1440,7 +1451,7 @@
 
 .client-section h3 {
   font-size: 16px;
-  color: #477A0C;
+  color: #477a0c;
   margin-bottom: 10px;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
@@ -1458,13 +1469,15 @@
   margin-bottom: 25px;
 }
 
-.payment-info, .delivery-info {
+.payment-info,
+.delivery-info {
   flex: 1;
 }
 
-.payment-info h4, .delivery-info h4 {
+.payment-info h4,
+.delivery-info h4 {
   font-size: 14px;
-  color: #477A0C;
+  color: #477a0c;
   margin-bottom: 8px;
 }
 
@@ -1482,7 +1495,7 @@
 
 .products-section h3 {
   font-size: 16px;
-  color: #477A0C;
+  color: #477a0c;
   margin-bottom: 15px;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
@@ -1496,7 +1509,7 @@
 }
 
 .products-table th {
-  background: #477A0C;
+  background: #477a0c;
   color: white;
   padding: 10px 8px;
   text-align: left;
@@ -1525,7 +1538,7 @@
 
 .signature-box {
   flex: 1;
-  border: 2px solid #477A0C;
+  border: 2px solid #477a0c;
   padding: 15px;
   background: #f8fdf4;
   border-radius: 5px;
@@ -1533,7 +1546,7 @@
 
 .signature-box h4 {
   font-size: 14px;
-  color: #477A0C;
+  color: #477a0c;
   margin: 0 0 15px 0;
   font-weight: bold;
 }
@@ -1541,7 +1554,7 @@
 .signature-area {
   min-height: 120px;
   background: white;
-  border: 1px dashed #477A0C;
+  border: 1px dashed #477a0c;
   padding: 10px;
   border-radius: 3px;
   position: relative;
@@ -1575,7 +1588,7 @@
   align-items: center;
   justify-content: center;
   height: 100px;
-  color: #477A0C;
+  color: #477a0c;
   font-style: italic;
   font-size: 14px;
 }
@@ -1600,7 +1613,7 @@
 }
 
 .total-line-final {
-  background: #477A0C;
+  background: #477a0c;
   color: white;
   font-weight: bold;
   font-size: 14px;
@@ -1611,12 +1624,12 @@
   margin-bottom: 25px;
   padding: 15px;
   background: #f9f9f9;
-  border-left: 4px solid #477A0C;
+  border-left: 4px solid #477a0c;
 }
 
 .notes-section h4 {
   font-size: 14px;
-  color: #477A0C;
+  color: #477a0c;
   margin-bottom: 10px;
 }
 
@@ -1638,13 +1651,13 @@
 .invoice-footer {
   text-align: center;
   padding: 20px;
-  border-top: 2px solid #477A0C;
+  border-top: 2px solid #477a0c;
   background: #f8fdf4;
 }
 
 .invoice-footer h3 {
   font-size: 20px;
-  color: #477A0C;
+  color: #477a0c;
   margin: 0 0 10px 0;
 }
 
@@ -1691,14 +1704,14 @@
 
 .company-info h1 {
   font-size: 24px;
-  color: #7CB342;
+  color: #7cb342;
   font-weight: bold;
   margin: 0 0 5px 0;
 }
 
 .company-info .tagline {
   font-style: italic;
-  color: #7CB342;
+  color: #7cb342;
   font-size: 14px;
   margin: 0 0 15px 0;
 }
@@ -1714,7 +1727,7 @@
 
 /* ENCADRÉ FACTURE VERT */
 .invoice-header-green {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 15px 20px;
   border-radius: 5px;
@@ -1744,7 +1757,8 @@
   margin-bottom: 20px;
 }
 
-.left-section, .right-section {
+.left-section,
+.right-section {
   flex: 1;
 }
 
@@ -1758,10 +1772,11 @@
 }
 
 .green-bg {
-  background: #7CB342;
+  background: #7cb342;
 }
 
-.client-details, .additional-info {
+.client-details,
+.additional-info {
   background: #f9f9f9;
   padding: 10px;
   border: 1px solid #ddd;
@@ -1769,7 +1784,8 @@
   line-height: 1.4;
 }
 
-.client-details p, .additional-info p {
+.client-details p,
+.additional-info p {
   margin: 3px 0;
 }
 
@@ -1782,7 +1798,7 @@
 }
 
 .original-products-table th {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 8px 6px;
   text-align: center;
@@ -1867,7 +1883,7 @@
 }
 
 .total-row-final {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   font-weight: bold;
   font-size: 13px;
@@ -1882,7 +1898,7 @@
   background: #f0f8e8;
   padding: 10px 12px;
   font-size: 10px;
-  color: #7CB342;
+  color: #7cb342;
   border-top: 1px solid #ddd;
 }
 
@@ -1893,7 +1909,7 @@
   cursor: pointer;
 }
 
-.conditions-checkbox input[type="checkbox"] {
+.conditions-checkbox input[type='checkbox'] {
   margin: 0;
 }
 
@@ -1916,7 +1932,7 @@
 
 /* FOOTER VERT */
 .green-footer {
-  background: #7CB342;
+  background: #7cb342;
   color: white;
   padding: 15px;
   margin-top: 20px;
@@ -1951,7 +1967,7 @@
 .footer-bottom {
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 10px;
   text-align: center;
 }
@@ -1968,21 +1984,27 @@
     margin: 0;
     box-shadow: none;
   }
-  
-  .green-bg, .invoice-header-green, .total-row-final, .green-footer {
-    background: #7CB342 !important;
+
+  .green-bg,
+  .invoice-header-green,
+  .total-row-final,
+  .green-footer {
+    background: #7cb342 !important;
     color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .conditions-checkbox {
     background: #f0f8e8 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
-  .legal-mention-table, .client-details, .additional-info, .payment-details {
+
+  .legal-mention-table,
+  .client-details,
+  .additional-info,
+  .payment-details {
     background: #f9f9f9 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -1991,16 +2013,16 @@
 
 /* Masquer la phrase TVA non applicable du footer */
 .footer::after {
-  content: "" !important;
+  content: '' !important;
   display: none !important;
 }
 
 /* S'assurer qu'aucune règle n'ajoute automatiquement la phrase TVA */
-.footer p:contains("TVA non applicable") {
+.footer p:contains('TVA non applicable') {
   display: none !important;
 }
 
 /* Règle plus spécifique pour empêcher l'affichage de cette phrase */
-*:contains("TVA non applicable, art. 293 B du CGI - RCS Paris 824 313 530") {
+*:contains('TVA non applicable, art. 293 B du CGI - RCS Paris 824 313 530') {
   display: none !important;
 }

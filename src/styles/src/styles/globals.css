@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
 
-html, body {
+html,
+body {
   font-family: 'Manrope', Arial, sans-serif;
   background: #f4f7fa;
   color: #1a202c;
@@ -11,17 +12,25 @@ html, body {
   box-sizing: border-box;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-weight: 700;
-  color: #14281D;
+  color: #14281d;
   margin-bottom: 0.4em;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font-family: inherit;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   outline: none;
   border-radius: 0.5rem;
 }
@@ -37,12 +46,12 @@ input, select, textarea {
 }
 
 .table-green th {
-  background: #477A0C;
+  background: #477a0c;
   color: white;
 }
 
 .bg-green-gradient {
-  background: linear-gradient(135deg, #F2EFE2 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f2efe2 0%, #ffffff 100%);
 }
 
 .rounded-xl {
