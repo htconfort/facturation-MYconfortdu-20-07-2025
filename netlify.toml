@@ -1,9 +1,7 @@
 [build]
-  # Répertoire où se trouvent les fichiers de build
+  # Installation propre + npx vite build pour forcer l'utilisation locale
+  command = "rm -rf node_modules package-lock.json && npm install && npx vite build"
   publish = "dist"
-  
-  # Installation propre avec suppression cache + build compatible Node 18
-  command = "rm -rf node_modules package-lock.json && npm install && npm run build"
 
 # Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
 [[redirects]]
@@ -17,7 +15,6 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
 
 # Configuration des headers de sécurité
 [[headers]]
