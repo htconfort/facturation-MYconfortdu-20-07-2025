@@ -55,6 +55,13 @@ export class N8nWebhookService {
         fichier_facture: pdfBase64, // Base64 du PDF
         date_creation: new Date().toISOString(),
 
+        // ✅ NOUVEAUX CHAMPS POUR DISTINCTION EMAIL/PDF
+        type_document_email: 'Bon de commande', // Ce qui apparaît dans l'email
+        type_document_pdf: 'Facture', // Ce qui est dans le PDF en pièce jointe
+        numero_bon_commande: invoice.invoiceNumber, // Même numéro pour le bon de commande
+        objet_email: `Bon de commande n° ${invoice.invoiceNumber}`, // Sujet de l'email
+        titre_email: `Votre bon de commande n° ${invoice.invoiceNumber}`, // Titre dans le corps de l'email
+
         // Invoice metadata - NOMS EXACTS DU COMMIT FONCTIONNEL
         numero_facture: invoice.invoiceNumber,
         date_facture: invoice.invoiceDate,
