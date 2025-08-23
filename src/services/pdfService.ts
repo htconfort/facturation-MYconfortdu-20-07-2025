@@ -213,6 +213,10 @@ async function toDataURL(url?: string) {
           canvas.width = width;
           canvas.height = height;
           
+          // 🎨 FOND BLANC: Forcer un fond blanc pour éviter la transparence noire
+          ctx!.fillStyle = 'white';
+          ctx!.fillRect(0, 0, width, height);
+          
           // Dessiner l'image redimensionnée avec compression
           ctx!.drawImage(img, 0, 0, width, height);
           
