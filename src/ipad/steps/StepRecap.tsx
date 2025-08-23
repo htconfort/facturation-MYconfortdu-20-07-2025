@@ -6,6 +6,7 @@ import { PDFService } from '../../services/pdfService';
 import { saveInvoice } from '../../utils/storage';
 import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
 import { Invoice } from '../../types';
+import PrintButton from '../../components/PrintButton';
 
 // Types pour le système de notifications
 interface NotificationMessage {
@@ -334,8 +335,8 @@ export default function StepRecap({ onPrev }: StepProps) {
 
   return (
     <div className='py-8'>
-      {/* Header avec code couleur harmonisé */}
-      <div className='text-center mb-8'>
+      {/* Header avec code couleur harmonisé - Masqué à l'impression */}
+      <div className='text-center mb-8 no-print'>
         <div className='inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4'>
           7
         </div>
@@ -345,12 +346,20 @@ export default function StepRecap({ onPrev }: StepProps) {
         <p className='text-gray-600 text-lg'>
           Vérification complète avant génération de la facture
         </p>
+        
+        {/* Bouton d'impression - Masqué à l'impression */}
+        <div className='mt-6 no-print'>
+          <PrintButton />
+        </div>
       </div>
+
+      {/* DÉBUT SECTION IMPRIMABLE - Applique le style unifié d'impression */}
+      <div className='print-bg invoice-container'>
 
       <div className='max-w-6xl mx-auto space-y-6'>
         {/* Système de notifications amélioré */}
         {notifications.length > 0 && (
-          <section className='space-y-3'>
+          <section className='space-y-3 no-print'>
             <div className='flex justify-between items-center'>
               <h3 className='text-lg font-semibold text-gray-700'>
                 📢 Notifications
@@ -418,7 +427,7 @@ export default function StepRecap({ onPrev }: StepProps) {
 
         {/* Historique des actions */}
         {actionHistory.length > 0 && (
-          <section className='bg-gray-50 rounded-xl p-4 border'>
+          <section className='bg-gray-50 rounded-xl p-4 border no-print'>
             <h3 className='text-sm font-semibold text-gray-600 mb-2'>
               📝 Historique des actions
             </h3>
@@ -954,7 +963,7 @@ export default function StepRecap({ onPrev }: StepProps) {
             </div>
           )}
 
-          <div className='flex gap-4 justify-center'>
+          <div className='flex gap-4 justify-center no-print'>
             <button
               type='button'
               onClick={onPrev}
@@ -982,6 +991,8 @@ export default function StepRecap({ onPrev }: StepProps) {
             </button>
           </div>
         </div>
+      </div>
+      {/* FIN SECTION IMPRIMABLE */}
       </div>
     </div>
   );
