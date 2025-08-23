@@ -2,7 +2,6 @@
 export { DeliveryStatusSelector } from './DeliveryStatusSelector';
 export { StatusBadge } from './StatusBadge';
 export { ProductsWithStatusSection } from './ProductsWithStatusSection';
-export { DeliveryStatusSummary } from './DeliveryStatusSummary';
 export { useProductsWithDeliveryStatus } from './hooks/useProductsWithDeliveryStatus';
 export { DeliveryStatusNotificationService } from './services/DeliveryStatusNotificationService';
 
