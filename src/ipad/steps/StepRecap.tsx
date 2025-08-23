@@ -641,7 +641,7 @@ export default function StepRecap({ onPrev }: StepProps) {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div>
               <h4 className='font-semibold text-green-800 mb-2'>
-                À emporter ({produitsAEmporter.length})
+                emporter ({produitsAEmporter.length})
               </h4>
               {produitsAEmporter.length > 0 ? (
                 <ul className='text-sm text-green-700'>

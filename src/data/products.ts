@@ -178,6 +178,18 @@ export const productCatalog: ProductCatalog[] = [
   },
   {
     category: 'Oreillers',
+    name: 'Pack 2 Dual',
+    priceTTC: 100,
+    autoCalculateHT: true,
+  },
+  {
+    category: 'Oreillers',
+    name: 'Pack 2 Thalasso',
+    priceTTC: 100,
+    autoCalculateHT: true,
+  },
+  {
+    category: 'Oreillers',
     name: 'Pack oreiller 2 douceur',
     priceTTC: 150,
     autoCalculateHT: true,

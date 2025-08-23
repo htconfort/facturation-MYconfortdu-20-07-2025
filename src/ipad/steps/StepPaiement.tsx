@@ -100,7 +100,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
           p.qty,
           p.priceTTC,
           p.discount || 0,
-          normalizeDiscountType(p.discountType as any) // 'amount' hérité → 'fixed'
+          normalizeDiscountType(p.discountType as unknown) // 'amount' hérité → 'fixed'
         )
       );
     }, 0);
@@ -113,8 +113,36 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
     1,
     10
   );
-  const montantParCheque =
-    nombreCheques > 0 ? remainingAmount / nombreCheques : 0;
+  
+  // Calculer le montant par chèque : entier pour "Chèque à venir", normal sinon
+  const montantParCheque = 
+    nombreCheques > 0 
+      ? paiement.method === 'Chèque à venir'
+        ? Math.round(remainingAmount / nombreCheques) // Montant rond pour les chèques
+        : remainingAmount / nombreCheques // Montant exact pour les autres modes
+      : 0;
+
+  // Pour les chèques à venir, recalculer l'acompte pour garantir des montants entiers
+  const adjustedDepositAmount = paiement.method === 'Chèque à venir' && nombreCheques > 0
+    ? (() => {
+        const proposedDeposit = totalTTC - (montantParCheque * nombreCheques);
+        // Si l'acompte proposé est négatif, réduire le montant par chèque
+        if (proposedDeposit < 0) {
+          const adjustedPerCheque = Math.floor(totalTTC / nombreCheques);
+          return totalTTC - (adjustedPerCheque * nombreCheques);
+        }
+        return Math.max(0, proposedDeposit);
+      })()
+    : depositAmount;
+
+  // Recalculer le montant par chèque avec l'acompte ajusté pour éviter les négatifs
+  const finalMontantParCheque = paiement.method === 'Chèque à venir' && nombreCheques > 0
+    ? Math.floor((totalTTC - adjustedDepositAmount) / nombreCheques)
+    : montantParCheque;
+
+  // Utiliser l'acompte ajusté pour l'affichage quand en mode "Chèque à venir"
+  const displayDepositAmount = paiement.method === 'Chèque à venir' ? adjustedDepositAmount : depositAmount;
+  const displayRemainingAmount = totalTTC - displayDepositAmount;
 
   // Validation plus sûre (type guard)
   const isValid =
@@ -134,7 +162,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
         p.qty,
         p.priceTTC,
         p.discount || 0,
-        normalizeDiscountType(p.discountType as any)
+        normalizeDiscountType(p.discountType as unknown)
       );
       return sum + (original - withDiscount);
     }, 0);
@@ -142,14 +170,45 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
 
   const handleDepositChange = (amount: number) => {
     const valid = clamp(safeNumber(amount), 0, totalTTC);
-    updatePaiement({
-      depositAmount: valid,
-      remainingAmount: totalTTC - valid,
-    });
+    
+    // Si on est en mode "Chèque à venir", ajuster pour avoir des chèques ronds
+    if (paiement.method === 'Chèque à venir' && nombreCheques > 0) {
+      const remaining = totalTTC - valid;
+      const roundedPerCheque = Math.round(remaining / nombreCheques);
+      const adjustedRemaining = roundedPerCheque * nombreCheques;
+      const adjustedDeposit = totalTTC - adjustedRemaining;
+      
+      updatePaiement({
+        depositAmount: Math.max(0, adjustedDeposit),
+        remainingAmount: adjustedRemaining,
+      });
+    } else {
+      updatePaiement({
+        depositAmount: valid,
+        remainingAmount: totalTTC - valid,
+      });
+    }
   };
 
   const handleNombreChequesChange = (nombre: number) => {
-    updatePaiement({ nombreChequesAVenir: clamp(safeNumber(nombre), 1, 10) });
+    const validNombre = clamp(safeNumber(nombre), 1, 10);
+    
+    // Si on est en mode "Chèque à venir", recalculer l'acompte pour des chèques ronds
+    if (paiement.method === 'Chèque à venir') {
+      const currentDeposit = safeNumber(paiement.depositAmount);
+      const remaining = totalTTC - currentDeposit;
+      const roundedPerCheque = Math.round(remaining / validNombre);
+      const adjustedRemaining = roundedPerCheque * validNombre;
+      const adjustedDeposit = totalTTC - adjustedRemaining;
+      
+      updatePaiement({ 
+        nombreChequesAVenir: validNombre,
+        depositAmount: Math.max(0, adjustedDeposit),
+        remainingAmount: adjustedRemaining,
+      });
+    } else {
+      updatePaiement({ nombreChequesAVenir: validNombre });
+    }
   };
 
   // Validation pour le mode de règlement de l'acompte
@@ -432,18 +491,18 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                   <div className='text-center p-4 bg-blue-100 rounded-xl'>
                     <div className='text-2xl font-bold text-blue-800'>
-                      {formatEUR(depositAmount)}
+                      {formatEUR(displayDepositAmount)}
                     </div>
                     <div className='text-blue-600 font-semibold'>
                       Acompte à verser
                     </div>
                     <div className='text-sm text-blue-500'>
                       {totalTTC > 0
-                        ? `${Math.round((depositAmount / totalTTC) * 100)}%`
+                        ? `${Math.round((displayDepositAmount / totalTTC) * 100)}%`
                         : '0%'}{' '}
                       du total
                     </div>
-                    {depositAmount > 0 && paiement.depositPaymentMethod && (
+                    {displayDepositAmount > 0 && paiement.depositPaymentMethod && (
                       <div className='mt-2 text-xs text-blue-700 font-bold'>
                         {paiement.depositPaymentMethod === 'Carte Bleue' &&
                           '💳 Carte Bleue'}
@@ -584,7 +643,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                           Acompte initial
                         </div>
                         <div className='text-xl font-bold text-green-800'>
-                          {formatEUR(depositAmount)}
+                          {formatEUR(displayDepositAmount)}
                         </div>
                         <div className='text-xs text-green-600'>
                           À la commande
@@ -602,7 +661,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                               Chèque #{index}
                             </div>
                             <div className='text-xl font-bold text-blue-800'>
-                              {formatEUR(montantParCheque)}
+                              {formatEUR(finalMontantParCheque)}
                             </div>
                             <div className='text-xs text-blue-600'>
                               {index === 1
@@ -630,7 +689,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                             Montant par chèque
                           </div>
                           <div className='text-lg font-bold text-blue-800'>
-                            {formatEUR(montantParCheque)}
+                            {formatEUR(finalMontantParCheque)}
                           </div>
                         </div>
                         <div>
@@ -638,7 +697,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                             Total chèques
                           </div>
                           <div className='text-lg font-bold text-blue-800'>
-                            {formatEUR(remainingAmount)}
+                            {formatEUR(displayRemainingAmount)}
                           </div>
                         </div>
                         <div>

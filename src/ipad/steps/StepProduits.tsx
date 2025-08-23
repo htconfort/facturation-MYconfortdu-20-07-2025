@@ -378,12 +378,12 @@ export default function StepProduits({
                       </td>
                       <td className="px-3 py-2 text-center">
                         <select
-                          className={`w-28 h-12 rounded-lg border-3 px-2 text-sm font-bold focus:ring-4 transition-all ${
+                          className={`w-28 h-12 rounded-lg border-3 px-2 text-sm font-bold focus:ring-4 transition-all shadow-lg ${
                             p.isPickupOnSite === undefined
-                              ? 'border-orange-500 bg-orange-50 text-orange-800 focus:border-orange-600 focus:ring-orange-200'
+                              ? 'border-yellow-500 bg-yellow-400 text-black focus:border-yellow-600 focus:ring-yellow-200'
                               : p.isPickupOnSite 
-                                ? 'border-green-500 bg-green-50 text-green-800 focus:border-green-600 focus:ring-green-200'
-                                : 'border-red-500 bg-red-50 text-red-800 focus:border-red-600 focus:ring-red-200'
+                                ? 'border-green-600 bg-green-600 text-white focus:border-green-700 focus:ring-green-300'
+                                : 'border-red-600 bg-red-600 text-white focus:border-red-700 focus:ring-red-300'
                           }`}
                           value={p.isPickupOnSite === undefined ? '' : (p.isPickupOnSite ? 'emporter' : 'livrer')}
                           onChange={(e) => {
@@ -394,9 +394,9 @@ export default function StepProduits({
                             }
                           }}
                         >
-                          <option value="" className="text-orange-800 font-bold">⚠️ À choisir</option>
-                          <option value="livrer" className="text-red-800 font-bold">� À livrer</option>
-                          <option value="emporter" className="text-green-800 font-bold">🚗 À emporter</option>
+                          <option value="" className="text-black font-bold">⚠️ À choisir</option>
+                          <option value="livrer" className="text-white font-bold">📦 À livrer</option>
+                          <option value="emporter" className="text-white font-bold">🚗 emporter</option>
                         </select>
                       </td>
                       <td className="px-3 py-2 text-right">
