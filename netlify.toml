@@ -2,11 +2,11 @@
   # Répertoire où se trouvent les fichiers de build
   publish = "dist"
   
-  # Commande de build simplifiée (sans TypeScript check)
-  command = "npm ci && npm run build"
+  # Commande de build avec Node 22 et npx vite
+  command = "npm install && npx vite build"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
 
 # Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
 [[redirects]]
