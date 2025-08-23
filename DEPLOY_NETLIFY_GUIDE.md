@@ -26,7 +26,7 @@ VITE_CONSOLE_LOGS=false
 
 ```env
 # WEBHOOK N8N (Automation)
-VITE_N8N_WEBHOOK_URL=https://n8n.srv765811.hstgr.cloud/webhook/e7ca38d2-4b2a-4216-9c26-23663529790a
+VITE_N8N_WEBHOOK_URL=https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle
 
 # PDF OPTIMISÉ
 VITE_PDF_QUALITY=0.8
