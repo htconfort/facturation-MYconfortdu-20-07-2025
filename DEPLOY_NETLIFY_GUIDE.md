@@ -5,10 +5,8 @@
 ### 🔥 Variables OBLIGATOIRES minimum :
 
 ```env
-# SYSTÈME EMAIL (OBLIGATOIRE)
-VITE_EMAILJS_PUBLIC_KEY=votre_public_key_emailjs
-VITE_EMAILJS_SERVICE_ID=votre_service_id_emailjs
-VITE_EMAILJS_TEMPLATE_ID=votre_template_id_emailjs
+# SYSTÈME EMAIL via N8N (OBLIGATOIRE)
+VITE_N8N_WEBHOOK_URL=https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle
 
 # ENTREPRISE (OBLIGATOIRE)
 VITE_COMPANY_NAME=HT CONFORT
@@ -57,11 +55,10 @@ Site Settings → Environment Variables → Add variable
 
 **⚡ Copier-coller directement :**
 ```
-VITE_EMAILJS_PUBLIC_KEY
-VITE_EMAILJS_SERVICE_ID  
-VITE_EMAILJS_TEMPLATE_ID
+VITE_N8N_WEBHOOK_URL
 VITE_COMPANY_NAME
 VITE_COMPANY_SIRET
+VITE_COMPANY_EMAIL
 NODE_ENV
 VITE_DEBUG_MODE
 ```

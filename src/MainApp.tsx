@@ -642,12 +642,13 @@ function MainApp() {
   //   PDFService.printInvoice(previewRef, invoice.invoiceNumber);
   // };
 
-  const handleEmailJSSuccess = (message: string) => {
+  // Handlers pour les toasts (N8N remplace EmailJS)
+  const showSuccessToast = (message: string) => {
     handleSaveInvoice();
     showToast(message, 'success');
   };
 
-  const handleEmailJSError = (message: string) => {
+  const showErrorToast = (message: string) => {
     showToast(message, 'error');
   };
 
@@ -840,8 +841,8 @@ function MainApp() {
           <div className='mb-6'>
             <DebugCenter
               invoice={invoice}
-              onSuccess={handleEmailJSSuccess}
-              onError={handleEmailJSError}
+              onSuccess={showSuccessToast}
+              onError={showErrorToast}
             />
           </div>
         )}
@@ -988,14 +989,7 @@ function MainApp() {
           </div>
         </div>
 
-        {/* Communication & Actions Section - EmailSender removed */}
-        {/* <EmailSender
-          invoice={invoice}
-          onSuccess={handleEmailJSSuccess}
-          onError={handleEmailJSError}
-          onShowConfig={() => setShowGoogleDriveConfig(true)}
-          onShowEmailJSConfig={() => setShowEmailJSConfig(true)}
-        /> */}
+        {/* Communication & Actions Section - EmailSender removed - Use N8N via wizard */}
 
         {/* Section Aperçu de la facture - Style Netlify intégré */}
         <div className='bg-white rounded-xl shadow-lg p-6 mb-6'>
@@ -1146,23 +1140,17 @@ function MainApp() {
       <PDFGuideModal
         isOpen={showPDFGuide}
         onClose={() => setShowPDFGuide(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={showSuccessToast}
+        onError={showErrorToast}
       />
 
-      {/* EmailJSConfigurationModal removed */}
-      {/* <EmailJSConfigurationModal
-        isOpen={showEmailJSConfig}
-        onClose={() => setShowEmailJSConfig(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
-      /> */}
+      {/* N8N email integration via wizard only - EmailJS removed */}
 
       <GoogleDriveModal
         isOpen={showGoogleDriveConfig}
         onClose={() => setShowGoogleDriveConfig(false)}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={showSuccessToast}
+        onError={showErrorToast}
       />
 
       {/* Keep the original PayloadDebugModal for compatibility */}
@@ -1170,8 +1158,8 @@ function MainApp() {
         isOpen={showPayloadDebug}
         onClose={() => setShowPayloadDebug(false)}
         invoice={invoice}
-        onSuccess={handleEmailJSSuccess}
-        onError={handleEmailJSError}
+        onSuccess={showSuccessToast}
+        onError={showErrorToast}
       />
 
       {/* Add toggle for Debug Center */}

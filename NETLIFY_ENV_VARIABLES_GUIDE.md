@@ -2,13 +2,12 @@
 
 ## 📋 Variables Obligatoires pour Netlify
 
-### 🔐 EmailJS (Obligatoire pour l'envoi d'emails)
+### � N8N Webhook (Obligatoire pour l'envoi d'emails)
 ```bash
-VITE_EMAILJS_PUBLIC_KEY="votre_public_key_emailjs"
-VITE_EMAILJS_SERVICE_ID="votre_service_id_emailjs"
-VITE_EMAILJS_TEMPLATE_ID="votre_template_id_emailjs"
+VITE_N8N_WEBHOOK_URL="https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle"
+VITE_N8N_WEBHOOK_SECRET="votre_secret_webhook"
 ```
-**Où les obtenir :** [EmailJS Dashboard](https://www.emailjs.com/)
+**Note :** L'application utilise N8N pour l'envoi d'emails, plus EmailJS.
 
 ### 📧 Configuration Email
 ```bash
@@ -36,9 +35,9 @@ VITE_GOOGLE_DRIVE_CLIENT_ID="votre_client_id"
 VITE_GOOGLE_DRIVE_FOLDER_ID="votre_dossier_principal_id"
 ```
 
-### 🔗 N8N Webhook (Optionnel - Automation)
+### 🔗 N8N Webhook (Déjà configuré en production)
 ```bash
-VITE_N8N_WEBHOOK_URL="https://votre-n8n.domain.com/webhook/xxxxx"
+VITE_N8N_WEBHOOK_URL="https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle"
 VITE_N8N_WEBHOOK_SECRET="votre_secret_webhook"
 ```
 
@@ -73,10 +72,9 @@ VITE_BACKUP_INTERVAL_HOURS="24"
 ### Pour un déploiement fonctionnel de base :
 
 ```bash
-# OBLIGATOIRE - EmailJS
-VITE_EMAILJS_PUBLIC_KEY="your_emailjs_public_key"
-VITE_EMAILJS_SERVICE_ID="your_emailjs_service_id" 
-VITE_EMAILJS_TEMPLATE_ID="your_emailjs_template_id"
+# OBLIGATOIRE - N8N Webhook
+VITE_N8N_WEBHOOK_URL="https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle"
+VITE_N8N_WEBHOOK_SECRET="votre_secret_webhook"
 
 # OBLIGATOIRE - Emails
 VITE_DEFAULT_EMAIL_FROM="noreply@myconfort.com"
@@ -128,7 +126,7 @@ Pour chaque variable, cliquer sur **Add a variable** et saisir :
 ### Vérifier que les variables sont bien chargées :
 ```javascript
 // Dans la console développeur du site déployé
-console.log('EmailJS Public Key:', import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+console.log('N8N Webhook URL:', import.meta.env.VITE_N8N_WEBHOOK_URL);
 console.log('Company Name:', import.meta.env.VITE_COMPANY_NAME);
 ```
 
@@ -146,9 +144,8 @@ Après avoir ajouté/modifié les variables d'environnement :
 ## ✅ Checklist Déploiement Netlify
 
 ### Variables Obligatoires :
-- [ ] `VITE_EMAILJS_PUBLIC_KEY`
-- [ ] `VITE_EMAILJS_SERVICE_ID`
-- [ ] `VITE_EMAILJS_TEMPLATE_ID`
+- [ ] `VITE_N8N_WEBHOOK_URL`
+- [ ] `VITE_N8N_WEBHOOK_SECRET`
 - [ ] `VITE_DEFAULT_EMAIL_FROM`
 - [ ] `VITE_DEFAULT_EMAIL_REPLY_TO`
 - [ ] `VITE_COMPANY_NAME`
@@ -161,13 +158,12 @@ Après avoir ajouté/modifié les variables d'environnement :
 
 ### Fonctionnalités Activées :
 - [ ] ✅ Génération de factures PDF
-- [ ] ✅ Envoi d'emails avec EmailJS
+- [ ] ✅ Envoi d'emails avec N8N
 - [ ] ✅ Mode iPad optimisé
 - [ ] ✅ Icônes de paiement
 - [ ] ✅ Validation des formulaires
 - [ ] ✅ Signature électronique
 - [ ] ⏸️ Upload Google Drive (optionnel)
-- [ ] ⏸️ Webhook N8N (optionnel)
 
 ---
 
