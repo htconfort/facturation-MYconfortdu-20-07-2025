@@ -1,0 +1,239 @@
+# .cursorrules — MYconfort Facturation (iPad/Desktop)
+# But: guider Cursor/Copilot pour produire du code complet, aligné stack & UX iPad.
+
+project:
+  name: facturation-myconfortdu-20-07-2025
+  type: SPA (React + Vite + TypeScript)
+  platforms: [iPad landscape, Desktop]
+  deployment: Netlify (auto-deploy depuis main)
+
+tech_stack:
+  runtime:
+    - react@18
+    - react-dom@18
+    - typescript@>=5.6
+    - vite@>=5
+  ui:
+    - tailwindcss@^3
+    - lucide-react
+    - polices: [Manrope (UI), Caveat (signature)]
+  state:
+    - zustand (persist; pas d'accès direct à window.localStorage dans le code d'app)
+  router:
+    - react-router-dom@^6.28
+  pdf:
+    - jspdf
+    - jspdf-autotable
+    - html2pdf.js
+    - html2canvas
+    - @react-pdf/renderer
+    - file-saver
+  signature:
+    - signature_pad
+  backend:
+    - @supabase/supabase-js (Postgres + Auth + Storage + RLS)
+  validation:
+    - zod
+  tests:
+    - vitest
+    - @playwright/test
+  tooling:
+    - eslint + @typescript-eslint + prettier
+    - rollup-plugin-visualizer
+
+# ===== DIRECTIVES GÉNÉRALES =====
+instructions:
+  - Écrire du code **TypeScript strict** et complet (pas d'extraits).
+  - Respecter **Tailwind uniquement** pour le style (pas de CSS inline).
+  - UI **iPad paysage first** : zones tactiles >= 44x44, hiérarchie typographique nette.
+  - Wizard **7 étapes**: facture, client, produits, paiement, livraison, signature, récapitulatif.
+  - **Pages secondaires**: ouvrir via route push/overlay *sans* stepper, avec **bouton Retour** en haut gauche.
+  - **Gestes swipe** gauche/droite pour naviguer entre steps (hook `useSwipe` propriétaire, ré-implémenté from-scratch).
+  - **État**: centralisé via Zustand; persistance via plugin persist, jamais d'accès direct à localStorage dans la logique UI.
+  - **Accessibilité**: labels explicites, ordre de focus logique, champs numériques avec claviers adaptés iPad.
+  - **Perf**: transitions < 150ms, virtualisation si listes volumineuses, lazy & code-splitting (vendor/utils/pdf).
+  - **PDF**: privilégier `unifiedPrintService` (si présent), sinon wrappers dédiés par cas d'usage.
+  - **Sécurité**: pas de secrets en dur; utiliser variables VITE_*; respecter RLS côté Supabase.
+  - **Licences**: interdiction d'importer du code tiers non licencié; réécrire toute portion avec "license: unknown".
+
+# ===== ARCHITECTURE / STRUCTURE =====
+filesystem_conventions:
+  base_dirs:
+    - src/components
+    - src/ipad/steps        # 7 steps
+    - src/ipad/secondary    # pages secondaires (ex: ProductDetails, AddressDetails, PaymentMethod)
+    - src/navigation
+    - src/store
+    - src/services
+    - src/types
+    - src/utils
+    - src/hooks
+    - src/styles
+  naming:
+    - components: PascalCase (ex: SecondaryPageLayout.tsx)
+    - hooks: useXxx.ts
+    - stores: useXxxStore.ts / useInvoiceWizard.ts
+    - steps: StepXxx.tsx (ex: StepInvoice.tsx, StepCustomer.tsx, ...)
+    - secondary pages: XxxDetailsScreen.tsx
+    - types: Xxx.types.ts
+  index_patterns:
+    - Chaque répertoire peut exposer un index.ts pour raccourcir les imports.
+
+navigation:
+  pattern:
+    - Utiliser react-router-dom v6 (routes par step).
+    - Stepper horizontal persistant (onglets personnalisés) dans `StepsNavigator`.
+    - Stack/Outlet pour pages secondaires (sans stepper) + **BackButton** obligatoire.
+  routes_examples:
+    - /wizard/invoice
+    - /wizard/client
+    - /wizard/product
+    - /wizard/product/details
+    - /wizard/payment
+    - /wizard/delivery
+    - /wizard/signature
+    - /wizard/recap
+
+state_management:
+  zustand:
+    - Un store `useInvoiceWizard.ts` gère: currentStep, draft, validations par step.
+    - Exposer des actions: goNext, goPrev, openSecondary, closeSecondary, saveDraft.
+    - Persistance via `persist` configurée; sérialisation sûre (dates, montants).
+  validation:
+    - Schémas zod pour Client, Product, Invoice, Payment, Delivery, Signature.
+
+gestures:
+  hook_useSwipe:
+    - Doit être **original** (pas de copie), API simple: onSwipe('left' | 'right' | 'up' | 'down').
+    - Attacher sur le conteneur du wizard; `preventScrollOnX: true` en paysage.
+    - Passive listeners correctement paramétrés.
+
+signature:
+  features:
+    - signature_pad; export PNG base64 + horodatage.
+    - Buttons: effacer, annuler; latence minimale au stylet.
+    - Intégration PDF (image + metadata).
+
+pdf_guidelines:
+  - `unifiedPrintService` agrège les besoins (A4, compact, React-PDF).
+  - Pas de canvas non maîtrisé sur mobile si risque de mémoire; fallback html2pdf.
+  - Inclure signature(s), logo fond blanc, totaux HT/TTC/TVA cohérents.
+
+# ===== DESIGN SYSTEM MYCONFORT =====
+colors:
+  myconfort:
+    green: '#477A0C'     # Vert principal - boutons primaires
+    cream: '#F2EFE2'     # Fond beige signature - backgrounds
+    coral: '#F55D3E'     # Rouge accent - alertes/erreurs
+    blue: '#89BBFE'      # Bleu interface - informations
+    purple: '#D68FD6'    # Violet - statuts spéciaux
+    dark: '#14281D'      # Vert foncé - textes principaux
+
+fonts:
+  manrope: ['Manrope', 'sans-serif']  # Police principale
+  caveat: ['Caveat', 'cursive']       # Police signatures
+
+ipad_constraints:
+  orientation: landscape first
+  touch_targets: minimum 44px (recommandé 56px+)
+  navigation: swipe gestures + boutons tactiles larges
+  secondary_pages: overlay slide-in depuis la droite avec bouton retour
+  animations: fluides < 150ms, optimisées performance (max 60fps)
+  feedback: retour visuel immédiat sur toute interaction
+
+# ===== RÈGLES DE CODE =====
+code_style:
+  typescript:
+    - "strict": true
+    - Pas d'any implicite; types explicites pour props/retours.
+  react:
+    - Composants fonctionnels + hooks; pas de classes.
+    - Éviter re-render: memo/useCallback/useMemo pertinents.
+  tailwind:
+    - Classes utilitaires; pas de style inline; préférer composants UI réutilisables (Field, Section, SummaryCard).
+  imports:
+    - Utiliser chemins relatifs courts et/ou alias configurés (si tsconfig paths).
+  errors:
+    - Favoriser `Result`/guard clauses; toasts/modals plutôt que `alert()`.
+
+interdictions:
+  - ❌ Pas d'alert(): Utiliser composants Modal/Toast
+  - ❌ Pas de localStorage direct: Passer par Zustand persistence  
+  - ❌ Pas de style inline: Uniquement Tailwind classes
+  - ❌ Pas de console.log en production: Utiliser système de logging
+  - ❌ Pas de any TypeScript: Types stricts obligatoires
+  - ❌ Pas de useEffect pour state sync: Utiliser Zustand actions
+  - ❌ Pas de code "license: unknown": Réécrire from-scratch
+
+testing:
+  unit:
+    - Vitest pour hooks/stores (ex: useSwipe, useInvoiceWizard).
+  e2e:
+    - Playwright pour navigation steps, retour depuis pages secondaires, génération PDF minimale.
+  requirements:
+    - Scripts npm: test, test:e2e, test:e2e:ui actifs.
+
+# ===== TÂCHES PRIORITAIRES POUR L'IA =====
+ai_todo:
+  - [A] Créer `src/navigation/StepsNavigator.tsx` (stepper + container iPad) et `src/components/BackButton.tsx`.
+  - [B] Générer les 7 steps (`src/ipad/steps/*.tsx`) avec champs essentiels; lier au store.
+  - [C] Ajouter 3 pages secondaires types (`ProductDetailsScreen.tsx`, `AddressDetailsScreen.tsx`, `PaymentMethodScreen.tsx`).
+  - [D] Implémenter `src/hooks/useSwipe.ts` **original** avec tests Vitest.
+  - [E] Intégrer signature tactile (composant + service export PNG base64).
+  - [F] Harmoniser services PDF via `unifiedPrintService` et ajouter un scénario "compact".
+  - [G] Ajouter tests Playwright basiques (navigation, retour, signature, PDF).
+  - [H] Rédiger/mettre à jour `README.md` (lancement, routes, UX iPad, licences).
+
+# ===== PATTERNS EXISTANTS (À RESPECTER) =====
+existing_components:
+  delivery_system:
+    - DeliveryStatusSummary.tsx
+    - StatusBadge.tsx  
+    - DeliveryStatusSelector.tsx
+    - ProductsWithStatusSection.tsx
+  
+  services_pdf:
+    - advancedPdfService.ts
+    - customPdfService.ts
+    - unifiedPrintService.ts
+  
+  n8n_integration:
+    - n8nWebhookService.ts
+    - n8nBlueprintAdapter.ts
+  
+  alma_payments:
+    - Logo Alma intégré dans ProductSection.tsx
+    - Simulation échéancier 2,3,4 fois
+    - Math.round() pour montants entiers
+
+workflow_types:
+  WizardStep: 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap'
+  DeliveryStatus: 'pending' | 'delivered' | 'to_deliver' | 'cancelled'
+
+# ===== FICHIERS PROTÉGÉS / À NE PAS CASSER =====
+protected:
+  - Ne pas supprimer: services PDF existants s'ils sont en production.
+  - Ne pas exposer de secrets; utiliser VITE_* depuis .env.
+  - Ne pas introduire de dépendances lourdes sans justification (bundle budget).
+
+# ===== LICENCES & CONFORMITÉ =====
+license_policy:
+  - Interdiction d'intégrer du code tiers "License: unknown".
+  - Si Copilot signale un match: réécrire la portion; sinon ajouter attribution (MIT/Apache) + THIRD_PARTY_NOTICES.md.
+  - Ajouter en-tête de source uniquement si licence compatible.
+
+# ===== QUALITÉ / CI =====
+quality:
+  commits:
+    - Commits atomiques, messages clairs (feat:, fix:, refactor:, chore:, test:, docs:).
+  lint:
+    - `npm run lint` & `npm run type-check` doivent passer.
+  build:
+    - `npm run build` doit produire dist sans sourcemap en prod; chunks vendor/utils/pdf séparés (Vite rollupOptions).
+
+# ===== COMMENT L'IA DOIT ÉCRIRE SES RÉPONSES =====
+assistant_output:
+  - Fournir des **fichiers complets** (création/modification) avec chemins exacts.
+  - Expliquer brièvement les choix (prose courte), puis livrer le code.
+  - Éviter les listes longues dans la prose; se concentrer sur le code opérationnel.
+  - Proposer des tests lorsque c'est pertinent (Vitest/Playwright).
