@@ -55,6 +55,11 @@ interface SignatureData {
   timestamp?: string;
 }
 
+// ✅ AJOUT : état de complétion sérialisable
+interface CompletionState {
+  completedStepIds: string[]; // on persiste en tableau
+}
+
 interface WizardState {
   step: WizardStep;
   
@@ -73,8 +78,17 @@ interface WizardState {
   advisorName?: string;
   termsAccepted: boolean;
   
+  // ✅ État de complétion
+  completion: CompletionState;
+  
   // Actions
   setStep: (s: WizardStep) => void;
+  
+  // Navigation helpers
+  steps: WizardStep[];
+  getCurrentStepIndex: () => number;
+  goNext: () => void;
+  goPrev: () => void;
   setInvoiceData: (data: { invoiceNumber?: string; invoiceDate?: string; eventLocation?: string }) => void;
   updateClient: (p: Partial<ClientData>) => void;
   addProduit: (p: Produit) => void;
@@ -93,6 +107,10 @@ interface WizardState {
   syncFromMainInvoice: (invoice: any) => void;
   syncToMainInvoice: () => any;
 
+  // ✅ API complétion
+  markStepDone: (stepId: string) => void;
+  resetCompletion: () => void;
+  
   // 💳 Actions pour le paiement Mollie
   setPaymentStatus: (status: PaymentData['paymentStatus']) => void;
   setPaymentData: (data: { paymentId?: string; orderId?: string; checkoutUrl?: string; paymentError?: string }) => void;
@@ -117,7 +135,36 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   advisorName: '',
   termsAccepted: false,
   
+  // ✅ État de complétion avec valeur par défaut robuste
+  completion: { completedStepIds: [] },
+  
+  // Navigation helpers
+  steps: ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap'],
+  
+  getCurrentStepIndex: () => {
+    const state = get();
+    return state.steps.indexOf(state.step);
+  },
+  
   setStep: (s) => set({ step: s }),
+  
+  goNext: () => {
+    const state = get();
+    const currentIndex = state.steps.indexOf(state.step);
+    const nextStep = state.steps[currentIndex + 1];
+    if (nextStep) {
+      set({ step: nextStep });
+    }
+  },
+  
+  goPrev: () => {
+    const state = get();
+    const currentIndex = state.steps.indexOf(state.step);
+    const prevStep = state.steps[currentIndex - 1];
+    if (prevStep) {
+      set({ step: prevStep });
+    }
+  },
   
   setInvoiceData: (data) => set((state) => ({
     invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
@@ -165,7 +212,18 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
     invoiceNotes: '',
     advisorName: '',
     termsAccepted: false,
+    completion: { completedStepIds: [] },
   }),
+  
+  // ✅ marquer une étape comme faite
+  markStepDone: (stepId) =>
+    set((state) => {
+      const setArr = new Set(state.completion?.completedStepIds ?? []);
+      setArr.add(stepId);
+      return { completion: { completedStepIds: Array.from(setArr) } };
+    }),
+
+  resetCompletion: () => set({ completion: { completedStepIds: [] } }),
   
   // Synchroniser depuis l'état principal de App.tsx
   syncFromMainInvoice: (invoice) => {
