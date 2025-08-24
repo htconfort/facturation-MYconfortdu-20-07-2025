@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
+import StepsNavigator from '../navigation/StepsNavigator';
 import StepFacture from './steps/StepFacture';
-import StepClient from './steps/StepClient';
+// import StepClient from './steps/StepClient'; //  remplacé par NoScroll
+import StepClientNoScroll from './steps/StepClientNoScroll';
 import StepProduits from './steps/StepProduits';
-import StepPaiement from './steps/StepPaiement';
-import StepLivraison from './steps/StepLivraison';
-import StepSignature from './steps/StepSignature';
-import StepRecap from './steps/StepRecap';
+// import StepPaiement from './steps/StepPaiement'; // remplacé par NoScroll
+import StepPaymentNoScrollFixed from './steps/StepPaymentNoScrollFixed';
+// import StepLivraison from './steps/StepLivraison'; // remplacé par NoScroll
+import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
+// import StepSignature from './steps/StepSignature'; // remplacé par NoScroll
+import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
+// import StepRecap from './steps/StepRecap'; // remplacé par NoScroll
+import StepRecapNoScroll from './steps/StepRecapNoScroll';
 
 const steps: WizardStep[] = ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap'];
 
@@ -70,16 +76,18 @@ export default function IpadWizard() {
           </div>
         </div>
       ) : (
-        <WizardSurface 
-          step={step} 
-          onGo={(dir) => {
-            const idx = steps.indexOf(step);
-            const next = steps[idx + (dir === 'next' ? 1 : -1)];
-            if (!next) return;
-            navigate(`/ipad?step=${next}`);
-          }} 
-          onQuit={() => navigate('/')} 
-        />
+        <StepsNavigator>
+          <WizardSurface 
+            step={step} 
+            onGo={(dir) => {
+              const idx = steps.indexOf(step);
+              const next = steps[idx + (dir === 'next' ? 1 : -1)];
+              if (!next) return;
+              navigate(`/ipad?step=${next}`);
+            }} 
+            onQuit={() => navigate('/')} 
+          />
+        </StepsNavigator>
       )}
     </div>
   );
@@ -195,149 +203,87 @@ function WizardSurface({
 
     switch (step) {
       case 'facture': return <StepFacture {...props} />;
-      case 'client': return <StepClient {...props} />;
+      case 'client': return <StepClientNoScroll {...props} />;
       case 'produits': return <StepProduits {...props} />;
-      case 'paiement': return <StepPaiement {...props} />;
-      case 'livraison': return <StepLivraison {...props} />;
-      case 'signature': return <StepSignature {...props} />;
-      case 'recap': return <StepRecap {...props} />;
+      case 'paiement': return <StepPaymentNoScrollFixed {...props} />;
+      case 'livraison': return <StepLivraisonNoScroll {...props} />;
+      case 'signature': return <StepSignatureNoScroll {...props} />;
+      case 'recap': return <StepRecapNoScroll {...props} />;
       default: return <div>Étape inconnue</div>;
     }
   }, [step, onGo, onQuit, isFirstStep, isLastStep, validateAndGoNext]);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-gray-50 to-white">
-      {/* Header mince avec gradient MyConfort */}
-      <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-8 bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] text-white shadow-lg">
-        <div className="flex items-center space-x-4">
-          <div className="text-2xl">🌸</div>
-          <div>
-            <div className="font-bold text-lg">MYCONFORT - Mode iPad</div>
-            <div className="text-sm opacity-90">{labelFor(step)}</div>
-          </div>
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      {/* Header ultra-compact - 28px seulement */}
+      <div className="h-7 flex items-center justify-between px-3 bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] text-white text-xs">
+        <div className="flex items-center gap-1">
+          <div className="text-sm">🌸</div>
+          <span className="font-medium truncate">{labelFor(step)}</span>
         </div>
         <button 
           onClick={onQuit} 
-          className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+          className="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-xs transition-all"
         >
-          ← Quitter
+          Quitter
         </button>
       </div>
 
-      {/* Contenu avec scroll */}
-      <div className="pt-16 pb-24 px-8 w-full h-full overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          {StepComponent}
-        </div>
+      {/* Contenu principal - utilise tout l'espace restant */}
+      <div className="flex-1 overflow-hidden">
+        {StepComponent}
       </div>
 
-      {/* Barre d'action bas : navigation + stepper */}
-      <div className="absolute left-0 bottom-0 right-0 h-20 bg-white border-t-2 border-gray-200 flex items-center px-8 justify-between shadow-lg">
-        <div className="flex items-center gap-4">
-          {/* Bouton Précédent */}
+      {/* Footer avec navigation agrandie - 48px pour les boutons plus gros */}
+      <div className="h-12 bg-white border-t border-gray-200 flex items-center justify-between px-3">
+        <div className="flex items-center">
           {!isFirstStep && (
-            <NavButton 
+            <button 
               onClick={() => onGo('prev')} 
-              label="← Précédent" 
-              variant="secondary"
-            />
-          )}
-          
-          {/* Bouton Suivant / Terminer */}
-          {!isLastStep ? (
-            (() => {
-              const { isValid } = validateCurrentStep();
-              return (
-                <NavButton 
-                  onClick={validateAndGoNext} 
-                  label="Suivant →" 
-                  variant={isValid ? "primary" : "danger"}
-                />
-              );
-            })()
-          ) : (
-            <NavButton 
-              onClick={onQuit} 
-              label="✅ Terminer" 
-              variant="success"
-            />
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-all min-h-[32px]"
+            >
+              ← Précédent
+            </button>
           )}
         </div>
-        
-        {/* Stepper à droite */}
-        <Stepper currentStep={step} />
+
+        {/* Stepper compact */}
+        <div className="flex gap-0.5">
+          {steps.map((_, idx) => (
+            <div 
+              key={idx}
+              className={`w-1.5 h-1.5 rounded-full ${
+                idx === stepIndex ? 'bg-[#477A0C]' : 
+                idx < stepIndex ? 'bg-green-400' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center">
+          {!isLastStep && (
+            <button 
+              onClick={validateAndGoNext}
+              className="px-4 py-2 bg-[#477A0C] hover:bg-[#5A8F0F] text-white rounded-lg text-sm font-medium transition-all shadow-sm min-h-[32px]"
+            >
+              Suivant →
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
-
-function NavButton({ 
-  onClick, 
-  label, 
-  variant = 'primary' 
-}: { 
-  onClick: () => void; 
-  label: string; 
-  variant?: 'primary' | 'secondary' | 'success' | 'danger';
-}) {
-  const baseClasses = "px-6 py-3 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg";
-  
-  const variantClasses = {
-    primary: "bg-[#477A0C] hover:bg-[#5A8F0F] text-white",
-    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
-    success: "bg-green-600 hover:bg-green-700 text-white",
-    danger: "bg-red-500 hover:bg-red-600 text-white",
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`${baseClasses} ${variantClasses[variant]}`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function Stepper({ currentStep }: { currentStep: WizardStep }) {
-  return (
-    <div className="flex items-center gap-3">
-      {steps.map((stepName, index) => {
-        const isActive = stepName === currentStep;
-        const isCompleted = steps.indexOf(currentStep) > index;
-        
-        return (
-          <div key={stepName} className="flex items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-              isActive 
-                ? 'bg-[#477A0C] text-white shadow-lg scale-110' 
-                : isCompleted 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-gray-300 text-gray-600'
-            }`}>
-              {isCompleted ? '✓' : index + 1}
-            </div>
-            {index < steps.length - 1 && (
-              <div className={`w-8 h-1 mx-2 transition-all ${
-                isCompleted ? 'bg-green-500' : 'bg-gray-300'
-              }`} />
-            )}
-          </div>
-        );
-      })}
     </div>
   );
 }
 
 function labelFor(s: WizardStep): string {
   switch (s) {
-    case 'facture': return 'Informations Facture';
-    case 'client': return 'Informations Client';
-    case 'produits': return 'Produits & Services';
-    case 'paiement': return 'Modalités de Paiement';
-    case 'livraison': return 'Livraison & Logistique';
-    case 'signature': return 'Signature Électronique';
-    case 'recap': return 'Récapitulatif Final';
-    default: return 'Étape inconnue';
+    case 'facture': return 'Facture';
+    case 'client': return 'Client';
+    case 'produits': return 'Produits';
+    case 'paiement': return 'Paiement';
+    case 'livraison': return 'Livraison';
+    case 'signature': return 'Signature';
+    case 'recap': return 'Récap';
+    default: return 'Étape';
   }
 }

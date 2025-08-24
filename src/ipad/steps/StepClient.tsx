@@ -49,14 +49,13 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
   // Fonction pour obtenir la classe CSS du champ
   const getFieldClass = (fieldName: keyof typeof requiredFields) => {
     const isValid = requiredFields[fieldName];
-    const hasBeenEdited = editedFields[fieldName];
 
     if (isValid) {
+      // Champ valide : fond vert
       return 'w-full h-16 rounded-xl border-3 border-green-500 bg-green-50 px-6 text-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all font-bold';
-    } else if (hasBeenEdited) {
-      return 'w-full h-16 rounded-xl border-3 border-red-500 bg-red-50 px-6 text-xl focus:border-red-600 focus:ring-4 focus:ring-red-200 transition-all font-bold';
     } else {
-      return 'w-full h-16 rounded-xl border-3 border-red-500 px-6 text-xl focus:border-red-600 focus:ring-4 focus:ring-red-200 transition-all font-bold';
+      // Champ non valide : fond orange, devient bleu clair au focus
+      return 'w-full h-16 rounded-xl border-3 border-red-500 bg-orange-100 px-6 text-xl focus:border-blue-400 focus:bg-blue-100 focus:ring-4 focus:ring-blue-200 transition-all font-bold';
     }
   };
 

@@ -3,6 +3,7 @@ import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
 import { PDFService } from '../../services/pdfService';
+import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { saveInvoice } from '../../utils/storage';
 import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
 import { Invoice } from '../../types';
@@ -239,6 +240,48 @@ export default function StepRecap({ onPrev }: StepProps) {
         'Impossible de générer le PDF. Vérifiez les données de la facture et réessayez.',
         true,
         'Échec génération PDF'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Nouvelle fonction : Export PDF avec signatures
+  const handleExportPdfWithSignatures = async () => {
+    try {
+      setIsLoading(true);
+      addNotification(
+        'info',
+        'Export PDF avec signatures',
+        'Génération du PDF avec signatures intégrées...'
+      );
+
+      const doc = await UnifiedPrintService.generateInvoicePdf(
+        { 
+          ...syncToMainInvoice(),
+          signature: signature 
+        },
+        { includeSignature: true }
+      );
+      
+      const blob = doc.output('blob');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `facture_${invoice.invoiceNumber || 'sans_num'}_signee.pdf`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      addNotification(
+        'success',
+        'PDF avec signatures exporté',
+        'Le PDF avec signatures a été téléchargé avec succès.'
+      );
+    } catch (error) {
+      console.error('Erreur export PDF avec signatures:', error);
+      addNotification(
+        'error',
+        'Erreur export PDF',
+        'Impossible d\'exporter le PDF avec signatures.'
       );
     } finally {
       setIsLoading(false);
@@ -840,6 +883,30 @@ export default function StepRecap({ onPrev }: StepProps) {
               ) && (
                 <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
                   ✓
+                </div>
+              )}
+            </div>
+
+            <div className='relative'>
+              <button
+                type='button'
+                onClick={handleExportPdfWithSignatures}
+                disabled={isLoading || !signature?.clientSignature}
+                className='w-full bg-myconfort-green hover:bg-myconfort-green/90 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
+              >
+                <span className='mr-2'>✍️</span>
+                <div className='text-center'>
+                  <div>
+                    {isLoading ? 'Export en cours...' : 'PDF avec Signatures'}
+                  </div>
+                  <div className='text-xs opacity-80 mt-1'>
+                    Facture signée
+                  </div>
+                </div>
+              </button>
+              {!signature?.clientSignature && (
+                <div className='text-xs text-gray-500 mt-1 text-center'>
+                  Signature requise pour activer
                 </div>
               )}
             </div>

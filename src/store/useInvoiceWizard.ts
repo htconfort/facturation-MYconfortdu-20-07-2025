@@ -28,7 +28,7 @@ interface Produit {
 }
 
 interface PaymentData {
-  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | '';
+  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèque au comptant' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | '';
   depositRate?: number; // %
   depositAmount?: number;
   depositPaymentMethod?: 'Carte Bleue' | 'Espèces' | 'Chèque' | ''; // Mode de règlement de l'acompte

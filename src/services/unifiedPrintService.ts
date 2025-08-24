@@ -1,5 +1,13 @@
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { saveAs } from 'file-saver';
+
+export type PrintOptions = {
+  includeSignature?: boolean;
+  format?: 'a4' | 'compact';
+};
 
 export class UnifiedPrintService {
   static async printInvoice(invoice: Invoice) {
@@ -721,5 +729,290 @@ export class UnifiedPrintService {
       </body>
       </html>
     `;
+  }
+
+  // Ajouter cette méthode à la classe UnifiedPrintService
+  static async generateInvoicePdf(
+    draft: any,
+    opts: PrintOptions = { includeSignature: true, format: 'a4' }
+  ): Promise<jsPDF> {
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: opts.format === 'compact' ? [595, 420] : 'a4',
+    });
+
+    // Configuration des polices et couleurs
+    const primaryColor = '#477A0C'; // myconfort-green
+    const darkColor = '#14281D'; // myconfort-dark
+
+    let yPosition = 50;
+    const margin = 50;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Header avec logo (si disponible)
+    doc.setFontSize(24);
+    doc.setTextColor(primaryColor);
+    doc.text('MYCONFORT', margin, yPosition);
+    doc.setFontSize(12);
+    doc.setTextColor(darkColor);
+    doc.text('Votre spécialiste literie et confort', margin, yPosition + 20);
+
+    yPosition += 60;
+
+    // Numéro de facture et date
+    doc.setFontSize(16);
+    doc.setTextColor(darkColor);
+    doc.text(`Facture N° ${draft.invoiceNumber || 'XXX'}`, margin, yPosition);
+    doc.setFontSize(10);
+    doc.text(
+      `Date: ${new Date(draft.invoiceDate || Date.now()).toLocaleDateString(
+        'fr-FR'
+      )}`,
+      pageWidth - 150,
+      yPosition
+    );
+
+    yPosition += 40;
+
+    // Informations client
+    if (draft.client) {
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor);
+      doc.text('FACTURER À:', margin, yPosition);
+      yPosition += 20;
+
+      doc.setFontSize(10);
+      doc.setTextColor(darkColor);
+      if (draft.client.name || draft.client.nom) {
+        doc.text(
+          `${draft.client.name || draft.client.nom} ${draft.client.prenom || ''}`,
+          margin,
+          yPosition
+        );
+        yPosition += 15;
+      }
+      if (draft.client.email) {
+        doc.text(draft.client.email, margin, yPosition);
+        yPosition += 15;
+      }
+      if (draft.client.address || draft.client.adresse?.rue) {
+        doc.text(
+          draft.client.address || draft.client.adresse?.rue || '',
+          margin,
+          yPosition
+        );
+        yPosition += 15;
+      }
+      if (draft.client.city || draft.client.adresse?.ville) {
+        const postalCode =
+          draft.client.postalCode || draft.client.adresse?.codePostal || '';
+        const city = draft.client.city || draft.client.adresse?.ville || '';
+        doc.text(`${postalCode} ${city}`, margin, yPosition);
+        yPosition += 15;
+      }
+    }
+
+    yPosition += 20;
+
+    // Tableau des produits
+    if (draft.produits && draft.produits.length > 0) {
+      const tableData = draft.produits.map((produit: any) => [
+        produit.designation || produit.nom || '',
+        produit.qty || produit.quantite || 1,
+        `${(produit.priceTTC || produit.prixUnitaire || 0).toFixed(2)} €`,
+        `${(
+          ((produit.qty || produit.quantite || 1) *
+            (produit.priceTTC || produit.prixUnitaire || 0)) /
+          1
+        ).toFixed(2)} €`,
+      ]);
+
+      (doc as any).autoTable({
+        head: [['Désignation', 'Qté', 'Prix unitaire', 'Total']],
+        body: tableData,
+        startY: yPosition,
+        margin: { left: margin, right: margin },
+        styles: {
+          fontSize: 9,
+          cellPadding: 8,
+        },
+        headStyles: {
+          fillColor: [71, 122, 12], // myconfort-green en RGB
+          textColor: 255,
+          fontStyle: 'bold',
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+      // Total
+      const totalHT = draft.produits.reduce(
+        (sum: number, p: any) =>
+          sum + ((p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0) / 1.2),
+        0
+      );
+      const totalTTC = draft.produits.reduce(
+        (sum: number, p: any) =>
+          sum + ((p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0)),
+        0
+      );
+      const totalTVA = totalTTC - totalHT;
+
+      doc.setFontSize(10);
+      doc.text(`Total HT: ${totalHT.toFixed(2)} €`, pageWidth - 200, yPosition);
+      yPosition += 15;
+      doc.text(`TVA (20%): ${totalTVA.toFixed(2)} €`, pageWidth - 200, yPosition);
+      yPosition += 15;
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor);
+      doc.text(`Total TTC: ${totalTTC.toFixed(2)} €`, pageWidth - 200, yPosition);
+      yPosition += 30;
+    }
+
+    // Informations de paiement
+    if (draft.paiement?.method) {
+      doc.setFontSize(10);
+      doc.setTextColor(darkColor);
+      doc.text(`Mode de paiement: ${draft.paiement.method}`, margin, yPosition);
+      yPosition += 15;
+
+      if (draft.paiement.depositAmount > 0) {
+        doc.text(
+          `Acompte: ${draft.paiement.depositAmount.toFixed(2)} €`,
+          margin,
+          yPosition
+        );
+        yPosition += 15;
+      }
+
+      if (draft.paiement.remainingAmount > 0) {
+        doc.text(
+          `Restant dû: ${draft.paiement.remainingAmount.toFixed(2)} €`,
+          margin,
+          yPosition
+        );
+        yPosition += 15;
+      }
+
+      yPosition += 20;
+    }
+
+    // Signatures (si demandées + disponibles)
+    if (
+      opts.includeSignature &&
+      (draft.signature?.clientSignature || draft.signature?.technicienSignature)
+    ) {
+      // Vérifier si on a assez de place, sinon nouvelle page
+      if (yPosition > doc.internal.pageSize.getHeight() - 200) {
+        doc.addPage();
+        yPosition = 50;
+      }
+
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor);
+      doc.text('SIGNATURES', margin, yPosition);
+      yPosition += 30;
+
+      // Signature client
+      if (draft.signature?.clientSignature) {
+        doc.setFontSize(10);
+        doc.setTextColor(darkColor);
+        doc.text('Signature client:', margin, yPosition);
+        yPosition += 10;
+
+        try {
+          doc.addImage(
+            draft.signature.clientSignature,
+            'PNG',
+            margin,
+            yPosition,
+            200,
+            60,
+            '',
+            'FAST'
+          );
+        } catch (error) {
+          console.warn(
+            "Erreur lors de l'ajout de la signature client:",
+            error
+          );
+          doc.text(
+            'Signature non disponible (format invalide)',
+            margin,
+            yPosition + 30
+          );
+        }
+        yPosition += 80;
+      }
+
+      // Signature technicien
+      if (draft.signature?.technicienSignature) {
+        doc.setFontSize(10);
+        doc.setTextColor(darkColor);
+        doc.text('Signature responsable:', margin, yPosition);
+        yPosition += 10;
+
+        try {
+          doc.addImage(
+            draft.signature.technicienSignature,
+            'PNG',
+            margin,
+            yPosition,
+            200,
+            60,
+            '',
+            'FAST'
+          );
+        } catch (error) {
+          console.warn(
+            "Erreur lors de l'ajout de la signature responsable:",
+            error
+          );
+          doc.text(
+            'Signature non disponible (format invalide)',
+            margin,
+            yPosition + 30
+          );
+        }
+        yPosition += 80;
+      }
+
+      // Métadonnées de signature
+      if (draft.signature?.lieu) {
+        doc.text(`Lieu: ${draft.signature.lieu}`, margin, yPosition);
+        yPosition += 15;
+      }
+
+      if (draft.signature?.dateSignature) {
+        doc.text(
+          `Date de signature: ${new Date(
+            draft.signature.dateSignature
+          ).toLocaleString('fr-FR')}`,
+          margin,
+          yPosition
+        );
+      }
+    }
+
+    return doc;
+  }
+
+  // Méthode utilitaire pour exporter directement
+  static async exportInvoicePdf(
+    draft: any,
+    filename?: string,
+    opts?: PrintOptions
+  ): Promise<void> {
+    try {
+      const doc = await this.generateInvoicePdf(draft, opts);
+      const blob = doc.output('blob');
+      saveAs(blob, filename || `facture_${draft?.invoiceNumber || 'sans_num'}.pdf`);
+    } catch (error) {
+      console.error("Erreur lors de l'export PDF:", error);
+      throw new Error('Impossible de générer le PDF');
+    }
   }
 }

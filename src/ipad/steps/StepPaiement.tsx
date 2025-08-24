@@ -17,6 +17,7 @@ type PaymentMethodValue =
   | 'Virement'
   | 'Carte Bleue'
   | 'Chèque'
+  | 'Chèque au comptant'
   | 'Acompte';
 
 // Mode de règlement autorisés pour l'acompte (évite les cast "as")
@@ -57,6 +58,12 @@ const paymentMethods: Array<{
   { 
     value: 'Chèque', 
     label: 'Chèque unique', 
+    icon: '/payment-icons/cheque.svg',
+    iconType: 'svg'
+  },
+  { 
+    value: 'Chèque au comptant', 
+    label: 'Chèque au comptant', 
     icon: '/payment-icons/cheque.svg',
     iconType: 'svg'
   },
@@ -121,10 +128,29 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
     4
   );
   
+  // 🎯 NOUVELLE LOGIQUE : Chèques ronds + acompte ajusté (minimum 10%)
+  // 1. Calculer le montant ROND par chèque sur le total TTC
+  const montantChequeRond = nombreCheques > 0 ? Math.round(totalTTC / nombreCheques) : 0;
+  
+  // 2. Calculer l'acompte automatiquement pour que le total soit exact
+  const totalChequesCalcule = montantChequeRond * nombreCheques;
+  const acompteCalculeBrut = totalTTC - totalChequesCalcule;
+  
+  // 3. ⚠️ RÈGLE IMPORTANTE : Acompte minimum 10% du total TTC
+  const acompteMinimum = totalTTC * 0.10;
+  const acompteAjuste = Math.max(acompteCalculeBrut, acompteMinimum);
+  
+  // 4. Recalculer le montant par chèque si l'acompte a été ajusté
+  const montantRestantApresCetAcompte = totalTTC - acompteAjuste;
+  const montantChequeDefinitif = nombreCheques > 0 
+    ? Math.round(montantRestantApresCetAcompte / nombreCheques) 
+    : montantChequeRond;
+  
+  // 5. Utiliser le montant définitif pour l'affichage
   const montantParCheque =
     nombreCheques > 0 
       ? paiement.method === 'Chèque à venir'
-        ? Math.round(remainingAmount / nombreCheques) // ✨ Montant ROND pour les chèques à venir
+        ? montantChequeDefinitif // ✨ Montant ROND avec acompte 10% minimum
         : remainingAmount / nombreCheques 
       : 0;
 
@@ -164,7 +190,26 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
   };
 
   const handleNombreChequesChange = (nombre: number) => {
-    updatePaiement({ nombreChequesAVenir: clamp(safeNumber(nombre), 1, 10) });
+    const nouveauNombre = clamp(safeNumber(nombre), 1, 10);
+    
+    // 🎯 NOUVEAU : Calcul automatique de l'acompte avec minimum 10%
+    if (paiement.method === 'Chèque à venir') {
+      const montantRondParCheque = Math.round(totalTTC / nouveauNombre);
+      const totalDesChequesRonds = montantRondParCheque * nouveauNombre;
+      const acompteCalculeBrut = totalTTC - totalDesChequesRonds;
+      
+      // Règle des 10% minimum
+      const acompteMinimum = totalTTC * 0.10;
+      const acompteDefinitif = Math.max(acompteCalculeBrut, acompteMinimum);
+      
+      // Mettre à jour le nombre de chèques ET l'acompte en une fois
+      updatePaiement({ 
+        nombreChequesAVenir: nouveauNombre,
+        depositAmount: acompteDefinitif
+      });
+    } else {
+      updatePaiement({ nombreChequesAVenir: nouveauNombre });
+    }
   };
 
   const handleNombreFoisAlmaChange = (nombreFois: number) => {
@@ -264,7 +309,7 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                 💳 Mode de règlement
               </h3>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+              <div className='grid grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl'>
                 {paymentMethods.map(method => {
                   const selected = paiement.method === method.value;
                   const base =
@@ -499,15 +544,15 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                 {/* Nombre de chèques */}
                 <div className='mb-6'>
                   <label className='block text-blue-700 font-semibold mb-3'>
-                    Nombre de chèques (de 1 à 10 fois)
+                    Nombre de chèques (de 1 à 10)
                   </label>
-                  <div className='grid grid-cols-3 md:grid-cols-5 gap-3 mb-4'>
-                    {[1, 2, 3, 6, 9, 10].map(n => (
+                  <div className='flex flex-wrap gap-2 mb-4'>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                       <button
                         key={n}
                         type='button'
                         onClick={() => handleNombreChequesChange(n)}
-                        className={`p-3 rounded-xl border-2 font-bold transition-all ${
+                        className={`flex-1 min-w-[80px] p-2 rounded-lg border-2 font-bold transition-all text-sm ${
                           nombreCheques === n
                             ? 'border-blue-600 bg-blue-100 text-blue-800 ring-2 ring-blue-300'
                             : 'border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50'
@@ -517,34 +562,38 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                       </button>
                     ))}
                   </div>
-
-                  <div className='flex items-center space-x-4'>
-                    <input
-                      type='range'
-                      min={1}
-                      max={10}
-                      value={nombreCheques}
-                      onChange={e =>
-                        handleNombreChequesChange(safeNumber(e.target.value))
-                      }
-                      className='flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer'
-                      aria-label='Nombre de chèques (curseur)'
-                    />
-                    <input
-                      type='number'
-                      min={1}
-                      max={10}
-                      value={nombreCheques}
-                      onChange={e =>
-                        handleNombreChequesChange(safeNumber(e.target.value))
-                      }
-                      className='w-20 h-12 rounded-lg border-2 border-blue-300 px-3 text-center font-bold text-blue-800 focus:border-blue-500'
-                      aria-label='Nombre de chèques (saisie)'
-                      title='Nombre de chèques'
-                    />
-                    <span className='text-blue-700 font-medium'>fois</span>
-                  </div>
                 </div>
+
+                {/* 🎯 EXPLICATION DU NOUVEAU CALCUL */}
+                {nombreCheques > 0 && (
+                  <div className='mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl'>
+                    <h4 className='font-bold text-green-800 mb-2 flex items-center'>
+                      <span className='mr-2'>🧮</span>
+                      Calcul automatique (chèques ronds)
+                    </h4>
+                    <div className='text-sm text-green-700 space-y-1'>
+                      <div><strong>Total TTC :</strong> {formatEUR(totalTTC)}</div>
+                      <div><strong>Nombre de chèques :</strong> {nombreCheques}</div>
+                      <div><strong>Acompte minimum (10%) :</strong> {formatEUR(acompteMinimum)}</div>
+                      <div><strong>Acompte calculé :</strong> {formatEUR(acompteCalculeBrut)}</div>
+                      <div className={`font-bold ${acompteAjuste >= acompteMinimum ? 'text-green-800' : 'text-orange-600'}`}>
+                        <strong>Acompte final :</strong> {formatEUR(acompteAjuste)}
+                        {acompteAjuste > acompteCalculeBrut && ' (ajusté à 10% minimum)'}
+                      </div>
+                      <div><strong>Montant par chèque (rond) :</strong> {formatEUR(montantChequeDefinitif)}</div>
+                      <div><strong>Total des chèques :</strong> {formatEUR(montantChequeDefinitif * nombreCheques)}</div>
+                    </div>
+                    {acompteAjuste >= 0 && (
+                      <button
+                        type='button'
+                        onClick={() => handleDepositChange(acompteAjuste)}
+                        className='mt-2 px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition'
+                      >
+                        Appliquer cet acompte ({formatEUR(acompteAjuste)})
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Acomptes magiques pour chèques sans virgule */}
                 {chequeSuggestions.length > 0 && (
@@ -821,34 +870,30 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
               />
             </section>
 
-            {/* Nav */}
-            <div className='flex gap-4 justify-center'>
-              <button
-                type='button'
-                onClick={onPrev}
-                className='px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all'
+            {/* Navigation - format ultra-compact harmonisé */}
+            <div className="flex gap-2 justify-center">
+              <button 
+                onClick={onPrev} 
+                className="px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all min-h-[40px]"
               >
                 ← Produits
               </button>
-
+              
               {isValid ? (
-                <button
-                  type='button'
-                  onClick={validateAndNext}
-                  className='bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg'
+                <button 
+                  onClick={validateAndNext} 
+                  className="px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg"
                 >
-                  Continuer vers la Livraison →
+                  Continuer vers Livraison →
                 </button>
               ) : (
-                <div className='text-center p-6 bg-orange-50 rounded-2xl'>
-                  <div className='text-3xl mb-3'>⚠️</div>
-                  <h3 className='text-lg font-semibold text-orange-800 mb-2'>
-                    Mode de règlement requis
-                  </h3>
-                  <p className='text-orange-600'>
-                    Veuillez sélectionner un mode de règlement pour continuer
-                  </p>
-                </div>
+                <button 
+                  disabled
+                  className="px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-coral text-white cursor-not-allowed opacity-70"
+                  title="Veuillez sélectionner un mode de règlement pour continuer"
+                >
+                  ⚠️ Mode de règlement requis
+                </button>
               )}
             </div>
           </div>
