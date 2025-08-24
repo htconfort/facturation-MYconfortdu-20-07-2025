@@ -1,190 +1,57 @@
 import React, { useMemo } from 'react';
-import { useInvoiceWizard, WizardStep } from '../store/useInvoiceWizard';
 import { useHorizontalSwipe } from '../hooks/useSwipe';
-import { 
-  FileText, 
-  User, 
-  Package, 
-  CreditCard, 
-  Truck, 
-  PenTool, 
-  CheckSquare,
-  LucideIcon
-} from 'lucide-react';
+import { useInvoiceWizard } from '../store/useInvoiceWizard';
 
-interface StepConfig {
-  key: WizardStep;
-  label: string;
-  icon: LucideIcon;
-  shortLabel: string; // For narrow screens
-}
+type Props = { children: React.ReactNode };
 
-const STEPS_CONFIG: StepConfig[] = [
-  { key: 'facture', label: 'Facture', icon: FileText, shortLabel: 'Fact.' },
-  { key: 'client', label: 'Client', icon: User, shortLabel: 'Client' },
-  { key: 'produits', label: 'Produits', icon: Package, shortLabel: 'Prod.' },
-  { key: 'paiement', label: 'Paiement', icon: CreditCard, shortLabel: 'Paie.' },
-  { key: 'livraison', label: 'Livraison', icon: Truck, shortLabel: 'Livr.' },
-  { key: 'signature', label: 'Signature', icon: PenTool, shortLabel: 'Sign.' },
-  { key: 'recap', label: 'Récapitulatif', icon: CheckSquare, shortLabel: 'Récap' }
-];
+export default function StepsNavigator({ children }: Props) {
+  const { goNext, goPrev, getCurrentStepIndex, steps = [], completion } = useInvoiceWizard();
 
-interface StepsNavigatorProps {
-  /** Container className for the navigator */
-  className?: string;
-  /** Enable/disable swipe navigation */
-  swipeEnabled?: boolean;
-}
+  const currentStepIndex = getCurrentStepIndex();
 
-/**
- * Horizontal steps navigator optimized for iPad landscape
- * Features:
- * - Touch-friendly 56px+ targets
- * - Swipe navigation between steps  
- * - Visual step completion indicators
- * - Responsive labels for various screen sizes
- */
-export const StepsNavigator: React.FC<StepsNavigatorProps> = ({
-  className = '',
-  swipeEnabled = true
-}) => {
-  const { 
-    step: currentStep, 
-    completion,
-    goNext, 
-    goPrev,
-    setStep
-  } = useInvoiceWizard();
-
-  // ✅ Set safe (même si completion est undefined)
+  // Toujours un Set valide, même si completion n'est pas encore hydraté par persist()
   const completed = useMemo(
     () => new Set<string>(completion?.completedStepIds ?? []),
     [completion?.completedStepIds]
   );
 
-  // ✅ Helper status safe
-  const getStepStatus = (stepId: WizardStep) => {
-    if (completed.has(stepId)) return 'completed';
-    if (stepId === currentStep) return 'current';
-    return 'pending';
+  const getStepStatus = (stepId: string, idx: number) => {
+    if (completed.has(stepId)) return 'done';
+    if (idx === currentStepIndex) return 'current';
+    return 'todo';
+    // Aucun accès à une valeur potentiellement undefined ici
   };
 
-  // Swipe navigation
   useHorizontalSwipe({
-    enabled: swipeEnabled,
-    onNext: goNext,
-    onPrev: goPrev,
+    onNext: () => goNext(),
+    onPrev: () => goPrev(),
     threshold: 56,
     velocity: 0.15,
     preventScrollOnX: true,
   });
 
-  const getStepStyles = (status: 'current' | 'completed' | 'pending') => {
-    const base = `
-      flex flex-col items-center justify-center gap-2 
-      min-h-[56px] px-3 py-2 rounded-lg
-      transition-all duration-150 ease-out
-      touch-manipulation cursor-pointer
-      border-2
-    `;
-
-    switch (status) {
-      case 'current':
-        return `${base} 
-          bg-myconfort-green text-white border-myconfort-green
-          shadow-md transform scale-105`;
-      
-      case 'completed':
-        return `${base} 
-          bg-myconfort-cream text-myconfort-dark border-myconfort-green
-          hover:bg-green-50 active:bg-green-100`;
-      
-      case 'pending':
-        return `${base} 
-          bg-white text-gray-600 border-gray-200
-          hover:bg-gray-50 active:bg-gray-100`;
-    }
-  };
-
-  const getIconStyles = (status: 'current' | 'completed' | 'pending') => {
-    switch (status) {
-      case 'current':
-        return 'text-white';
-      case 'completed':
-        return 'text-myconfort-green';
-      case 'pending':
-        return 'text-gray-400';
-    }
-  };
-
-  const getTextStyles = (status: 'current' | 'completed' | 'pending') => {
-    const base = 'text-sm font-medium font-manrope text-center leading-tight';
-    
-    switch (status) {
-      case 'current':
-        return `${base} text-white font-semibold`;
-      case 'completed':
-        return `${base} text-myconfort-dark`;
-      case 'pending':
-        return `${base} text-gray-500`;
-    }
-  };
-
   return (
-    <div 
-      className={`
-        flex items-center justify-between gap-2 
-        px-4 py-3 bg-white border-b border-gray-100
-        overflow-x-auto scrollbar-hide
-        ${className}
-      `}
-      role="tablist"
-      aria-label="Étapes de facturation"
-    >
-      {STEPS_CONFIG.map((stepConfig, index) => {
-        const status = getStepStatus(stepConfig.key);
-        const IconComponent = stepConfig.icon;
-        
-        return (
-          <button
-            key={stepConfig.key}
-            onClick={() => setStep(stepConfig.key)}
-            className={getStepStyles(status)}
-            role="tab"
-            aria-selected={status === 'current'}
-            aria-label={`Étape ${index + 1}: ${stepConfig.label}`}
-            tabIndex={status === 'current' ? 0 : -1}
-          >
-            <IconComponent 
-              size={20} 
-              className={getIconStyles(status)} 
-            />
-            
-            {/* Responsive text - full label on larger screens, short on smaller */}
-            <span className={`${getTextStyles(status)} hidden sm:block`}>
-              {stepConfig.label}
-            </span>
-            <span className={`${getTextStyles(status)} block sm:hidden`}>
-              {stepConfig.shortLabel}
-            </span>
-            
-            {/* Step number indicator for accessibility */}
-            <span className="sr-only">
-              Étape {index + 1} sur {STEPS_CONFIG.length}
-            </span>
-          </button>
-        );
-      })}
-      
-      {/* Progress indicator */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-100">
-        <div 
-          className="h-full bg-myconfort-green transition-all duration-300 ease-out"
-          style={{ 
-            width: `${((STEPS_CONFIG.findIndex(s => s.key === currentStep) + 1) / STEPS_CONFIG.length) * 100}%` 
-          }}
-        />
-      </div>
+    <div className="w-full h-dvh bg-myconfort-cream overflow-hidden">
+      <header className="w-full px-6 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-myconfort-dark">
+          Wizard iPad — Étape {Math.min(currentStepIndex + 1, steps.length)}/{steps.length || 0}
+        </h1>
+
+        {/* Timeline simple et robuste */}
+        <nav className="flex gap-2">
+          {steps.map((id, idx) => {
+            const st = getStepStatus(id, idx);
+            const base = 'h-2 w-6 rounded-full';
+            const cls =
+              st === 'done' ? 'bg-myconfort-green'
+              : st === 'current' ? 'bg-myconfort-blue'
+              : 'bg-myconfort-dark/20';
+            return <span key={id} className={`${base} ${cls}`} aria-label={`${id} - ${st}`} />;
+          })}
+        </nav>
+      </header>
+
+      <main className="w-full h-[calc(100dvh-56px)]">{children}</main>
     </div>
   );
-};
+}
