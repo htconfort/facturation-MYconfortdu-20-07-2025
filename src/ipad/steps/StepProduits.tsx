@@ -130,31 +130,36 @@ export default function StepProduits({
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
-      {/* Header */}
-      <div className="bg-[#477A0C] rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] p-8 mb-8 border border-gray-100">
-        <h1 className="text-3xl font-bold text-[#F2EFE2] mb-6 flex items-center justify-center">
-          <span className="bg-[#F2EFE2] text-[#477A0C] px-8 py-4 rounded-full font-bold text-2xl">
-            📦 PRODUITS & SERVICES
-          </span>
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+      {/* 🎯 Header ultra-compact */}
+      <div className="px-4 py-1 border-b border-myconfort-dark/10">
+        <h1 className="text-2xl font-bold text-myconfort-dark font-manrope">
+          📦 Produits & Services
         </h1>
-        
-        <div className="bg-[#F2EFE2] rounded-lg p-8">
-          <p className="text-center text-gray-700 text-lg mb-6">
-            Ajoutez les produits de la commande avec quantités et prix
-          </p>
+        <p className="text-sm text-gray-600">
+          Étape 3/7 • Ajoutez les produits avec quantités et prix
+        </p>
+      </div>
 
-          {/* Ligne d'ajout rapide avec remise */}
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg border-2 border-gray-200">
-            <h3 className="text-lg font-semibold text-[#477A0C] mb-4">➕ Ajouter un produit</h3>
-          <div className="grid grid-cols-12 gap-4 items-end">
-            {/* Catégorie en premier - plus large */}
-            <div className="col-span-3">
-              <label className="block text-gray-700 font-semibold mb-2">Catégorie</label>
+      {/* 🎯 Contenu principal */}
+      <div className="flex-1 px-4 py-2 overflow-hidden flex flex-col gap-2">
+        
+        {/* Formulaire d'ajout de produit - ultra-compact */}
+        <div className="bg-white rounded-lg p-3 border border-myconfort-dark/10">
+          <h3 className="text-base font-medium text-myconfort-dark font-manrope mb-2">➕ Ajouter un produit</h3>
+          
+          {/* Grille 3×2 pour optimiser l'espace horizontal */}
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            
+            {/* Catégorie (OBLIGATOIRE) */}
+            <div className="space-y-1">
+              <label className="flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope">
+                Catégorie <span className="text-red-600 font-bold">*</span>
+              </label>
               <select
-                className="w-full h-16 rounded-xl border-2 border-gray-300 px-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all bg-white"
                 value={draft.category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
+                className="w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
               >
                 <option value="">Sélectionner une catégorie</option>
                 {extendedCategories.map(category => (
@@ -165,23 +170,26 @@ export default function StepProduits({
               </select>
             </div>
 
-            {/* Produit conditionnel - taille normale */}
-            <div className="col-span-3">
-              <label className="block text-gray-700 font-semibold mb-2">Produit</label>
+            {/* Produit (OBLIGATOIRE) */}
+            <div className="space-y-1">
+              <label className="flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope">
+                Produit <span className="text-red-600 font-bold">*</span>
+              </label>
               {draft.category === 'Diverse' ? (
                 <input
-                  className="w-full h-16 rounded-xl border-2 border-gray-300 px-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all"
+                  type="text"
                   placeholder="Saisir le nom du produit..."
                   value={draft.designation}
                   onChange={(e) => setDraft(d => ({ ...d, designation: e.target.value }))}
                   disabled={!draft.category}
+                  className="w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500"
                 />
               ) : (
                 <select
-                  className="w-full h-16 rounded-xl border-2 border-gray-300 px-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all bg-white"
                   value={draft.designation}
                   onChange={(e) => handleProductChange(e.target.value)}
                   disabled={!draft.category}
+                  className="w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500"
                 >
                   <option value="">
                     {draft.category 
@@ -197,39 +205,49 @@ export default function StepProduits({
               )}
             </div>
 
-            <div className="col-span-1">
-              <label className="block text-gray-700 font-semibold mb-2">Quantité</label>
+            {/* Quantité (OBLIGATOIRE) */}
+            <div className="space-y-1">
+              <label className="flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope">
+                Qté <span className="text-red-600 font-bold">*</span>
+              </label>
               <input
                 type="number"
                 min={1}
-                className="w-full h-16 rounded-xl border-2 border-gray-300 px-4 text-xl focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all"
                 value={draft.qty}
                 onChange={(e) => setDraft((d) => ({ ...d, qty: Number(e.target.value || 1) }))}
+                className="w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
               />
             </div>
-            <div className="col-span-2">
-              <label className="block text-gray-700 font-semibold mb-2">Prix TTC (€)</label>
+          </div>
+
+          {/* Ligne 2 : Prix + Remise + Bouton */}
+          <div className="grid grid-cols-4 gap-2">
+            
+            {/* Prix TTC (OBLIGATOIRE) */}
+            <div className="space-y-1">
+              <label className="flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope">
+                Prix TTC (€) <span className="text-red-600 font-bold">*</span>
+              </label>
               <input
                 type="number"
                 step="0.01"
-                className="w-full h-16 rounded-xl border-2 border-gray-300 px-4 text-xl focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all"
                 value={draft.priceTTC}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, priceTTC: Number(e.target.value || 0) }))
-                }
+                onChange={(e) => setDraft((d) => ({ ...d, priceTTC: Number(e.target.value || 0) }))}
+                className="w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
               />
             </div>
-            <div className="col-span-2">
-              <label className="block text-gray-700 font-semibold mb-2">Remise</label>
-              <div className="flex gap-2">
+
+            {/* Remise (optionnelle) */}
+            <div className="space-y-1 col-span-2">
+              <label className="flex items-center gap-1 text-sm font-medium text-gray-600 font-manrope">
+                Remise (optionnel)
+                {draft.discount > 0 && <span className="text-myconfort-green ml-1 font-bold">✓</span>}
+              </label>
+              <div className="flex gap-1">
                 <select
-                  className={`w-16 h-16 rounded-xl border-2 px-2 text-lg transition-all bg-white ${
-                    draft.discount > 0 
-                      ? 'border-pink-500 bg-pink-50 text-pink-700 focus:border-pink-600' 
-                      : 'border-gray-300 focus:border-[#477A0C]'
-                  }`}
                   value={draft.discountType}
                   onChange={(e) => setDraft(d => ({ ...d, discountType: e.target.value as 'percent' | 'fixed' }))}
+                  className="w-12 px-1 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
                 >
                   <option value="percent">%</option>
                   <option value="fixed">€</option>
@@ -238,74 +256,46 @@ export default function StepProduits({
                   type="number"
                   step="0.01"
                   min="0"
-                  className={`w-20 h-16 rounded-xl border-2 px-4 text-xl transition-all ${
-                    draft.discount > 0 
-                      ? 'border-pink-500 bg-pink-50 text-pink-700 focus:border-pink-600 focus:ring-4 focus:ring-pink-200' 
-                      : 'border-gray-300 focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20'
-                  }`}
+                  placeholder="0"
                   value={draft.discount}
                   onChange={(e) => setDraft(d => ({ ...d, discount: Number(e.target.value || 0) }))}
-                  placeholder="0"
+                  className="flex-1 px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
                 />
               </div>
             </div>
-            <div className="col-span-1">
+
+            {/* Bouton Ajouter */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-transparent">Action</label>
               <button
                 onClick={handleAdd}
-                className="w-full h-16 rounded-xl bg-[#477A0C] text-white text-xl font-bold hover:bg-green-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                title="Ajouter le produit"
                 disabled={!draft.category || !draft.designation || draft.qty <= 0 || draft.priceTTC <= 0}
+                className={`w-full px-3 py-2 rounded-lg text-sm font-medium font-manrope text-white transition-all min-h-[40px] ${
+                  (!draft.category || !draft.designation || draft.qty <= 0 || draft.priceTTC <= 0)
+                    ? 'bg-myconfort-coral hover:bg-myconfort-coral/90'
+                    : 'bg-myconfort-green hover:bg-myconfort-green/90 shadow-lg'
+                }`}
               >
-                +
+                Ajouter
               </button>
             </div>
           </div>
-
-          {/* Aperçu du produit avec calculs */}
-          {draft.priceTTC > 0 && (
-            <div className={`mt-4 p-4 rounded-xl border-2 transition-all ${
-              draft.discount > 0 
-                ? 'bg-pink-50 border-pink-300 shadow-lg' 
-                : 'bg-white border-[#477A0C]/20'
-            }`}>
-              <div className="text-sm space-y-1">
-                <div className="text-gray-600">
-                  Prix HT calculé: <strong className="text-gray-800">{calculateHT(draft.priceTTC, taxRate).toFixed(2)} €</strong>
-                </div>
-                {draft.discount > 0 && (
-                  <>
-                    <div className="text-gray-600">
-                      Prix original: <span className="line-through">{(draft.qty * draft.priceTTC).toFixed(2)} €</span>
-                    </div>
-                    <div className="text-pink-600 font-semibold">
-                      💰 Total avec remise: <strong className="text-pink-700 text-lg">
-                        {calculateProductTotal(draft.qty, draft.priceTTC, draft.discount, draft.discountType).toFixed(2)} €
-                      </strong>
-                    </div>
-                    <div className="text-pink-500 text-xs">
-                      Économie: {(draft.qty * draft.priceTTC - calculateProductTotal(draft.qty, draft.priceTTC, draft.discount, draft.discountType)).toFixed(2)} €
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Tableau produits - Version complète conforme à l'app principale */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="overflow-auto max-h-96">
+        {/* Liste des produits ajoutés - compact avec hauteur fixe */}
+        <div className="flex-1 bg-white rounded-lg border border-myconfort-dark/10 overflow-hidden">
+          <div className="overflow-auto h-full">
             <table className="w-full text-left">
-              <thead className="bg-[#477A0C] text-white">
+              <thead className="bg-myconfort-green text-white sticky top-0">
                 <tr>
-                  <th className="px-4 py-3 text-lg font-bold">PRODUIT</th>
-                  <th className="px-3 py-2 text-center text-lg font-bold">Quantité</th>
-                  <th className="px-3 py-2 text-right text-lg font-bold">PU HT</th>
-                  <th className="px-3 py-2 text-right text-lg font-bold">PU TTC</th>
-                  <th className="px-3 py-2 text-right text-lg font-bold">Remise</th>
-                  <th className="px-3 py-2 text-center text-lg font-bold">Livraison</th>
-                  <th className="px-3 py-2 text-right text-lg font-bold">Total TTC</th>
-                  <th className="px-3 py-2 text-center text-lg font-bold">Actions</th>
+                  <th className="px-2 py-2 text-sm font-medium font-manrope">PRODUIT</th>
+                  <th className="px-1 py-2 text-center text-sm font-medium font-manrope">Qté</th>
+                  <th className="px-1 py-2 text-right text-sm font-medium font-manrope">PU HT</th>
+                  <th className="px-1 py-2 text-right text-sm font-medium font-manrope">PU TTC</th>
+                  <th className="px-1 py-2 text-right text-sm font-medium font-manrope">Remise</th>
+                  <th className="px-1 py-2 text-center text-sm font-medium font-manrope">Livraison</th>
+                  <th className="px-1 py-2 text-right text-sm font-medium font-manrope">Total TTC</th>
+                  <th className="px-1 py-2 text-center text-sm font-medium font-manrope">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,41 +309,41 @@ export default function StepProduits({
                   );
                   
                   return (
-                    <tr key={p.id} className={`border-b ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                      <td className="px-4 py-3">
-                        <div className="text-black font-bold">{p.designation}</div>
-                        <div className="text-sm text-gray-600">Catégorie: {p.category || 'Non définie'}</div>
+                    <tr key={p.id} className={`border-b border-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                      <td className="px-2 py-2">
+                        <div className="text-sm font-medium font-manrope text-myconfort-dark">{p.designation}</div>
+                        <div className="text-xs text-gray-600">{p.category || 'Non définie'}</div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-1 py-2 text-center">
                         <input
                           type="number"
                           min={1}
-                          className="w-20 h-10 rounded-lg border-2 border-gray-300 px-2 text-center text-lg font-bold focus:border-[#477A0C] focus:ring-2 focus:ring-[#477A0C]/20"
+                          className="w-12 px-1 py-1 text-center text-sm border-2 rounded font-manrope transition-colors duration-150 min-h-[32px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
                           value={p.qty}
                           onChange={(e) => updateProduit(p.id, { qty: Number(e.target.value || 1) })}
                         />
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        <div className="text-lg font-semibold">{puHT.toFixed(2)} €</div>
+                      <td className="px-1 py-2 text-right">
+                        <div className="text-sm font-medium font-manrope text-myconfort-dark">{puHT.toFixed(2)} €</div>
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="px-1 py-2 text-right">
                         <input
                           type="number"
                           step="0.01"
-                          className="w-28 h-10 rounded-lg border-2 border-gray-300 px-2 text-right text-lg font-bold focus:border-[#477A0C] focus:ring-2 focus:ring-[#477A0C]/20"
+                          className="w-16 px-1 py-1 text-right text-sm border-2 rounded font-manrope transition-colors duration-150 min-h-[32px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green"
                           value={p.priceTTC}
                           onChange={(e) =>
                             updateProduit(p.id, { priceTTC: Number(e.target.value || 0) })
                           }
                         />
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        <div className="flex flex-col gap-1">
+                      <td className="px-1 py-2 text-right">
+                        <div className="flex gap-1">
                           <select
-                            className={`w-20 h-8 rounded border text-sm bg-white transition-all ${
+                            className={`w-8 px-1 py-1 text-xs border rounded font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 ${
                               (p.discount || 0) > 0 
-                                ? 'border-pink-500 bg-pink-50 text-pink-700 focus:border-pink-600' 
-                                : 'border-gray-300 focus:border-[#477A0C]'
+                                ? 'border-myconfort-coral bg-red-50 text-red-700 focus:border-myconfort-coral' 
+                                : 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                             }`}
                             value={p.discountType || 'percent'}
                             onChange={(e) => updateProduit(p.id, { discountType: e.target.value as 'percent' | 'fixed' })}
@@ -365,10 +355,10 @@ export default function StepProduits({
                             type="number"
                             step="0.01"
                             min="0"
-                            className={`w-20 h-8 rounded border px-2 text-right text-sm transition-all ${
+                            className={`w-10 px-1 py-1 text-right text-xs border rounded font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 ${
                               (p.discount || 0) > 0 
-                                ? 'border-pink-500 bg-pink-50 text-pink-700 focus:border-pink-600 focus:ring-2 focus:ring-pink-200' 
-                                : 'border-gray-300 focus:border-[#477A0C] focus:ring-1 focus:ring-[#477A0C]/20'
+                                ? 'border-myconfort-coral bg-red-50 text-red-700 focus:border-myconfort-coral' 
+                                : 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                             }`}
                             value={p.discount || 0}
                             onChange={(e) => updateProduit(p.id, { discount: Number(e.target.value || 0) })}
@@ -376,14 +366,14 @@ export default function StepProduits({
                           />
                         </div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-1 py-2 text-center">
                         <select
-                          className={`w-28 h-12 rounded-lg border-3 px-2 text-sm font-bold focus:ring-4 transition-all shadow-lg ${
+                          className={`w-16 px-1 py-1 text-xs font-medium border rounded font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 ${
                             p.isPickupOnSite === undefined
-                              ? 'border-yellow-500 bg-yellow-400 text-black focus:border-yellow-600 focus:ring-yellow-200'
+                              ? 'border-yellow-500 bg-yellow-100 text-yellow-800 focus:border-yellow-600'
                               : p.isPickupOnSite 
-                                ? 'border-green-600 bg-green-600 text-white focus:border-green-700 focus:ring-green-300'
-                                : 'border-red-600 bg-red-600 text-white focus:border-red-700 focus:ring-red-300'
+                                ? 'border-myconfort-green bg-green-100 text-green-800 focus:border-myconfort-green'
+                                : 'border-myconfort-coral bg-red-100 text-red-800 focus:border-myconfort-coral'
                           }`}
                           value={p.isPickupOnSite === undefined ? '' : (p.isPickupOnSite ? 'emporter' : 'livrer')}
                           onChange={(e) => {
@@ -394,18 +384,18 @@ export default function StepProduits({
                             }
                           }}
                         >
-                          <option value="" className="text-black font-bold">⚠️ À choisir</option>
-                          <option value="livrer" className="text-white font-bold">📦 À livrer</option>
-                          <option value="emporter" className="text-white font-bold">🚗 emporter</option>
+                          <option value="" className="text-black font-medium">⚠️ À choisir</option>
+                          <option value="livrer" className="text-black font-medium">📦 Livrer</option>
+                          <option value="emporter" className="text-black font-medium">🚗 Emporter</option>
                         </select>
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        <div className="text-lg font-bold text-[#477A0C]">{totalTTC.toFixed(2)} €</div>
+                      <td className="px-1 py-2 text-right">
+                        <div className="text-sm font-bold text-myconfort-green font-manrope">{totalTTC.toFixed(2)} €</div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-1 py-2 text-center">
                         <button
                           onClick={() => removeProduit(p.id)}
-                          className="w-10 h-10 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition-all"
+                          className="w-6 h-6 rounded bg-myconfort-coral text-white font-bold hover:bg-red-600 transition-all font-manrope text-xs"
                           title="Supprimer"
                         >
                           ✕
@@ -416,78 +406,52 @@ export default function StepProduits({
                 })}
                 {produits.length === 0 && (
                   <tr>
-                    <td className="px-6 py-12 text-gray-500 text-center text-lg" colSpan={8}>
+                    <td className="px-6 py-8 text-gray-500 text-center text-sm font-manrope" colSpan={8}>
                       Aucun produit pour l'instant. Utilisez le formulaire ci-dessus pour ajouter des produits.
                     </td>
                   </tr>
                 )}
               </tbody>
               {produits.length > 0 && (
-                <tfoot className="bg-[#F2EFE2]">
+                <tfoot className="bg-myconfort-cream sticky bottom-0">
                   <tr>
-                    <td className="px-4 py-4 text-right font-bold text-lg text-[#477A0C]" colSpan={4}>
-                      Total HT:
+                    <td className="px-2 py-1 text-right font-bold text-xs text-myconfort-dark font-manrope" colSpan={6}>
+                      <div className="flex justify-end gap-4">
+                        <span>HT: {totals.totalHT.toFixed(2)}€</span>
+                        <span>TVA ({taxRate}%): {totals.totalTVA.toFixed(2)}€</span>
+                        {totals.totalRemise > 0 && <span className="text-red-600">Remise: -{totals.totalRemise.toFixed(2)}€</span>}
+                      </div>
                     </td>
-                    <td className="px-3 py-4 text-right font-bold text-lg text-[#477A0C]">
-                      {totals.totalHT.toFixed(2)} €
-                    </td>
-                    <td className="px-3 py-4 text-right font-bold text-lg text-[#477A0C]">
-                      {totals.totalTTC.toFixed(2)} €
+                    <td className="px-1 py-1 text-right font-bold text-sm text-myconfort-green font-manrope">
+                      <strong>TTC: {totals.totalTTC.toFixed(2)} €</strong>
                     </td>
                     <td />
                   </tr>
-                  <tr>
-                    <td className="px-4 py-2 text-right font-bold text-lg text-[#477A0C]" colSpan={4}>
-                      TVA ({taxRate}%):
-                    </td>
-                    <td className="px-3 py-2 text-right font-bold text-lg text-[#477A0C]">
-                      {totals.totalTVA.toFixed(2)} €
-                    </td>
-                    <td className="px-3 py-2 text-right font-bold text-xl text-[#477A0C]">
-                      <strong>TOTAL TTC</strong>
-                    </td>
-                    <td />
-                  </tr>
-                  {totals.totalRemise > 0 && (
-                    <tr className="bg-pink-50 border-t-2 border-pink-200">
-                      <td className="px-4 py-3 text-right font-bold text-lg text-pink-600" colSpan={4}>
-                        💰 Remise totale appliquée:
-                      </td>
-                      <td className="px-3 py-3 text-right font-bold text-lg text-pink-700">
-                        -{totals.totalRemise.toFixed(2)} €
-                      </td>
-                      <td className="px-3 py-3 text-right text-sm text-pink-500 italic">
-                        Économie !
-                      </td>
-                      <td />
-                    </tr>
-                  )}
                 </tfoot>
               )}
             </table>
           </div>
         </div>
 
-        {/* Navigation locale */}
-        <div className="mt-8 flex gap-4 justify-center">
+        {/* Navigation */}
+        <div className="mt-2 flex gap-2 justify-center">
           <button 
             onClick={onPrev} 
-            className="px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all"
+            className="px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all min-h-[40px]"
           >
             ← Client
           </button>
           <button 
             onClick={validateAndNext} 
             disabled={!canProceed}
-            className={`px-8 py-4 rounded-xl text-lg font-semibold transition-all shadow-lg ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] ${
               !canProceed
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
-                : 'bg-[#477A0C] text-white hover:bg-green-700'
+                ? 'bg-myconfort-coral text-white cursor-not-allowed opacity-70'
+                : 'bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg'
             }`}
           >
             Continuer vers Paiement →
           </button>
-        </div>
         </div>
       </div>
     </div>
