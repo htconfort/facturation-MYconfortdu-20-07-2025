@@ -15,12 +15,14 @@ import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 // import StepRecap from './steps/StepRecap'; // remplacé par NoScroll
 import StepRecapNoScroll from './steps/StepRecapNoScroll';
 import StepNouvellesCommandes from './steps/StepNouvellesCommandes';
+import StepPaiementClone from './steps/StepPaiementClone';
 
 const steps: WizardStep[] = [
   'facture',
   'client',
   'produits',
   'paiement',
+  'paiement-clone', // Ajout clone pour test
   'livraison',
   'signature',
   'recap',
@@ -260,6 +262,8 @@ function WizardSurface({
         return <StepProduits {...props} />;
       case 'paiement':
         return <StepPaymentNoScroll {...props} />;
+      case 'paiement-clone':
+        return <StepPaiementClone {...props} />;
       case 'livraison':
         return <StepLivraisonNoScroll {...props} />;
       case 'signature':

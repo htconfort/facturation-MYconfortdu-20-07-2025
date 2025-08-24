@@ -42,21 +42,32 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
 
   return (
     <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative'>
-      {/* 🎯 Header fixe */}
+      {/* 🎯 Header fixe avec bouton Suivant */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
-        <h1 className='text-2xl font-bold text-myconfort-dark'>
-          🚚 Modalités de Livraison
-        </h1>
-        <p className='text-myconfort-dark/70 text-sm'>
-          Étape 5/7 • {produitsALivrer.length} produits à livrer,{' '}
-          {produitsAEmporter.length} à emporter
-        </p>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='text-2xl font-bold text-myconfort-dark'>
+              🚚 Modalités de Livraison
+            </h1>
+            <p className='text-myconfort-dark/70 text-sm'>
+              Étape 5/7 • {produitsALivrer.length} produits à livrer,{' '}
+              {produitsAEmporter.length} à emporter
+            </p>
+          </div>
+          <button
+            type='button'
+            onClick={onNext}
+            className='bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg border-2 border-[#477A0C] transition-all'
+          >
+            Suivant →
+          </button>
+        </div>
       </div>
 
-      {/* 🎯 Contenu principal - centré */}
-      <div className='flex-1 px-6 py-6 flex flex-col justify-center'>
+      {/* 🎯 Contenu principal - centré et remonté */}
+      <div className='flex-1 px-6 py-4 flex flex-col justify-start'>
         {/* Résumé rapide */}
-        <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-6'>
+        <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-4'>
           <div className='grid grid-cols-2 gap-4 text-center'>
             <div>
               <div className='text-2xl font-bold text-myconfort-green'>
@@ -74,7 +85,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
         </div>
 
         {/* Choix du mode de livraison */}
-        <div className='space-y-4'>
+        <div className='space-y-3'>
           <label className='block text-lg font-medium text-myconfort-dark mb-4'>
             Mode de livraison *
           </label>
@@ -160,30 +171,8 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           </div>
         </div>
 
-        {/* Boutons d'action alignés */}
-        <div className='flex justify-between items-center mt-6'>
-          <button
-            onClick={() => setShowDetailsPage(true)}
-            className='px-6 py-3 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 
-                       text-myconfort-dark font-medium rounded-xl transition-colors
-                       border border-myconfort-blue/30'
-          >
-            📋 Voir détails produits + adresse + planning
-          </button>
-
-          <button
-            onClick={isValid ? onNext : undefined}
-            disabled={!isValid}
-            className={`px-8 py-3 font-bold rounded-xl text-lg transition-all transform 
-                        shadow-lg ${
-                          !isValid
-                            ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-                            : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
-                        }`}
-          >
-            {!isValid ? 'Sélectionnez un mode de livraison' : 'Suivant →'}
-          </button>
-        </div>
+        {/* Espacement optimisé pour éviter que les boutons flottants couvrent le contenu */}
+        <div className='h-32'></div>
       </div>
 
       {/* 🚀 BOUTONS FLOTTANTS - Dans le cadre iPad, remontés de 2cm */}

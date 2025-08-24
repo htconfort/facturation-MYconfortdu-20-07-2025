@@ -9,15 +9,16 @@ import DebugFooter from './pages/DebugFooter';
 
 export default function App() {
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
-      <Routes>
-        <Route path='/' element={<MainApp />} />
-        <Route path='/wizard' element={<WizardPage />} />
+    <div>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <Routes>
+          <Route path='/' element={<MainApp />} />
+          <Route path='/wizard' element={<WizardPage />} />
         <Route path='/wizard/:step' element={<WizardPage />} />
         <Route path='/ipad' element={<IpadWizard />} />
         <Route path='/wizard-demo' element={<WizardDemo />} />
@@ -26,5 +27,6 @@ export default function App() {
         <Route path='/debug-footer' element={<DebugFooter />} />
       </Routes>
     </BrowserRouter>
+    </div>
   );
 }

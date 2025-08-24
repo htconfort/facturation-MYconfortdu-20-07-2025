@@ -21,10 +21,20 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
 
   return (
     <div className='py-8'>
-      {/* Header avec code couleur harmonisé */}
-      <div className='text-center mb-8'>
-        <div className='inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4'>
-          5
+      {/* Header avec bouton Suivant à côté du cercle 5 */}
+      <div className='text-center mb-8 flex flex-col items-center'>
+        <div className='flex items-center gap-6'>
+          <div className='inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4'>
+            5
+          </div>
+          <button
+            type='button'
+            onClick={onNext}
+            className='bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg border-2 border-[#477A0C] transition-all'
+            style={{ marginBottom: '1rem' }}
+          >
+            Suivant →
+          </button>
         </div>
         <h2 className='text-3xl font-bold text-[#477A0C] mb-2'>
           🚚 Modalités de Livraison
@@ -86,18 +96,11 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           </div>
         </section>
 
-        {/* Mode de livraison - OBLIGATOIRE */}
+        {/* TEST SUPPRESSION - Section supprimée pour vérifier l'interaction */}
         <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
           <h3 className='text-xl font-semibold text-[#477A0C] mb-6'>
-            🚚 Mode de livraison <span className='text-red-500'>*</span>
+            Modes de livraison
           </h3>
-
-          <div className='bg-red-50 rounded-xl p-4 mb-6'>
-            <h4 className='font-semibold text-red-800 mb-2'>⚠️ Obligatoire</h4>
-            <p className='text-red-700 text-sm'>
-              Vous devez sélectionner un mode de livraison pour continuer.
-            </p>
-          </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             {[
@@ -171,27 +174,13 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
         {/* Notes de livraison */}
         <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
           <h3 className='text-xl font-semibold text-[#477A0C] mb-6'>
-            📝 Notes de livraison
+            � SECTION SUPPRIMÉE POUR TEST INTERACTION
           </h3>
 
-          <textarea
-            value={livraison.deliveryNotes || ''}
-            onChange={e => updateLivraison({ deliveryNotes: e.target.value })}
-            className='w-full h-32 rounded-xl border-2 border-gray-300 px-6 py-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all resize-none'
-            placeholder='Instructions spéciales, horaires préférés, accès difficile, étage, ascenseur...'
-          />
-
-          <div className='mt-4 bg-gray-50 rounded-lg p-4'>
-            <h4 className='font-semibold text-gray-700 mb-2'>
-              💡 Suggestions d'informations utiles :
-            </h4>
-            <ul className='text-gray-600 text-sm space-y-1'>
-              <li>• Horaires de disponibilité du client</li>
-              <li>• Étage, présence d'ascenseur</li>
-              <li>• Code d'accès, interphone</li>
-              <li>• Difficultés d'accès (escaliers, parking)</li>
-              <li>• Matériel spécial nécessaire</li>
-            </ul>
+          <div className='bg-red-100 rounded-xl p-6 text-center'>
+            <p className='text-red-800 font-bold text-xl'>
+              ✅ SI TU VOIS CE MESSAGE, L'INTERACTION FONCTIONNE !
+            </p>
           </div>
         </section>
 
@@ -205,7 +194,7 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
             ← Paiement
           </button>
 
-          {/* Mode de livraison OBLIGATOIRE */}
+          {/* Modes de livraison OBLIGATOIRE */}
           {isValid ? (
             <button
               type='button'
@@ -218,7 +207,7 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
             <div className='text-center p-6 bg-orange-50 rounded-2xl'>
               <div className='text-3xl mb-3'>⚠️</div>
               <h3 className='text-lg font-semibold text-orange-800 mb-2'>
-                Mode de livraison requis
+                Modes de livraison requis
               </h3>
               <p className='text-orange-600'>
                 Veuillez sélectionner un mode de livraison pour continuer

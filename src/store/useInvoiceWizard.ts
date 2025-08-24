@@ -6,6 +6,7 @@ export type WizardStep =
   | 'client'
   | 'produits'
   | 'paiement'
+  | 'paiement-clone' // Ajout pour test clone
   | 'livraison'
   | 'signature'
   | 'recap'
