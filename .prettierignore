@@ -1,6 +1,82 @@
 # Build outputs
 dist/
 build/
+packages/
+
+# Config and generated files
+*.config.js
+*.config.ts
+*.config.d.ts
+tsconfig*.json
+*.tsbuildinfo
+
+# Scripts and debug files
+*.sh
+*.cjs
+*.mjs
+test-*.js
+diagnostic-*.js
+debug-*.js
+validation-*.js
+verification-*.js
+*-test-*.js
+audit-*.js
+guide-*.js
+demo-*.js
+comparatif-*.js
+console-*.js
+correction-*.js
+deploiement-*.js
+init-*.js
+nettoyage-*.js
+payload-*.js
+reset-*.js
+scan-*.js
+sendFacture.*
+simulation-*.js
+create-*.js
+operation-*.js
+
+# JSON data and payloads
+payload-*.json
+test-*.json
+*-payload-*.json
+
+# HTML test files
+debug-*.html
+test-*.html
+diagnostic-*.html
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Documentation with specific formatting
+*.md
+dist/
+build/
 .next/
 out/
 

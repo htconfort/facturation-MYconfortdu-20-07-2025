@@ -4,6 +4,8 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
+const isCI = process.env.CI === 'true';
+
 export default tseslint.config(
   { ignores: ['dist', '**/*_Backup.*', '**/*_backup.*'] },
   {
@@ -14,7 +16,7 @@ export default tseslint.config(
       globals: globals.browser,
       parser: tseslint.parser,
       parserOptions: {
-        project: false,
+        project: false, // pas de type-checking pour éviter la complexité
       },
     },
     plugins: {
@@ -23,16 +25,18 @@ export default tseslint.config(
       '@typescript-eslint': tseslint.plugin,
     },
     rules: {
-      // 🚀 RÈGLES ASSOUPLIES POUR DÉVELOPPEMENT RAPIDE
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
+      // 🚀 RÈGLES DE BASE (sans type-checking)
+      '@typescript-eslint/no-explicit-any': isCI ? 'warn' : 'off',
+      '@typescript-eslint/no-unused-vars': isCI ? ['warn', { argsIgnorePattern: '^_' }] : 'off',
+      'no-unused-vars': isCI ? ['warn', { argsIgnorePattern: '^_' }] : 'off',
       'no-case-declarations': 'off',
       
-      // ✅ RÈGLES GARDÉES (bonnes pratiques légères)
+      // ❌ PAS DE RÈGLES TYPE-CHECKED (trop complexes pour l'instant)
+      // '@typescript-eslint/no-unsafe-assignment': isCI ? 'warn' : 'off',
+      // '@typescript-eslint/no-unsafe-member-access': isCI ? 'warn' : 'off',
+      // '@typescript-eslint/no-unsafe-call': isCI ? 'warn' : 'off',
+      
+      // ✅ RÈGLES CONSTANTES (bonnes pratiques)
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',

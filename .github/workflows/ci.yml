@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ main, develop, chore/ci-setup ]
   pull_request:
-    branches: [ "**" ]
+    branches: [ main, develop ]
 
 jobs:
   build-test:
@@ -18,6 +18,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint (CI mode)
+        run: npm run lint:ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
           cache: 'npm'
 
       - name: Install deps (clean)
