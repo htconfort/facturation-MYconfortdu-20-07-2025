@@ -133,7 +133,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   signatureDataUrl: undefined,
   invoiceNotes: '',
   advisorName: '',
-  termsAccepted: false,
+  termsAccepted: true,
   
   // ✅ État de complétion avec valeur par défaut robuste
   completion: { completedStepIds: [] },
@@ -211,7 +211,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
     signatureDataUrl: undefined,
     invoiceNotes: '',
     advisorName: '',
-    termsAccepted: false,
+    termsAccepted: true,
     completion: { completedStepIds: [] },
   }),
   
@@ -264,7 +264,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       signatureDataUrl: invoice.signature || undefined,
       invoiceNotes: invoice.invoiceNotes || '',
       advisorName: invoice.advisorName || '',
-      termsAccepted: invoice.termsAccepted || false,
+      termsAccepted: invoice.termsAccepted || true,
     });
   },
   

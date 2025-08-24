@@ -25,7 +25,7 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
   };
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* Header */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
@@ -125,12 +125,12 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
         )}
       </div>
 
-      {/* Navigation */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
+      {/* 🎯 Boutons navigation flottants */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4">
         <button
           onClick={onPrev}
           disabled={isResetting}
-          className={`px-8 py-4 font-bold rounded-xl text-lg transition-all min-h-[56px] ${
+          className={`px-8 py-4 font-bold rounded-xl text-lg transition-all shadow-lg min-h-[56px] ${
             isResetting 
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-gray-200 hover:bg-gray-300 text-gray-800 transform hover:scale-105'
@@ -139,7 +139,7 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
           ← Retour au récap
         </button>
 
-        <div className="text-sm text-myconfort-dark/60">
+        <div className="px-4 py-4 text-sm text-myconfort-dark/60 flex items-center">
           Fin du processus de commande
         </div>
       </div>

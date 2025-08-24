@@ -187,7 +187,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
               : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
           }`}
         >
-          {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
+                    {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
         </button>
       </div>
     </div>
@@ -203,23 +203,15 @@ function DeliveryDetailsPage({
   updateLivraison,
   onBack,
   onComplete 
-}: { 
-  produitsALivrer: any[];
-  produitsAEmporter: any[];
-  client: any;
-  livraison: any;
-  updateLivraison: (data: any) => void;
-  onBack: () => void; 
-  onComplete: () => void; 
-}) {
-  const [notes, setNotes] = useState(livraison.deliveryNotes || '');
+}: any) {
+  const [useCustomAddress, setUseCustomAddress] = useState(false);
   const [customAddress, setCustomAddress] = useState(livraison.deliveryAddress || '');
-  const [useCustomAddress, setUseCustomAddress] = useState(Boolean(livraison.deliveryAddress));
+  const [notes, setNotes] = useState(livraison.deliveryNotes || '');
 
   const handleSave = () => {
     updateLivraison({
-      deliveryNotes: notes,
-      deliveryAddress: useCustomAddress ? customAddress : client.address
+      deliveryAddress: useCustomAddress ? customAddress : client.address,
+      deliveryNotes: notes
     });
     onComplete();
   };
@@ -229,21 +221,21 @@ function DeliveryDetailsPage({
       {/* Header */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
-          📋 Détails de livraison
+          📦 Détails de Livraison
         </h1>
         <p className="text-myconfort-dark/70 text-sm">
-          Mode: {livraison.deliveryMethod || 'Non défini'}
+          Configuration complète de la livraison
         </p>
       </div>
 
-      {/* Contenu avec scroll interne si nécessaire */}
+      {/* Contenu scrollable */}
       <div className="flex-1 px-6 py-4 overflow-y-auto">
-        <div className="space-y-6 max-w-2xl mx-auto">
-
-          {/* Récap produits */}
+        <div className="space-y-4 max-w-4xl mx-auto">
+          
+          {/* Répartition des produits */}
           <div className="bg-white p-4 rounded-xl border border-gray-300">
-            <h3 className="font-bold text-myconfort-dark mb-3">📦 Produits</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <h3 className="font-bold text-myconfort-dark mb-3">📊 Répartition des produits</h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="font-medium text-blue-600">À livrer ({produitsALivrer.length})</div>
                 {produitsALivrer.map((p, i) => (
@@ -311,22 +303,18 @@ function DeliveryDetailsPage({
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
-        <button
-          onClick={onBack}
-          className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     min-h-[56px]"
+      {/* Navigation - Utilise les boutons flottants aussi */}
+      {/* 🚀 BOUTONS FLOTTANTS */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4">
+        <button 
+          onClick={onBack} 
+          className="px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl"
         >
           ← Retour
         </button>
-
-        <button
+        <button 
           onClick={handleSave}
-          className="px-12 py-4 bg-myconfort-green hover:bg-myconfort-green/90 text-white
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     shadow-lg min-h-[56px]"
+          className="px-6 py-3 rounded-full bg-myconfort-green text-white text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl hover:bg-myconfort-green/90"
         >
           Valider →
         </button>

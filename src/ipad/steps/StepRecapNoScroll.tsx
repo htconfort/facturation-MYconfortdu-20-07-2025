@@ -2,16 +2,7 @@ import { useState, useMemo } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
-import { PDFService } from '../../services  return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
-      {/* 🎯 Header fixe */}
-      <div className="px-6 py-4 border-b border-myconfort-dark/10">
-        <h1 className="text-2xl font-bold text-myconfort-dark">
-          📋 Récapitulatif Final
-        </h1>
-        <p className="text-myconfort-dark/70 text-sm">
-          Étape 7/8 • Vérification avant finalisation</p>
-      </div>e';
+import { PDFService } from '../../services/pdfService';
 import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { saveInvoice } from '../../utils/storage';
 import { Invoice } from '../../types';
@@ -294,7 +285,7 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* 🎯 Header fixe */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
@@ -308,24 +299,41 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
       {/* 🎯 Contenu principal - INTERFACE SIMPLIFIÉE */}
       <div className="flex-1 px-6 py-4 flex flex-col justify-center">
         
-        {/* Résumé ultra-compact - Une seule ligne */}
+        {/* Résumé ultra-compact avec bouton détails */}
         <div className="bg-myconfort-green/10 p-3 rounded-xl border border-myconfort-green/30 mb-4">
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <div className="text-sm font-bold text-myconfort-dark">{client.name ? '✓' : '❌'}</div>
-              <div className="text-xs text-myconfort-dark/70">Client</div>
+          <div className="flex items-center justify-between">
+            {/* Résumé en colonnes */}
+            <div className="grid grid-cols-4 gap-2 text-center flex-1">
+              <div>
+                <div className="text-sm font-bold text-myconfort-dark">{client.name ? '✓' : '❌'}</div>
+                <div className="text-xs text-myconfort-dark/70">Client</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold text-myconfort-dark">{produits.length}</div>
+                <div className="text-xs text-myconfort-dark/70">Produits</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold text-myconfort-dark">{totalTTC.toFixed(0)}€</div>
+                <div className="text-xs text-myconfort-dark/70">Total</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold text-myconfort-dark">{paiement.method ? '✓' : '❌'}</div>
+                <div className="text-xs text-myconfort-dark/70">Paiement</div>
+              </div>
             </div>
-            <div>
-              <div className="text-sm font-bold text-myconfort-dark">{produits.length}</div>
-              <div className="text-xs text-myconfort-dark/70">Produits</div>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-myconfort-dark">{totalTTC.toFixed(0)}€</div>
-              <div className="text-xs text-myconfort-dark/70">Total</div>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-myconfort-dark">{paiement.method ? '✓' : '❌'}</div>
-              <div className="text-xs text-myconfort-dark/70">Paiement</div>
+            
+            {/* Bouton Voir détails repositionné */}
+            <div className="ml-4">
+              <button
+                type="button"
+                onClick={() => setShowFullInvoice(true)}
+                className="px-4 py-2 bg-slate-400 hover:bg-slate-500 text-white
+                           rounded-lg text-sm font-medium transition-all shadow-sm
+                           flex items-center gap-1"
+              >
+                <span className="text-xs">📄</span>
+                <span>Voir détails</span>
+              </button>
             </div>
           </div>
         </div>
@@ -372,9 +380,23 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
             </div>
           )}
 
-          {/* BOUTONS D'ACTIONS - Grid 3 colonnes optimisé */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* BOUTONS D'ACTIONS + NAVIGATION - Grid 5 colonnes optimisé */}
+          <div className="grid grid-cols-5 gap-3">
             
+            {/* 0. Bouton Précédent */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={onPrev}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-4 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center min-h-[80px]"
+              >
+                <span className="text-xl mb-1">←</span>
+                <div className="text-center">
+                  <div className="text-sm">Précédent</div>
+                </div>
+              </button>
+            </div>
+
             {/* 1. Enregistrer Facture - OBLIGATOIRE */}
             <div className="relative">
               <button
@@ -447,6 +469,21 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
                 </div>
               )}
             </div>
+
+            {/* 4. Bouton Suivant */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={onNext}
+                className="w-full bg-myconfort-green hover:bg-myconfort-green/90 text-white px-3 py-4 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center min-h-[80px]"
+              >
+                <span className="text-xl mb-1">→</span>
+                <div className="text-center">
+                  <div className="text-sm">Nouvelles</div>
+                  <div className="text-xs opacity-80">Commandes</div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Actions effectuées - compact */}
@@ -467,27 +504,6 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
             </div>
           )}
         </div>
-      </div>
-
-      {/* 🎯 Navigation avec bouton Suivant vers nouvelles commandes */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
-        <button
-          onClick={onPrev}
-          className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     min-h-[56px]"
-        >
-          ← Précédent
-        </button>
-
-        <button
-          onClick={onNext}
-          className="px-12 py-4 bg-myconfort-green hover:bg-myconfort-green/90 text-white 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     shadow-lg min-h-[56px]"
-        >
-          Nouvelles commandes →
-        </button>
       </div>
     </div>
   );

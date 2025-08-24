@@ -43,7 +43,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   const isLocationEmpty = !eventLocation || eventLocation.trim() === '';
 
   return (
-    <div className='max-w-6xl mx-auto py-2'>
+    <div className='max-w-6xl mx-auto py-2 relative'>
       {/* Header avec style MyConfort - COMPACT */}
       <div className='bg-[#477A0C] rounded-lg shadow-lg p-4 mb-4 border border-gray-100'>
         <h1 className='text-2xl font-bold text-[#F2EFE2] mb-3 flex items-center justify-center'>
@@ -149,57 +149,27 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
         </div>
       </div>
 
-      {/* Instructions iPad + Bouton de validation - COMPACT */}
-      <div className='bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3'>
-        <div className='flex items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 flex-1'>
-            <div className='text-lg'>📱</div>
-            <div>
-              <h3 className='text-sm font-bold text-blue-800 mb-1'>
-                Instructions iPad
-              </h3>
-              <ul className='text-blue-700 text-xs space-y-0.5'>
-                <li>• ✅ Numéro de facture généré automatiquement</li>
-                <li>• ✅ Date remplie automatiquement avec aujourd'hui</li>
-                <li>
-                  • 🎯 <strong>Une seule chose à faire :</strong> Remplir le lieu
-                  d'événement
-                </li>
-                <li>• 🔴➡️🟢 Le cadre devient vert quand c'est rempli</li>
-                <li>
-                  • 🚫 Impossible de continuer tant que le lieu n'est pas
-                  renseigné
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          {/* Bouton de validation au même niveau */}
-          <div className='flex-shrink-0'>
-            <button
-              onClick={validateAndNext}
-              disabled={isLocationEmpty}
-              className={`px-6 py-3 font-bold rounded-lg text-sm transition-all transform shadow-lg ${
-                isLocationEmpty
-                  ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-                  : 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white hover:scale-105'
-              }`}
-            >
-              {isLocationEmpty
-                ? "🚫 Remplir le lieu d'abord"
-                : '✅ Suivant: Client →'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Bouton Quitter seul en bas */}
-      <div className='flex justify-start items-center pt-2'>
+      {/* 🎯 Boutons navigation */}
+      <div className="flex justify-center gap-4 mt-6 mb-4">
         <button
           onClick={onQuit}
-          className='px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg text-sm transition-all transform hover:scale-105'
+          className='px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg'
         >
           ← Quitter
+        </button>
+
+        <button
+          onClick={validateAndNext}
+          disabled={isLocationEmpty}
+          className={`px-6 py-3 font-bold rounded-xl text-lg transition-all transform shadow-lg ${
+            isLocationEmpty
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+              : 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white hover:scale-105'
+          }`}
+        >
+          {isLocationEmpty
+            ? "🚫 Remplir le lieu d'abord"
+            : '✅ Suivant: Client →'}
         </button>
       </div>
     </div>

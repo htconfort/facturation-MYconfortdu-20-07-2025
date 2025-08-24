@@ -4,10 +4,11 @@ import { initSignaturePad, exportSignature } from '../services/signatureService'
 
 type Props = {
   onSigned?: (dataUrl: string, timestamp: string) => void;
+  onPrevious?: () => void;
   className?: string;
 };
 
-export default function SignaturePadView({ onSigned, className }: Props) {
+export default function SignaturePadView({ onSigned, onPrevious, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [pad, setPad] = useState<SignaturePad | null>(null);
 
@@ -49,6 +50,14 @@ export default function SignaturePadView({ onSigned, className }: Props) {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {onPrevious && (
+          <button 
+            onClick={onPrevious} 
+            className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 min-h-[56px] font-semibold"
+          >
+            ← Précédent
+          </button>
+        )}
         <button 
           onClick={handleClear} 
           className="px-4 py-2 rounded-xl bg-myconfort-blue/20 hover:bg-myconfort-blue/30 min-h-[56px] font-semibold"

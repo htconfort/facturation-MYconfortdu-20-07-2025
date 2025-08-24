@@ -13,11 +13,18 @@ interface StepProps {
 export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
   const { signature, updateSignature, termsAccepted, setTermsAccepted } = useInvoiceWizard();
   const [showTermsPage, setShowTermsPage] = useState(false);
-
-  const isValid = signature?.dataUrl && termsAccepted;
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSigned = (dataUrl: string, timestamp: string) => {
     updateSignature({ dataUrl, timestamp });
+    
+    // Indication de traitement et passage automatique
+    if (termsAccepted) {
+      setIsProcessing(true);
+      setTimeout(() => {
+        onNext();
+      }, 1500);
+    }
   };
 
   // Page secondaire pour les conditions générales
@@ -34,19 +41,19 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* 🎯 Header fixe */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
-          ✍️ Signature & Validation
+          ✍️ Signature du Client
         </h1>
         <p className="text-myconfort-dark/70 text-sm">
-          Étape 6/7 • Validation finale du devis
+          Étape 6/8 • Signature obligatoire pour finaliser
         </p>
       </div>
 
-      {/* 🎯 Contenu principal */}
-      <div className="flex-1 px-6 py-4 flex flex-col">
+      {/* 🎯 Contenu principal avec espace pour les boutons */}
+      <div className="flex-1 px-6 py-4 pb-16 flex flex-col">
         
         {/* Zone de signature - prend la place disponible */}
         <div className="flex-1 bg-white rounded-xl border-2 border-gray-300 p-4 mb-4">
@@ -62,7 +69,7 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             
             {/* SignaturePad responsive */}
             <div className="flex-1 min-h-[200px]">
-              <SignaturePadView onSigned={handleSigned} />
+              <SignaturePadView onSigned={handleSigned} onPrevious={onPrev} />
             </div>
           </div>
         </div>
@@ -75,7 +82,9 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             <div className="bg-myconfort-green/10 p-3 rounded-xl border border-myconfort-green/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-myconfort-green">✓ Signature enregistrée</div>
+                  <div className="text-sm font-medium text-myconfort-green">
+                    {isProcessing ? '🔄 Passage à l\'étape suivante...' : '✓ Signature enregistrée'}
+                  </div>
                   <div className="text-xs text-myconfort-dark/70">
                     {signature.timestamp && new Date(signature.timestamp).toLocaleString()}
                   </div>
@@ -112,31 +121,6 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* 🎯 Navigation fixe */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
-        <button
-          onClick={onPrev}
-          className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     min-h-[56px]"
-        >
-          ← Précédent
-        </button>
-
-        <button
-          onClick={isValid ? onNext : undefined}
-          disabled={!isValid}
-          className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
-                      shadow-lg min-h-[56px] ${
-            !isValid
-              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-              : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
-          }`}
-        >
-          {!isValid ? 'Signez et acceptez les conditions' : 'Suivant →'}
-        </button>
       </div>
     </div>
   );
