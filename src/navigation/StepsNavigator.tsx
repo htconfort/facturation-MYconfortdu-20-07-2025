@@ -33,15 +33,15 @@ export default function StepsNavigator({ children }: Props) {
   });
 
   return (
-    <div className="w-full h-dvh bg-gray-300 flex items-center justify-center overflow-hidden p-8">
+    <div className="w-full h-dvh bg-gray-300 flex items-center justify-center overflow-hidden p-4">
       {/* Spinner de chargement (mouline) */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-myconfort-blue border-opacity-70 bg-white/80 shadow-2xl"></div>
         </div>
       )}
-      {/* 🎯 Cadre iPad - Dimensions exactes landscape */}
-      <div className="w-[1024px] h-[768px] bg-myconfort-cream border-8 border-black rounded-xl shadow-2xl overflow-hidden relative">
+      {/* 🎯 Cadre iPad - Dimensions réduites pour éviter les marges iPad physique */}
+      <div className="w-[950px] h-[650px] bg-myconfort-cream border-6 border-black rounded-lg shadow-2xl overflow-hidden relative">
         
         {/* Bouton info compact en haut à droite */}
         <button

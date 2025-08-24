@@ -130,7 +130,7 @@ export default function StepProduits({
   };
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* 🎯 Header ultra-compact */}
       <div className="px-4 py-1 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark font-manrope">
@@ -142,10 +142,10 @@ export default function StepProduits({
       </div>
 
       {/* 🎯 Contenu principal */}
-      <div className="flex-1 px-4 py-2 overflow-hidden flex flex-col gap-2">
+      <div className="flex-1 px-4 py-2 overflow-hidden flex flex-col">
         
         {/* Formulaire d'ajout de produit - ultra-compact */}
-        <div className="bg-white rounded-lg p-3 border border-myconfort-dark/10">
+        <div className="bg-white rounded-lg p-3 border border-myconfort-dark/10 mb-2">
           <h3 className="text-base font-medium text-myconfort-dark font-manrope mb-2">➕ Ajouter un produit</h3>
           
           {/* Grille 3×2 pour optimiser l'espace horizontal */}
@@ -282,7 +282,7 @@ export default function StepProduits({
           </div>
         </div>
 
-        {/* Liste des produits ajoutés - compact avec hauteur fixe */}
+        {/* Liste des produits ajoutés - compact sans navigation */}
         <div className="flex-1 bg-white rounded-lg border border-myconfort-dark/10 overflow-hidden">
           <div className="overflow-auto h-full">
             <table className="w-full text-left">
@@ -432,27 +432,32 @@ export default function StepProduits({
             </table>
           </div>
         </div>
-
-        {/* Navigation */}
-        <div className="mt-2 flex gap-2 justify-center">
-          <button 
-            onClick={onPrev} 
-            className="px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all min-h-[40px]"
-          >
-            ← Client
-          </button>
-          <button 
-            onClick={validateAndNext} 
-            disabled={!canProceed}
-            className={`px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] ${
-              !canProceed
-                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-                : 'bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg'
-            }`}
-          >
-            {!canProceed ? 'Ajoutez au moins un produit' : 'Continuer vers Paiement →'}
-          </button>
+      </div>
+      
+      {/* 🚀 BOUTONS FLOTTANTS - Dans le cadre iPad, remontés de 2cm */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4">
+        <button 
+          onClick={onPrev} 
+          className="px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl"
+        >
+          ← Précédent
+        </button>
+        <div className="flex flex-col items-center">
+          <div className="bg-white px-3 py-1 rounded-full shadow-lg mb-1">
+            <div className="text-xs text-gray-500 font-manrope">Étape 3/7</div>
+          </div>
         </div>
+        <button 
+          onClick={validateAndNext} 
+          disabled={!canProceed}
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
+            !canProceed
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+              : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
+          }`}
+        >
+          {!canProceed ? '⚠️ Produits requis' : 'Suivant →'}
+        </button>
       </div>
     </div>
   );

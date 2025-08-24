@@ -71,7 +71,7 @@ export default function StepPaymentNoScrollFixed({ onNext, onPrev }: StepProps) 
   }
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* 🎯 Header fixe - 60px */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
@@ -280,28 +280,29 @@ export default function StepPaymentNoScrollFixed({ onNext, onPrev }: StepProps) 
 
       </div>
 
-      {/* 🎯 Navigation fixe - 80px */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
-        <button
-          onClick={onPrev}
-          className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     min-h-[56px]"
+      {/* 🚀 BOUTONS FLOTTANTS - Dans le cadre iPad, remontés de 2cm */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4">
+        <button 
+          onClick={onPrev} 
+          className="px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl"
         >
           ← Précédent
         </button>
-
-        <button
+        <div className="flex flex-col items-center">
+          <div className="bg-white px-3 py-1 rounded-full shadow-lg mb-1">
+            <div className="text-xs text-gray-500 font-manrope">Étape 4/7</div>
+          </div>
+        </div>
+        <button 
           onClick={isValidPayment ? onNext : undefined}
           disabled={!isValidPayment}
-          className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
-                      shadow-lg min-h-[56px] ${
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
             !isValidPayment
               ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-              : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
+              : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
           }`}
         >
-          {!isValidPayment ? 'Sélectionnez un mode de paiement' : 'Suivant →'}
+          {!isValidPayment ? '⚠️ Sélection requise' : 'Suivant →'}
         </button>
       </div>
     </div>

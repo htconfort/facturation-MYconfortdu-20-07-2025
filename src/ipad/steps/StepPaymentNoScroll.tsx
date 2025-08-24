@@ -11,6 +11,98 @@ interface StepProps {
   isLastStep: boolean;
 }
 
+interface PaymentData {
+  method: string;
+  acompte: number;
+  almaInstallments?: number; // 2, 3, ou 4 fois
+  chequesCount?: number;
+  chequeAmount?: number;
+  notes?: string;
+}
+
+export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
+  const { paiement, updatePaiement, produits } = useInvoiceWizard();
+  const [showAlmaPage, setShowAlmaPage] = useState(false);
+  const [showChequesPage, setShowChequesPage] = useState(false);
+  
+  // Calcul du total - fonction helper simple
+  const getTotalAmount = () => {
+    return produits.reduce((total: number, produit: any) => {
+      return total + calculateProductTotal(produit.qty, produit.priceTTC, produit.discount, produit.discountType);
+    }, 0);
+  };
+  const totalAmount = getTotalAmount();
+  
+  // État local pour les sélections
+  const [selectedMethod, setSelectedMethod] = useState<string>(paiement?.method || '');
+  const [acompte, setAcompte] = useState(paiement?.depositAmount || 0);
+
+  const restePay = totalAmount - acompte;
+  const isValidPayment = selectedMethod && acompte >= 0 && acompte <= totalAmount;
+
+  // Helper pour mettre à jour le paiement
+  const updatePayment = (data: Partial<PaymentData>) => {
+    updatePaiement({ ...paiement, ...data });
+  };
+
+  // Pages secondaires
+  if (showAlmaPage) {
+    return <AlmaDetailsPage 
+      totalAmount={totalAmount}
+      acompte={acompte}
+      onBack={() => setShowAlmaPage(false)} 
+      onSelect={(installments) => {
+        updatePayment({ 
+          method: `Alma ${installments}x`, 
+          acompte, 
+          almaInstallments: installments 
+        });
+        setSelectedMethod(`Alma ${installments}x`);
+        setShowAlmaPage(false);
+      }}
+    />;
+  }
+
+  if (showChequesPage) {
+    return <ChequesDetailsPage 
+      totalAmount={totalAmount}
+      acompte={acompte}
+      onBack={() => setShowChequesPage(false)} 
+      onComplete={(data) => {
+        updatePayment({ 
+          method: 'Chèques à venir', 
+          acompte, 
+          chequesCount: data.count,
+          chequeAmount: data.amount,
+          notes: data.notes
+        });
+        setSelectedMethod('Chèques à venir');
+        setShowChequesPage(false);
+      }}
+    />;
+  }
+
+  return (
+    <div className="w-full h-dvh bg-myconfort-cream flex flex-col overflow-hidden relative">
+      {/* 🎯 Header fixe - 60px */}
+      <div className="px-6 py-4 border-b border-myconfort-dark/10">
+        <h1 className="text-2xl font-bold text-myconfort-dark">
+          💳 Mode de Règlement
+        </h1>
+        <p className="text-myconfort-dark/70 text-sm">
+          Étape 4/7 • Total: {totalAmount.toFixed(2)}€ TTC
+        </p>
+      </div>port { calculateProductTotal } from '../../utils/calculations';
+import AlmaLogo from '../../assets/images/Alma_orange.png';
+
+interface StepProps {
+  onNext: () => void;
+  onPrev: () => void;
+  onQuit: () => void;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+}
+
 export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
   const { paiement, updatePaiement, produits } = useInvoiceWizard();
   const [showAlmaPage, setShowAlmaPage] = useState(false);

@@ -37,7 +37,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
       {/* 🎯 Header fixe */}
       <div className="px-6 py-4 border-b border-myconfort-dark/10">
         <h1 className="text-2xl font-bold text-myconfort-dark">
@@ -165,15 +165,29 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* 🎯 Navigation simplifiée - seulement bouton Précédent */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-start items-center">
-        <button
-          onClick={onPrev}
-          className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                     min-h-[56px]"
+      {/* 🚀 BOUTONS FLOTTANTS - Dans le cadre iPad, remontés de 2cm */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4">
+        <button 
+          onClick={onPrev} 
+          className="px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl"
         >
           ← Précédent
+        </button>
+        <div className="flex flex-col items-center">
+          <div className="bg-white px-3 py-1 rounded-full shadow-lg mb-1">
+            <div className="text-xs text-gray-500 font-manrope">Étape 5/7</div>
+          </div>
+        </div>
+        <button 
+          onClick={isValid ? onNext : undefined}
+          disabled={!isValid}
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
+            !isValid
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+              : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
+          }`}
+        >
+          {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
         </button>
       </div>
     </div>

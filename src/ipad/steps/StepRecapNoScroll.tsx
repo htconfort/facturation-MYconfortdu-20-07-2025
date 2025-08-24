@@ -2,7 +2,16 @@ import { useState, useMemo } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
-import { PDFService } from '../../services/pdfService';
+import { PDFService } from '../../services  return (
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative">
+      {/* 🎯 Header fixe */}
+      <div className="px-6 py-4 border-b border-myconfort-dark/10">
+        <h1 className="text-2xl font-bold text-myconfort-dark">
+          📋 Récapitulatif Final
+        </h1>
+        <p className="text-myconfort-dark/70 text-sm">
+          Étape 7/8 • Vérification avant finalisation</p>
+      </div>e';
 import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { saveInvoice } from '../../utils/storage';
 import { Invoice } from '../../types';
