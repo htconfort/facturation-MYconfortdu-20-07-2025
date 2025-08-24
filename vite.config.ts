@@ -1,9 +1,31 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import type { NextHandleFunction } from 'connect';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-// https://vitejs.dev/config/
-export default defineConfig({
+// Plugin d'exemple typé sans any
+function proxyLoggerPlugin(_options: Record<string, unknown> = {}): Plugin {
+  return {
+    name: 'proxy-logger',
+    
+    configureServer(server) {
+      // Typage strict du middleware Connect (pas de any)
+      const mw: NextHandleFunction = (
+        _req: IncomingMessage,
+        _res: ServerResponse,
+        next
+      ) => {
+        // Middleware pour logging si nécessaire
+        next();
+      };
+
+      server.middlewares.use(mw);
+    }
+  };
+}
+
+export default defineConfig((_env) => ({
   plugins: [
     react(),
     visualizer({
@@ -13,6 +35,7 @@ export default defineConfig({
       gzipSize: true,
       brotliSize: true,
     }),
+    proxyLoggerPlugin({}),
   ],
 
   optimizeDeps: {
@@ -45,7 +68,14 @@ export default defineConfig({
   },
 
   server: {
+    port: 5173,
     proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        // réécrit /api/hello -> /hello sur l'API Express
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
       '/api/n8n': {
         target: 'https://n8n.srv765811.hstgr.cloud',
         changeOrigin: true,
@@ -55,9 +85,10 @@ export default defineConfig({
         configure: (proxy /* http-proxy */, _options) => {
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             // ⚠️ évite de logguer des payloads sensibles en prod
+            const reqUrl = (req as IncomingMessage & { url?: string }).url;
             console.log('🔄 PROXY REQUEST:', {
               method: req.method,
-              url: (req as any).url,
+              url: reqUrl,
               targetUrl: proxyReq.path,
               contentLength: req.headers['content-length'],
               contentType: req.headers['content-type'],
@@ -79,4 +110,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

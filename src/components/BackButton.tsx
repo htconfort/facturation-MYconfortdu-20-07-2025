@@ -20,7 +20,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
   label = 'Retour',
   onBack,
   className = '',
-  showIcon = true
+  showIcon = true,
 }) => {
   const navigate = useNavigate();
 
@@ -44,16 +44,13 @@ export const BackButton: React.FC<BackButtonProps> = ({
         touch-manipulation
         ${className}
       `}
-      type="button"
+      type='button'
       aria-label={`${label} à la page précédente`}
     >
       {showIcon && (
-        <ArrowLeft 
-          size={24} 
-          className="text-myconfort-green flex-shrink-0" 
-        />
+        <ArrowLeft size={24} className='text-myconfort-green flex-shrink-0' />
       )}
-      <span className="font-manrope">{label}</span>
+      <span className='font-manrope'>{label}</span>
     </button>
   );
 };

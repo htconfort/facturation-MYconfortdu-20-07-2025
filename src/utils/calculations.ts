@@ -98,7 +98,7 @@ export const generateInvoiceNumber = (sessionId?: string): string => {
       `🔢 Génération facture [${sessionId || 'direct'}]: ${lastInvoiceNumber} → ${newNumber}`
     );
     return newNumber;
-  } catch (error) {
+  } catch (_error) {
     // Fallback if parsing fails - Start with 001
     const fallbackNumber = `${year}-001`;
     localStorage.setItem('lastInvoiceNumber', fallbackNumber);
@@ -146,7 +146,7 @@ export const getNextInvoiceNumber = (): string => {
   try {
     const lastNumber = parseInt(lastInvoiceNumber.split('-')[1]) || 0;
     return `${year}-${String(lastNumber + 1).padStart(3, '0')}`;
-  } catch (error) {
+  } catch (_error) {
     return `${year}-001`;
   }
 };

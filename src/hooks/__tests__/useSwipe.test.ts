@@ -7,23 +7,31 @@ import { useSwipe, useHorizontalSwipe } from '../useSwipe';
 beforeAll(() => {
   if (typeof (globalThis as any).TouchEvent === 'undefined') {
     (globalThis as any).TouchEvent = class extends Event {
-      changedTouches: any[]; touches: any[];
-      constructor(type: string, init: any = {}) { 
-        super(type, init); 
-        this.changedTouches = init?.changedTouches || []; 
-        this.touches = init?.touches || []; 
+      changedTouches: any[];
+      touches: any[];
+      constructor(type: string, init: any = {}) {
+        super(type, init);
+        this.changedTouches = init?.changedTouches || [];
+        this.touches = init?.touches || [];
       }
     } as any;
   }
   if (typeof (globalThis as any).Touch === 'undefined') {
-    (globalThis as any).Touch = function(init: any){ return init; } as any;
+    (globalThis as any).Touch = function (init: any) {
+      return init;
+    } as any;
   }
 });
 
-function fireTouch(target: Element | Document, type: 'touchstart'|'touchmove'|'touchend', x: number, y: number) {
+function fireTouch(
+  target: Element | Document,
+  type: 'touchstart' | 'touchmove' | 'touchend',
+  x: number,
+  y: number
+) {
   const touch: any = { identifier: 1, target, clientX: x, clientY: y };
   const evt = new (globalThis as any).TouchEvent(type, {
-    bubbles: true, 
+    bubbles: true,
     cancelable: true,
     touches: type === 'touchend' ? [] : [touch],
     changedTouches: [touch],
@@ -31,9 +39,21 @@ function fireTouch(target: Element | Document, type: 'touchstart'|'touchmove'|'t
   (target as any).dispatchEvent(evt);
 }
 
-function WithSwipe({ onSwipe, enabled = true }: { onSwipe: (d: string) => void; enabled?: boolean }) {
+function WithSwipe({
+  onSwipe,
+  enabled = true,
+}: {
+  onSwipe: (d: string) => void;
+  enabled?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  useSwipe({ enabled, onSwipe, preventScrollOnX: true, threshold: 30, velocity: 0 });
+  useSwipe({
+    enabled,
+    onSwipe,
+    preventScrollOnX: true,
+    threshold: 30,
+    velocity: 0,
+  });
   return React.createElement('div', { 'data-testid': 'zone', ref });
 }
 
@@ -42,10 +62,24 @@ describe('useSwipe', () => {
     const addSpy = vi.spyOn(document, 'addEventListener');
     const rmSpy = vi.spyOn(document, 'removeEventListener');
 
-    const { unmount } = render(React.createElement(WithSwipe, { onSwipe: () => {}, enabled: true }));
-    expect(addSpy).toHaveBeenCalledWith('touchstart', expect.any(Function), expect.anything());
-    expect(addSpy).toHaveBeenCalledWith('touchmove', expect.any(Function), expect.anything());
-    expect(addSpy).toHaveBeenCalledWith('touchend', expect.any(Function), expect.anything());
+    const { unmount } = render(
+      React.createElement(WithSwipe, { onSwipe: () => {}, enabled: true })
+    );
+    expect(addSpy).toHaveBeenCalledWith(
+      'touchstart',
+      expect.any(Function),
+      expect.anything()
+    );
+    expect(addSpy).toHaveBeenCalledWith(
+      'touchmove',
+      expect.any(Function),
+      expect.anything()
+    );
+    expect(addSpy).toHaveBeenCalledWith(
+      'touchend',
+      expect.any(Function),
+      expect.anything()
+    );
 
     unmount();
     expect(rmSpy).toHaveBeenCalledWith('touchstart', expect.any(Function));
@@ -73,7 +107,13 @@ describe('useSwipe', () => {
 });
 
 describe('useHorizontalSwipe', () => {
-  function WithHS({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }) {
+  function WithHS({
+    onNext,
+    onPrev,
+  }: {
+    onNext: () => void;
+    onPrev: () => void;
+  }) {
     useHorizontalSwipe({ onNext, onPrev, threshold: 30, velocity: 0 });
     return React.createElement('div');
   }

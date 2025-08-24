@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Invoice } from '../types';
 import {
-  formatCurrency,
+  // formatCurrency, // unused
   calculateHT,
   calculateProductTotal,
 } from '../utils/calculations';

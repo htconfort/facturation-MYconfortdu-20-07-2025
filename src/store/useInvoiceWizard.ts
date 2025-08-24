@@ -1,7 +1,15 @@
 import { create } from 'zustand';
 import { calculateProductTotal } from '../utils/calculations';
 
-export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap' | 'nouvelles-commandes';
+export type WizardStep =
+  | 'facture'
+  | 'client'
+  | 'produits'
+  | 'paiement'
+  | 'livraison'
+  | 'signature'
+  | 'recap'
+  | 'nouvelles-commandes';
 
 interface ClientData {
   name: string;
@@ -28,7 +36,19 @@ interface Produit {
 }
 
 interface PaymentData {
-  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèque au comptant' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | 'Alma 2x' | 'Alma 3x' | 'Alma 4x' | '';
+  method:
+    | 'Carte Bleue'
+    | 'Espèces'
+    | 'Virement'
+    | 'Chèque'
+    | 'Chèque au comptant'
+    | 'Chèques (3 fois)'
+    | 'Chèque à venir'
+    | 'Acompte'
+    | 'Alma 2x'
+    | 'Alma 3x'
+    | 'Alma 4x'
+    | '';
   depositRate?: number; // %
   depositAmount?: number;
   depositPaymentMethod?: 'Carte Bleue' | 'Espèces' | 'Chèque' | ''; // Mode de règlement de l'acompte
@@ -62,12 +82,12 @@ interface CompletionState {
 
 interface WizardState {
   step: WizardStep;
-  
+
   // Informations facture
   invoiceNumber: string;
   invoiceDate: string;
   eventLocation: string;
-  
+
   client: ClientData;
   produits: Produit[];
   paiement: PaymentData;
@@ -77,19 +97,23 @@ interface WizardState {
   invoiceNotes?: string;
   advisorName?: string;
   termsAccepted: boolean;
-  
+
   // ✅ État de complétion
   completion: CompletionState;
-  
+
   // Actions
   setStep: (s: WizardStep) => void;
-  
+
   // Navigation helpers
   steps: WizardStep[];
   getCurrentStepIndex: () => number;
   goNext: () => void;
   goPrev: () => void;
-  setInvoiceData: (data: { invoiceNumber?: string; invoiceDate?: string; eventLocation?: string }) => void;
+  setInvoiceData: (data: {
+    invoiceNumber?: string;
+    invoiceDate?: string;
+    eventLocation?: string;
+  }) => void;
   updateClient: (p: Partial<ClientData>) => void;
   addProduit: (p: Produit) => void;
   updateProduit: (id: string, p: Partial<Produit>) => void;
@@ -102,7 +126,7 @@ interface WizardState {
   updateAdvisorName: (name: string) => void;
   setTermsAccepted: (accepted: boolean) => void;
   reset: () => void;
-  
+
   // Synchronisation avec l'état principal
   syncFromMainInvoice: (invoice: any) => void;
   syncToMainInvoice: () => any;
@@ -110,21 +134,26 @@ interface WizardState {
   // ✅ API complétion
   markStepDone: (stepId: string) => void;
   resetCompletion: () => void;
-  
+
   // 💳 Actions pour le paiement Mollie
   setPaymentStatus: (status: PaymentData['paymentStatus']) => void;
-  setPaymentData: (data: { paymentId?: string; orderId?: string; checkoutUrl?: string; paymentError?: string }) => void;
+  setPaymentData: (data: {
+    paymentId?: string;
+    orderId?: string;
+    checkoutUrl?: string;
+    paymentError?: string;
+  }) => void;
   clearPaymentData: () => void;
 }
 
 export const useInvoiceWizard = create<WizardState>((set, get) => ({
   step: 'facture',
-  
+
   // Informations facture - valeurs par défaut
   invoiceNumber: '',
   invoiceDate: '',
   eventLocation: '',
-  
+
   client: { name: '' },
   produits: [],
   paiement: { method: '' },
@@ -134,20 +163,29 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   invoiceNotes: '',
   advisorName: '',
   termsAccepted: true,
-  
+
   // ✅ État de complétion avec valeur par défaut robuste
   completion: { completedStepIds: [] },
-  
+
   // Navigation helpers
-  steps: ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap', 'nouvelles-commandes'],
-  
+  steps: [
+    'facture',
+    'client',
+    'produits',
+    'paiement',
+    'livraison',
+    'signature',
+    'recap',
+    'nouvelles-commandes',
+  ],
+
   getCurrentStepIndex: () => {
     const state = get();
     return state.steps.indexOf(state.step);
   },
-  
-  setStep: (s) => set({ step: s }),
-  
+
+  setStep: s => set({ step: s }),
+
   goNext: () => {
     const state = get();
     const currentIndex = state.steps.indexOf(state.step);
@@ -156,7 +194,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       set({ step: nextStep });
     }
   },
-  
+
   goPrev: () => {
     const state = get();
     const currentIndex = state.steps.indexOf(state.step);
@@ -165,68 +203,70 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       set({ step: prevStep });
     }
   },
-  
-  setInvoiceData: (data) => set((state) => ({
-    invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
-    invoiceDate: data.invoiceDate ?? state.invoiceDate,
-    eventLocation: data.eventLocation ?? state.eventLocation,
-  })),
-  
-  updateClient: (p) => set((st) => ({ client: { ...st.client, ...p } })),
-  
-  addProduit: (p) => set((st) => ({ produits: [...st.produits, p] })),
-  
-  updateProduit: (id, p) =>
-    set((st) => ({ 
-      produits: st.produits.map(x => x.id === id ? { ...x, ...p } : x) 
+
+  setInvoiceData: data =>
+    set(state => ({
+      invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
+      invoiceDate: data.invoiceDate ?? state.invoiceDate,
+      eventLocation: data.eventLocation ?? state.eventLocation,
     })),
-    
-  removeProduit: (id) =>
-    set((st) => ({ produits: st.produits.filter(x => x.id !== id) })),
-    
-  updatePaiement: (p) => set((st) => ({ paiement: { ...st.paiement, ...p } })),
-  
-  updateLivraison: (p) => set((st) => ({ livraison: { ...st.livraison, ...p } })),
-  
-  updateSignature: (s) => set((st) => ({ signature: { ...st.signature, ...s } })),
-  
-  setSignature: (dataUrl) => set({ signatureDataUrl: dataUrl }),
-  
-  updateInvoiceNotes: (notes) => set({ invoiceNotes: notes }),
-  
-  updateAdvisorName: (name) => set({ advisorName: name }),
-  
-  setTermsAccepted: (accepted) => set({ termsAccepted: accepted }),
-  
-  reset: () => set({
-    step: 'facture',
-    invoiceNumber: '',
-    invoiceDate: '',
-    eventLocation: '',
-    client: { name: '' },
-    produits: [],
-    paiement: { method: '' },
-    livraison: {},
-    signature: { dataUrl: '', timestamp: '' },
-    signatureDataUrl: undefined,
-    invoiceNotes: '',
-    advisorName: '',
-    termsAccepted: true,
-    completion: { completedStepIds: [] },
-  }),
-  
+
+  updateClient: p => set(st => ({ client: { ...st.client, ...p } })),
+
+  addProduit: p => set(st => ({ produits: [...st.produits, p] })),
+
+  updateProduit: (id, p) =>
+    set(st => ({
+      produits: st.produits.map(x => (x.id === id ? { ...x, ...p } : x)),
+    })),
+
+  removeProduit: id =>
+    set(st => ({ produits: st.produits.filter(x => x.id !== id) })),
+
+  updatePaiement: p => set(st => ({ paiement: { ...st.paiement, ...p } })),
+
+  updateLivraison: p => set(st => ({ livraison: { ...st.livraison, ...p } })),
+
+  updateSignature: s => set(st => ({ signature: { ...st.signature, ...s } })),
+
+  setSignature: dataUrl => set({ signatureDataUrl: dataUrl }),
+
+  updateInvoiceNotes: notes => set({ invoiceNotes: notes }),
+
+  updateAdvisorName: name => set({ advisorName: name }),
+
+  setTermsAccepted: accepted => set({ termsAccepted: accepted }),
+
+  reset: () =>
+    set({
+      step: 'facture',
+      invoiceNumber: '',
+      invoiceDate: '',
+      eventLocation: '',
+      client: { name: '' },
+      produits: [],
+      paiement: { method: '' },
+      livraison: {},
+      signature: { dataUrl: '', timestamp: '' },
+      signatureDataUrl: undefined,
+      invoiceNotes: '',
+      advisorName: '',
+      termsAccepted: true,
+      completion: { completedStepIds: [] },
+    }),
+
   // ✅ marquer une étape comme faite
-  markStepDone: (stepId) =>
-    set((state) => {
+  markStepDone: stepId =>
+    set(state => {
       const setArr = new Set(state.completion?.completedStepIds ?? []);
       setArr.add(stepId);
       return { completion: { completedStepIds: Array.from(setArr) } };
     }),
 
   resetCompletion: () => set({ completion: { completedStepIds: [] } }),
-  
+
   // Synchroniser depuis l'état principal de App.tsx
-  syncFromMainInvoice: (invoice) => {
+  syncFromMainInvoice: invoice => {
     set({
       invoiceNumber: invoice.invoiceNumber || '',
       invoiceDate: invoice.invoiceDate || '',
@@ -267,7 +307,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       termsAccepted: invoice.termsAccepted || true,
     });
   },
-  
+
   // Synchroniser vers l'état principal
   syncToMainInvoice: () => {
     const state = get();
@@ -275,7 +315,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       invoiceNumber: state.invoiceNumber,
       invoiceDate: state.invoiceDate,
       eventLocation: state.eventLocation,
-      
+
       clientName: state.client.name,
       clientEmail: state.client.email || '',
       clientPhone: state.client.phone || '',
@@ -286,7 +326,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       clientSiret: state.client.siret || '',
       clientHousingType: state.client.housingType || '',
       clientDoorCode: state.client.doorCode || '',
-      
+
       products: state.produits.map(p => {
         // Calculer le total TTC avec remises appliquées
         const totalTTCWithDiscount = calculateProductTotal(
@@ -295,7 +335,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
           p.discount || 0,
           p.discountType || 'percent'
         );
-        
+
         return {
           id: p.id,
           name: p.designation, // ✅ CORRECTION: mapper designation vers name pour compatibilité N8N
@@ -314,8 +354,8 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
           isPickupOnSite: p.isPickupOnSite, // ✅ CORRECTION: ajouter l'info livraison/emporter
         };
       }),
-      
-      // 🎯 CORRECTION: Mode de règlement détaillé 
+
+      // 🎯 CORRECTION: Mode de règlement détaillé
       paymentMethod: (() => {
         const method = state.paiement.method;
         const depositAmount = state.paiement.depositAmount || 0;
@@ -329,32 +369,40 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
           );
           return sum + totalTTCWithDiscount;
         }, 0);
-        
+
         if (method === 'Chèque à venir' && nombreCheques > 0) {
-          const montantParCheque = Math.round((totalTTC - depositAmount) / nombreCheques);
+          const montantParCheque = Math.round(
+            (totalTTC - depositAmount) / nombreCheques
+          );
           return `Chèque à venir (${nombreCheques} chèques de ${montantParCheque}€ + acompte ${depositAmount.toFixed(2)}€)`;
         }
-        
+
         if (method?.startsWith('Alma') && state.paiement.nombreFoisAlma) {
-          const montantParFois = Math.round((totalTTC - depositAmount) / state.paiement.nombreFoisAlma);
+          const montantParFois = Math.round(
+            (totalTTC - depositAmount) / state.paiement.nombreFoisAlma
+          );
           return `${method} (${state.paiement.nombreFoisAlma} fois de ${montantParFois}€ + acompte ${depositAmount.toFixed(2)}€)`;
         }
-        
-        if (depositAmount > 0 && method !== 'Chèque à venir' && !method?.startsWith('Alma')) {
+
+        if (
+          depositAmount > 0 &&
+          method !== 'Chèque à venir' &&
+          !method?.startsWith('Alma')
+        ) {
           return `${method} (acompte ${depositAmount.toFixed(2)}€)`;
         }
-        
+
         return method || '';
       })(),
       montantAcompte: state.paiement.depositAmount || 0,
       depositPaymentMethod: state.paiement.depositPaymentMethod || '',
       montantRestant: state.paiement.remainingAmount || 0,
       nombreChequesAVenir: state.paiement.nombreChequesAVenir || 0,
-      
+
       deliveryMethod: state.livraison.deliveryMethod || '',
       deliveryAddress: state.livraison.deliveryAddress || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
-      
+
       // 🎯 CORRECTION: Calculs des totaux globaux manquants
       montantTTC: state.produits.reduce((sum, p) => {
         const totalTTCWithDiscount = calculateProductTotal(
@@ -372,7 +420,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
           p.discount || 0,
           p.discountType || 'percent'
         );
-        return sum + (totalTTCWithDiscount / 1.2);
+        return sum + totalTTCWithDiscount / 1.2;
       }, 0),
       montantTVA: state.produits.reduce((sum, p) => {
         const totalTTCWithDiscount = calculateProductTotal(
@@ -384,10 +432,12 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         const ht = totalTTCWithDiscount / 1.2;
         return sum + (totalTTCWithDiscount - ht);
       }, 0),
-      
+
       signature: state.signature.dataUrl || '',
       isSigned: !!state.signature.dataUrl,
-      signatureDate: state.signature.dataUrl ? state.signature.timestamp || new Date().toISOString() : undefined,
+      signatureDate: state.signature.dataUrl
+        ? state.signature.timestamp || new Date().toISOString()
+        : undefined,
       invoiceNotes: state.invoiceNotes || '',
       advisorName: state.advisorName || '',
       termsAccepted: state.termsAccepted,
@@ -395,18 +445,18 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   },
 
   // 💳 Actions pour le paiement Mollie
-  setPaymentStatus: (status) =>
-    set((state) => ({
-      paiement: { ...state.paiement, paymentStatus: status }
+  setPaymentStatus: status =>
+    set(state => ({
+      paiement: { ...state.paiement, paymentStatus: status },
     })),
-    
-  setPaymentData: (data) =>
-    set((state) => ({
-      paiement: { ...state.paiement, ...data }
+
+  setPaymentData: data =>
+    set(state => ({
+      paiement: { ...state.paiement, ...data },
     })),
-    
+
   clearPaymentData: () =>
-    set((state) => ({
+    set(state => ({
       paiement: {
         ...state.paiement,
         paymentStatus: 'idle',
@@ -414,6 +464,6 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         orderId: undefined,
         checkoutUrl: undefined,
         paymentError: undefined,
-      }
+      },
     })),
 }));

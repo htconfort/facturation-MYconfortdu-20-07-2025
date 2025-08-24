@@ -6,9 +6,9 @@ export type SwipeDir = 'left' | 'right' | 'up' | 'down';
 export interface UseSwipeOptions {
   enabled?: boolean;
   axis?: SwipeAxis;
-  threshold?: number;          // distance min en px
-  velocity?: number;           // px/ms min
-  preventScrollOnX?: boolean;  // true => touchmove { passive:false } + preventDefault()
+  threshold?: number; // distance min en px
+  velocity?: number; // px/ms min
+  preventScrollOnX?: boolean; // true => touchmove { passive:false } + preventDefault()
   onSwipe?: (dir: SwipeDir) => void;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
@@ -16,7 +16,8 @@ export interface UseSwipeOptions {
   onSwipeDown?: () => void;
 }
 
-const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+const now = () =>
+  typeof performance !== 'undefined' ? performance.now() : Date.now();
 
 export function useSwipe({
   enabled = true,
@@ -49,7 +50,8 @@ export function useSwipe({
 
     const onMove = (e: TouchEvent) => {
       if (!active.current) return;
-      if (preventScrollOnX && (axis === 'x' || axis === 'both')) e.preventDefault();
+      if (preventScrollOnX && (axis === 'x' || axis === 'both'))
+        e.preventDefault();
     };
 
     const onEnd = (e: TouchEvent) => {
@@ -62,25 +64,38 @@ export function useSwipe({
       const dt = now() - startT.current;
       const dx = t.clientX - startX.current;
       const dy = t.clientY - startY.current;
-      const ax = Math.abs(dx), ay = Math.abs(dy);
+      const ax = Math.abs(dx),
+        ay = Math.abs(dy);
       const main = ax >= ay ? ax : ay;
       const v = dt > 0 ? main / dt : 0;
 
       if (main < threshold || v < velocity) return;
 
       if ((axis === 'x' || axis === 'both') && ax >= ay) {
-        if (dx < 0) { onSwipe?.('left'); onSwipeLeft?.(); }
-        else { onSwipe?.('right'); onSwipeRight?.(); }
+        if (dx < 0) {
+          onSwipe?.('left');
+          onSwipeLeft?.();
+        } else {
+          onSwipe?.('right');
+          onSwipeRight?.();
+        }
         return;
       }
       if ((axis === 'y' || axis === 'both') && ay > ax) {
-        if (dy < 0) { onSwipe?.('up'); onSwipeUp?.(); }
-        else { onSwipe?.('down'); onSwipeDown?.(); }
+        if (dy < 0) {
+          onSwipe?.('up');
+          onSwipeUp?.();
+        } else {
+          onSwipe?.('down');
+          onSwipeDown?.();
+        }
       }
     };
 
     document.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchmove', onMove, { passive: !preventScrollOnX }); // => false par défaut
+    document.addEventListener('touchmove', onMove, {
+      passive: !preventScrollOnX,
+    }); // => false par défaut
     document.addEventListener('touchend', onEnd, { passive: true });
 
     return () => {
@@ -88,17 +103,44 @@ export function useSwipe({
       document.removeEventListener('touchmove', onMove as EventListener);
       document.removeEventListener('touchend', onEnd);
     };
-  }, [enabled, axis, threshold, velocity, preventScrollOnX, onSwipe, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown]);
+  }, [
+    enabled,
+    axis,
+    threshold,
+    velocity,
+    preventScrollOnX,
+    onSwipe,
+    onSwipeLeft,
+    onSwipeRight,
+    onSwipeUp,
+    onSwipeDown,
+  ]);
 }
 
 /** Helper horizontal pour wizard (left => next, right => prev) */
 export function useHorizontalSwipe(opts: {
-  enabled?: boolean; threshold?: number; velocity?: number; preventScrollOnX?: boolean;
-  onNext?: () => void; onPrev?: () => void;
+  enabled?: boolean;
+  threshold?: number;
+  velocity?: number;
+  preventScrollOnX?: boolean;
+  onNext?: () => void;
+  onPrev?: () => void;
 }) {
-  const { enabled = true, threshold = 60, velocity = 0.2, preventScrollOnX = true, onNext, onPrev } = opts || {};
+  const {
+    enabled = true,
+    threshold = 60,
+    velocity = 0.2,
+    preventScrollOnX = true,
+    onNext,
+    onPrev,
+  } = opts || {};
   useSwipe({
-    enabled, axis: 'x', threshold, velocity, preventScrollOnX,
-    onSwipeLeft: () => onNext?.(), onSwipeRight: () => onPrev?.(),
+    enabled,
+    axis: 'x',
+    threshold,
+    velocity,
+    preventScrollOnX,
+    onSwipeLeft: () => onNext?.(),
+    onSwipeRight: () => onPrev?.(),
   });
 }

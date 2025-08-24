@@ -240,7 +240,9 @@ export class N8nWebhookService {
           (p.quantity * p.priceHT).toFixed(2)
         ),
         produits_statuts_livraison: invoice.products.map(p =>
-          (p as ProductWithDeliveryStatus).isPickupOnSite ? 'emporte' : 'a_livrer'
+          (p as ProductWithDeliveryStatus).isPickupOnSite
+            ? 'emporte'
+            : 'a_livrer'
         ), // Nouveau champ pour les statuts de livraison
 
         // Additional metadata
@@ -261,7 +263,9 @@ export class N8nWebhookService {
           .filter(p => (p as ProductWithDeliveryStatus).isPickupOnSite)
           .map(p => p.name)
           .join(', '),
-        a_une_livraison: invoice.products.some(p => !(p as ProductWithDeliveryStatus).isPickupOnSite)
+        a_une_livraison: invoice.products.some(
+          p => !(p as ProductWithDeliveryStatus).isPickupOnSite
+        )
           ? 'Oui'
           : 'Non',
         a_des_produits_emportes: invoice.products.some(
@@ -279,7 +283,8 @@ export class N8nWebhookService {
           total_ttc: product.quantity * product.priceTTC,
           total_ht: product.quantity * product.priceHT,
           categorie: product.category || 'Non spécifiée',
-          statut_livraison: (product as ProductWithDeliveryStatus).isPickupOnSite
+          statut_livraison: (product as ProductWithDeliveryStatus)
+            .isPickupOnSite
             ? 'emporte'
             : 'a_livrer', // Nouveau champ pour le statut de livraison
           remise: product.discount || 0,
@@ -471,9 +476,9 @@ export class N8nWebhookService {
 
         // Gestion spéciale des erreurs CORS
         if (
-          fetchError instanceof Error && 
+          fetchError instanceof Error &&
           (fetchError.message.includes('CORS') ||
-          fetchError.message.includes('Failed to fetch'))
+            fetchError.message.includes('Failed to fetch'))
         ) {
           console.warn(
             '⚠️ Erreur CORS détectée, tentative avec mode no-cors...'

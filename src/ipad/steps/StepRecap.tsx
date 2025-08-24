@@ -257,13 +257,13 @@ export default function StepRecap({ onPrev }: StepProps) {
       );
 
       const doc = await UnifiedPrintService.generateInvoicePdf(
-        { 
+        {
           ...syncToMainInvoice(),
-          signature: signature 
+          signature: signature,
         },
         { includeSignature: true }
       );
-      
+
       const blob = doc.output('blob');
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -281,7 +281,7 @@ export default function StepRecap({ onPrev }: StepProps) {
       addNotification(
         'error',
         'Erreur export PDF',
-        'Impossible d\'exporter le PDF avec signatures.'
+        "Impossible d'exporter le PDF avec signatures."
       );
     } finally {
       setIsLoading(false);
@@ -389,7 +389,7 @@ export default function StepRecap({ onPrev }: StepProps) {
         <p className='text-gray-600 text-lg'>
           Vérification complète avant génération de la facture
         </p>
-        
+
         {/* Bouton d'impression - Masqué à l'impression */}
         <div className='mt-6 no-print'>
           <PrintButton />
@@ -398,668 +398,676 @@ export default function StepRecap({ onPrev }: StepProps) {
 
       {/* DÉBUT SECTION IMPRIMABLE - Applique le style unifié d'impression */}
       <div className='print-bg invoice-container'>
-
-      <div className='max-w-6xl mx-auto space-y-6'>
-        {/* Système de notifications amélioré */}
-        {notifications.length > 0 && (
-          <section className='space-y-3 no-print'>
-            <div className='flex justify-between items-center'>
-              <h3 className='text-lg font-semibold text-gray-700'>
-                📢 Notifications
-              </h3>
-              {notifications.length > 1 && (
-                <button
-                  onClick={clearAllNotifications}
-                  className='text-sm text-gray-500 hover:text-gray-700 underline'
-                >
-                  Tout effacer
-                </button>
-              )}
-            </div>
-
-            {notifications.map(notification => {
-              const bgColors = {
-                info: 'bg-blue-50 border-blue-200 text-blue-800',
-                success: 'bg-green-50 border-green-200 text-green-800',
-                warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-                error: 'bg-red-50 border-red-200 text-red-800',
-              };
-
-              const icons = {
-                info: '🔵',
-                success: '✅',
-                warning: '⚠️',
-                error: '❌',
-              };
-
-              return (
-                <div
-                  key={notification.id}
-                  className={`${bgColors[notification.type]} border rounded-xl p-4 shadow-sm`}
-                >
-                  <div className='flex justify-between items-start'>
-                    <div className='flex-1'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <span className='text-lg'>
-                          {icons[notification.type]}
-                        </span>
-                        <span className='font-semibold'>
-                          {notification.title}
-                        </span>
-                        <span className='text-xs text-gray-500'>
-                          {notification.timestamp.toLocaleTimeString('fr-FR')}
-                        </span>
-                      </div>
-                      <p className='text-sm leading-relaxed'>
-                        {notification.message}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => removeNotification(notification.id)}
-                      className='text-gray-400 hover:text-gray-600 ml-2 text-xl'
-                      title='Fermer'
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </section>
-        )}
-
-        {/* Historique des actions */}
-        {actionHistory.length > 0 && (
-          <section className='bg-gray-50 rounded-xl p-4 border no-print'>
-            <h3 className='text-sm font-semibold text-gray-600 mb-2'>
-              📝 Historique des actions
-            </h3>
-            <div className='space-y-1'>
-              {actionHistory.slice(0, 5).map((action, index) => (
-                <div
-                  key={index}
-                  className='text-xs text-gray-500 flex items-center gap-2'
-                >
-                  <span className='w-1 h-1 bg-gray-400 rounded-full'></span>
-                  {action}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Aperçu de la facture */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            📄 Aperçu de la facture
-          </h3>
-          <div className='border rounded-lg p-4 bg-gray-50'>
-            <InvoicePreviewModern
-              ref={invoicePreviewRef}
-              invoice={invoice}
-              className='bg-white'
-            />
-          </div>
-        </section>
-
-        {/* Informations client */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>👤</span>
-            Informations Client
-          </h3>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <strong>Nom :</strong> {client.name}
-            </div>
-            <div>
-              <strong>Email :</strong> {client.email}
-            </div>
-            <div>
-              <strong>Téléphone :</strong> {client.phone}
-            </div>
-            <div>
-              <strong>Adresse :</strong> {client.address}
-              {client.addressLine2 && (
-                <div className='text-gray-600'>{client.addressLine2}</div>
-              )}
-            </div>
-            <div>
-              <strong>Code postal :</strong> {client.postalCode}
-            </div>
-            <div>
-              <strong>Ville :</strong> {client.city}
-            </div>
-            {client.siret && (
-              <div>
-                <strong>SIRET :</strong> {client.siret}
-              </div>
-            )}
-            {client.housingType && (
-              <div>
-                <strong>Type de logement :</strong> {client.housingType}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Produits commandés */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>📦</span>
-            Produits Commandés
-          </h3>
-
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead>
-                <tr className='border-b-2 border-gray-200'>
-                  <th className='text-left py-3 px-2 font-semibold'>
-                    Désignation
-                  </th>
-                  <th className='text-center py-3 px-2 font-semibold'>Qté</th>
-                  <th className='text-right py-3 px-2 font-semibold'>
-                    Prix unit. TTC
-                  </th>
-                  <th className='text-right py-3 px-2 font-semibold'>Remise</th>
-                  <th className='text-center py-3 px-2 font-semibold'>
-                    Livraison
-                  </th>
-                  <th className='text-right py-3 px-2 font-semibold'>
-                    Total TTC
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {produits.map(produit => (
-                  <tr key={produit.id} className='border-b border-gray-100'>
-                    <td className='py-3 px-2'>
-                      <div className='font-medium'>{produit.designation}</div>
-                      {produit.category && (
-                        <div className='text-sm text-gray-500'>
-                          {produit.category}
-                        </div>
-                      )}
-                    </td>
-                    <td className='text-center py-3 px-2'>{produit.qty}</td>
-                    <td className='text-right py-3 px-2'>
-                      {formatEUR(produit.priceTTC)}
-                    </td>
-                    <td className='text-right py-3 px-2'>
-                      {produit.discount > 0 ? (
-                        <span className='text-green-600'>
-                          -{produit.discount}
-                          {produit.discountType === 'percent' ? '%' : '€'}
-                        </span>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td className='text-center py-3 px-2'>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          produit.isPickupOnSite
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {produit.isPickupOnSite ? '🚗 Emporter' : '📦 Livrer'}
-                      </span>
-                    </td>
-                    <td className='text-right py-3 px-2 font-semibold'>
-                      {formatEUR(
-                        calculateProductTotal(
-                          produit.qty,
-                          produit.priceTTC,
-                          produit.discount || 0,
-                          produit.discountType || 'percent'
-                        )
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Totaux */}
-          <div className='bg-gray-50 rounded-xl p-4 mt-4'>
-            {/* Sous-total avant remises */}
-            {invoice.montantRemise > 0 && (
-              <div className='flex justify-between py-2 text-gray-600'>
-                <span>Sous-total avant remises :</span>
-                <span className='font-semibold'>
-                  {formatEUR(invoice.montantTTC + invoice.montantRemise)}
-                </span>
-              </div>
-            )}
-            
-            {/* Total des remises */}
-            {invoice.montantRemise > 0 && (
-              <div className='flex justify-between py-2 text-green-600'>
-                <span>Total des remises :</span>
-                <span className='font-semibold'>
-                  -{formatEUR(invoice.montantRemise)}
-                </span>
-              </div>
-            )}
-            
-            <div className='flex justify-between py-2'>
-              <span>Total HT :</span>
-              <span className='font-semibold'>
-                {formatEUR(invoice.montantHT)}
-              </span>
-            </div>
-            <div className='flex justify-between py-2'>
-              <span>TVA (20%) :</span>
-              <span className='font-semibold'>
-                {formatEUR(invoice.montantTVA)}
-              </span>
-            </div>
-            <div className='flex justify-between py-3 border-t-2 border-gray-300 text-xl font-bold text-[#477A0C]'>
-              <span>Total TTC :</span>
-              <span>{formatEUR(invoice.montantTTC)}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Modalités de paiement */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>💳</span>
-            Modalités de Paiement
-          </h3>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <strong>Mode de règlement :</strong> {paiement.method}
-            </div>
-            {paiement.depositAmount && paiement.depositAmount > 0 && (
-              <div>
-                <strong>Acompte :</strong> {formatEUR(paiement.depositAmount)}
-              </div>
-            )}
-            {paiement.nombreChequesAVenir &&
-              paiement.nombreChequesAVenir > 0 && (
-                <div>
-                  <strong>Nombre de chèques :</strong>{' '}
-                  {paiement.nombreChequesAVenir} fois
-                </div>
-              )}
-            {paiement.remainingAmount && paiement.remainingAmount > 0 && (
-              <div>
-                <strong>Montant par chèque :</strong>{' '}
-                {formatEUR(
-                  paiement.remainingAmount / (paiement.nombreChequesAVenir || 1)
+        <div className='max-w-6xl mx-auto space-y-6'>
+          {/* Système de notifications amélioré */}
+          {notifications.length > 0 && (
+            <section className='space-y-3 no-print'>
+              <div className='flex justify-between items-center'>
+                <h3 className='text-lg font-semibold text-gray-700'>
+                  📢 Notifications
+                </h3>
+                {notifications.length > 1 && (
+                  <button
+                    onClick={clearAllNotifications}
+                    className='text-sm text-gray-500 hover:text-gray-700 underline'
+                  >
+                    Tout effacer
+                  </button>
                 )}
               </div>
-            )}
-          </div>
 
-          {paiement.note && (
-            <div className='mt-4 p-3 bg-blue-50 rounded-lg'>
-              <strong>Notes :</strong> {paiement.note}
-            </div>
-          )}
-        </section>
+              {notifications.map(notification => {
+                const bgColors = {
+                  info: 'bg-blue-50 border-blue-200 text-blue-800',
+                  success: 'bg-green-50 border-green-200 text-green-800',
+                  warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                  error: 'bg-red-50 border-red-200 text-red-800',
+                };
 
-        {/* Modalités de livraison */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>🚚</span>
-            Modalités de Livraison
-          </h3>
+                const icons = {
+                  info: '🔵',
+                  success: '✅',
+                  warning: '⚠️',
+                  error: '❌',
+                };
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <h4 className='font-semibold text-green-800 mb-2'>
-                emporter ({produitsAEmporter.length})
-              </h4>
-              {produitsAEmporter.length > 0 ? (
-                <ul className='text-sm text-green-700'>
-                  {produitsAEmporter.map(p => (
-                    <li key={p.id}>
-                      • {p.designation} (x{p.qty})
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className='text-gray-500 text-sm'>
-                  Aucun produit à emporter
-                </p>
-              )}
-            </div>
-
-            <div>
-              <h4 className='font-semibold text-blue-800 mb-2'>
-                À livrer ({produitsALivrer.length})
-              </h4>
-              {produitsALivrer.length > 0 ? (
-                <ul className='text-sm text-blue-700'>
-                  {produitsALivrer.map(p => (
-                    <li key={p.id}>
-                      • {p.designation} (x{p.qty})
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className='text-gray-500 text-sm'>Aucun produit à livrer</p>
-              )}
-            </div>
-          </div>
-
-          {livraison.deliveryMethod && (
-            <div className='mt-4'>
-              <strong>Mode de livraison :</strong> {livraison.deliveryMethod}
-            </div>
+                return (
+                  <div
+                    key={notification.id}
+                    className={`${bgColors[notification.type]} border rounded-xl p-4 shadow-sm`}
+                  >
+                    <div className='flex justify-between items-start'>
+                      <div className='flex-1'>
+                        <div className='flex items-center gap-2 mb-1'>
+                          <span className='text-lg'>
+                            {icons[notification.type]}
+                          </span>
+                          <span className='font-semibold'>
+                            {notification.title}
+                          </span>
+                          <span className='text-xs text-gray-500'>
+                            {notification.timestamp.toLocaleTimeString('fr-FR')}
+                          </span>
+                        </div>
+                        <p className='text-sm leading-relaxed'>
+                          {notification.message}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeNotification(notification.id)}
+                        className='text-gray-400 hover:text-gray-600 ml-2 text-xl'
+                        title='Fermer'
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
           )}
 
-          {livraison.deliveryNotes && (
-            <div className='mt-4 p-3 bg-yellow-50 rounded-lg'>
-              <strong>Notes de livraison :</strong> {livraison.deliveryNotes}
-            </div>
-          )}
-        </section>
-
-        {/* Signature */}
-        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>✍️</span>
-            Signature Client
-          </h3>
-
-          {signature.dataUrl ? (
-            <div className='text-center'>
-              <img
-                src={signature.dataUrl}
-                alt='Signature du client'
-                className='max-w-md mx-auto border rounded-lg shadow-sm'
-              />
-              <p className='text-sm text-gray-600 mt-2'>
-                Signé le{' '}
-                {signature.timestamp
-                  ? new Date(signature.timestamp).toLocaleString('fr-FR')
-                  : ''}
-              </p>
-            </div>
-          ) : (
-            <p className='text-red-600'>⚠️ Aucune signature enregistrée</p>
-          )}
-        </section>
-
-        {/* Actions principales */}
-        <section className='bg-gradient-to-r from-[#477A0C]/10 to-[#477A0C]/20 rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]'>
-          <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
-            <span className='mr-2'>⚡</span>
-            Actions Principales
-          </h3>
-
-          <p className='text-green-700 mb-4'>
-            Toutes les informations ont été collectées avec succès. Vous pouvez
-            maintenant :
-          </p>
-
-          {/* Avertissement sur les actions obligatoires */}
-          {!canProceed && (
-            <div className='bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-6'>
-              <div className='flex items-center gap-2'>
-                <span className='text-lg'>⚠️</span>
-                <span className='font-semibold'>Actions obligatoires</span>
-              </div>
-              <p className='text-sm mt-1'>
-                Vous devez <strong>enregistrer la facture</strong> et{' '}
-                <strong>envoyer l'email</strong> pour pouvoir continuer.
-              </p>
-            </div>
-          )}
-
-          {/* Indicateur de progression global */}
-          {isLoading && (
-            <div className='bg-white rounded-lg p-4 mb-6 border-2 border-blue-200'>
-              <div className='flex items-center gap-3'>
-                <div className='w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
-                <span className='text-blue-700 font-medium'>
-                  Traitement en cours...
-                </span>
-              </div>
-              <div className='w-full bg-gray-200 rounded-full h-2 mt-3'>
-                <div className='bg-blue-600 h-2 rounded-full w-1/3 animate-pulse'></div>
-              </div>
-            </div>
-          )}
-
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <div className='relative'>
-              <button
-                type='button'
-                onClick={handleSaveInvoice}
-                disabled={isLoading}
-                className='w-full bg-[#477A0C] hover:bg-[#5A8F0F] disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
-              >
-                <span className='mr-2'>💾</span>
-                <div className='text-center'>
-                  <div>
-                    {isLoading ? 'Enregistrement...' : 'Enregistrer Facture'}
-                  </div>
-                  <div className='text-xs opacity-80 mt-1'>
-                    Sauvegarde dans l'onglet factures
-                  </div>
-                </div>
-              </button>
-              {/* Badge OBLIGATOIRE */}
-              {!isInvoiceSaved && (
-                <div className='absolute -top-3 -left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
-                  OBLIGATOIRE
-                </div>
-              )}
-              {actionHistory.includes(
-                `Facture ${invoice.invoiceNumber} enregistrée`
-              ) && (
-                <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
-                  ✓
-                </div>
-              )}
-            </div>
-
-            <div className='relative'>
-              <button
-                type='button'
-                onClick={handlePrintInvoice}
-                disabled={isLoading}
-                className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
-              >
-                <span className='mr-2'>🖨️</span>
-                <div className='text-center'>
-                  <div>
-                    {isLoading ? 'Génération PDF...' : 'Imprimer (PDF A4)'}
-                  </div>
-                  <div className='text-xs opacity-80 mt-1'>
-                    PDF premium avec CGV
-                  </div>
-                </div>
-              </button>
-              {actionHistory.some(action =>
-                action.includes('ouvert pour impression')
-              ) && (
-                <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
-                  ✓
-                </div>
-              )}
-            </div>
-
-            <div className='relative'>
-              <button
-                type='button'
-                onClick={handleExportPdfWithSignatures}
-                disabled={isLoading || !signature?.clientSignature}
-                className='w-full bg-myconfort-green hover:bg-myconfort-green/90 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
-              >
-                <span className='mr-2'>✍️</span>
-                <div className='text-center'>
-                  <div>
-                    {isLoading ? 'Export en cours...' : 'PDF avec Signatures'}
-                  </div>
-                  <div className='text-xs opacity-80 mt-1'>
-                    Facture signée
-                  </div>
-                </div>
-              </button>
-              {!signature?.clientSignature && (
-                <div className='text-xs text-gray-500 mt-1 text-center'>
-                  Signature requise pour activer
-                </div>
-              )}
-            </div>
-
-            <div className='relative'>
-              <button
-                type='button'
-                onClick={handleSendEmailAndDrive}
-                disabled={isLoading}
-                className='w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
-              >
-                <span className='mr-2'>📧</span>
-                <div className='text-center'>
-                  <div>
-                    {isLoading ? 'Envoi en cours...' : 'Envoyer Email & Drive'}
-                  </div>
-                  <div className='text-xs opacity-80 mt-1'>
-                    Email + sauvegarde Google Drive
-                  </div>
-                </div>
-              </button>
-              {/* Badge OBLIGATOIRE */}
-              {!isEmailSent && (
-                <div className='absolute -top-3 -left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
-                  OBLIGATOIRE
-                </div>
-              )}
-              {actionHistory.some(action =>
-                action.includes('envoyée par email et Drive')
-              ) && (
-                <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
-                  ✓
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Récapitulatif des actions effectuées */}
+          {/* Historique des actions */}
           {actionHistory.length > 0 && (
-            <div className='mt-6 p-4 bg-green-50 rounded-xl border border-green-200'>
-              <h4 className='text-sm font-semibold text-green-700 mb-2'>
-                ✅ Actions effectuées
-              </h4>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'>
-                <div
-                  className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('enregistrée')) ? 'text-green-600' : 'text-gray-400'}`}
-                >
-                  <span>
-                    {actionHistory.some(a => a.includes('enregistrée'))
-                      ? '✅'
-                      : '⭕'}
-                  </span>
-                  Facture enregistrée
-                </div>
-                <div
-                  className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('impression')) ? 'text-green-600' : 'text-gray-400'}`}
-                >
-                  <span>
-                    {actionHistory.some(a => a.includes('impression'))
-                      ? '✅'
-                      : '⭕'}
-                  </span>
-                  PDF généré
-                </div>
-                <div
-                  className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('email')) ? 'text-green-600' : 'text-gray-400'}`}
-                >
-                  <span>
-                    {actionHistory.some(a => a.includes('email')) ? '✅' : '⭕'}
-                  </span>
-                  Email envoyé
-                </div>
+            <section className='bg-gray-50 rounded-xl p-4 border no-print'>
+              <h3 className='text-sm font-semibold text-gray-600 mb-2'>
+                📝 Historique des actions
+              </h3>
+              <div className='space-y-1'>
+                {actionHistory.slice(0, 5).map((action, index) => (
+                  <div
+                    key={index}
+                    className='text-xs text-gray-500 flex items-center gap-2'
+                  >
+                    <span className='w-1 h-1 bg-gray-400 rounded-full'></span>
+                    {action}
+                  </div>
+                ))}
               </div>
-            </div>
+            </section>
           )}
-        </section>
 
-        {/* Navigation */}
-        <div className='flex flex-col items-center gap-4'>
-          {/* Message d'information si les actions ne sont pas complètes */}
-          {!canProceed && (
-            <div className='bg-orange-50 border border-orange-200 text-orange-800 px-6 py-4 rounded-xl text-center max-w-2xl'>
-              <div className='flex items-center justify-center gap-2 mb-2'>
-                <span className='text-xl'>⚠️</span>
+          {/* Aperçu de la facture */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              📄 Aperçu de la facture
+            </h3>
+            <div className='border rounded-lg p-4 bg-gray-50'>
+              <InvoicePreviewModern
+                ref={invoicePreviewRef}
+                invoice={invoice}
+                className='bg-white'
+              />
+            </div>
+          </section>
+
+          {/* Informations client */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>👤</span>
+              Informations Client
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <strong>Nom :</strong> {client.name}
+              </div>
+              <div>
+                <strong>Email :</strong> {client.email}
+              </div>
+              <div>
+                <strong>Téléphone :</strong> {client.phone}
+              </div>
+              <div>
+                <strong>Adresse :</strong> {client.address}
+                {client.addressLine2 && (
+                  <div className='text-gray-600'>{client.addressLine2}</div>
+                )}
+              </div>
+              <div>
+                <strong>Code postal :</strong> {client.postalCode}
+              </div>
+              <div>
+                <strong>Ville :</strong> {client.city}
+              </div>
+              {client.siret && (
+                <div>
+                  <strong>SIRET :</strong> {client.siret}
+                </div>
+              )}
+              {client.housingType && (
+                <div>
+                  <strong>Type de logement :</strong> {client.housingType}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Produits commandés */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>📦</span>
+              Produits Commandés
+            </h3>
+
+            <div className='overflow-x-auto'>
+              <table className='w-full'>
+                <thead>
+                  <tr className='border-b-2 border-gray-200'>
+                    <th className='text-left py-3 px-2 font-semibold'>
+                      Désignation
+                    </th>
+                    <th className='text-center py-3 px-2 font-semibold'>Qté</th>
+                    <th className='text-right py-3 px-2 font-semibold'>
+                      Prix unit. TTC
+                    </th>
+                    <th className='text-right py-3 px-2 font-semibold'>
+                      Remise
+                    </th>
+                    <th className='text-center py-3 px-2 font-semibold'>
+                      Livraison
+                    </th>
+                    <th className='text-right py-3 px-2 font-semibold'>
+                      Total TTC
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {produits.map(produit => (
+                    <tr key={produit.id} className='border-b border-gray-100'>
+                      <td className='py-3 px-2'>
+                        <div className='font-medium'>{produit.designation}</div>
+                        {produit.category && (
+                          <div className='text-sm text-gray-500'>
+                            {produit.category}
+                          </div>
+                        )}
+                      </td>
+                      <td className='text-center py-3 px-2'>{produit.qty}</td>
+                      <td className='text-right py-3 px-2'>
+                        {formatEUR(produit.priceTTC)}
+                      </td>
+                      <td className='text-right py-3 px-2'>
+                        {produit.discount > 0 ? (
+                          <span className='text-green-600'>
+                            -{produit.discount}
+                            {produit.discountType === 'percent' ? '%' : '€'}
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className='text-center py-3 px-2'>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            produit.isPickupOnSite
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {produit.isPickupOnSite ? '🚗 Emporter' : '📦 Livrer'}
+                        </span>
+                      </td>
+                      <td className='text-right py-3 px-2 font-semibold'>
+                        {formatEUR(
+                          calculateProductTotal(
+                            produit.qty,
+                            produit.priceTTC,
+                            produit.discount || 0,
+                            produit.discountType || 'percent'
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totaux */}
+            <div className='bg-gray-50 rounded-xl p-4 mt-4'>
+              {/* Sous-total avant remises */}
+              {invoice.montantRemise > 0 && (
+                <div className='flex justify-between py-2 text-gray-600'>
+                  <span>Sous-total avant remises :</span>
+                  <span className='font-semibold'>
+                    {formatEUR(invoice.montantTTC + invoice.montantRemise)}
+                  </span>
+                </div>
+              )}
+
+              {/* Total des remises */}
+              {invoice.montantRemise > 0 && (
+                <div className='flex justify-between py-2 text-green-600'>
+                  <span>Total des remises :</span>
+                  <span className='font-semibold'>
+                    -{formatEUR(invoice.montantRemise)}
+                  </span>
+                </div>
+              )}
+
+              <div className='flex justify-between py-2'>
+                <span>Total HT :</span>
                 <span className='font-semibold'>
-                  Actions obligatoires requises
+                  {formatEUR(invoice.montantHT)}
                 </span>
               </div>
-              <p className='text-sm'>
-                Vous devez d'abord <strong>enregistrer la facture</strong> et{' '}
-                <strong>envoyer l'email</strong> avant de pouvoir poursuivre.
-              </p>
-              <div className='flex justify-center gap-4 mt-3 text-xs'>
-                <span
-                  className={`flex items-center gap-1 ${isInvoiceSaved ? 'text-green-600' : 'text-gray-500'}`}
-                >
-                  {isInvoiceSaved ? '✅' : '⭕'} Facture enregistrée
-                </span>
-                <span
-                  className={`flex items-center gap-1 ${isEmailSent ? 'text-green-600' : 'text-gray-500'}`}
-                >
-                  {isEmailSent ? '✅' : '⭕'} Email envoyé
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Message de validation si toutes les actions sont complètes */}
-          {canProceed && (
-            <div className='bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-center max-w-2xl'>
-              <div className='flex items-center justify-center gap-2 mb-2'>
-                <span className='text-xl'>✅</span>
+              <div className='flex justify-between py-2'>
+                <span>TVA (20%) :</span>
                 <span className='font-semibold'>
-                  Toutes les actions effectuées
+                  {formatEUR(invoice.montantTVA)}
                 </span>
               </div>
-              <p className='text-sm'>
-                La facture a été enregistrée et l'email envoyé. Vous pouvez
-                maintenant poursuivre.
-              </p>
+              <div className='flex justify-between py-3 border-t-2 border-gray-300 text-xl font-bold text-[#477A0C]'>
+                <span>Total TTC :</span>
+                <span>{formatEUR(invoice.montantTTC)}</span>
+              </div>
             </div>
-          )}
+          </section>
 
-          <div className='flex gap-4 justify-center no-print'>
-            <button
-              type='button'
-              onClick={onPrev}
-              className='px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all'
-            >
-              ← Signature
-            </button>
+          {/* Modalités de paiement */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>💳</span>
+              Modalités de Paiement
+            </h3>
 
-            <button
-              type='button'
-              onClick={handleNewOrder}
-              disabled={!canProceed}
-              className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform shadow-lg ${
-                canProceed
-                  ? 'bg-[#477A0C] hover:bg-[#5A8F0F] text-white hover:scale-105'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              title={
-                !canProceed
-                  ? "Veuillez d'abord enregistrer la facture et envoyer l'email"
-                  : ''
-              }
-            >
-              🆕 Nouvelle Commande
-            </button>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div>
+                <strong>Mode de règlement :</strong> {paiement.method}
+              </div>
+              {paiement.depositAmount && paiement.depositAmount > 0 && (
+                <div>
+                  <strong>Acompte :</strong> {formatEUR(paiement.depositAmount)}
+                </div>
+              )}
+              {paiement.nombreChequesAVenir &&
+                paiement.nombreChequesAVenir > 0 && (
+                  <div>
+                    <strong>Nombre de chèques :</strong>{' '}
+                    {paiement.nombreChequesAVenir} fois
+                  </div>
+                )}
+              {paiement.remainingAmount && paiement.remainingAmount > 0 && (
+                <div>
+                  <strong>Montant par chèque :</strong>{' '}
+                  {formatEUR(
+                    paiement.remainingAmount /
+                      (paiement.nombreChequesAVenir || 1)
+                  )}
+                </div>
+              )}
+            </div>
+
+            {paiement.note && (
+              <div className='mt-4 p-3 bg-blue-50 rounded-lg'>
+                <strong>Notes :</strong> {paiement.note}
+              </div>
+            )}
+          </section>
+
+          {/* Modalités de livraison */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>🚚</span>
+              Modalités de Livraison
+            </h3>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div>
+                <h4 className='font-semibold text-green-800 mb-2'>
+                  emporter ({produitsAEmporter.length})
+                </h4>
+                {produitsAEmporter.length > 0 ? (
+                  <ul className='text-sm text-green-700'>
+                    {produitsAEmporter.map(p => (
+                      <li key={p.id}>
+                        • {p.designation} (x{p.qty})
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className='text-gray-500 text-sm'>
+                    Aucun produit à emporter
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <h4 className='font-semibold text-blue-800 mb-2'>
+                  À livrer ({produitsALivrer.length})
+                </h4>
+                {produitsALivrer.length > 0 ? (
+                  <ul className='text-sm text-blue-700'>
+                    {produitsALivrer.map(p => (
+                      <li key={p.id}>
+                        • {p.designation} (x{p.qty})
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className='text-gray-500 text-sm'>
+                    Aucun produit à livrer
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {livraison.deliveryMethod && (
+              <div className='mt-4'>
+                <strong>Mode de livraison :</strong> {livraison.deliveryMethod}
+              </div>
+            )}
+
+            {livraison.deliveryNotes && (
+              <div className='mt-4 p-3 bg-yellow-50 rounded-lg'>
+                <strong>Notes de livraison :</strong> {livraison.deliveryNotes}
+              </div>
+            )}
+          </section>
+
+          {/* Signature */}
+          <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>✍️</span>
+              Signature Client
+            </h3>
+
+            {signature.dataUrl ? (
+              <div className='text-center'>
+                <img
+                  src={signature.dataUrl}
+                  alt='Signature du client'
+                  className='max-w-md mx-auto border rounded-lg shadow-sm'
+                />
+                <p className='text-sm text-gray-600 mt-2'>
+                  Signé le{' '}
+                  {signature.timestamp
+                    ? new Date(signature.timestamp).toLocaleString('fr-FR')
+                    : ''}
+                </p>
+              </div>
+            ) : (
+              <p className='text-red-600'>⚠️ Aucune signature enregistrée</p>
+            )}
+          </section>
+
+          {/* Actions principales */}
+          <section className='bg-gradient-to-r from-[#477A0C]/10 to-[#477A0C]/20 rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]'>
+            <h3 className='text-xl font-semibold text-[#477A0C] mb-4 flex items-center'>
+              <span className='mr-2'>⚡</span>
+              Actions Principales
+            </h3>
+
+            <p className='text-green-700 mb-4'>
+              Toutes les informations ont été collectées avec succès. Vous
+              pouvez maintenant :
+            </p>
+
+            {/* Avertissement sur les actions obligatoires */}
+            {!canProceed && (
+              <div className='bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-6'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-lg'>⚠️</span>
+                  <span className='font-semibold'>Actions obligatoires</span>
+                </div>
+                <p className='text-sm mt-1'>
+                  Vous devez <strong>enregistrer la facture</strong> et{' '}
+                  <strong>envoyer l'email</strong> pour pouvoir continuer.
+                </p>
+              </div>
+            )}
+
+            {/* Indicateur de progression global */}
+            {isLoading && (
+              <div className='bg-white rounded-lg p-4 mb-6 border-2 border-blue-200'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
+                  <span className='text-blue-700 font-medium'>
+                    Traitement en cours...
+                  </span>
+                </div>
+                <div className='w-full bg-gray-200 rounded-full h-2 mt-3'>
+                  <div className='bg-blue-600 h-2 rounded-full w-1/3 animate-pulse'></div>
+                </div>
+              </div>
+            )}
+
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={handleSaveInvoice}
+                  disabled={isLoading}
+                  className='w-full bg-[#477A0C] hover:bg-[#5A8F0F] disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
+                >
+                  <span className='mr-2'>💾</span>
+                  <div className='text-center'>
+                    <div>
+                      {isLoading ? 'Enregistrement...' : 'Enregistrer Facture'}
+                    </div>
+                    <div className='text-xs opacity-80 mt-1'>
+                      Sauvegarde dans l'onglet factures
+                    </div>
+                  </div>
+                </button>
+                {/* Badge OBLIGATOIRE */}
+                {!isInvoiceSaved && (
+                  <div className='absolute -top-3 -left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
+                    OBLIGATOIRE
+                  </div>
+                )}
+                {actionHistory.includes(
+                  `Facture ${invoice.invoiceNumber} enregistrée`
+                ) && (
+                  <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
+                    ✓
+                  </div>
+                )}
+              </div>
+
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={handlePrintInvoice}
+                  disabled={isLoading}
+                  className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
+                >
+                  <span className='mr-2'>🖨️</span>
+                  <div className='text-center'>
+                    <div>
+                      {isLoading ? 'Génération PDF...' : 'Imprimer (PDF A4)'}
+                    </div>
+                    <div className='text-xs opacity-80 mt-1'>
+                      PDF premium avec CGV
+                    </div>
+                  </div>
+                </button>
+                {actionHistory.some(action =>
+                  action.includes('ouvert pour impression')
+                ) && (
+                  <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
+                    ✓
+                  </div>
+                )}
+              </div>
+
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={handleExportPdfWithSignatures}
+                  disabled={isLoading || !signature?.clientSignature}
+                  className='w-full bg-myconfort-green hover:bg-myconfort-green/90 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
+                >
+                  <span className='mr-2'>✍️</span>
+                  <div className='text-center'>
+                    <div>
+                      {isLoading ? 'Export en cours...' : 'PDF avec Signatures'}
+                    </div>
+                    <div className='text-xs opacity-80 mt-1'>
+                      Facture signée
+                    </div>
+                  </div>
+                </button>
+                {!signature?.clientSignature && (
+                  <div className='text-xs text-gray-500 mt-1 text-center'>
+                    Signature requise pour activer
+                  </div>
+                )}
+              </div>
+
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={handleSendEmailAndDrive}
+                  disabled={isLoading}
+                  className='w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center min-h-[60px]'
+                >
+                  <span className='mr-2'>📧</span>
+                  <div className='text-center'>
+                    <div>
+                      {isLoading
+                        ? 'Envoi en cours...'
+                        : 'Envoyer Email & Drive'}
+                    </div>
+                    <div className='text-xs opacity-80 mt-1'>
+                      Email + sauvegarde Google Drive
+                    </div>
+                  </div>
+                </button>
+                {/* Badge OBLIGATOIRE */}
+                {!isEmailSent && (
+                  <div className='absolute -top-3 -left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
+                    OBLIGATOIRE
+                  </div>
+                )}
+                {actionHistory.some(action =>
+                  action.includes('envoyée par email et Drive')
+                ) && (
+                  <div className='absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs'>
+                    ✓
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Récapitulatif des actions effectuées */}
+            {actionHistory.length > 0 && (
+              <div className='mt-6 p-4 bg-green-50 rounded-xl border border-green-200'>
+                <h4 className='text-sm font-semibold text-green-700 mb-2'>
+                  ✅ Actions effectuées
+                </h4>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'>
+                  <div
+                    className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('enregistrée')) ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    <span>
+                      {actionHistory.some(a => a.includes('enregistrée'))
+                        ? '✅'
+                        : '⭕'}
+                    </span>
+                    Facture enregistrée
+                  </div>
+                  <div
+                    className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('impression')) ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    <span>
+                      {actionHistory.some(a => a.includes('impression'))
+                        ? '✅'
+                        : '⭕'}
+                    </span>
+                    PDF généré
+                  </div>
+                  <div
+                    className={`flex items-center gap-2 ${actionHistory.some(a => a.includes('email')) ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    <span>
+                      {actionHistory.some(a => a.includes('email'))
+                        ? '✅'
+                        : '⭕'}
+                    </span>
+                    Email envoyé
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Navigation */}
+          <div className='flex flex-col items-center gap-4'>
+            {/* Message d'information si les actions ne sont pas complètes */}
+            {!canProceed && (
+              <div className='bg-orange-50 border border-orange-200 text-orange-800 px-6 py-4 rounded-xl text-center max-w-2xl'>
+                <div className='flex items-center justify-center gap-2 mb-2'>
+                  <span className='text-xl'>⚠️</span>
+                  <span className='font-semibold'>
+                    Actions obligatoires requises
+                  </span>
+                </div>
+                <p className='text-sm'>
+                  Vous devez d'abord <strong>enregistrer la facture</strong> et{' '}
+                  <strong>envoyer l'email</strong> avant de pouvoir poursuivre.
+                </p>
+                <div className='flex justify-center gap-4 mt-3 text-xs'>
+                  <span
+                    className={`flex items-center gap-1 ${isInvoiceSaved ? 'text-green-600' : 'text-gray-500'}`}
+                  >
+                    {isInvoiceSaved ? '✅' : '⭕'} Facture enregistrée
+                  </span>
+                  <span
+                    className={`flex items-center gap-1 ${isEmailSent ? 'text-green-600' : 'text-gray-500'}`}
+                  >
+                    {isEmailSent ? '✅' : '⭕'} Email envoyé
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Message de validation si toutes les actions sont complètes */}
+            {canProceed && (
+              <div className='bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-center max-w-2xl'>
+                <div className='flex items-center justify-center gap-2 mb-2'>
+                  <span className='text-xl'>✅</span>
+                  <span className='font-semibold'>
+                    Toutes les actions effectuées
+                  </span>
+                </div>
+                <p className='text-sm'>
+                  La facture a été enregistrée et l'email envoyé. Vous pouvez
+                  maintenant poursuivre.
+                </p>
+              </div>
+            )}
+
+            <div className='flex gap-4 justify-center no-print'>
+              <button
+                type='button'
+                onClick={onPrev}
+                className='px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all'
+              >
+                ← Signature
+              </button>
+
+              <button
+                type='button'
+                onClick={handleNewOrder}
+                disabled={!canProceed}
+                className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform shadow-lg ${
+                  canProceed
+                    ? 'bg-[#477A0C] hover:bg-[#5A8F0F] text-white hover:scale-105'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                title={
+                  !canProceed
+                    ? "Veuillez d'abord enregistrer la facture et envoyer l'email"
+                    : ''
+                }
+              >
+                🆕 Nouvelle Commande
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      {/* FIN SECTION IMPRIMABLE */}
+        {/* FIN SECTION IMPRIMABLE */}
       </div>
     </div>
   );

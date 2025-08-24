@@ -1,0 +1,9 @@
+dist/
+node_modules/
+build/
+.env
+*.backup.tsx
+*_Backup.tsx
+*Backup.tsx
+**/*Backup*
+**/*backup*

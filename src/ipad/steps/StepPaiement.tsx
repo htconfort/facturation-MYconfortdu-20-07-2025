@@ -37,41 +37,41 @@ const paymentMethods: Array<{
     iconType: 'svg',
     priority: true,
   },
-  { 
-    value: 'Espèces', 
-    label: 'Espèces', 
+  {
+    value: 'Espèces',
+    label: 'Espèces',
     icon: '/payment-icons/especes.svg',
-    iconType: 'svg'
+    iconType: 'svg',
   },
-  { 
-    value: 'Virement', 
-    label: 'Virement bancaire', 
+  {
+    value: 'Virement',
+    label: 'Virement bancaire',
     icon: '/payment-icons/virement.svg',
-    iconType: 'svg'
+    iconType: 'svg',
   },
-  { 
-    value: 'Carte Bleue', 
-    label: 'Carte Bleue', 
+  {
+    value: 'Carte Bleue',
+    label: 'Carte Bleue',
     icon: '/payment-icons/carte-bleue.svg',
-    iconType: 'svg'
+    iconType: 'svg',
   },
-  { 
-    value: 'Chèque', 
-    label: 'Chèque unique', 
+  {
+    value: 'Chèque',
+    label: 'Chèque unique',
     icon: '/payment-icons/cheque.svg',
-    iconType: 'svg'
+    iconType: 'svg',
   },
-  { 
-    value: 'Chèque au comptant', 
-    label: 'Chèque au comptant', 
+  {
+    value: 'Chèque au comptant',
+    label: 'Chèque au comptant',
     icon: '/payment-icons/cheque.svg',
-    iconType: 'svg'
+    iconType: 'svg',
   },
-  { 
-    value: 'Acompte', 
-    label: 'Alma', 
+  {
+    value: 'Acompte',
+    label: 'Alma',
     icon: '/Alma_orange.png',
-    iconType: 'png'
+    iconType: 'png',
   },
 ];
 
@@ -120,38 +120,36 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
     1,
     10
   );
-  
+
   // Variables pour Alma (paiement en plusieurs fois)
-  const nombreFoisAlma = clamp(
-    safeNumber(paiement.nombreFoisAlma || 3),
-    2,
-    4
-  );
-  
+  const nombreFoisAlma = clamp(safeNumber(paiement.nombreFoisAlma || 3), 2, 4);
+
   // 🎯 NOUVELLE LOGIQUE : Chèques ronds + acompte ajusté (minimum 10%)
   // 1. Calculer le montant ROND par chèque sur le total TTC
-  const montantChequeRond = nombreCheques > 0 ? Math.round(totalTTC / nombreCheques) : 0;
-  
+  const montantChequeRond =
+    nombreCheques > 0 ? Math.round(totalTTC / nombreCheques) : 0;
+
   // 2. Calculer l'acompte automatiquement pour que le total soit exact
   const totalChequesCalcule = montantChequeRond * nombreCheques;
   const acompteCalculeBrut = totalTTC - totalChequesCalcule;
-  
+
   // 3. ⚠️ RÈGLE IMPORTANTE : Acompte minimum 10% du total TTC
-  const acompteMinimum = totalTTC * 0.10;
+  const acompteMinimum = totalTTC * 0.1;
   const acompteAjuste = Math.max(acompteCalculeBrut, acompteMinimum);
-  
+
   // 4. Recalculer le montant par chèque si l'acompte a été ajusté
   const montantRestantApresCetAcompte = totalTTC - acompteAjuste;
-  const montantChequeDefinitif = nombreCheques > 0 
-    ? Math.round(montantRestantApresCetAcompte / nombreCheques) 
-    : montantChequeRond;
-  
+  const montantChequeDefinitif =
+    nombreCheques > 0
+      ? Math.round(montantRestantApresCetAcompte / nombreCheques)
+      : montantChequeRond;
+
   // 5. Utiliser le montant définitif pour l'affichage
   const montantParCheque =
-    nombreCheques > 0 
+    nombreCheques > 0
       ? paiement.method === 'Chèque à venir'
         ? montantChequeDefinitif // ✨ Montant ROND avec acompte 10% minimum
-        : remainingAmount / nombreCheques 
+        : remainingAmount / nombreCheques
       : 0;
 
   // Calcul pour Alma (division du total par le nombre de fois)
@@ -191,21 +189,21 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
 
   const handleNombreChequesChange = (nombre: number) => {
     const nouveauNombre = clamp(safeNumber(nombre), 1, 10);
-    
+
     // 🎯 NOUVEAU : Calcul automatique de l'acompte avec minimum 10%
     if (paiement.method === 'Chèque à venir') {
       const montantRondParCheque = Math.round(totalTTC / nouveauNombre);
       const totalDesChequesRonds = montantRondParCheque * nouveauNombre;
       const acompteCalculeBrut = totalTTC - totalDesChequesRonds;
-      
+
       // Règle des 10% minimum
-      const acompteMinimum = totalTTC * 0.10;
+      const acompteMinimum = totalTTC * 0.1;
       const acompteDefinitif = Math.max(acompteCalculeBrut, acompteMinimum);
-      
+
       // Mettre à jour le nombre de chèques ET l'acompte en une fois
-      updatePaiement({ 
+      updatePaiement({
         nombreChequesAVenir: nouveauNombre,
-        depositAmount: acompteDefinitif
+        depositAmount: acompteDefinitif,
       });
     } else {
       updatePaiement({ nombreChequesAVenir: nouveauNombre });
@@ -334,17 +332,20 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                         updatePaiement({ method: method.value });
                         // Si Alma est sélectionnée, définir automatiquement le mode de règlement sur Carte Bleue
                         if (method.value === 'Acompte') {
-                          updatePaiement({ depositPaymentMethod: 'Carte Bleue' });
+                          updatePaiement({
+                            depositPaymentMethod: 'Carte Bleue',
+                          });
                         }
                       }}
                       className={`${base}${priority}${state}`}
                     >
                       <div className='mb-2 flex justify-center'>
-                        {method.iconType === 'svg' || method.iconType === 'png' ? (
-                          <img 
-                            src={method.icon} 
-                            alt={method.label} 
-                            className="h-12 w-auto" 
+                        {method.iconType === 'svg' ||
+                        method.iconType === 'png' ? (
+                          <img
+                            src={method.icon}
+                            alt={method.label}
+                            className='h-12 w-auto'
                           />
                         ) : (
                           <div className='text-3xl'>{method.icon}</div>
@@ -572,16 +573,36 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                       Calcul automatique (chèques ronds)
                     </h4>
                     <div className='text-sm text-green-700 space-y-1'>
-                      <div><strong>Total TTC :</strong> {formatEUR(totalTTC)}</div>
-                      <div><strong>Nombre de chèques :</strong> {nombreCheques}</div>
-                      <div><strong>Acompte minimum (10%) :</strong> {formatEUR(acompteMinimum)}</div>
-                      <div><strong>Acompte calculé :</strong> {formatEUR(acompteCalculeBrut)}</div>
-                      <div className={`font-bold ${acompteAjuste >= acompteMinimum ? 'text-green-800' : 'text-orange-600'}`}>
-                        <strong>Acompte final :</strong> {formatEUR(acompteAjuste)}
-                        {acompteAjuste > acompteCalculeBrut && ' (ajusté à 10% minimum)'}
+                      <div>
+                        <strong>Total TTC :</strong> {formatEUR(totalTTC)}
                       </div>
-                      <div><strong>Montant par chèque (rond) :</strong> {formatEUR(montantChequeDefinitif)}</div>
-                      <div><strong>Total des chèques :</strong> {formatEUR(montantChequeDefinitif * nombreCheques)}</div>
+                      <div>
+                        <strong>Nombre de chèques :</strong> {nombreCheques}
+                      </div>
+                      <div>
+                        <strong>Acompte minimum (10%) :</strong>{' '}
+                        {formatEUR(acompteMinimum)}
+                      </div>
+                      <div>
+                        <strong>Acompte calculé :</strong>{' '}
+                        {formatEUR(acompteCalculeBrut)}
+                      </div>
+                      <div
+                        className={`font-bold ${acompteAjuste >= acompteMinimum ? 'text-green-800' : 'text-orange-600'}`}
+                      >
+                        <strong>Acompte final :</strong>{' '}
+                        {formatEUR(acompteAjuste)}
+                        {acompteAjuste > acompteCalculeBrut &&
+                          ' (ajusté à 10% minimum)'}
+                      </div>
+                      <div>
+                        <strong>Montant par chèque (rond) :</strong>{' '}
+                        {formatEUR(montantChequeDefinitif)}
+                      </div>
+                      <div>
+                        <strong>Total des chèques :</strong>{' '}
+                        {formatEUR(montantChequeDefinitif * nombreCheques)}
+                      </div>
                     </div>
                     {acompteAjuste >= 0 && (
                       <button
@@ -733,10 +754,10 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
             {paiement.method === 'Acompte' && (
               <section className='bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl shadow-xl p-6 border-2 border-orange-300'>
                 <h3 className='text-xl font-semibold text-orange-800 mb-6 flex items-center'>
-                  <img 
-                    src="/Alma_orange.png" 
-                    alt="Alma" 
-                    className="h-8 w-auto mr-3" 
+                  <img
+                    src='/Alma_orange.png'
+                    alt='Alma'
+                    className='h-8 w-auto mr-3'
                   />
                   Paiement Alma en plusieurs fois
                 </h3>
@@ -758,12 +779,20 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                             : 'border-orange-200 text-orange-600 hover:border-orange-400 hover:bg-orange-50'
                         }`}
                       >
-                        <div className="text-2xl font-bold">{n}x</div>
-                        <div className="text-sm">{n === 2 ? 'En 2 fois' : n === 3 ? 'En 3 fois' : 'En 4 fois'}</div>
-                        <div className="text-lg font-bold text-green-600">
+                        <div className='text-2xl font-bold'>{n}x</div>
+                        <div className='text-sm'>
+                          {n === 2
+                            ? 'En 2 fois'
+                            : n === 3
+                              ? 'En 3 fois'
+                              : 'En 4 fois'}
+                        </div>
+                        <div className='text-lg font-bold text-green-600'>
                           {formatEUR(totalTTC / n)}
                         </div>
-                        <div className="text-xs text-gray-600">par versement</div>
+                        <div className='text-xs text-gray-600'>
+                          par versement
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -782,25 +811,35 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                         <div
                           key={index}
                           className={`p-4 rounded-lg border ${
-                            index === 0 
-                              ? 'bg-green-100 border-green-300' 
+                            index === 0
+                              ? 'bg-green-100 border-green-300'
                               : 'bg-orange-100 border-orange-300'
                           }`}
                         >
-                          <div className={`text-sm font-semibold ${
-                            index === 0 ? 'text-green-700' : 'text-orange-700'
-                          }`}>
-                            {index === 0 ? 'Aujourd\'hui' : `Dans ${index * 30} jours`}
+                          <div
+                            className={`text-sm font-semibold ${
+                              index === 0 ? 'text-green-700' : 'text-orange-700'
+                            }`}
+                          >
+                            {index === 0
+                              ? "Aujourd'hui"
+                              : `Dans ${index * 30} jours`}
                           </div>
-                          <div className={`text-xl font-bold ${
-                            index === 0 ? 'text-green-800' : 'text-orange-800'
-                          }`}>
+                          <div
+                            className={`text-xl font-bold ${
+                              index === 0 ? 'text-green-800' : 'text-orange-800'
+                            }`}
+                          >
                             {formatEUR(montantParFoisAlma)}
                           </div>
-                          <div className={`text-xs ${
-                            index === 0 ? 'text-green-600' : 'text-orange-600'
-                          }`}>
-                            {index === 0 ? 'À la commande' : `Versement ${index + 1}`}
+                          <div
+                            className={`text-xs ${
+                              index === 0 ? 'text-green-600' : 'text-orange-600'
+                            }`}
+                          >
+                            {index === 0
+                              ? 'À la commande'
+                              : `Versement ${index + 1}`}
                           </div>
                         </div>
                       ))}
@@ -825,15 +864,15 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
                           </div>
                         </div>
                         <div>
-                          <div className='text-sm text-orange-600'>
-                            Total
-                          </div>
+                          <div className='text-sm text-orange-600'>Total</div>
                           <div className='text-lg font-bold text-orange-800'>
                             {formatEUR(totalTTC)}
                           </div>
                         </div>
                         <div>
-                          <div className='text-sm text-orange-600'>Durée max</div>
+                          <div className='text-sm text-orange-600'>
+                            Durée max
+                          </div>
                           <div className='text-lg font-bold text-orange-800'>
                             {nombreFoisAlma * 30} jours
                           </div>
@@ -843,13 +882,16 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
 
                     <div className='mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200'>
                       <div className='text-sm text-blue-700'>
-                        ✅ <strong>Avantage Alma :</strong> paiement sécurisé • frais transparents • validation instantanée
+                        ✅ <strong>Avantage Alma :</strong> paiement sécurisé •
+                        frais transparents • validation instantanée
                       </div>
                     </div>
 
                     <div className='mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200'>
                       <div className='text-sm text-yellow-700'>
-                        ℹ️ <strong>Information :</strong> Le premier versement est prélevé immédiatement, les suivants à intervalles de 30 jours.
+                        ℹ️ <strong>Information :</strong> Le premier versement
+                        est prélevé immédiatement, les suivants à intervalles de
+                        30 jours.
                       </div>
                     </div>
                   </div>
@@ -871,26 +913,26 @@ export default function StepPaiement({ onNext, onPrev, onQuit }: StepProps) {
             </section>
 
             {/* Navigation - format ultra-compact harmonisé */}
-            <div className="flex gap-2 justify-center">
-              <button 
-                onClick={onPrev} 
-                className="px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all min-h-[40px]"
+            <div className='flex gap-2 justify-center'>
+              <button
+                onClick={onPrev}
+                className='px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all min-h-[40px]'
               >
                 ← Produits
               </button>
-              
+
               {isValid ? (
-                <button 
-                  onClick={validateAndNext} 
-                  className="px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg"
+                <button
+                  onClick={validateAndNext}
+                  className='px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg'
                 >
                   Continuer vers Livraison →
                 </button>
               ) : (
-                <button 
+                <button
                   disabled
-                  className="px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-coral text-white cursor-not-allowed opacity-70"
-                  title="Veuillez sélectionner un mode de règlement pour continuer"
+                  className='px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] bg-myconfort-coral text-white cursor-not-allowed opacity-70'
+                  title='Veuillez sélectionner un mode de règlement pour continuer'
                 >
                   ⚠️ Mode de règlement requis
                 </button>

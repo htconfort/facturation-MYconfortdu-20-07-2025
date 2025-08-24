@@ -2,7 +2,14 @@
 export * from './index';
 
 // Types spécifiques aux .cursorrules
-export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap';
+export type WizardStep =
+  | 'facture'
+  | 'client'
+  | 'produits'
+  | 'paiement'
+  | 'livraison'
+  | 'signature'
+  | 'recap';
 
 export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
 

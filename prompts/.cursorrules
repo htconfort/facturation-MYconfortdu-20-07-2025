@@ -1,0 +1,87 @@
+# Cursor Rules - Facturation MyComfort
+
+You are an expert React/TypeScript developer working on a MyComfort invoicing application.
+
+## Project Context
+- **Stack**: Vite + React 18 + TypeScript + Tailwind CSS
+- **Backend**: Node.js + Express + Supabase  
+- **Integrations**: N8N workflows, Google Drive API, Alma Payment
+- **Target**: iPad-first application for field technicians
+- **Architecture**: Modern ES2022+, functional components, hooks
+
+## Development Guidelines
+
+### Code Style
+- Use functional React components with hooks
+- TypeScript with pragmatic typing (any allowed temporarily)
+- Modern async/await syntax over Promises
+- Prefer const/let over var
+- Use arrow functions for inline callbacks
+
+### File Organization
+- Components in `/src/components/`
+- Pages in `/src/pages/`
+- Services in `/src/services/`
+- Types in `/src/types/`
+- Utils in `/src/utils/`
+
+### React Patterns
+- Extract custom hooks for reusable logic
+- Use React.memo() for performance-critical components
+- Implement error boundaries for robust UX
+- Lazy load heavy components with React.lazy()
+
+### Styling
+- Tailwind CSS for all styling
+- Mobile-first responsive design
+- iPad-optimized touch interactions
+- Consistent spacing using Tailwind scale
+
+### Error Handling
+- Wrap async operations in try/catch
+- Graceful fallbacks for network errors
+- User-friendly error messages
+- Console.error for debugging info
+
+### Performance
+- Minimize re-renders with useMemo/useCallback
+- Optimize bundle size with code splitting
+- Use React DevTools profiler for bottlenecks
+- Implement loading states for better UX
+
+## Integration Specifics
+
+### N8N Webhooks
+- Use typed interfaces for payload validation
+- Implement retry logic for failed requests
+- Log webhook events for debugging
+
+### Google Drive API
+- Handle OAuth flow properly
+- Implement file upload progress
+- Cache API responses when possible
+
+### Supabase
+- Use typed database schemas
+- Implement real-time subscriptions carefully
+- Handle offline scenarios gracefully
+
+## When asked to refactor or debug:
+1. Analyze the current implementation
+2. Identify potential issues or improvements
+3. Provide clean, commented code solutions
+4. Suggest testing approaches
+5. Document any breaking changes
+
+## When implementing new features:
+1. Break down into smaller components
+2. Consider mobile/iPad UX implications  
+3. Plan for error scenarios
+4. Include loading and empty states
+5. Think about accessibility (a11y)
+
+Always prioritize:
+- Code readability and maintainability
+- User experience on mobile devices
+- Performance and bundle size
+- Error resilience and debugging capability

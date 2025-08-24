@@ -9,6 +9,20 @@ node_modules/
 .pnp
 .pnp.js
 
+# Backup files with syntax errors
+*_Backup.tsx
+*Backup.tsx
+*.backup.tsx
+**/*backup*
+**/*Backup*
+
+# Backup files with syntax errors
+*.backup.tsx
+*_Backup.tsx
+*Backup.tsx
+**/*Backup*
+**/*backup*
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

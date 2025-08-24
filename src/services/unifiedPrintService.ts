@@ -851,12 +851,15 @@ export class UnifiedPrintService {
       // Total
       const totalHT = draft.produits.reduce(
         (sum: number, p: any) =>
-          sum + ((p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0) / 1.2),
+          sum +
+          ((p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0)) /
+            1.2,
         0
       );
       const totalTTC = draft.produits.reduce(
         (sum: number, p: any) =>
-          sum + ((p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0)),
+          sum +
+          (p.qty || p.quantite || 1) * (p.priceTTC || p.prixUnitaire || 0),
         0
       );
       const totalTVA = totalTTC - totalHT;
@@ -864,11 +867,19 @@ export class UnifiedPrintService {
       doc.setFontSize(10);
       doc.text(`Total HT: ${totalHT.toFixed(2)} €`, pageWidth - 200, yPosition);
       yPosition += 15;
-      doc.text(`TVA (20%): ${totalTVA.toFixed(2)} €`, pageWidth - 200, yPosition);
+      doc.text(
+        `TVA (20%): ${totalTVA.toFixed(2)} €`,
+        pageWidth - 200,
+        yPosition
+      );
       yPosition += 15;
       doc.setFontSize(12);
       doc.setTextColor(primaryColor);
-      doc.text(`Total TTC: ${totalTTC.toFixed(2)} €`, pageWidth - 200, yPosition);
+      doc.text(
+        `Total TTC: ${totalTTC.toFixed(2)} €`,
+        pageWidth - 200,
+        yPosition
+      );
       yPosition += 30;
     }
 
@@ -935,10 +946,7 @@ export class UnifiedPrintService {
             'FAST'
           );
         } catch (error) {
-          console.warn(
-            "Erreur lors de l'ajout de la signature client:",
-            error
-          );
+          console.warn("Erreur lors de l'ajout de la signature client:", error);
           doc.text(
             'Signature non disponible (format invalide)',
             margin,
@@ -1009,7 +1017,10 @@ export class UnifiedPrintService {
     try {
       const doc = await this.generateInvoicePdf(draft, opts);
       const blob = doc.output('blob');
-      saveAs(blob, filename || `facture_${draft?.invoiceNumber || 'sans_num'}.pdf`);
+      saveAs(
+        blob,
+        filename || `facture_${draft?.invoiceNumber || 'sans_num'}.pdf`
+      );
     } catch (error) {
       console.error("Erreur lors de l'export PDF:", error);
       throw new Error('Impossible de générer le PDF');

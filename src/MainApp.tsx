@@ -492,12 +492,10 @@ function MainApp() {
         throw new Error(result.message);
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erreur inconnue';
       console.error('❌ Erreur envoi PDF via N8N:', error);
-      showToast(
-        `❌ Erreur d'envoi N8N: ${errorMessage}`,
-        'error'
-      );
+      showToast(`❌ Erreur d'envoi N8N: ${errorMessage}`, 'error');
     }
   };
 

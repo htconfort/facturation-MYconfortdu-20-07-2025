@@ -29,55 +29,57 @@ export const SecondaryPageLayout: React.FC<SecondaryPageLayoutProps> = ({
   onBack,
   headerContent,
   className = '',
-  showBackButton = true
+  showBackButton = true,
 }) => {
   return (
-    <div className={`
+    <div
+      className={`
       fixed inset-0 z-50 bg-white
       flex flex-col
       animate-slide-in-right
       ${className}
-    `}>
+    `}
+    >
       {/* Header with back button */}
-      <header className="
+      <header
+        className='
         flex items-center justify-between gap-4
         px-6 py-4 min-h-[80px]
         bg-white border-b border-gray-200
         shadow-sm
-      ">
-        <div className="flex items-center gap-4">
+      '
+      >
+        <div className='flex items-center gap-4'>
           {showBackButton && (
-            <BackButton 
+            <BackButton
               label={backLabel}
               onBack={onBack}
-              className="flex-shrink-0"
+              className='flex-shrink-0'
             />
           )}
-          
-          <h1 className="
+
+          <h1
+            className='
             text-2xl font-bold text-myconfort-dark font-manrope
             truncate
-          ">
+          '
+          >
             {title}
           </h1>
         </div>
-        
-        {headerContent && (
-          <div className="flex-shrink-0">
-            {headerContent}
-          </div>
-        )}
+
+        {headerContent && <div className='flex-shrink-0'>{headerContent}</div>}
       </header>
 
       {/* Scrollable content area */}
-      <main className="
+      <main
+        className='
         flex-1 overflow-y-auto
         bg-myconfort-cream
         p-6
-      ">
-        <div className="max-w-4xl mx-auto">
-          {children}
-        </div>
+      '
+      >
+        <div className='max-w-4xl mx-auto'>{children}</div>
       </main>
     </div>
   );

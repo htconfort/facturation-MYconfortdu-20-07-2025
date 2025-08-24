@@ -5,6 +5,7 @@ import WizardPage from './pages/WizardPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import WizardDemo from './pages/WizardDemo';
+import DebugFooter from './pages/DebugFooter';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path='/wizard-demo' element={<WizardDemo />} />
         <Route path='/payment/success' element={<PaymentSuccess />} />
         <Route path='/payment/cancel' element={<PaymentCancel />} />
+        <Route path='/debug-footer' element={<DebugFooter />} />
       </Routes>
     </BrowserRouter>
   );

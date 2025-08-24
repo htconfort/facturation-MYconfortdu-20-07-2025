@@ -150,7 +150,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
       </div>
 
       {/* 🎯 Boutons navigation */}
-      <div className="flex justify-center gap-4 mt-6 mb-4">
+      <div className='flex justify-center gap-4 mt-6 mb-4'>
         <button
           onClick={onQuit}
           className='px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg'

@@ -36,7 +36,7 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
   penColor = '#14281D', // myconfort-dark
   readOnly = false,
   className = '',
-  label = 'Zone de signature'
+  label = 'Zone de signature',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
@@ -48,14 +48,14 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    
+
     // Set canvas size with device pixel ratio for crisp lines
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = width * ratio;
     canvas.height = height * ratio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    
+
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.scale(ratio, ratio);
@@ -83,7 +83,7 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
     const handleChange = () => {
       const isEmpty = signaturePad.isEmpty();
       setIsEmpty(isEmpty);
-      
+
       if (onSignatureChange) {
         onSignatureChange(isEmpty ? null : signaturePad.toDataURL('image/png'));
       }
@@ -110,7 +110,15 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       signaturePad.removeEventListener('endStroke', handleChange);
       signaturePad.off();
     };
-  }, [width, height, backgroundColor, penColor, readOnly, onSignatureChange, initialSignature]);
+  }, [
+    width,
+    height,
+    backgroundColor,
+    penColor,
+    readOnly,
+    onSignatureChange,
+    initialSignature,
+  ]);
 
   const handleClear = () => {
     if (signaturePadRef.current) {
@@ -126,10 +134,12 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       if (data.length > 0) {
         data.pop(); // Remove last stroke
         signaturePadRef.current.fromData(data);
-        
+
         const isEmpty = signaturePadRef.current.isEmpty();
         setIsEmpty(isEmpty);
-        onSignatureChange?.(isEmpty ? null : signaturePadRef.current.toDataURL('image/png'));
+        onSignatureChange?.(
+          isEmpty ? null : signaturePadRef.current.toDataURL('image/png')
+        );
       }
     }
   };
@@ -149,20 +159,20 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       return {
         dataURL: signaturePadRef.current.toDataURL('image/png'),
         isEmpty: false,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
     return {
       dataURL: null,
       isEmpty: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   };
 
   return (
     <div className={`signature-canvas-container ${className}`}>
       {/* Canvas container with border */}
-      <div className="relative">
+      <div className='relative'>
         <canvas
           ref={canvasRef}
           className={`
@@ -172,24 +182,24 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
             ${!isSignaturePadReady ? 'opacity-50' : ''}
           `}
           aria-label={label}
-          role="img"
+          role='img'
           tabIndex={readOnly ? -1 : 0}
         />
-        
+
         {/* Overlay message when empty */}
         {isEmpty && !readOnly && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-gray-400 text-lg font-manrope text-center">
-              <div className="mb-2">✍️</div>
+          <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+            <div className='text-gray-400 text-lg font-manrope text-center'>
+              <div className='mb-2'>✍️</div>
               <div>Signez dans cette zone</div>
-              <div className="text-sm mt-1">Compatible avec Apple Pencil</div>
+              <div className='text-sm mt-1'>Compatible avec Apple Pencil</div>
             </div>
           </div>
         )}
 
         {/* Read-only indicator */}
         {readOnly && !isEmpty && (
-          <div className="absolute top-2 right-2 bg-myconfort-blue text-white px-2 py-1 rounded text-sm">
+          <div className='absolute top-2 right-2 bg-myconfort-blue text-white px-2 py-1 rounded text-sm'>
             Signature enregistrée
           </div>
         )}
@@ -197,8 +207,8 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
 
       {/* Action buttons - only show if not read-only */}
       {!readOnly && (
-        <div className="flex items-center justify-between mt-4 gap-3">
-          <div className="flex gap-3">
+        <div className='flex items-center justify-between mt-4 gap-3'>
+          <div className='flex gap-3'>
             {/* Clear button */}
             <button
               onClick={handleClear}
@@ -208,12 +218,13 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
                 rounded-lg font-medium font-manrope
                 transition-colors duration-150
                 touch-manipulation
-                ${isEmpty 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-myconfort-coral text-white hover:bg-red-600 active:bg-red-700'
+                ${
+                  isEmpty
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-myconfort-coral text-white hover:bg-red-600 active:bg-red-700'
                 }
               `}
-              aria-label="Effacer la signature"
+              aria-label='Effacer la signature'
             >
               <Trash2 size={20} />
               <span>Effacer</span>
@@ -228,19 +239,20 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
                 rounded-lg font-medium font-manrope
                 transition-colors duration-150
                 touch-manipulation
-                ${isEmpty 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-gray-200 text-myconfort-dark hover:bg-gray-300 active:bg-gray-400'
+                ${
+                  isEmpty
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-myconfort-dark hover:bg-gray-300 active:bg-gray-400'
                 }
               `}
-              aria-label="Annuler le dernier trait"
+              aria-label='Annuler le dernier trait'
             >
               <RotateCcw size={20} />
               <span>Annuler</span>
             </button>
           </div>
 
-          <div className="flex gap-3">
+          <div className='flex gap-3'>
             {/* Download button */}
             <button
               onClick={handleDownload}
@@ -250,26 +262,30 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
                 rounded-lg font-medium font-manrope
                 transition-colors duration-150
                 touch-manipulation
-                ${isEmpty 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-myconfort-blue text-white hover:bg-blue-600 active:bg-blue-700'
+                ${
+                  isEmpty
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-myconfort-blue text-white hover:bg-blue-600 active:bg-blue-700'
                 }
               `}
-              aria-label="Télécharger la signature"
+              aria-label='Télécharger la signature'
             >
               <Download size={20} />
               <span>Télécharger</span>
             </button>
 
             {/* Status indicator */}
-            <div className={`
+            <div
+              className={`
               flex items-center gap-2 px-4 py-3 min-h-[56px]
               rounded-lg font-medium font-manrope
-              ${isEmpty 
-                ? 'bg-gray-100 text-gray-500' 
-                : 'bg-myconfort-green text-white'
+              ${
+                isEmpty
+                  ? 'bg-gray-100 text-gray-500'
+                  : 'bg-myconfort-green text-white'
               }
-            `}>
+            `}
+            >
               <Check size={20} />
               <span>{isEmpty ? 'En attente' : 'Signée'}</span>
             </div>

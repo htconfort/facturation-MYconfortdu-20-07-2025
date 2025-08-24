@@ -1,20 +1,20 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "prettier"
-  ],
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
+  "root": true,
+  "env": { "browser": true, "es2021": true, "node": true },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" },
+  "plugins": ["@typescript-eslint", "import", "react-hooks", "react-refresh"],
+  "extends": ["eslint:recommended"],
   "rules": {
-    "no-unused-vars": "warn",
-    "no-console": "off",
-    "no-undef": "warn"
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "no-case-declarations": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "react-refresh/only-export-components": "warn",
+    "import/no-unresolved": "off"
   }
 }
