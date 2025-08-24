@@ -305,10 +305,10 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
           className={`px-8 py-4 rounded-lg text-lg font-medium font-manrope text-white transition-all min-h-[56px] ${
             allFieldsValid
               ? 'bg-myconfort-green hover:bg-myconfort-green/90 shadow-lg'
-              : 'bg-myconfort-coral hover:bg-myconfort-coral/90'
+              : 'bg-red-500 hover:bg-red-600 cursor-not-allowed opacity-90'
           }`}
         >
-          Suivant →
+          {allFieldsValid ? 'Suivant →' : 'Complétez les champs obligatoires'}
         </button>
       </div>
     </div>

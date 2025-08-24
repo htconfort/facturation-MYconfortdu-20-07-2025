@@ -77,61 +77,61 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
 
           <div className="grid grid-cols-1 gap-4">
             
-            {/* Livraison standard */}
+            {/* Livraison Colissimo */}
             <button
-              onClick={() => updateLivraison({ deliveryMethod: 'Livraison standard' })}
+              onClick={() => updateLivraison({ deliveryMethod: 'Livraison Colissimo' })}
               className={`p-4 rounded-xl border-2 transition-all text-left ${
-                livraison.deliveryMethod === 'Livraison standard'
+                livraison.deliveryMethod === 'Livraison Colissimo'
                   ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
                   : 'border-gray-300 bg-white hover:border-myconfort-green/50'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-myconfort-dark">🚛 Livraison standard</div>
-                  <div className="text-sm text-gray-600">Livraison à l'adresse du client</div>
+                  <div className="font-semibold text-myconfort-dark">� Livraison Colissimo</div>
+                  <div className="text-sm text-gray-600">48 heures • Poids inférieur à 5 kg</div>
                 </div>
-                {livraison.deliveryMethod === 'Livraison standard' && (
+                {livraison.deliveryMethod === 'Livraison Colissimo' && (
                   <div className="text-myconfort-green text-xl">✓</div>
                 )}
               </div>
             </button>
 
-            {/* Livraison express */}
+            {/* Livraison par transporteur France Express */}
             <button
-              onClick={() => updateLivraison({ deliveryMethod: 'Livraison express' })}
+              onClick={() => updateLivraison({ deliveryMethod: 'Livraison France Express' })}
               className={`p-4 rounded-xl border-2 transition-all text-left ${
-                livraison.deliveryMethod === 'Livraison express'
+                livraison.deliveryMethod === 'Livraison France Express'
                   ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
                   : 'border-gray-300 bg-white hover:border-myconfort-green/50'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-myconfort-dark">⚡ Livraison express</div>
-                  <div className="text-sm text-gray-600">Livraison sous 24-48h</div>
+                  <div className="font-semibold text-myconfort-dark">⚡ Livraison par transporteur France Express</div>
+                  <div className="text-sm text-gray-600">Date à définir dans les détails du planning</div>
                 </div>
-                {livraison.deliveryMethod === 'Livraison express' && (
+                {livraison.deliveryMethod === 'Livraison France Express' && (
                   <div className="text-myconfort-green text-xl">✓</div>
                 )}
               </div>
             </button>
 
-            {/* Retrait en magasin */}
+            {/* Retrait sur stand */}
             <button
-              onClick={() => updateLivraison({ deliveryMethod: 'Retrait en magasin' })}
+              onClick={() => updateLivraison({ deliveryMethod: 'Retrait sur stand' })}
               className={`p-4 rounded-xl border-2 transition-all text-left ${
-                livraison.deliveryMethod === 'Retrait en magasin'
+                livraison.deliveryMethod === 'Retrait sur stand'
                   ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
                   : 'border-gray-300 bg-white hover:border-myconfort-green/50'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-myconfort-dark">🏪 Retrait en magasin</div>
-                  <div className="text-sm text-gray-600">Client vient récupérer</div>
+                  <div className="font-semibold text-myconfort-dark">🏪 Retrait sur stand</div>
+                  <div className="text-sm text-gray-600">À la fin de l'événement</div>
                 </div>
-                {livraison.deliveryMethod === 'Retrait en magasin' && (
+                {livraison.deliveryMethod === 'Retrait sur stand' && (
                   <div className="text-myconfort-green text-xl">✓</div>
                 )}
               </div>
@@ -139,8 +139,8 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           </div>
         </div>
 
-        {/* Bouton vers les détails */}
-        <div className="flex justify-center mt-6">
+        {/* Boutons d'action alignés */}
+        <div className="flex justify-between items-center mt-6">
           <button
             onClick={() => setShowDetailsPage(true)}
             className="px-6 py-3 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 
@@ -149,11 +149,24 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           >
             📋 Voir détails produits + adresse + planning
           </button>
+
+          <button
+            onClick={isValid ? onNext : undefined}
+            disabled={!isValid}
+            className={`px-8 py-3 font-bold rounded-xl text-lg transition-all transform 
+                        shadow-lg ${
+              !isValid
+                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+                : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
+            }`}
+          >
+            {!isValid ? 'Sélectionnez un mode de livraison' : 'Suivant →'}
+          </button>
         </div>
       </div>
 
-      {/* 🎯 Navigation fixe */}
-      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-between items-center">
+      {/* 🎯 Navigation simplifiée - seulement bouton Précédent */}
+      <div className="px-6 py-4 border-t border-myconfort-dark/10 flex justify-start items-center">
         <button
           onClick={onPrev}
           className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
@@ -161,19 +174,6 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
                      min-h-[56px]"
         >
           ← Précédent
-        </button>
-
-        <button
-          onClick={isValid ? onNext : undefined}
-          disabled={!isValid}
-          className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
-                      shadow-lg min-h-[56px] ${
-            !isValid
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
-              : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
-          }`}
-        >
-          Suivant →
         </button>
       </div>
     </div>

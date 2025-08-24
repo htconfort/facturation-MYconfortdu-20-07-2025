@@ -131,11 +131,11 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
           className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
                       shadow-lg min-h-[56px] ${
             !isValid
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
           }`}
         >
-          Suivant →
+          {!isValid ? 'Signez et acceptez les conditions' : 'Suivant →'}
         </button>
       </div>
     </div>
@@ -282,11 +282,11 @@ function TermsAndConditionsPage({
             className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
                         shadow-lg min-h-[56px] ${
               !termsAccepted
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
                 : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
             }`}
           >
-            Accepter et continuer →
+            {!termsAccepted ? 'Cochez pour accepter les conditions' : 'Accepter et continuer →'}
           </button>
         </div>
       </div>

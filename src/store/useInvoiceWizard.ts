@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { calculateProductTotal } from '../utils/calculations';
 
-export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap';
+export type WizardStep = 'facture' | 'client' | 'produits' | 'paiement' | 'livraison' | 'signature' | 'recap' | 'nouvelles-commandes';
 
 interface ClientData {
   name: string;
@@ -28,7 +28,7 @@ interface Produit {
 }
 
 interface PaymentData {
-  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèque au comptant' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | '';
+  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque' | 'Chèque au comptant' | 'Chèques (3 fois)' | 'Chèque à venir' | 'Acompte' | 'Alma 2x' | 'Alma 3x' | 'Alma 4x' | '';
   depositRate?: number; // %
   depositAmount?: number;
   depositPaymentMethod?: 'Carte Bleue' | 'Espèces' | 'Chèque' | ''; // Mode de règlement de l'acompte
@@ -139,7 +139,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   completion: { completedStepIds: [] },
   
   // Navigation helpers
-  steps: ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap'],
+  steps: ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap', 'nouvelles-commandes'],
   
   getCurrentStepIndex: () => {
     const state = get();
@@ -315,7 +315,37 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         };
       }),
       
-      paymentMethod: state.paiement.method,
+      // 🎯 CORRECTION: Mode de règlement détaillé 
+      paymentMethod: (() => {
+        const method = state.paiement.method;
+        const depositAmount = state.paiement.depositAmount || 0;
+        const nombreCheques = state.paiement.nombreChequesAVenir || 0;
+        const totalTTC = state.produits.reduce((sum, p) => {
+          const totalTTCWithDiscount = calculateProductTotal(
+            p.qty,
+            p.priceTTC,
+            p.discount || 0,
+            p.discountType || 'percent'
+          );
+          return sum + totalTTCWithDiscount;
+        }, 0);
+        
+        if (method === 'Chèque à venir' && nombreCheques > 0) {
+          const montantParCheque = Math.round((totalTTC - depositAmount) / nombreCheques);
+          return `Chèque à venir (${nombreCheques} chèques de ${montantParCheque}€ + acompte ${depositAmount.toFixed(2)}€)`;
+        }
+        
+        if (method?.startsWith('Alma') && state.paiement.nombreFoisAlma) {
+          const montantParFois = Math.round((totalTTC - depositAmount) / state.paiement.nombreFoisAlma);
+          return `${method} (${state.paiement.nombreFoisAlma} fois de ${montantParFois}€ + acompte ${depositAmount.toFixed(2)}€)`;
+        }
+        
+        if (depositAmount > 0 && method !== 'Chèque à venir' && !method?.startsWith('Alma')) {
+          return `${method} (acompte ${depositAmount.toFixed(2)}€)`;
+        }
+        
+        return method || '';
+      })(),
       montantAcompte: state.paiement.depositAmount || 0,
       depositPaymentMethod: state.paiement.depositPaymentMethod || '',
       montantRestant: state.paiement.remainingAmount || 0,
@@ -324,6 +354,36 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       deliveryMethod: state.livraison.deliveryMethod || '',
       deliveryAddress: state.livraison.deliveryAddress || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
+      
+      // 🎯 CORRECTION: Calculs des totaux globaux manquants
+      montantTTC: state.produits.reduce((sum, p) => {
+        const totalTTCWithDiscount = calculateProductTotal(
+          p.qty,
+          p.priceTTC,
+          p.discount || 0,
+          p.discountType || 'percent'
+        );
+        return sum + totalTTCWithDiscount;
+      }, 0),
+      montantHT: state.produits.reduce((sum, p) => {
+        const totalTTCWithDiscount = calculateProductTotal(
+          p.qty,
+          p.priceTTC,
+          p.discount || 0,
+          p.discountType || 'percent'
+        );
+        return sum + (totalTTCWithDiscount / 1.2);
+      }, 0),
+      montantTVA: state.produits.reduce((sum, p) => {
+        const totalTTCWithDiscount = calculateProductTotal(
+          p.qty,
+          p.priceTTC,
+          p.discount || 0,
+          p.discountType || 'percent'
+        );
+        const ht = totalTTCWithDiscount / 1.2;
+        return sum + (totalTTCWithDiscount - ht);
+      }, 0),
       
       signature: state.signature.dataUrl || '',
       isSigned: !!state.signature.dataUrl,

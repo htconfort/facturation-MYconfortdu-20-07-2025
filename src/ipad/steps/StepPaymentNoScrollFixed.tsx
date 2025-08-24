@@ -39,7 +39,7 @@ export default function StepPaymentNoScrollFixed({ onNext, onPrev }: StepProps) 
       onBack={() => setShowAlmaPage(false)} 
       onSelect={(installments) => {
         updatePaiement({ 
-          method: 'Acompte', 
+          method: `Alma ${installments}x` as 'Alma 2x' | 'Alma 3x' | 'Alma 4x', // 🎯 CORRECTION: Utiliser la vraie méthode
           depositAmount: acompte, 
           nombreFoisAlma: installments,
           note: `Alma ${installments}x`
@@ -297,11 +297,11 @@ export default function StepPaymentNoScrollFixed({ onNext, onPrev }: StepProps) 
           className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
                       shadow-lg min-h-[56px] ${
             !isValidPayment
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
           }`}
         >
-          Suivant →
+          {!isValidPayment ? 'Sélectionnez un mode de paiement' : 'Suivant →'}
         </button>
       </div>
     </div>
@@ -604,11 +604,11 @@ function ChequesDetailsPage({
           className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
                       shadow-lg min-h-[56px] ${
             !isValid
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
           }`}
         >
-          Confirmer →
+          {!isValid ? 'Sélectionnez un nombre de chèques' : 'Confirmer →'}
         </button>
       </div>
     </div>

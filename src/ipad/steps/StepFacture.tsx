@@ -188,7 +188,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
           disabled={isLocationEmpty}
           className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform shadow-lg ${
             isLocationEmpty
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white hover:scale-105'
           }`}
         >

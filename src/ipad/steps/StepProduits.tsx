@@ -446,11 +446,11 @@ export default function StepProduits({
             disabled={!canProceed}
             className={`px-4 py-2 rounded-lg text-sm font-medium font-manrope transition-all min-h-[40px] ${
               !canProceed
-                ? 'bg-myconfort-coral text-white cursor-not-allowed opacity-70'
+                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
                 : 'bg-myconfort-green text-white hover:bg-myconfort-green/90 shadow-lg'
             }`}
           >
-            Continuer vers Paiement →
+            {!canProceed ? 'Ajoutez au moins un produit' : 'Continuer vers Paiement →'}
           </button>
         </div>
       </div>

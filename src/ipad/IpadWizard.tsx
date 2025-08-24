@@ -14,8 +14,9 @@ import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
 import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 // import StepRecap from './steps/StepRecap'; // remplacé par NoScroll
 import StepRecapNoScroll from './steps/StepRecapNoScroll';
+import StepNouvellesCommandes from './steps/StepNouvellesCommandes';
 
-const steps: WizardStep[] = ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap'];
+const steps: WizardStep[] = ['facture', 'client', 'produits', 'paiement', 'livraison', 'signature', 'recap', 'nouvelles-commandes'];
 
 export default function IpadWizard() {
   const navigate = useNavigate();
@@ -174,6 +175,7 @@ function WizardSurface({
       case 'livraison':
       case 'signature':
       case 'recap':
+      case 'nouvelles-commandes':
         // Ces steps n'ont pas de validation obligatoire
         break;
     }
@@ -209,6 +211,7 @@ function WizardSurface({
       case 'livraison': return <StepLivraisonNoScroll {...props} />;
       case 'signature': return <StepSignatureNoScroll {...props} />;
       case 'recap': return <StepRecapNoScroll {...props} />;
+      case 'nouvelles-commandes': return <StepNouvellesCommandes {...props} />;
       default: return <div>Étape inconnue</div>;
     }
   }, [step, onGo, onQuit, isFirstStep, isLastStep, validateAndGoNext]);
@@ -284,6 +287,7 @@ function labelFor(s: WizardStep): string {
     case 'livraison': return 'Livraison';
     case 'signature': return 'Signature';
     case 'recap': return 'Récap';
+    case 'nouvelles-commandes': return 'Nouvelles commandes';
     default: return 'Étape';
   }
 }
