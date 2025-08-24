@@ -1,0 +1,7 @@
+{
+  "extends": ["html-validate:standard"],
+  "rules": {
+    "no-dup-id": "error",
+    "wcag/h32": "error"
+  }
+}

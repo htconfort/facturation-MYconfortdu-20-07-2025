@@ -12,10 +12,12 @@
     "build:server": "cd server && npm run build",
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix",
+    "lint:js": "./node_modules/.bin/eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "./node_modules/.bin/tsc --noEmit",
     "typecheck": "./node_modules/.bin/tsc --noEmit",
     "format": "./node_modules/.bin/prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "./node_modules/.bin/prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "check:format": "./node_modules/.bin/prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "test": "vitest --config vitest.config.ts",
     "test:unit": "vitest --config vitest.config.ts",
     "test:e2e": "playwright test",
@@ -25,7 +27,9 @@
     "check-all": "npm run type-check && npm run format:check",
     "check-all-with-lint": "npm run type-check && npm run lint && npm run format:check",
     "setup": "npm install && cd server && npm install",
-    "start:prod": "npm run preview"
+    "start:prod": "npm run preview",
+    "lint:html": "htmlhint 'src/**/*.html' 'public/**/*.html'",
+    "validate:html": "html-validate 'src/**/*.html' 'public/**/*.html'"
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.0",

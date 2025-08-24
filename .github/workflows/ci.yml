@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install deps (clean)
+        run: npm ci
+
+      - name: Show environment
+        run: |
+          node -v
+          npm -v
+          npx vite --version || true
+
+      # Qualité (rapports stricts). Ajuste si besoin.
+      - name: Lint HTML
+        run: npm run lint:html
+
+      - name: Validate HTML
+        run: npm run validate:html
+
+      - name: Lint JS/TS
+        run: npm run lint:js
+
+      - name: Check formatting
+        run: npm run check:format
+
+      - name: Build (Vite)
+        run: npm run build
+
+      # Artefacts utiles (dist) quand c'est vert
+      - name: Upload build artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Logs de debug si échec
+      - name: Upload npm logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-logs
+          path: ~/.npm/_logs
