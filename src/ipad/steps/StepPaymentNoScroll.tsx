@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import AlmaLogo from '../../assets/images/Alma_orange.png';
-import FloatingFooter from '../../components/ui/FloatingFooter';
 
 interface StepProps {
   onNext: () => void;
@@ -29,9 +28,11 @@ interface PaymentData {
     | 'Alma 4x';
   depositAmount?: number;
   almaInstallments?: number; // 2,3,4
-  chequesCount?: number; // 2..10
-  chequeAmount?: number;
+  chequesCount?: number; // 2..10 (pour compatibilité locale)
+  chequeAmount?: number; // (pour compatibilité locale)
+  nombreChequesAVenir?: number; // nom utilisé par le store
   notes?: string;
+  note?: string; // nom utilisé par le store
 }
 
 export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
@@ -119,19 +120,19 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
         totalAmount={totalAmount}
         acompte={acompte}
         defaultCount={Math.min(
-          Math.max((paiement as PaymentData)?.chequesCount || 3, 2),
+          Math.max((paiement as PaymentData)?.nombreChequesAVenir || 3, 2),
           10
         )}
-        defaultNotes={(paiement as PaymentData)?.notes || ''}
+        defaultNotes={(paiement as PaymentData)?.note || ''}
         onBack={() => setShowChequesPage(false)}
         onComplete={data => {
           setSelectedMethod('Chèque à venir');
           savePayment({
             method: 'Chèque à venir',
             depositAmount: acompte,
-            chequesCount: data.count,
-            chequeAmount: data.amount,
-            notes: data.notes,
+            nombreChequesAVenir: data.count, // Utiliser le bon nom de propriété
+            // Stocker aussi les autres infos pour le PDF
+            note: data.notes,
           });
           setShowChequesPage(false);
         }}
@@ -287,19 +288,36 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             }
             emoji='📄'
             highlight='amber'
-            onClick={() => setShowChequesPage(true)}
+            onClick={() => {
+              // Toujours ouvrir la page de configuration des chèques
+              setShowChequesPage(true);
+            }}
           />
         </div>
       </div>
 
-      {/* FloatingFooter - Composant standardisé */}
-      <FloatingFooter
-        leftLabel='← Précédent'
-        onLeft={onPrev}
-        rightLabel='Suivant →'
-        onRight={isValidPayment ? onNext : () => {}}
-        rightDisabled={!isValidPayment}
-      />
+      {/* Boutons flottants légèrement descendus */}
+      <div className='absolute top-[60%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 z-50'>
+        <button
+          type='button'
+          onClick={onPrev}
+          className='bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg transition-all'
+        >
+          ← Précédent
+        </button>
+        <button
+          type='button'
+          onClick={isValidPayment ? onNext : () => {}}
+          disabled={!isValidPayment}
+          className={`px-6 py-3 rounded-xl text-lg font-bold shadow-lg transition-all ${
+            isValidPayment
+              ? 'bg-[#477A0C] hover:bg-[#5A8F0F] text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Suivant →
+        </button>
+      </div>
     </div>
   );
 }
@@ -412,7 +430,16 @@ function AlmaDetailsPage({
         </div>
       </div>
 
-      <FloatingFooter leftLabel='← Retour' onLeft={onBack} />
+      {/* Bouton de retour repositionné */}
+      <div className='absolute top-[60%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'>
+        <button
+          type='button'
+          onClick={onBack}
+          className='bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg transition-all'
+        >
+          ← Retour
+        </button>
+      </div>
     </div>
   );
 }
@@ -526,19 +553,32 @@ function ChequesDetailsPage({
         </div>
       </div>
 
-      {/* FloatingFooter pour page Chèques avec thème amber */}
-      <FloatingFooter
-        leftLabel='← Retour'
-        onLeft={onBack}
-        rightLabel='Confirmer →'
-        onRight={
-          isValid
-            ? () => onComplete({ count: chequeCount, amount: perCheque, notes })
-            : () => {}
-        }
-        rightDisabled={!isValid}
-        className='border-amber-500/30 bg-amber-50/95 supports-[backdrop-filter]:bg-amber-50/80'
-      />
+      {/* Boutons pour page Chèques - AU CENTRE pour repositionnement */}
+      <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 z-50'>
+        <button
+          type='button'
+          onClick={onBack}
+          className='bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg transition-all'
+        >
+          ← Retour
+        </button>
+        <button
+          type='button'
+          onClick={
+            isValid
+              ? () => onComplete({ count: chequeCount, amount: perCheque, notes })
+              : () => {}
+          }
+          disabled={!isValid}
+          className={`px-6 py-3 rounded-xl text-lg font-bold shadow-lg transition-all ${
+            isValid
+              ? 'bg-amber-500 hover:bg-amber-600 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Confirmer →
+        </button>
+      </div>
     </div>
   );
 }
