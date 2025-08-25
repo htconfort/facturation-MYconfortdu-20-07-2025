@@ -1,41 +1,36 @@
-[build]
-  # Installation propre + npx vite build pour forcer l'utilisation locale
-  command = "rm -rf node_modules package-lock.json && npm install && npx vite build"
-  publish = "dist"
+# netlify.toml
 
-# Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
+[build]
+  publish = "dist"
+  command = "npm run build"
+
 [[redirects]]
-  from = "/api/n8n/*"
-  to = "https://n8n.srv765811.hstgr.cloud/:splat"
+  from = "/n8n/*"
+  to = "https://n8n.mycomfort.fr/:splat"
   status = 200
   force = true
 
-# Configuration des redirections pour les SPA (Single Page Application)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Configuration des headers de sécurité
+# 1) Bloquer TOUS les Service Workers (hotfix immédiat)
 [[headers]]
   for = "/*"
   [headers.values]
+    Content-Security-Policy = "worker-src 'none';"
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Configuration spéciale pour les fichiers statiques
+# 2) Empêcher le cache de l'ancien SW fautif (cnm-sw.js)
 [[headers]]
-  for = "/assets/*"
+  for = "/cnm-sw.js"
   [headers.values]
-    Cache-Control = "public, immutable, max-age=31536000"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+    Pragma = "no-cache"
+    Expires = "0"
+    X-Robots-Tag = "noindex, nofollow"
 
-# Headers CORS pour le proxy N8N
+# 3) Cache optimal pour les assets JS
 [[headers]]
-  for = "/api/n8n/*"
+  for = "/*.js"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
-    Access-Control-Max-Age = "86400"
+    Cache-Control = "public, max-age=31536000, immutable"
