@@ -281,7 +281,9 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             active={selectedMethod === 'Chèque à venir'}
             title='Chèques à venir'
             subtitle={
-              selectedMethod === 'Chèque à venir'
+              selectedMethod === 'Chèque à venir' && paiement?.nombreChequesAVenir
+                ? `${paiement.nombreChequesAVenir} chèques × ${(restePay / (paiement.nombreChequesAVenir || 1)).toFixed(2)}€`
+                : selectedMethod === 'Chèque à venir'
                 ? 'Configuré ✓'
                 : 'Planifier →'
             }
