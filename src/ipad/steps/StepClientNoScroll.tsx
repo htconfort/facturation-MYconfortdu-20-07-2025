@@ -64,7 +64,11 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
   };
 
   return (
-    <div className='min-h-screen w-full bg-myconfort-cream'>
+    <div className='min-h-screen w-full bg-myconfort-cream' style={{
+      WebkitTouchCallout: 'none',
+      WebkitUserSelect: 'none',
+      userSelect: 'none'
+    }}>
       {/* Conteneur centré */}
       <div className='mx-auto w-full max-w-6xl px-4 pt-6 pb-6'>
         {/* Header */}
@@ -242,12 +246,23 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                   pattern='[0-9]*'
                   value={client.postalCode || ''}
                   onChange={e => updateField('postalCode', e.target.value)}
-                  onFocus={e => (e.target.style.fontSize = '16px')}
+                  onFocus={e => {
+                    e.target.style.fontSize = '16px';
+                    e.target.style.webkitUserSelect = 'text';
+                    e.target.style.userSelect = 'text';
+                  }}
+                  onTouchStart={e => e.preventDefault()}
                   className={`w-full px-3 py-2 text-base border-2 rounded-lg font-manrope transition-colors min-h-[40px] focus:outline-none ${
                     isFieldValid('postalCode')
                       ? 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                       : 'border-myconfort-coral bg-red-50 text-red-900'
                   }`}
+                  style={{ 
+                    WebkitAppearance: 'none',
+                    WebkitUserSelect: 'text',
+                    userSelect: 'text',
+                    touchAction: 'manipulation'
+                  }}
                   placeholder='75001'
                   required
                 />
@@ -267,11 +282,20 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                 <select
                   value={client.housingType || ''}
                   onChange={e => updateField('housingType', e.target.value)}
-                  className={`w-full px-3 py-2 text-base border-2 rounded-lg font-manrope transition-colors min-h-[40px] focus:outline-none ${
+                  onFocus={e => {
+                    e.target.style.fontSize = '16px';
+                    e.target.style.webkitUserSelect = 'none';
+                    e.target.style.userSelect = 'none';
+                  }}
+                  className={`w-full px-3 py-2 text-base border-2 rounded-lg font-manrope transition-colors min-h-[40px] focus:outline-none cursor-pointer ${
                     isFieldValid('housingType')
                       ? 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                       : 'border-myconfort-coral bg-red-50 text-red-900'
                   }`}
+                  style={{ 
+                    WebkitAppearance: 'none',
+                    touchAction: 'manipulation'
+                  }}
                   required
                 >
                   <option value=''>Sélectionner...</option>
@@ -301,6 +325,11 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                         : client.doorCode || ''
                     }
                     onChange={e => updateField('doorCode', e.target.value)}
+                    onFocus={e => {
+                      e.target.style.fontSize = '16px';
+                      e.target.style.webkitUserSelect = 'text';
+                      e.target.style.userSelect = 'text';
+                    }}
                     disabled={client.doorCode === 'Pas de digicode'}
                     className={`flex-1 px-3 py-2 text-base border-2 rounded-lg font-manrope transition-colors min-h-[40px] focus:outline-none ${
                       client.doorCode === 'Pas de digicode'
@@ -309,6 +338,12 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                           ? 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                           : 'border-myconfort-coral bg-red-50 text-red-900'
                     }`}
+                    style={{ 
+                      WebkitAppearance: 'none',
+                      WebkitUserSelect: client.doorCode === 'Pas de digicode' ? 'none' : 'text',
+                      userSelect: client.doorCode === 'Pas de digicode' ? 'none' : 'text',
+                      touchAction: 'manipulation'
+                    }}
                     placeholder='A1234B'
                   />
                   <button
@@ -321,11 +356,16 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                           : 'Pas de digicode'
                       )
                     }
-                    className={`px-3 py-2 text-base font-medium rounded-lg border-2 transition-colors min-h-[40px] ${
+                    className={`px-3 py-2 text-base font-medium rounded-lg border-2 transition-colors min-h-[40px] cursor-pointer select-none ${
                       client.doorCode === 'Pas de digicode'
                         ? 'bg-myconfort-coral text-white border-myconfort-coral'
                         : 'bg-gray-100 text-myconfort-dark border-gray-200 hover:bg-gray-200'
                     }`}
+                    style={{ 
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none',
+                      touchAction: 'manipulation'
+                    }}
                   >
                     {client.doorCode === 'Pas de digicode'
                       ? 'Annuler'
