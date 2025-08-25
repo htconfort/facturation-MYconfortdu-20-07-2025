@@ -6,7 +6,11 @@ export type WizardStep =
   | 'client'
   | 'produits'
   | 'paiement'
+<<<<<<< HEAD
   | 'paiement-clone'
+=======
+  | 'paiement-clone' // Ajout pour test clone
+>>>>>>> 31a86f1 (✨ Ajout bouton Suivant flottant étape Livraison iPad)
   | 'livraison'
   | 'signature'
   | 'recap'
