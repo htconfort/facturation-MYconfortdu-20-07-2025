@@ -1,7 +1,13 @@
 [build]
-  # Installation propre + npx vite build pour forcer l'utilisation locale
-  command = "rm -rf node_modules package-lock.json && npm install && npx vite build"
+  # Build optimisé pour déploiement automatique GitHub Actions
+  command = "npm ci && npm run build"
   publish = "dist"
+  
+  # Variables d'environnement pour le build
+  [build.environment]
+    NODE_VERSION = "20"
+    NPM_VERSION = "10"
+    NODE_ENV = "production"
 
 # Configuration pour les API externes (N8N proxy) - DOIT ÊTRE AVANT LA RÈGLE SPA
 [[redirects]]
@@ -24,6 +30,8 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Cache policy pour les assets
+    Cache-Control = "public, max-age=3600"
 
 # Configuration spéciale pour les fichiers statiques
 [[headers]]
@@ -39,3 +47,10 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
     Access-Control-Max-Age = "86400"
+
+# Configuration pour les deployments de branches
+[context.deploy-preview]
+  command = "npm ci && npm run build"
+  
+[context.branch-deploy]
+  command = "npm ci && npm run build"
