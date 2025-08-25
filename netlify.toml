@@ -1,6 +1,6 @@
 [build]
-  # Build optimisé pour déploiement automatique GitHub Actions
-  command = "npm ci && npm run build"
+  # Build robuste compatible avec ou sans package-lock.json
+  command = "if [ -f package-lock.json ]; then npm ci && npm run build; else npm install && npm run build; fi"
   publish = "dist"
   
   # Variables d'environnement pour le build

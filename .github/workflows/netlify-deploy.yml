@@ -26,13 +26,24 @@ jobs:
           node-version: '20'
           cache: 'npm'
           
-      - name: 🧹 Nettoyage cache
+      - name: 🧹 Nettoyage cache (si besoin)
         run: |
-          rm -rf node_modules package-lock.json dist .vite || true
-          npm cache clean --force
+          # Nettoyage seulement si pas de package-lock.json
+          if [ ! -f "package-lock.json" ]; then
+            echo "⚠️ package-lock.json manquant, génération..."
+            rm -rf node_modules package-lock.json || true
+            npm install
+          fi
           
       - name: 📚 Installation des dépendances
-        run: npm ci
+        run: |
+          if [ -f "package-lock.json" ]; then
+            echo "✅ Utilisation de npm ci (package-lock.json présent)"
+            npm ci
+          else
+            echo "⚠️ Fallback vers npm install (package-lock.json manquant)"
+            npm install
+          fi
         
       - name: 🔍 Vérification TypeScript
         run: npm run typecheck
