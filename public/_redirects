@@ -1,5 +1,9 @@
 # Redirection pour l'API N8N (DOIT ÊTRE AVANT LA RÈGLE SPA)
 /api/n8n/*  https://n8n.srv765811.hstgr.cloud/:splat  200
 
+# Empêche l'étape 0/8 et toute étape > 7
+/wizard/step/0   /wizard/step/7   301
+/wizard/step/8   /wizard/step/7   301
+
 # Redirection pour Single Page Application
 /*    /index.html   200

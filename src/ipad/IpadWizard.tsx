@@ -22,6 +22,7 @@ const steps: WizardStep[] = [
   'client',
   'produits',
   'paiement',
+  'paiement-clone',
   'livraison',
   'signature',
   'recap',
@@ -200,6 +201,7 @@ function WizardSurface({
         break;
 
       case 'paiement':
+      case 'paiement-clone':
         if (!paiement.method) {
           errorMessage = 'Veuillez sélectionner un mode de paiement';
           isValid = false;
@@ -260,6 +262,7 @@ function WizardSurface({
       case 'produits':
         return <StepProduits {...props} />;
       case 'paiement':
+      case 'paiement-clone':
         return <StepPaymentNoScroll {...props} />;
       case 'livraison':
         return <StepLivraisonNoScroll {...props} />;
@@ -346,6 +349,7 @@ function labelFor(s: WizardStep): string {
     case 'produits':
       return 'Produits';
     case 'paiement':
+    case 'paiement-clone':
       return 'Paiement';
     case 'livraison':
       return 'Livraison';

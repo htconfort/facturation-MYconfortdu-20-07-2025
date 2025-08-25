@@ -34,20 +34,25 @@ export default function StepRecapNoScroll({ onNext, onPrev }: StepProps) {
     livraison,
     invoiceNumber,
     invoiceDate,
-    syncToMainInvoice,
   } = useInvoiceWizard();
 
   const [showFullInvoice, setShowFullInvoice] = useState(false);
-  const [showProcessing, setShowProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
 
-  // Construction de l'objet Invoice depuis le store Zustand
-  const invoice: Invoice = useMemo(() => {
-    const baseInvoice = syncToMainInvoice();
-    return baseInvoice;
-  }, [syncToMainInvoice]);
+  // Vérifications de base pour éviter les erreurs
+  const safeClient = client || {};
+  const safeProduits = produits || [];
+  const safePaiement = paiement || {};
+  const safeLivraison = livraison || {};
+
+  console.log('StepRecapNoScroll rendu avec:', {
+    client: safeClient,
+    produits: safeProduits.length,
+    paiement: safePaiement,
+    livraison: safeLivraison
+  });
 
   // Système de notifications
   const addNotification = (

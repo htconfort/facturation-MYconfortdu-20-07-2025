@@ -69,7 +69,7 @@ export default function StepsNavigator({ children }: Props) {
         {/* Header dans le cadre iPad - ultra compact */}
         <header className='w-full px-3 py-1 flex items-center justify-between border-b border-myconfort-dark/10'>
           <h1 className='text-xs font-medium text-myconfort-dark'>
-            Wizard iPad — Étape {Math.min(currentStepIndex + 1, steps.length)}/
+            Wizard iPad — Étape {Math.min(Math.max(currentStepIndex + 1, 1), steps.length)}/
             {steps.length || 0}
           </h1>
 

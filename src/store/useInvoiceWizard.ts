@@ -6,6 +6,7 @@ export type WizardStep =
   | 'client'
   | 'produits'
   | 'paiement'
+  | 'paiement-clone'
   | 'livraison'
   | 'signature'
   | 'recap'
@@ -189,7 +190,8 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   goNext: () => {
     const state = get();
     const currentIndex = state.steps.indexOf(state.step);
-    const nextStep = state.steps[currentIndex + 1];
+    const nextIndex = Math.min(currentIndex + 1, state.steps.length - 1); // Clamp à la fin
+    const nextStep = state.steps[nextIndex];
     if (nextStep) {
       set({ step: nextStep });
     }
@@ -198,7 +200,8 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   goPrev: () => {
     const state = get();
     const currentIndex = state.steps.indexOf(state.step);
-    const prevStep = state.steps[currentIndex - 1];
+    const prevIndex = Math.max(currentIndex - 1, 0); // Clamp au début
+    const prevStep = state.steps[prevIndex];
     if (prevStep) {
       set({ step: prevStep });
     }
