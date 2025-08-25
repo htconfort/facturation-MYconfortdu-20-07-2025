@@ -307,10 +307,16 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
                       <span className="font-medium text-green-600">{paiement.depositAmount.toFixed(2)} €</span>
                     </div>
                   )}
-                  {paiement?.nombreChequesAVenir && (
+                  {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Chèques :</span>
-                      <span className="font-medium">{paiement.nombreChequesAVenir} × {(totals.reste / paiement.nombreChequesAVenir).toFixed(2)} €</span>
+                      <span className="text-gray-600">Chèques à venir :</span>
+                      <span className="font-medium">{paiement.nombreChequesAVenir} chèques de {(totals.reste / paiement.nombreChequesAVenir).toFixed(2)} €</span>
+                    </div>
+                  )}
+                  {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Montant total des chèques :</span>
+                      <span className="font-medium text-blue-600">{totals.reste.toFixed(2)} €</span>
                     </div>
                   )}
                 </div>
@@ -425,8 +431,18 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* Footer fixe avec les 3 boutons d'action MyConfort - Toujours visible */}
-      <div className="bg-[#F2EFE2] border-t border-[#477A0C]/20 shadow-lg p-4 flex-shrink-0">
+      {/* Footer vraiment fixe en bas de l'écran, toujours visible */}
+      <div
+        className="bg-[#F2EFE2] border-t border-[#477A0C]/20 shadow-lg p-4 flex-shrink-0"
+        style={{
+          position: 'fixed',
+          left: 0,
+          bottom: 0,
+          width: '100vw',
+          zIndex: 100,
+          boxShadow: '0 -2px 12px rgba(71,122,12,0.08)',
+        }}
+      >
         <div className="max-w-5xl mx-auto">
           
           {/* Message d'obligation si pas encore fait */}
@@ -519,9 +535,14 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               )}
             </div>
 
-            {/* Bouton Nouvelle commande - Disponible seulement si tout est fait */}
+            {/* Bouton Nouvelle commande - Redirige directement vers l'étape 1 */}
             <button
-              onClick={onNext}
+              onClick={() => {
+                if (isInvoiceSaved && isEmailSent) {
+                  // Réinitialise le wizard et va à l'étape 1
+                  window.location.href = '/ipad?step=facture';
+                }
+              }}
               disabled={!isInvoiceSaved || !isEmailSent}
               className={`rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[70px] ${
                 isInvoiceSaved && isEmailSent
@@ -529,7 +550,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              <span className="text-lg mb-1">�</span>
+              <span className="text-lg mb-1">🆕</span>
               <div className="text-center">
                 <div className="text-xs">Nouvelle</div>
                 <div className="text-xs opacity-80">Commande</div>
