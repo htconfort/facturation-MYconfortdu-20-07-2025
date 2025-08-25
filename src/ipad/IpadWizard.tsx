@@ -36,10 +36,16 @@ export default function IpadWizard() {
     'facture') as WizardStep;
   const setStep = useInvoiceWizard(s => s.setStep);
   const step = useInvoiceWizard(s => s.step);
+  const reset = useInvoiceWizard(s => s.reset);
 
   useEffect(() => {
     setStep(urlStep);
-  }, [urlStep, setStep]);
+    
+    // Si on accède directement à l'étape facture via URL, réinitialiser
+    if (urlStep === 'facture' && search.includes('step=facture')) {
+      reset();
+    }
+  }, [urlStep, setStep, reset, search]);
 
   // Détection orientation (iOS ne permet pas lock, on affiche un message si portrait)
   const [orientation, setOrientation] = useState(
@@ -106,6 +112,11 @@ export default function IpadWizard() {
               navigate(`/ipad?step=${next}`);
             }}
             onQuit={() => navigate('/')}
+            onReset={() => {
+              const state = useInvoiceWizard.getState();
+              state.reset();
+              navigate('/ipad?step=facture');
+            }}
           />
         </StepsNavigator>
       )}
@@ -132,6 +143,7 @@ function WizardSurface({
     client,
     produits,
     paiement,
+    reset,
   } = useInvoiceWizard();
 
   // Fonction de validation qui retourne le statut (pour les couleurs)
@@ -285,12 +297,24 @@ function WizardSurface({
           <div className='text-sm'>🌸</div>
           <span className='font-medium truncate'>{labelFor(step)}</span>
         </div>
-        <button
-          onClick={onQuit}
-          className='bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-xs transition-all'
-        >
-          Quitter
-        </button>
+        <div className='flex items-center gap-2'>
+          <button
+            onClick={() => {
+              reset();
+              window.location.href = '/ipad?step=facture';
+            }}
+            className='bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs font-medium transition-all'
+            title='Nouvelle facture - Remet tout à zéro'
+          >
+            🆕 Nouvelle facture
+          </button>
+          <button
+            onClick={onQuit}
+            className='bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-xs transition-all'
+          >
+            Quitter
+          </button>
+        </div>
       </div>
 
       {/* Contenu principal - utilise tout l'espace restant */}
