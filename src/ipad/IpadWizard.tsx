@@ -16,18 +16,12 @@ import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 // import StepRecapNoScroll from './steps/StepRecapNoScroll'; // Version avec bugs
 import StepRecapNoScrollFixed from './steps/StepRecapNoScrollFixed'; // 🔧 Version corrigée
 import StepNouvellesCommandes from './steps/StepNouvellesCommandes';
-import StepPaiementClone from './steps/StepPaiementClone';
 
 const steps: WizardStep[] = [
   'facture',
   'client',
   'produits',
   'paiement',
-<<<<<<< HEAD
-  'paiement-clone',
-=======
-  'paiement-clone', // Ajout clone pour test
->>>>>>> 31a86f1 (✨ Ajout bouton Suivant flottant étape Livraison iPad)
   'livraison',
   'signature',
   'recap',
@@ -206,7 +200,6 @@ function WizardSurface({
         break;
 
       case 'paiement':
-      case 'paiement-clone':
         if (!paiement.method) {
           errorMessage = 'Veuillez sélectionner un mode de paiement';
           isValid = false;
@@ -267,10 +260,7 @@ function WizardSurface({
       case 'produits':
         return <StepProduits {...props} />;
       case 'paiement':
-      case 'paiement-clone':
         return <StepPaymentNoScroll {...props} />;
-      case 'paiement-clone':
-        return <StepPaiementClone {...props} />;
       case 'livraison':
         return <StepLivraisonNoScroll {...props} />;
       case 'signature':
@@ -356,7 +346,6 @@ function labelFor(s: WizardStep): string {
     case 'produits':
       return 'Produits';
     case 'paiement':
-    case 'paiement-clone':
       return 'Paiement';
     case 'livraison':
       return 'Livraison';

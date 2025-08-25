@@ -27,7 +27,6 @@ export default function App() {
         <Routes>
           <Route path='/' element={<MainApp />} />
           <Route path='/wizard' element={<WizardPage />} />
-<<<<<<< HEAD
           <Route path='/wizard/:step' element={<WizardPage />} />
           {/* Empêche l'étape 0/8 et toute étape > 7 */}
           <Route path='/wizard/step/0' element={<Navigate to='/wizard/step/7' replace />} />
@@ -39,15 +38,6 @@ export default function App() {
           <Route path='/payment/cancel' element={<PaymentCancel />} />
           <Route path='/debug-footer' element={<DebugFooter />} />
         </Routes>
-=======
-        <Route path='/wizard/:step' element={<WizardPage />} />
-        <Route path='/ipad' element={<IpadWizard />} />
-        <Route path='/wizard-demo' element={<WizardDemo />} />
-        <Route path='/payment/success' element={<PaymentSuccess />} />
-        <Route path='/payment/cancel' element={<PaymentCancel />} />
-        <Route path='/debug-footer' element={<DebugFooter />} />
-      </Routes>
->>>>>>> 31a86f1 (✨ Ajout bouton Suivant flottant étape Livraison iPad)
     </BrowserRouter>
     </div>
   );
