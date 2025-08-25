@@ -14,7 +14,7 @@ import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
 import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 // import StepRecap from './steps/StepRecap'; // remplacé par NoScroll - TEMPORAIREMENT REMPLACÉ
 // import StepRecapNoScroll from './steps/StepRecapNoScroll'; // Version avec bugs
-import StepRecapNoScrollFixed from './steps/StepRecapNoScrollFixed'; // 🔧 Version corrigée
+import StepRecapIpadOptimized from './steps/StepRecapIpadOptimized'; // 🔧 Version iPad optimisée - TOUT VISIBLE
 import StepNouvellesCommandes from './steps/StepNouvellesCommandes';
 
 const steps: WizardStep[] = [
@@ -266,7 +266,7 @@ function WizardSurface({
       case 'signature':
         return <StepSignatureNoScroll {...props} />;
       case 'recap':
-        return <StepRecapNoScrollFixed {...props} />;
+        return <StepRecapIpadOptimized {...props} />;
       case 'nouvelles-commandes':
         return <StepNouvellesCommandes {...props} />;
       default:
