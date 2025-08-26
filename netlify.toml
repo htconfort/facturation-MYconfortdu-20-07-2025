@@ -19,6 +19,11 @@
   minify = true
 
 [[redirects]]
+  from = "/api/n8n/*"
+  to = "https://n8n.srv765811.hstgr.cloud/webhook/:splat"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
