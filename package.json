@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js",
+    "dev:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js --host --port 5173",
     "build": "vite build",
     "build:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
