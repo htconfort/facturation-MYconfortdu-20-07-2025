@@ -82,3 +82,47 @@ jobs:
         with:
           name: npm-logs
           path: ~/.npm/_logs
+
+  deploy_netlify:
+    if: github.ref == 'refs/heads/main'
+    needs: [build-test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Export commit SHA for cache-busting
+        run: |
+          echo "VITE_COMMIT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Build (prod)
+        run: npm run build
+        env:
+          VITE_COMMIT_SHA: ${{ env.VITE_COMMIT_SHA }}
+
+      - name: Deploy to Netlify (prod)
+        run: |
+          npm i -g netlify-cli
+          netlify deploy \
+            --dir=dist \
+            --prod \
+            --message "CI deploy ${GITHUB_SHA::7}" \
+            --site "$NETLIFY_SITE_ID" \
+            --auth "$NETLIFY_AUTH_TOKEN"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Output URLs
+        run: |
+          echo "✅ Déployé avec commit: ${GITHUB_SHA::7}"
+          echo "👉 Ouvre l'app iPad et vérifie le label build."
