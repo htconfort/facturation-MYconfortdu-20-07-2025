@@ -6,18 +6,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['jspdf', 'html2canvas', 'html2pdf.js'], // évite un pré-bundle très gourmand
   },
-  server: { 
-    port: 5173, 
-    strictPort: true,
-    host: true
-  },
-  preview: { 
-    port: 5174, 
-    strictPort: true,
-    host: true
-  },
   build: {
-    outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
     cssCodeSplit: true,
@@ -31,5 +20,4 @@ export default defineConfig({
       },
     },
   },
-  base: '/'
 });
