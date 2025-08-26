@@ -77,8 +77,8 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* 🎯 Contenu principal avec espace pour les boutons */}
-      <div className='flex-1 px-6 py-4 pb-16 flex flex-col'>
+      {/* 🎯 Contenu principal sans footer caché */}
+      <div className='flex-1 px-6 py-4 flex flex-col'>
         {/* Zone de signature - prend la place disponible */}
         <div className='flex-1 bg-white rounded-xl border-2 border-gray-300 p-4 mb-4'>
           <div className='h-full flex flex-col'>
@@ -95,10 +95,39 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             <div className='flex-1 min-h-[200px]'>
               <SignaturePadView
                 onSigned={handleSigned}
-                onPrevious={onPrev}
                 onDrawingStart={onStart}
                 onDrawingEnd={onEnd}
               />
+              
+              {/* Boutons de navigation remontés à côté d'Enregistrer */}
+              <div className='flex items-center gap-2 mt-3'>
+                <button
+                  onClick={onPrev}
+                  disabled={isSaving}
+                  className='px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 min-h-[56px] font-semibold'
+                >
+                  ← Précédent
+                </button>
+                
+                <button
+                  onClick={handleNext}
+                  disabled={!signature?.dataUrl || !termsAccepted || isSaving || isProcessing}
+                  className={`px-4 py-2 rounded-xl min-h-[56px] font-semibold
+                    ${(!signature?.dataUrl || !termsAccepted || isSaving || isProcessing)
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
+                      : 'bg-myconfort-green text-white hover:opacity-90'}`}
+                >
+                  {isProcessing 
+                    ? '🔄 Traitement...' 
+                    : isSaving 
+                      ? '💾 Sauvegarde...'
+                      : !signature?.dataUrl
+                        ? 'Signez d\'abord'
+                        : !termsAccepted
+                          ? 'Acceptez conditions'
+                          : 'Suivant →'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -155,50 +184,6 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* 🎯 Footer fixe avec navigation sécurisée */}
-      <div className='px-6 py-4 border-t border-myconfort-dark/10 bg-white'>
-        <div className='flex justify-between items-center'>
-          <button
-            onClick={onPrev}
-            disabled={isSaving}
-            className='px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                       font-bold rounded-xl text-lg transition-all transform hover:scale-105
-                       min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            ← Précédent
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={!signature?.dataUrl || !termsAccepted || isSaving || isProcessing}
-            className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
-                        shadow-lg min-h-[56px] ${
-                          !signature?.dataUrl || !termsAccepted || isSaving || isProcessing
-                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
-                            : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
-                        }`}
-          >
-            {isProcessing 
-              ? '🔄 Traitement...' 
-              : isSaving 
-                ? '💾 Sauvegarde...'
-                : !signature?.dataUrl
-                    ? 'Signez d\'abord'
-                    : !termsAccepted
-                      ? 'Acceptez les conditions'
-                      : 'Suivant →'
-            }
-          </button>
-        </div>
-        
-        {/* Aide contextuelle */}
-        {isSaving && (
-          <div className='mt-2 text-center text-xs text-gray-500'>
-            💾 Sauvegarde en cours...
-          </div>
-        )}
       </div>
     </div>
   );

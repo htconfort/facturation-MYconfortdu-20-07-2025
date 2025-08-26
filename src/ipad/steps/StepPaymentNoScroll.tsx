@@ -283,10 +283,10 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             title='Chèques à venir'
             subtitle={
               selectedMethod === 'Chèque à venir' && paiement?.nombreChequesAVenir
-                ? `${paiement.nombreChequesAVenir} chèques × ${(restePay / (paiement.nombreChequesAVenir || 1)).toFixed(2)}€`
+                ? `${paiement.nombreChequesAVenir} chèques de ${(restePay / (paiement.nombreChequesAVenir || 1)).toFixed(2)}€ chacun`
                 : selectedMethod === 'Chèque à venir'
-                ? 'Configuré ✓'
-                : 'Planifier →'
+                ? `${(paiement as PaymentData)?.chequesCount || 3} chèques × ${((paiement as PaymentData)?.chequeAmount || 0).toFixed(2)}€`
+                : 'Planifier le paiement échelonné →'
             }
             emoji='📄'
             highlight='amber'
