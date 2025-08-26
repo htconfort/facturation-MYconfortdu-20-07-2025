@@ -213,19 +213,21 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#F2EFE2] overflow-hidden">
       
-      {/* Header compact */}
-      <div className="bg-white shadow-sm p-3 border-b flex-shrink-0">
-        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          📄 Récapitulatif Final
-          <span className="text-lg font-normal text-blue-600">#{invoiceNumber}</span>
-        </h1>
-      </div>
+      {/* Header sticky */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b shadow-sm flex-shrink-0">
+        <div className="p-3">
+          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            📄 Récapitulatif Final
+            <span className="text-lg font-normal text-blue-600">#{invoiceNumber}</span>
+          </h1>
+        </div>
+      </header>
 
-      {/* Contenu principal - Scroll optimisé pour iPad */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 pb-20"> {/* Padding bottom pour les boutons */}
+      {/* Main content - scrollable */}
+      <main className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="p-4 pb-32 max-w-5xl mx-auto"> {/* Extra padding pour footer */}
           
           {/* Grille responsive 2 colonnes sur iPad */}
           <div className="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
@@ -429,19 +431,16 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Footer vraiment fixe en bas de l'écran, toujours visible */}
-      <div
-        className="bg-[#F2EFE2] border-t border-[#477A0C]/20 shadow-lg p-4 flex-shrink-0"
-        style={{
-          position: 'fixed',
-          left: 0,
-          bottom: 0,
-          width: '100vw',
-          zIndex: 100,
-          boxShadow: '0 -2px 12px rgba(71,122,12,0.08)',
-        }}
+      <footer
+        className="
+          fixed bottom-0 left-0 right-0 z-40
+          bg-white/95 backdrop-blur border-t border-[#477A0C]/20
+          shadow-lg p-4
+          supports-[padding:max(0px)]:pb-[env(safe-area-inset-bottom)]
+        "
       >
         <div className="max-w-5xl mx-auto">
           
@@ -568,7 +567,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
             </div>
           )}
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

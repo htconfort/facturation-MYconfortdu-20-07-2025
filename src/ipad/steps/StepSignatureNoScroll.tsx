@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import SignaturePadView from '../../components/SignaturePadView';
 
@@ -15,18 +15,59 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
     useInvoiceWizard();
   const [showTermsPage, setShowTermsPage] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSigned = (dataUrl: string, timestamp: string) => {
-    updateSignature({ dataUrl, timestamp });
-
-    // Indication de traitement et passage automatique
-    if (termsAccepted) {
-      setIsProcessing(true);
-      setTimeout(() => {
-        onNext();
-      }, 1500);
+  const handleSigned = async (dataUrl: string, timestamp: string) => {
+    try {
+      setIsSaving(true);
+      updateSignature({ dataUrl, timestamp });
+      
+      // Attendre un peu pour que l'état se stabilise
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setIsSaving(false);
+      
+      // Ne pas naviguer automatiquement - laisser l'utilisateur cliquer "Suivant"
+    } catch (error) {
+      console.error('Erreur sauvegarde signature:', error);
+      setIsSaving(false);
     }
   };
+
+  const handleNext = () => {
+    if (!signature?.dataUrl || isDrawing || isSaving) return;
+    
+    setIsProcessing(true);
+    // Navigation manuelle sécurisée
+    setTimeout(() => {
+      onNext();
+    }, 500);
+  };
+
+  // Empêche le back-swipe / scroll parent pendant le dessin
+  useEffect(() => {
+    const onTouchMove = (e: TouchEvent) => {
+      if (isDrawing) {
+        e.preventDefault();
+      }
+    };
+    
+    const onPopState = (e: PopStateEvent) => {
+      if (isDrawing || isSaving) {
+        e.preventDefault();
+        // Remet l'état précédent
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('popstate', onPopState);
+    
+    return () => {
+      document.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [isDrawing, isSaving]);
 
   // Page secondaire pour les conditions générales
   if (showTermsPage) {
@@ -71,7 +112,12 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
 
             {/* SignaturePad responsive */}
             <div className='flex-1 min-h-[200px]'>
-              <SignaturePadView onSigned={handleSigned} onPrevious={onPrev} />
+              <SignaturePadView 
+                onSigned={handleSigned} 
+                onPrevious={onPrev}
+                onDrawingStart={() => setIsDrawing(true)}
+                onDrawingEnd={() => setIsDrawing(false)}
+              />
             </div>
           </div>
         </div>
@@ -128,6 +174,53 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 🎯 Footer fixe avec navigation sécurisée */}
+      <div className='px-6 py-4 border-t border-myconfort-dark/10 bg-white'>
+        <div className='flex justify-between items-center'>
+          <button
+            onClick={onPrev}
+            disabled={isDrawing || isSaving}
+            className='px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
+                       font-bold rounded-xl text-lg transition-all transform hover:scale-105
+                       min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            ← Précédent
+          </button>
+
+          <button
+            onClick={handleNext}
+            disabled={!signature?.dataUrl || !termsAccepted || isDrawing || isSaving || isProcessing}
+            className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
+                        shadow-lg min-h-[56px] ${
+                          !signature?.dataUrl || !termsAccepted || isDrawing || isSaving || isProcessing
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
+                            : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
+                        }`}
+          >
+            {isProcessing 
+              ? '🔄 Traitement...' 
+              : isSaving 
+                ? '💾 Sauvegarde...'
+                : isDrawing
+                  ? '✍️ En cours...'
+                  : !signature?.dataUrl
+                    ? 'Signez d\'abord'
+                    : !termsAccepted
+                      ? 'Acceptez les conditions'
+                      : 'Suivant →'
+            }
+          </button>
+        </div>
+        
+        {/* Aide contextuelle */}
+        {(isDrawing || isSaving) && (
+          <div className='mt-2 text-center text-xs text-gray-500'>
+            {isDrawing && '✍️ Signature en cours - ne naviguez pas'}
+            {isSaving && '💾 Sauvegarde en cours...'}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,12 +8,16 @@ import {
 type Props = {
   onSigned?: (dataUrl: string, timestamp: string) => void;
   onPrevious?: () => void;
+  onDrawingStart?: () => void;
+  onDrawingEnd?: () => void;
   className?: string;
 };
 
 export default function SignaturePadView({
   onSigned,
   onPrevious,
+  onDrawingStart,
+  onDrawingEnd,
   className,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,6 +26,11 @@ export default function SignaturePadView({
   useEffect(() => {
     if (!canvasRef.current) return;
     const p = initSignaturePad(canvasRef.current);
+    
+    // Callbacks pour gérer l'état de dessin
+    p.addEventListener('beginStroke', () => onDrawingStart?.());
+    p.addEventListener('endStroke', () => onDrawingEnd?.());
+    
     setPad(p);
 
     const handleResize = () => {
@@ -39,7 +48,7 @@ export default function SignaturePadView({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [onDrawingStart, onDrawingEnd]);
 
   const handleClear = () => pad?.clear();
 
@@ -56,6 +65,12 @@ export default function SignaturePadView({
           <canvas
             ref={canvasRef}
             className='h-full w-full rounded-xl touch-none'
+            style={{ 
+              touchAction: 'none', 
+              overscrollBehavior: 'contain' 
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
           />
         </div>
       </div>
