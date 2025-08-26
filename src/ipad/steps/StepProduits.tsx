@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { productCatalog, productCategories } from '../../data/products';
 import { calculateHT, calculateProductTotal } from '../../utils/calculations';
+import NumericInput from '../../components/NumericInput';
 
 // On ajoute Diverse pour la saisie libre, comme dans ProductSection
 const extendedCategories = [...productCategories, 'Diverse'];
@@ -233,14 +234,14 @@ export default function StepProduits({
               <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
                 Qté <span className='text-red-600 font-bold'>*</span>
               </label>
-              <input
-                type='number'
-                min={1}
+              <NumericInput
                 value={draft.qty}
-                onChange={e =>
-                  setDraft(d => ({ ...d, qty: Number(e.target.value || 1) }))
+                onChange={(value) =>
+                  setDraft(d => ({ ...d, qty: Number(value) || 1 }))
                 }
-                className='w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                min={1}
+                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                aria-label="Quantité"
               />
             </div>
           </div>
@@ -252,17 +253,18 @@ export default function StepProduits({
               <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
                 Prix TTC (€) <span className='text-red-600 font-bold'>*</span>
               </label>
-              <input
-                type='number'
-                step='0.01'
+              <NumericInput
                 value={draft.priceTTC}
-                onChange={e =>
+                onChange={(value) =>
                   setDraft(d => ({
                     ...d,
-                    priceTTC: Number(e.target.value || 0),
+                    priceTTC: Number(value) || 0,
                   }))
                 }
-                className='w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                min={0}
+                step="0.01"
+                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                aria-label="Prix TTC en euros"
               />
             </div>
 
@@ -288,19 +290,19 @@ export default function StepProduits({
                   <option value='percent'>%</option>
                   <option value='fixed'>€</option>
                 </select>
-                <input
-                  type='number'
-                  step='0.01'
-                  min='0'
-                  placeholder='0'
+                <NumericInput
                   value={draft.discount}
-                  onChange={e =>
+                  onChange={(value) =>
                     setDraft(d => ({
                       ...d,
-                      discount: Number(e.target.value || 0),
+                      discount: Number(value) || 0,
                     }))
                   }
-                  className='flex-1 px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                  min={0}
+                  step="0.01"
+                  placeholder="0"
+                  className='flex-1 text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                  aria-label="Montant de la remise"
                 />
               </div>
             </div>
@@ -389,16 +391,16 @@ export default function StepProduits({
                         </div>
                       </td>
                       <td className='px-1 py-2 text-center'>
-                        <input
-                          type='number'
-                          min={1}
-                          className='w-12 px-1 py-1 text-center text-sm border-2 rounded font-manrope transition-colors duration-150 min-h-[32px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                        <NumericInput
                           value={p.qty}
-                          onChange={e =>
+                          onChange={(value) =>
                             updateProduit(p.id, {
-                              qty: Number(e.target.value || 1),
+                              qty: Number(value) || 1,
                             })
                           }
+                          min={1}
+                          className='w-12 text-center text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                          aria-label="Quantité"
                         />
                       </td>
                       <td className='px-1 py-2 text-right'>
@@ -407,16 +409,17 @@ export default function StepProduits({
                         </div>
                       </td>
                       <td className='px-1 py-2 text-right'>
-                        <input
-                          type='number'
-                          step='0.01'
-                          className='w-16 px-1 py-1 text-right text-sm border-2 rounded font-manrope transition-colors duration-150 min-h-[32px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                        <NumericInput
                           value={p.priceTTC}
-                          onChange={e =>
+                          onChange={(value) =>
                             updateProduit(p.id, {
-                              priceTTC: Number(e.target.value || 0),
+                              priceTTC: Number(value) || 0,
                             })
                           }
+                          min={0}
+                          step="0.01"
+                          className='w-16 text-right text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                          aria-label="Prix TTC"
                         />
                       </td>
                       <td className='px-1 py-2 text-right'>
@@ -439,22 +442,22 @@ export default function StepProduits({
                             <option value='percent'>%</option>
                             <option value='fixed'>€</option>
                           </select>
-                          <input
-                            type='number'
-                            step='0.01'
-                            min='0'
-                            className={`w-10 px-1 py-1 text-right text-xs border rounded font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 ${
+                          <NumericInput
+                            value={p.discount || 0}
+                            onChange={(value) =>
+                              updateProduit(p.id, {
+                                discount: Number(value) || 0,
+                              })
+                            }
+                            min={0}
+                            step="0.01"
+                            placeholder="0"
+                            className={`w-10 text-right text-xs ${
                               (p.discount || 0) > 0
                                 ? 'border-myconfort-coral bg-red-50 text-red-700 focus:border-myconfort-coral'
                                 : 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                             }`}
-                            value={p.discount || 0}
-                            onChange={e =>
-                              updateProduit(p.id, {
-                                discount: Number(e.target.value || 0),
-                              })
-                            }
-                            placeholder='0'
+                            aria-label="Remise"
                           />
                         </div>
                       </td>

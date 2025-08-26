@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Navigation - Étape Signature</title>
+    <style>
+        body { 
+            margin: 0;
+            font-family: Arial, sans-serif; 
+            background: #f0f0f0;
+        }
+        .test-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #333;
+            color: white;
+            padding: 10px;
+            z-index: 2000;
+            font-size: 12px;
+        }
+        .test-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status {
+            display: flex;
+            gap: 15px;
+        }
+        .status span {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status .ok { background: #28a745; }
+        .status .error { background: #dc3545; }
+        .status .warning { background: #ffc107; color: black; }
+        .iframe-container {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .instructions {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <div class="test-info">
+            <div>
+                <strong>🖊️ Test Étape Signature</strong> - 
+                <span id="timestamp">Chargé à 00:00:00</span>
+            </div>
+            <div class="status">
+                <span class="ok" id="server-status">Serveur OK</span>
+                <span class="warning" id="navigation-status">Navigation à tester</span>
+                <span class="warning" id="signature-status">Signature à tester</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="iframe-container">
+        <iframe id="appFrame" src="http://localhost:5173/ipad"></iframe>
+    </div>
+    
+    <div class="instructions">
+        <strong>📋 Instructions de Test :</strong><br>
+        1. Allez à l'étape 6 (Signature)<br>
+        2. Signez dans la zone blanche<br>
+        3. Cliquez "Enregistrer"<br>
+        4. Cochez les CGV<br>
+        5. Testez "Précédent" et "Suivant"<br>
+        <br>
+        <strong>Console :</strong> Ouvrez F12 pour voir les logs
+    </div>
+
+    <script>
+        // Mettre à jour le timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = 
+                `Chargé à ${now.toLocaleTimeString()}`;
+        }
+        
+        // Test de connexion au serveur
+        async function testServerConnection() {
+            try {
+                const response = await fetch('http://localhost:5173/');
+                if (response.ok) {
+                    document.getElementById('server-status').textContent = '✅ Serveur OK';
+                    document.getElementById('server-status').className = 'ok';
+                } else {
+                    document.getElementById('server-status').textContent = '⚠️ Serveur Problème';
+                    document.getElementById('server-status').className = 'warning';
+                }
+            } catch (error) {
+                document.getElementById('server-status').textContent = '❌ Serveur Erreur';
+                document.getElementById('server-status').className = 'error';
+            }
+        }
+        
+        // Écouter les messages du frame pour tester les interactions
+        window.addEventListener('message', (event) => {
+            if (event.origin === 'http://localhost:5173') {
+                console.log('📨 Message reçu du frame:', event.data);
+                
+                if (event.data.type === 'signature-test') {
+                    document.getElementById('signature-status').textContent = '✅ Signature fonctionne';
+                    document.getElementById('signature-status').className = 'ok';
+                }
+                
+                if (event.data.type === 'navigation-test') {
+                    document.getElementById('navigation-status').textContent = '✅ Navigation fonctionne';
+                    document.getElementById('navigation-status').className = 'ok';
+                }
+            }
+        });
+        
+        // Raccourcis clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' && e.ctrlKey) {
+                e.preventDefault();
+                document.getElementById('appFrame').src = document.getElementById('appFrame').src;
+                console.log('🔄 Frame rechargé');
+            }
+            
+            if (e.key === 'F5') {
+                e.preventDefault();
+                location.reload();
+            }
+        });
+        
+        // Initialisation
+        updateTimestamp();
+        testServerConnection();
+        
+        // Vérifier la connexion toutes les 30 secondes
+        setInterval(testServerConnection, 30000);
+        
+        console.log('🚀 Test de navigation de l\'étape signature initialisé');
+        console.log('📋 Instructions:');
+        console.log('   - Ctrl+R: Recharger le frame');
+        console.log('   - F5: Recharger la page de test');
+        console.log('   - Ouvrez la console pour voir tous les logs');
+    </script>
+</body>
+</html>

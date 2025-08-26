@@ -87,6 +87,7 @@ interface WizardState {
   invoiceNumber: string;
   invoiceDate: string;
   eventLocation: string;
+  isFairEvent: boolean; // 🆕 Indique si c'est une foire (remise auto matelas 20%)
 
   client: ClientData;
   produits: Produit[];
@@ -113,11 +114,14 @@ interface WizardState {
     invoiceNumber?: string;
     invoiceDate?: string;
     eventLocation?: string;
+    isFairEvent?: boolean; // 🆕 Option pour définir si c'est une foire
   }) => void;
   updateClient: (p: Partial<ClientData>) => void;
+  updateEventLocation: (eventLocation: string) => void; // 🆕 Met à jour le lieu et détecte si c'est une foire
   addProduit: (p: Produit) => void;
   updateProduit: (id: string, p: Partial<Produit>) => void;
   removeProduit: (id: string) => void;
+  applyFairDiscountIfNeeded: (produit: Produit) => Produit; // 🆕 Applique remise foire automatique
   updatePaiement: (p: Partial<PaymentData>) => void;
   updateLivraison: (p: Partial<LivraisonData>) => void;
   updateSignature: (s: Partial<SignatureData>) => void;
@@ -153,6 +157,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   invoiceNumber: '',
   invoiceDate: '',
   eventLocation: '',
+  isFairEvent: false, // 🆕 Par défaut, pas une foire
 
   client: { name: '' },
   produits: [],
@@ -207,15 +212,33 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
   },
 
   setInvoiceData: data =>
-    set(state => ({
-      invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
-      invoiceDate: data.invoiceDate ?? state.invoiceDate,
-      eventLocation: data.eventLocation ?? state.eventLocation,
-    })),
+    set(state => {
+      const eventLocation = data.eventLocation ?? state.eventLocation;
+      const isFairEvent = eventLocation ? 
+        /foire|salon|exposition/i.test(eventLocation) : 
+        false;
+      
+      return {
+        invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
+        invoiceDate: data.invoiceDate ?? state.invoiceDate,
+        eventLocation,
+        isFairEvent,
+      };
+    }),
 
   updateClient: p => set(st => ({ client: { ...st.client, ...p } })),
 
-  addProduit: p => set(st => ({ produits: [...st.produits, p] })),
+  updateEventLocation: (eventLocation: string) =>
+    set(() => ({
+      eventLocation,
+      isFairEvent: /foire|salon|exposition/i.test(eventLocation),
+    })),
+
+  addProduit: p => {
+    const state = get();
+    const produitWithDiscount = state.applyFairDiscountIfNeeded(p);
+    set(st => ({ produits: [...st.produits, produitWithDiscount] }));
+  },
 
   updateProduit: (id, p) =>
     set(st => ({
@@ -224,6 +247,22 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
 
   removeProduit: id =>
     set(st => ({ produits: st.produits.filter(x => x.id !== id) })),
+
+  // 🆕 Applique automatiquement 20% de remise sur les matelas lors des foires
+  applyFairDiscountIfNeeded: (produit: Produit): Produit => {
+    const state = get();
+    
+    // Si c'est une foire et que c'est un matelas, appliquer 20% de remise
+    if (state.isFairEvent && produit.category === 'Matelas') {
+      return {
+        ...produit,
+        discount: 20,
+        discountType: 'percent' as const,
+      };
+    }
+    
+    return produit;
+  },
 
   updatePaiement: p => set(st => ({ paiement: { ...st.paiement, ...p } })),
 

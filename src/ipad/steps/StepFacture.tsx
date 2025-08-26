@@ -11,7 +11,7 @@ interface StepProps {
 }
 
 export default function StepFacture({ onNext, onQuit }: StepProps) {
-  const { invoiceNumber, invoiceDate, eventLocation, advisorName, setInvoiceData, updateAdvisorName } =
+  const { invoiceNumber, invoiceDate, eventLocation, advisorName, setInvoiceData, updateAdvisorName, updateEventLocation } =
     useInvoiceWizard();
   const [hasEditedLocation, setHasEditedLocation] = useState(false);
   const [hasEditedAdvisor, setHasEditedAdvisor] = useState(false);
@@ -127,7 +127,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                 <input
                   value={eventLocation}
                   onChange={e => {
-                    setInvoiceData({ eventLocation: e.target.value });
+                    updateEventLocation(e.target.value);
                     setHasEditedLocation(true);
                   }}
                   type='text'

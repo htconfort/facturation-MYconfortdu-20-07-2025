@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signature Debug</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .signature-area {
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: white;
+            margin: 20px 0;
+        }
+        canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            touch-action: none;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .clear { background: #ff4444; color: white; }
+        .save { background: #44aa44; color: white; }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8f4f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖊️ Test du Signature Pad</h1>
+        <p>Test de fonctionnement du signature pad pour debugging</p>
+        
+        <div class="signature-area">
+            <canvas id="signature-canvas"></canvas>
+        </div>
+        
+        <div class="buttons">
+            <button class="clear" onclick="clearSignature()">🗑️ Effacer</button>
+            <button class="save" onclick="saveSignature()">✓ Enregistrer</button>
+        </div>
+        
+        <div class="status" id="status">
+            Prêt à signer... Dessinez dans la zone ci-dessus.
+        </div>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.10/dist/signature_pad.umd.min.js"></script>
+    <script>
+        const canvas = document.getElementById('signature-canvas');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        
+        // Initialiser le signature pad
+        const signaturePad = new SignaturePad(canvas, {
+            throttle: 16,
+            minWidth: 0.75,
+            maxWidth: 2.5,
+            penColor: '#14281D',
+            backgroundColor: 'rgba(255,255,255,0)',
+        });
+
+        // Ajuster la résolution pour les écrans HD
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext('2d').scale(ratio, ratio);
+            signaturePad.clear();
+        }
+        
+        // Initialiser la taille
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Event listeners pour le feedback
+        signaturePad.addEventListener('beginStroke', () => {
+            statusDiv.innerHTML = '🖊️ Signature en cours...';
+            statusDiv.style.background = '#fff3cd';
+        });
+        
+        signaturePad.addEventListener('endStroke', () => {
+            statusDiv.innerHTML = '✅ Trait terminé. Continuez ou enregistrez.';
+            statusDiv.style.background = '#d4edda';
+        });
+        
+        function clearSignature() {
+            signaturePad.clear();
+            statusDiv.innerHTML = 'Signature effacée. Prêt à signer.';
+            statusDiv.style.background = '#e8f4f8';
+            resultDiv.innerHTML = '';
+        }
+        
+        function saveSignature() {
+            if (signaturePad.isEmpty()) {
+                statusDiv.innerHTML = '⚠️ Aucune signature détectée !';
+                statusDiv.style.background = '#f8d7da';
+                return;
+            }
+            
+            const dataUrl = signaturePad.toDataURL('image/png');
+            const timestamp = new Date().toISOString();
+            
+            statusDiv.innerHTML = '✅ Signature enregistrée avec succès !';
+            statusDiv.style.background = '#d4edda';
+            
+            resultDiv.innerHTML = `
+                <h3>📋 Résultat de l'enregistrement :</h3>
+                <p><strong>Timestamp:</strong> ${timestamp}</p>
+                <p><strong>Taille des données:</strong> ${dataUrl.length} caractères</p>
+                <img src="${dataUrl}" style="max-width: 300px; border: 1px solid #ccc; border-radius: 5px;" alt="Signature">
+                <br><br>
+                <textarea readonly style="width: 100%; height: 100px; font-size: 10px;">${dataUrl.substring(0, 500)}...</textarea>
+            `;
+            
+            console.log('🖊️ Signature enregistrée:', { dataUrl: dataUrl.substring(0, 50) + '...', timestamp });
+        }
+        
+        // Test au chargement
+        console.log('🚀 Signature Pad initialisé:', signaturePad);
+        console.log('📱 Canvas dimensions:', { 
+            width: canvas.width, 
+            height: canvas.height,
+            offsetWidth: canvas.offsetWidth,
+            offsetHeight: canvas.offsetHeight,
+            devicePixelRatio: window.devicePixelRatio
+        });
+    </script>
+</body>
+</html>

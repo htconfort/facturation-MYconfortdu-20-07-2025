@@ -4,6 +4,7 @@ import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import AlmaLogo from '../../assets/images/Alma_orange.png';
 import FloatingFooter from '../../components/ui/FloatingFooter';
+import NumericInput from '../../components/NumericInput';
 
 interface StepProps {
   onNext: () => void;
@@ -199,14 +200,14 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
               );
             })}
           </div>
-          <input
-            type='number'
+          <NumericInput
             value={acompte}
-            onChange={e => setAcompte(Number(e.target.value) || 0)}
+            onChange={(value) => setAcompte(Number(value) || 0)}
             min={0}
             max={totalAmount}
-            className='w-full px-4 py-3 text-xl font-bold border-2 border-gray-300 rounded-xl focus:border-myconfort-green focus:outline-none bg-white shadow-sm text-center'
-            placeholder='0'
+            placeholder="0"
+            className='w-full text-xl font-bold border-gray-300 focus:border-myconfort-green bg-white shadow-sm text-center'
+            aria-label="Montant de l'acompte"
           />
         </div>
 
