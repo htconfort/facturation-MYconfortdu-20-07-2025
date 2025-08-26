@@ -11,9 +11,10 @@ interface StepProps {
 }
 
 export default function StepFacture({ onNext, onQuit }: StepProps) {
-  const { invoiceNumber, invoiceDate, eventLocation, setInvoiceData } =
+  const { invoiceNumber, invoiceDate, eventLocation, advisorName, setInvoiceData, updateAdvisorName } =
     useInvoiceWizard();
   const [hasEditedLocation, setHasEditedLocation] = useState(false);
+  const [hasEditedAdvisor, setHasEditedAdvisor] = useState(false);
 
   // Générer automatiquement un numéro de facture et la date du jour si vides
   useEffect(() => {
@@ -29,9 +30,12 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   }, [invoiceNumber, invoiceDate, setInvoiceData]);
 
   const validateAndNext = () => {
-    // Seul le lieu d'événement est obligatoire
+    // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
-      // Le cadre rouge est déjà géré dans le className conditionnel
+      return;
+    }
+    
+    if (!advisorName || advisorName.trim() === '') {
       return;
     }
 
@@ -41,6 +45,9 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   // État de validation pour les couleurs des cadres
   const isLocationValid = eventLocation && eventLocation.trim() !== '';
   const isLocationEmpty = !eventLocation || eventLocation.trim() === '';
+  const isAdvisorValid = advisorName && advisorName.trim() !== '';
+  const isAdvisorEmpty = !advisorName || advisorName.trim() === '';
+  const isFormValid = isLocationValid && isAdvisorValid;
 
   return (
     <div className='max-w-6xl mx-auto py-2 relative'>
@@ -144,6 +151,39 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   </p>
                 )}
               </div>
+
+              {/* Conseiller/Vendeuse */}
+              <div className='flex flex-col space-y-1'>
+                <label className='font-bold text-black text-sm'>
+                  Conseiller/Vendeuse: <span className='text-red-600'>*</span>
+                </label>
+                <input
+                  value={advisorName}
+                  onChange={e => {
+                    updateAdvisorName(e.target.value);
+                    setHasEditedAdvisor(true);
+                  }}
+                  type='text'
+                  required
+                  className={`w-full border-2 rounded-lg px-3 py-2 text-sm text-black bg-white focus:ring-1 transition-all font-bold ${
+                    isAdvisorEmpty && hasEditedAdvisor
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+                      : isAdvisorValid
+                        ? 'border-green-500 focus:border-green-600 focus:ring-green-200 bg-green-50'
+                        : 'border-red-500 focus:border-red-500 focus:ring-red-200'
+                  }`}
+                  placeholder="Ex: Marie Dupont, Jean Martin, etc."
+                />
+                {isAdvisorEmpty ? (
+                  <p className='text-red-600 text-xs font-bold flex items-center'>
+                    ⚠️ Le nom du conseiller est obligatoire pour continuer
+                  </p>
+                ) : (
+                  <p className='text-green-600 text-xs font-bold flex items-center'>
+                    ✅ Conseiller renseigné - Vous pouvez continuer
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -160,15 +200,19 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
 
         <button
           onClick={validateAndNext}
-          disabled={isLocationEmpty}
+          disabled={!isFormValid}
           className={`px-6 py-3 font-bold rounded-xl text-lg transition-all transform shadow-lg ${
-            isLocationEmpty
+            !isFormValid
               ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white hover:scale-105'
           }`}
         >
-          {isLocationEmpty
-            ? "🚫 Remplir le lieu d'abord"
+          {!isFormValid
+            ? isLocationEmpty && isAdvisorEmpty
+              ? "🚫 Remplir lieu et conseiller"
+              : isLocationEmpty
+              ? "🚫 Remplir le lieu d'abord"
+              : "🚫 Remplir le conseiller d'abord"
             : '✅ Suivant: Client →'}
         </button>
       </div>
