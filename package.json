@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js",
     "build": "vite build",
+    "build:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "clean": "rimraf dist .vite node_modules/.cache || true",
     "typecheck": "tsc --noEmit",
