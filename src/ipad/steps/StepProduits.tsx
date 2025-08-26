@@ -496,7 +496,7 @@ export default function StepProduits({
                             value='livrer'
                             className='text-black font-medium'
                           >
-                            📦 Livrer
+                            📦 À livrer
                           </option>
                           <option
                             value='emporter'

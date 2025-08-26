@@ -33,19 +33,42 @@ export default function SignaturePadView({
     if (!canvasRef.current) return;
     const p = initSignaturePad(canvasRef.current);
 
-    // Utiliser l'API native signature_pad
-    (p as any).onBegin = () => {
+    // Utiliser les événements de signature_pad v5
+    p.addEventListener('beginStroke', () => {
       onStartRef.current?.();
       // dès qu'on commence un trait, on considère qu'il y a de l'encre
       setHasInk(true);
-    };
-    (p as any).onEnd = () => {
+    });
+    
+    p.addEventListener('endStroke', () => {
       onEndRef.current?.();
-      // si effacé par un clear programmatique, hasInk repassera à false
+      // vérifier s'il y a encore du contenu après le trait
       setHasInk(!p.isEmpty());
+    });
+
+    // Solution de secours : écouter directement sur le canvas
+    const handleCanvasInteraction = () => {
+      // petite temporisation pour que le trait soit enregistré
+      setTimeout(() => {
+        const isEmpty = p.isEmpty();
+        setHasInk(!isEmpty);
+      }, 50);
     };
 
+    canvasRef.current.addEventListener('pointerup', handleCanvasInteraction);
+    canvasRef.current.addEventListener('touchend', handleCanvasInteraction);
+    canvasRef.current.addEventListener('mouseup', handleCanvasInteraction);
+
     setPad(p);
+
+    // fonction de nettoyage des événements
+    const cleanupEvents = () => {
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('pointerup', handleCanvasInteraction);
+        canvasRef.current.removeEventListener('touchend', handleCanvasInteraction);
+        canvasRef.current.removeEventListener('mouseup', handleCanvasInteraction);
+      }
+    };
 
     // resize avec conservation des traits
     const handleResize = () => {
@@ -67,7 +90,10 @@ export default function SignaturePadView({
 
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cleanupEvents();
+    };
   }, []);
 
   const handleClear = () => {

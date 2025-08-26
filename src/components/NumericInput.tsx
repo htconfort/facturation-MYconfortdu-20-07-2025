@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { toSafeString, normalizeInput } from '../utils/number';
 
 interface NumericInputProps {
   value: number | string;
@@ -32,70 +33,79 @@ export default function NumericInput({
   autoFocus = false,
   'aria-label': ariaLabel,
 }: NumericInputProps) {
-  const [internalValue, setInternalValue] = useState(String(value || '0'));
+  const [internalValue, setInternalValue] = useState(() => toSafeString(value || '0'));
 
   // Synchroniser avec la valeur externe
   useEffect(() => {
-    setInternalValue(String(value || '0'));
+    setInternalValue(toSafeString(value || '0'));
   }, [value]);
 
-  const normalize = useCallback((s: string): string => {
-    // Remplacer virgule par point
-    let v = s.replace(',', '.');
-    
-    // Enlever les zéros en tête (sauf si c'est juste "0" ou "0.")
-    v = v.replace(/^0+(?=\d)/, '');
-    
-    // Limiter à un seul point décimal
-    const parts = v.split('.');
-    if (parts.length > 2) {
-      v = parts[0] + '.' + parts.slice(1).join('');
-    }
-    
-    // Si vide, remettre "0"
-    if (v === '' || v === '.') v = '0';
-    
-    return v;
-  }, []);
-
   const applyConstraints = useCallback((val: string): string => {
-    const num = parseFloat(val);
-    if (isNaN(num)) return val;
+    const { number } = normalizeInput(val);
+    if (number === null) return val;
     
-    let constrainedNum = num;
+    let constrainedNum = number;
     if (min !== undefined && constrainedNum < min) constrainedNum = min;
     if (max !== undefined && constrainedNum > max) constrainedNum = max;
     
-    return constrainedNum !== num ? String(constrainedNum) : val;
+    return constrainedNum !== number ? String(constrainedNum) : val;
   }, [min, max]);
 
   const handleBeforeInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
     const nativeEvent = (e as any).nativeEvent as InputEvent;
     const target = e.currentTarget;
-    const data = nativeEvent.data || '';
+    const data = toSafeString(nativeEvent.data || '');
     
     // Si on tape un chiffre et que le champ contient juste "0"
     if (
-      nativeEvent.inputType.startsWith('insert') &&
+      nativeEvent.inputType?.startsWith('insert') &&
       /^[0-9.,]$/.test(data) &&
       target.value === '0'
     ) {
       e.preventDefault();
-      const normalized = normalize(data);
-      const constrained = applyConstraints(normalized);
+      const { clean } = normalizeInput(data);
+      const constrained = applyConstraints(clean);
       setInternalValue(constrained);
       onChange(constrained);
     }
-  }, [normalize, applyConstraints, onChange]);
+  }, [applyConstraints, onChange]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    const normalized = normalize(rawValue);
-    const constrained = applyConstraints(normalized);
+    const rawValue = toSafeString(e.target?.value || '');
     
+    // Si entrée vide
+    if (rawValue === '') {
+      setInternalValue('0');
+      onChange('0');
+      return;
+    }
+
+    // Gestion des débuts par . ou ,
+    const startsWithDot = rawValue.startsWith('.');
+    const startsWithComma = rawValue.startsWith(',');
+    if (startsWithDot || startsWithComma) {
+      const fixed = `0${startsWithComma ? rawValue.replace(',', '.') : rawValue}`;
+      const { number } = normalizeInput(fixed);
+      if (number === null) return;
+      const finalValue = String(number);
+      const constrained = applyConstraints(finalValue);
+      setInternalValue(constrained);
+      onChange(constrained);
+      return;
+    }
+
+    const { clean, number } = normalizeInput(rawValue);
+    // Accepter entrée intermédiaire comme "12."
+    if (number === null && clean !== '') {
+      setInternalValue(clean);
+      return;
+    }
+    
+    const finalValue = number !== null ? String(number) : clean;
+    const constrained = applyConstraints(finalValue);
     setInternalValue(constrained);
     onChange(constrained);
-  }, [normalize, applyConstraints, onChange]);
+  }, [applyConstraints, onChange]);
 
   const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     // Sélectionner tout le texte au focus pour faciliter la saisie
@@ -106,6 +116,7 @@ export default function NumericInput({
     <input
       type="text"
       inputMode="decimal"
+      pattern="[0-9]*[.,]?[0-9]*"
       enterKeyHint="done"
       value={internalValue}
       onChange={handleChange}
