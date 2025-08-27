@@ -1,65 +1,70 @@
 import SignaturePad from 'signature_pad';
 
 export type SignatureExport = {
-  pngDataUrl: string; // data:image/png;base64,...
+  pngDataUrl: string;
   blob: Blob;
-  timestamp: string; // ISO
+  timestamp: string;  // ISO
 };
 
-export function initSignaturePad(canvas: HTMLCanvasElement) {
-  // 🔧 SOLUTION SIGNATURE INVISIBLE IPAD: Fond blanc OPAQUE obligatoire
-  const pad = new SignaturePad(canvas, {
-    throttle: 8,                    // 🔧 Réduction pour plus de fluidité sur iPad
-    minWidth: 1.5,                  // 🔧 Traits plus épais pour meilleure visibilité
-    maxWidth: 4.0,                  // 🔧 Largeur max augmentée  
-    penColor: '#111827',            // 🔧 CONTRASTE ABSOLU pour Safari iPad
-    backgroundColor: 'rgb(255,255,255)', // 🔧 BLANC OPAQUE - évite transparence
-    velocityFilterWeight: 0.7,      // 🔧 Lissage optimisé pour stylet/doigt
-    minDistance: 2,                 // 🔧 Distance minimum entre points
-    dotSize: 1.5,                   // 🔧 Taille des points pour départ de trait
-  });
-
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  const { offsetWidth, offsetHeight } = canvas;
-  if (offsetWidth > 0 && offsetHeight > 0) {
-    canvas.width = offsetWidth * ratio;
-    canvas.height = offsetHeight * ratio;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(ratio, ratio);
-      // 🔧 Configuration explicite du contexte pour iPad
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalCompositeOperation = 'source-over';
-      
-      // 🔧 PEINDRE FOND BLANC BITMAP EXPLICITE pour iPad Safari
-      ctx.save();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, offsetWidth, offsetHeight);
-      ctx.restore();
-    }
-  }
-  
-  // 🔧 Fonction helper CRITIQUE pour repeindre fond après resize
-  (pad as any).__repaintBackground = function() {
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      const { offsetWidth, offsetHeight } = canvas;
-      ctx.save();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, offsetWidth, offsetHeight);
-      ctx.restore();
-    }
+export function initSignaturePad(
+  canvas: HTMLCanvasElement,
+  { penColor = '#ff00ff', minWidth = 1.5, maxWidth = 4.0 }: { penColor?: string; minWidth?: number; maxWidth?: number } = {}
+) {
+  const paintBackground = () => {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const { offsetWidth, offsetHeight } = canvas;
+    if (!offsetWidth || !offsetHeight) return;
+    canvas.width = Math.floor(offsetWidth * ratio);
+    canvas.height = Math.floor(offsetHeight * ratio);
+    const ctx = canvas.getContext('2d')!;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(ratio, ratio);
+    ctx.fillStyle = '#ffffff';              // ⬅️ fond OPAQUE
+    ctx.fillRect(0, 0, offsetWidth, offsetHeight);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = 'source-over';
   };
-  
+
+  paintBackground();
+
+  const pad = new SignaturePad(canvas, {
+    throttle: 8,
+    minWidth,
+    maxWidth,
+    penColor,                               // ⬅️ trait MAGENTA pour test visuel
+    velocityFilterWeight: 0.7,
+    minDistance: 2,
+    dotSize: 1.5,
+  }) as SignaturePad & { __repaintBackground?: () => void };
+
+  pad.__repaintBackground = () => {
+    const data = pad.toData();
+    paintBackground();
+    pad.clear();
+    if (data.length) { try { pad.fromData(data); } catch { /* ignore */ } }
+  };
+
   pad.clear();
   return pad;
 }
 
 export async function exportSignature(pad: SignaturePad) {
   const timestamp = new Date().toISOString();
-  const pngDataUrl = pad.toDataURL('image/png');
+  const src = (pad as any).canvas as HTMLCanvasElement;
+
+  // ⬇️ Compose sur fond blanc OPAQUE avant l'export
+  const out = document.createElement('canvas');
+  out.width = src.width;
+  out.height = src.height;
+  const ctx = out.getContext('2d')!;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, out.width, out.height);
+  ctx.drawImage(src, 0, 0);
+
+  const pngDataUrl = out.toDataURL('image/png');
   const res = await fetch(pngDataUrl);
   const blob = await res.blob();
+
   return { pngDataUrl, blob, timestamp };
 }

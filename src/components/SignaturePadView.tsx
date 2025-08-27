@@ -31,7 +31,7 @@ export default function SignaturePadView({
   // init du pad une seule fois
   useEffect(() => {
     if (!canvasRef.current) return;
-    const p = initSignaturePad(canvasRef.current);
+    const p = initSignaturePad(canvasRef.current, { penColor: '#ff00ff' }) as any; // 🔧 MAGENTA pour test visuel
 
     // Utiliser les événements de signature_pad v5
     p.addEventListener('beginStroke', () => {
@@ -132,8 +132,9 @@ export default function SignaturePadView({
         <div className='h-[280px] w-full relative'>
           <canvas
             ref={canvasRef}
-            className='h-full w-full rounded-xl bg-white'
+            className='h-full w-full rounded-xl'
             style={{ 
+              backgroundColor: '#fffbe6', // 🔧 JAUNE PÂLE pour test visuel
               touchAction: 'none', 
               overscrollBehavior: 'contain',
               WebkitTouchCallout: 'none',
