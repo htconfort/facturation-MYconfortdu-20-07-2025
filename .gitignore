@@ -1,3 +1,6 @@
+# Build info auto-généré
+src/buildInfo.ts
+
 # Logs
 logs
 *.log

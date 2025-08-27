@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js --host --port 5173",
-    "build": "vite build",
+    "build": "echo \"export const BUILD_COMMIT='$(git rev-parse --short HEAD)'; export const BUILD_DATE='$(date +%d-%m-%Y)';\" > src/buildInfo.ts && vite build",
     "build:mem": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "clean": "rimraf dist .vite node_modules/.cache || true",

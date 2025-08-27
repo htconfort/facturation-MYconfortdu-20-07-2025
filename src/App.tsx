@@ -6,6 +6,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import WizardDemo from './pages/WizardDemo';
 import DebugFooter from './pages/DebugFooter';
+import { BUILD_COMMIT, BUILD_DATE } from './buildInfo';
 
 // Guard pour borner les steps à [1..7]
 function StepGuard() {
@@ -16,14 +17,12 @@ function StepGuard() {
 }
 
 export default function App() {
-  const commitSha = import.meta.env.VITE_COMMIT_SHA || 'dev';
-  
   return (
     <div>
-      {/* Indicateur de version pour vérifier les déploiements */}
-      <div className="fixed bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm font-mono z-50">
-        build: {commitSha}
-      </div>
+      {/* ✅ Badge build signature iPad - auto-généré */}
+      <footer className="fixed bottom-2 right-2 text-[10px] text-gray-600 bg-white/90 px-2 py-1 rounded shadow-md border border-gray-200 font-mono z-50">
+        iPad Fix • {BUILD_DATE} • {BUILD_COMMIT}
+      </footer>
       <BrowserRouter
         future={{
           v7_startTransition: true,
