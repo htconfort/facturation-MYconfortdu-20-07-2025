@@ -109,6 +109,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
     montantAcompte: paiement?.depositAmount || 0,
     depositPaymentMethod: paiement?.depositPaymentMethod || '',
     montantRestant: totals.reste,
+    nombreChequesAVenir: paiement?.nombreChequesAVenir || 0, // ✅ Ajout pour le PDF
     
     // Livraison
     deliveryMethod: livraison?.deliveryMethod || '',
@@ -309,6 +310,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
                       <span className="font-medium text-green-600">{paiement.depositAmount.toFixed(2)} €</span>
                     </div>
                   )}
+                  
                   {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Chèques à venir :</span>
@@ -356,6 +358,12 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
                 
                 {/* Total */}
                 <div className="border-t-2 border-gray-300 pt-2 mt-3">
+                  {/* Remise effectuée */}
+                  <div className="flex justify-between items-center mb-2 text-sm text-green-600">
+                    <span>Remise effectuée 20% :</span>
+                    <span>-{(totals.total * 0.2).toFixed(2)} €</span>
+                  </div>
+                  
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-gray-800">Total TTC :</span>
                     <span className="font-bold text-xl text-blue-600">{totals.total.toFixed(2)} €</span>

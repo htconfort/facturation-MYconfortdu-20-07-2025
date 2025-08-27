@@ -37,6 +37,8 @@ type InvoiceForPDF = {
   signature?: string; // data URL de la signature
   isSigned?: boolean;
   signatureDate?: string;
+  nombreChequesAVenir?: number; // ✅ Ajout pour les chèques à venir
+  montantRestant?: number; // ✅ Ajout pour le montant restant
 };
 
 const GREEN: [number, number, number] = [71, 122, 12]; // #477A0C
@@ -417,7 +419,18 @@ export const PDFService = {
       doc.setFont('helvetica', 'normal');
       y += 5;
       doc.text(invoiceData.paymentMethod, MARGIN, y);
-      y += 6;
+      y += 4;
+      
+      // ✅ Affichage des détails des chèques à venir
+      if (invoiceData.nombreChequesAVenir && invoiceData.nombreChequesAVenir > 0 && invoiceData.montantRestant) {
+        const montantParCheque = (invoiceData.montantRestant / invoiceData.nombreChequesAVenir).toFixed(2);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`• ${invoiceData.nombreChequesAVenir} chèques de ${montantParCheque}€ chacun`, MARGIN + 5, y + 3);
+        doc.text(`• Montant total des chèques : ${invoiceData.montantRestant.toFixed(2)}€`, MARGIN + 5, y + 7);
+        y += 10;
+      }
+      y += 2;
     }
     // Remerciements & instructions de paiement
     doc.setFont('helvetica', 'bold');
@@ -610,5 +623,7 @@ function coerceInvoice(invoice: Invoice): InvoiceForPDF {
     signatureDate: invoice.signatureDate
       ? String(invoice.signatureDate)
       : undefined,
+    nombreChequesAVenir: Number(invoice.nombreChequesAVenir) || 0, // ✅ Ajout
+    montantRestant: Number(invoice.montantRestant) || 0, // ✅ Ajout
   };
 }

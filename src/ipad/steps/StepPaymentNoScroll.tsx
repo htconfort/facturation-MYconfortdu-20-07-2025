@@ -134,6 +134,13 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             chequeAmount: data.amount,
             notes: data.notes,
           });
+          // ✅ CORRECTION: Sauvegarder aussi dans la structure attendue par le store
+          updatePaiement({
+            method: 'Chèque à venir',
+            depositAmount: acompte,
+            nombreChequesAVenir: data.count, // ← Utiliser nombreChequesAVenir
+            note: data.notes, // ← Utiliser 'note' au lieu de 'notes'
+          });
           setShowChequesPage(false);
         }}
       />
