@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type SignaturePad from 'signature_pad';
 import { initSignaturePad, exportSignature } from '../services/signatureService';
+import { getIOSVersion, isIOSLegacy, getIOSDebugInfo } from '../utils/iOS';
 
 type Props = {
   onSigned?: (dataUrl: string, timestamp: string) => void;
@@ -24,6 +25,11 @@ export default function SignaturePadView({
   
   // 🔧 CRITICAL: Flag pour empêcher repaint pendant dessin
   const isDrawingRef = useRef(false);
+
+  // 🔧 NEW: Détection iOS pour patch compatibilité 18.4.1
+  const iosVersion = getIOSVersion();
+  const needsLegacyCompat = isIOSLegacy();
+  const debugEnabled = new URLSearchParams(location.search).has('debugSig');
 
   // garder des refs stables pour les callbacks
   const onStartRef = useRef(onDrawingStart);
@@ -77,62 +83,79 @@ export default function SignaturePadView({
     };
 
     // resize avec conservation des traits
+    let resizeRAF: number | null = null;
     const handleResize = () => {
-      if (!canvasRef.current) return;
-      
-      // 🚨 CRITICAL: NE PAS repeindre pendant qu'on trace
-      if (isDrawingRef.current) {
-        console.log('🚫 Resize ignoré - dessin en cours');
-        return;
-      }
+      if (resizeRAF) cancelAnimationFrame(resizeRAF);
+      resizeRAF = requestAnimationFrame(() => {
+        if (!canvasRef.current || isDrawingRef.current) {
+          console.log('🚫 Resize ignoré - dessin en cours ou canvas absent');
+          return;
+        }
 
-      const data = p.toData();
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      const { offsetWidth, offsetHeight } = canvasRef.current;
-      if (offsetWidth === 0 || offsetHeight === 0) return;
-      canvasRef.current.width = offsetWidth * ratio;
-      canvasRef.current.height = offsetHeight * ratio;
-      const ctx = canvasRef.current.getContext('2d');
-      if (ctx) {
-        ctx.scale(ratio, ratio);
-      }
-      
-      // 🔧 Utiliser helper pour repeindre fond + restaurer
-      if ((p as any).__repaintBackground) {
-        (p as any).__repaintBackground();
-      }
-      
-      if (data.length > 0) {
-        try { p.fromData(data); } catch { /* noop si incompatible */ }
-      }
-      setHasInk(!p.isEmpty());
+        const data = p.toData();
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const { offsetWidth, offsetHeight } = canvasRef.current;
+        if (offsetWidth === 0 || offsetHeight === 0) return;
+        
+        canvasRef.current.width = offsetWidth * ratio;
+        canvasRef.current.height = offsetHeight * ratio;
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.scale(ratio, ratio);
+        }
+        
+        // 🔧 Utiliser helper pour repeindre fond + restaurer
+        if ((p as any).__repaintBackground) {
+          (p as any).__repaintBackground();
+        }
+        
+        if (data.length > 0) {
+          try { p.fromData(data); } catch { /* noop si incompatible */ }
+        }
+        setHasInk(!p.isEmpty());
+      });
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     
-    // 🔧 CRITICAL: Listeners tactiles non-passifs pour iOS
+    // 🔧 PATCH COMPATIBILITÉ iOS: Listeners tactiles conditionnels selon version
     const canvas = canvasRef.current;
     const preventScroll = (e: TouchEvent) => {
-      console.log('🛡️ preventDefault touch:', e.type);
-      e.preventDefault();
+      if (needsLegacyCompat || isDrawingRef.current) {
+        console.log(`🛡️ preventDefault touch (iOS ${iosVersion || '?'}):`, e.type);
+        e.preventDefault();
+      }
     };
-    canvas.addEventListener('touchstart', preventScroll, { passive: false });
-    canvas.addEventListener('touchmove', preventScroll, { passive: false });
-    canvas.addEventListener('touchend', preventScroll, { passive: false });
+
+    // Activer listeners non-passifs seulement pour iOS < 18.5 (workaround bug)
+    if (needsLegacyCompat) {
+      console.log(`🔧 Activation patch compatibilité iOS ${iosVersion} (< 18.5)`);
+      canvas.addEventListener('touchstart', preventScroll, { passive: false });
+      canvas.addEventListener('touchmove', preventScroll, { passive: false });
+      canvas.addEventListener('touchend', preventScroll, { passive: false });
+    } else {
+      console.log(`✅ iOS ${iosVersion || 'moderne'} - pas de patch nécessaire`);
+    }
 
     setPad(p);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('touchstart', preventScroll as any);
-      canvas.removeEventListener('touchmove', preventScroll as any);
-      canvas.removeEventListener('touchend', preventScroll as any);
+      if (resizeRAF) cancelAnimationFrame(resizeRAF);
+      
+      // Cleanup conditionnel selon version iOS
+      if (needsLegacyCompat) {
+        canvas.removeEventListener('touchstart', preventScroll as any);
+        canvas.removeEventListener('touchmove', preventScroll as any);
+        canvas.removeEventListener('touchend', preventScroll as any);
+      }
+      
       p.removeEventListener('beginStroke', onBegin);
       p.removeEventListener('endStroke', onEnd);
       cleanupEvents();
     };
-  }, []);
+  }, [needsLegacyCompat, iosVersion]);
 
   const handleClear = () => {
     pad?.clear();
@@ -173,6 +196,16 @@ export default function SignaturePadView({
 
   return (
     <div className={`flex flex-col gap-3 ${className || ''}`}>
+      {/* 🔧 DEBUG: Panneau info iOS (query ?debugSig=1) */}
+      {debugEnabled && (
+        <div className="fixed bottom-2 left-2 text-[10px] bg-white/90 px-2 py-1 rounded shadow-lg border z-50">
+          <div>iOS: {iosVersion ?? "non-détecté"}</div>
+          <div>Patch: {needsLegacyCompat ? "✅ actif" : "⏭️ désactivé"}</div>
+          <div>DPR: {window.devicePixelRatio || 1}</div>
+          <div>Drawing: {hasInk ? "✅" : "❌"}</div>
+        </div>
+      )}
+      
       <div className='rounded-2xl border-2 border-myconfort-dark/20 bg-white shadow-sm p-2'>
         <div className='h-[280px] w-full relative'>
           <canvas
