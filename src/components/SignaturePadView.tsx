@@ -21,6 +21,9 @@ export default function SignaturePadView({
   const [pad, setPad] = useState<SignaturePad | null>(null);
   const [hasInk, setHasInk] = useState(false);     // ⇐ y a-t-il quelque chose de dessiné ?
   const [saving, setSaving] = useState(false);     // ⇐ état local d'enregistrement
+  
+  // 🔧 CRITICAL: Flag pour empêcher repaint pendant dessin
+  const isDrawingRef = useRef(false);
 
   // garder des refs stables pour les callbacks
   const onStartRef = useRef(onDrawingStart);
@@ -31,20 +34,23 @@ export default function SignaturePadView({
   // init du pad une seule fois
   useEffect(() => {
     if (!canvasRef.current) return;
-    const p = initSignaturePad(canvasRef.current, { penColor: '#ff00ff' }) as any; // 🔧 MAGENTA pour test visuel
+    const p = initSignaturePad(canvasRef.current, { penColor: '#111827' }) as any; // 🔧 NOIR foncé production
+
+    // 🔧 CRITICAL: Events avec flag drawing
+    const onBegin = () => { 
+      isDrawingRef.current = true; 
+      onStartRef.current?.(); 
+      setHasInk(true); 
+    };
+    const onEnd = () => { 
+      onEndRef.current?.(); 
+      isDrawingRef.current = false;
+      setHasInk(!p.isEmpty()); 
+    };
 
     // Utiliser les événements de signature_pad v5
-    p.addEventListener('beginStroke', () => {
-      onStartRef.current?.();
-      // dès qu'on commence un trait, on considère qu'il y a de l'encre
-      setHasInk(true);
-    });
-    
-    p.addEventListener('endStroke', () => {
-      onEndRef.current?.();
-      // vérifier s'il y a encore du contenu après le trait
-      setHasInk(!p.isEmpty());
-    });
+    p.addEventListener('beginStroke', onBegin);
+    p.addEventListener('endStroke', onEnd);
 
     // Solution de secours : écouter directement sur le canvas
     const handleCanvasInteraction = () => {
@@ -73,6 +79,13 @@ export default function SignaturePadView({
     // resize avec conservation des traits
     const handleResize = () => {
       if (!canvasRef.current) return;
+      
+      // 🚨 CRITICAL: NE PAS repeindre pendant qu'on trace
+      if (isDrawingRef.current) {
+        console.log('🚫 Resize ignoré - dessin en cours');
+        return;
+      }
+
       const data = p.toData();
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
       const { offsetWidth, offsetHeight } = canvasRef.current;
@@ -82,19 +95,13 @@ export default function SignaturePadView({
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
         ctx.scale(ratio, ratio);
-        // 🔧 CRITIQUE: Repeindre fond blanc après resize pour iPad
-        ctx.save();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, offsetWidth, offsetHeight);
-        ctx.restore();
       }
       
-      // 🔧 Alternative: utiliser helper si disponible
+      // 🔧 Utiliser helper pour repeindre fond + restaurer
       if ((p as any).__repaintBackground) {
         (p as any).__repaintBackground();
       }
       
-      p.clear();
       if (data.length > 0) {
         try { p.fromData(data); } catch { /* noop si incompatible */ }
       }
@@ -103,18 +110,56 @@ export default function SignaturePadView({
 
     handleResize();
     window.addEventListener('resize', handleResize);
+    
+    // 🔧 CRITICAL: Listeners tactiles non-passifs pour iOS
+    const canvas = canvasRef.current;
+    const preventScroll = (e: TouchEvent) => {
+      console.log('🛡️ preventDefault touch:', e.type);
+      e.preventDefault();
+    };
+    canvas.addEventListener('touchstart', preventScroll, { passive: false });
+    canvas.addEventListener('touchmove', preventScroll, { passive: false });
+    canvas.addEventListener('touchend', preventScroll, { passive: false });
+
+    setPad(p);
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('touchstart', preventScroll as any);
+      canvas.removeEventListener('touchmove', preventScroll as any);
+      canvas.removeEventListener('touchend', preventScroll as any);
+      p.removeEventListener('beginStroke', onBegin);
+      p.removeEventListener('endStroke', onEnd);
       cleanupEvents();
     };
   }, []);
 
   const handleClear = () => {
     pad?.clear();
-    setHasInk(false); // ⇐ désactive "Enregistrer" après effacement
+    setHasInk(false);
   };
 
-  const handleSave = async () => {
+  // 🔧 DEBUG: Test de rendu direct sur canvas
+  const paintTest = () => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext('2d')!;
+    console.log('🎨 Test paint - canvas:', c.width, 'x', c.height);
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#ff00ff';
+    ctx.fillStyle = '#ff00ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(20, 20);
+    ctx.lineTo(200, 20);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(30, 50, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    console.log('✅ Test paint terminé');
+  };  const handleSave = async () => {
     if (!pad || pad.isEmpty() || saving) return;
     try {
       setSaving(true);
@@ -139,7 +184,8 @@ export default function SignaturePadView({
               overscrollBehavior: 'contain',
               WebkitTouchCallout: 'none',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              WebkitTapHighlightColor: 'transparent', // 🔧 iOS
             }}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
@@ -174,6 +220,14 @@ export default function SignaturePadView({
           className='px-4 py-2 rounded-xl bg-myconfort-blue/20 hover:bg-myconfort-blue/30 min-h-[56px] font-semibold'
         >
           Effacer
+        </button>
+
+        {/* 🔧 DEBUG: Bouton test rendering */}
+        <button
+          onClick={paintTest}
+          className='px-3 py-2 bg-yellow-200 hover:bg-yellow-300 rounded-xl text-sm font-semibold'
+        >
+          🎨 Test
         </button>
 
         <button
