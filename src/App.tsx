@@ -17,11 +17,18 @@ function StepGuard() {
 }
 
 export default function App() {
+  const buildDate = new Date(BUILD_TIME_ISO).toLocaleDateString('fr-FR', { 
+    day: '2-digit', 
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
   return (
     <div>
       {/* ✅ Badge build signature iPad - auto-généré */}
       <footer className="fixed bottom-2 right-2 text-[10px] text-gray-600 bg-white/90 px-2 py-1 rounded shadow-md border border-gray-200 font-mono z-50">
-        iPad Fix • {BUILD_DATE} • {BUILD_COMMIT}
+        iPad Fix • {buildDate} • {BUILD_COMMIT.slice(0,7)}
       </footer>
       <BrowserRouter
         future={{
