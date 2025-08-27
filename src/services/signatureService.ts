@@ -8,11 +8,14 @@ export type SignatureExport = {
 
 export function initSignaturePad(canvas: HTMLCanvasElement) {
   const pad = new SignaturePad(canvas, {
-    throttle: 16,
-    minWidth: 0.75,
-    maxWidth: 2.5,
-    penColor: '#14281D',
-    backgroundColor: '#FFFFFF', // évite la "disparition" visuelle sur iPad/WebView
+    throttle: 8,                    // 🔧 Réduction pour plus de fluidité sur iPad
+    minWidth: 1.5,                  // 🔧 Traits plus épais pour meilleure visibilité
+    maxWidth: 4.0,                  // 🔧 Largeur max augmentée  
+    penColor: '#000000',            // 🔧 Noir pur pour contraste maximum sur iPad
+    backgroundColor: 'rgba(255,255,255,0)', // 🔧 Fond transparent pour éviter conflits WebView
+    velocityFilterWeight: 0.7,      // 🔧 Lissage optimisé pour stylet/doigt
+    minDistance: 2,                 // 🔧 Distance minimum entre points
+    dotSize: 1.5,                   // 🔧 Taille des points pour départ de trait
   });
 
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
@@ -21,7 +24,13 @@ export function initSignaturePad(canvas: HTMLCanvasElement) {
     canvas.width = offsetWidth * ratio;
     canvas.height = offsetHeight * ratio;
     const ctx = canvas.getContext('2d');
-    if (ctx) ctx.scale(ratio, ratio);
+    if (ctx) {
+      ctx.scale(ratio, ratio);
+      // 🔧 Configuration explicite du contexte pour iPad
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalCompositeOperation = 'source-over';
+    }
   }
   pad.clear();
   return pad;

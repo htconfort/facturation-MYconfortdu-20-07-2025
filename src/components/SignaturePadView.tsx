@@ -115,15 +115,33 @@ export default function SignaturePadView({
 
   return (
     <div className={`flex flex-col gap-3 ${className || ''}`}>
-      <div className='rounded-2xl border border-myconfort-dark/20 bg-white shadow-sm p-2'>
-        <div className='h-[280px] w-full'>
+      <div className='rounded-2xl border-2 border-myconfort-dark/20 bg-white shadow-sm p-2'>
+        <div className='h-[280px] w-full relative'>
           <canvas
             ref={canvasRef}
-            className='h-full w-full rounded-xl'
-            style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+            className='h-full w-full rounded-xl bg-white'
+            style={{ 
+              touchAction: 'none', 
+              overscrollBehavior: 'contain',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none'
+            }}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            onContextMenu={(e) => e.preventDefault()}
           />
+          {/* 🔧 Indicateur visuel pour iPad quand vide */}
+          {!hasInk && (
+            <div className='absolute inset-0 flex items-center justify-center pointer-events-none text-gray-400'>
+              <div className='text-center'>
+                <div className='text-2xl mb-2'>✍️</div>
+                <div className='text-sm font-medium'>Signez dans cette zone</div>
+                <div className='text-xs mt-1'>Compatible Apple Pencil et doigt</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

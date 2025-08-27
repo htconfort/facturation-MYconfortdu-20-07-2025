@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Diagnostic Signature iPad</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px; 
+            background: #F2EFE2;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .signature-area {
+            border: 3px solid #477A0C;
+            border-radius: 15px;
+            background: white;
+            margin: 20px 0;
+            position: relative;
+        }
+        canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            touch-action: none;
+            cursor: crosshair;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .clear { background: #ff4444; color: white; }
+        .clear:hover { background: #dd2222; }
+        .save { background: #477A0C; color: white; }
+        .save:hover { background: #3A6A0A; }
+        .test { background: #007acc; color: white; }
+        .test:hover { background: #005a99; }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .info { background: #e8f4f8; color: #0066cc; }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        .device-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .test-configs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .config-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .config-card:hover {
+            border-color: #477A0C;
+            background: #e8f5e8;
+        }
+        .config-card.active {
+            border-color: #477A0C;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnostic Signature iPad MyConfort</h1>
+        <p><strong>Objectif :</strong> Identifier et corriger le problème de signature invisible sur iPad</p>
+        
+        <div class="device-info" id="device-info">
+            <strong>🔍 Informations Dispositif :</strong><br>
+            <span id="device-details">Chargement...</span>
+        </div>
+
+        <h2>🧪 Tests de Configuration</h2>
+        <div class="test-configs" id="test-configs">
+            <!-- Les configurations seront ajoutées par JavaScript -->
+        </div>
+
+        <div class="signature-area">
+            <canvas id="signature-canvas"></canvas>
+        </div>
+        
+        <div class="buttons">
+            <button class="clear" onclick="clearSignature()">🗑️ Effacer</button>
+            <button class="save" onclick="saveSignature()">✓ Enregistrer</button>
+            <button class="test" onclick="runAllTests()">🧪 Tests Auto</button>
+        </div>
+        
+        <div class="status info" id="status">
+            Prêt pour diagnostic... Sélectionnez une configuration et testez.
+        </div>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+        
+        <div id="test-results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.10/dist/signature_pad.umd.min.js"></script>
+    <script>
+        const canvas = document.getElementById('signature-canvas');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const deviceInfoDiv = document.getElementById('device-details');
+        const testResultsDiv = document.getElementById('test-results');
+        
+        let signaturePad = null;
+        let currentConfig = 0;
+
+        // 🔧 Configurations à tester pour iPad
+        const configs = [
+            {
+                name: "Config Actuelle (Problématique)",
+                settings: {
+                    throttle: 16,
+                    minWidth: 0.75,
+                    maxWidth: 2.5,
+                    penColor: '#14281D',
+                    backgroundColor: '#FFFFFF'
+                },
+                description: "Configuration actuelle qui pose problème"
+            },
+            {
+                name: "Config iPad Optimisée v1",
+                settings: {
+                    throttle: 8,
+                    minWidth: 1.5,
+                    maxWidth: 4.0,
+                    penColor: '#000000',
+                    backgroundColor: 'rgba(255,255,255,0)'
+                },
+                description: "Fond transparent, traits plus épais"
+            },
+            {
+                name: "Config iPad Optimisée v2",
+                settings: {
+                    throttle: 16,
+                    minWidth: 2.0,
+                    maxWidth: 5.0,
+                    penColor: '#477A0C',
+                    backgroundColor: '#F2EFE2'
+                },
+                description: "Couleurs MyConfort, contraste élevé"
+            },
+            {
+                name: "Config iPad Apple Pencil",
+                settings: {
+                    throttle: 4,
+                    minWidth: 1.0,
+                    maxWidth: 3.0,
+                    penColor: '#14281D',
+                    backgroundColor: 'rgba(242,239,226,0.9)',
+                    velocityFilterWeight: 0.7,
+                    minDistance: 5
+                },
+                description: "Optimisé pour Apple Pencil"
+            },
+            {
+                name: "Config iPad Touch",
+                settings: {
+                    throttle: 16,
+                    minWidth: 3.0,
+                    maxWidth: 6.0,
+                    penColor: '#000000',
+                    backgroundColor: '#FAFAFA',
+                    dotSize: 2.0
+                },
+                description: "Optimisé pour signature au doigt"
+            }
+        ];
+
+        // 📱 Afficher les informations du dispositif
+        function displayDeviceInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                devicePixelRatio: window.devicePixelRatio,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                windowWidth: window.innerWidth,
+                windowHeight: window.innerHeight,
+                touchSupport: 'ontouchstart' in window,
+                isIpad: /iPad|iPhone|iPod/.test(navigator.userAgent),
+                webkitInfo: !!window.webkit
+            };
+            
+            deviceInfoDiv.innerHTML = Object.entries(info)
+                .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+                .join('<br>');
+        }
+
+        // 🎨 Créer les cartes de configuration
+        function createConfigCards() {
+            const container = document.getElementById('test-configs');
+            container.innerHTML = configs.map((config, index) => `
+                <div class="config-card ${index === 0 ? 'active' : ''}" onclick="selectConfig(${index})">
+                    <strong>${config.name}</strong><br>
+                    <small>${config.description}</small><br>
+                    <code style="font-size: 10px;">
+                        pen: ${config.settings.penColor}<br>
+                        bg: ${config.settings.backgroundColor}<br>
+                        width: ${config.settings.minWidth}-${config.settings.maxWidth}
+                    </code>
+                </div>
+            `).join('');
+        }
+
+        // 🔄 Sélectionner une configuration
+        function selectConfig(index) {
+            currentConfig = index;
+            
+            // Mettre à jour l'UI
+            document.querySelectorAll('.config-card').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+            
+            // Recréer le signature pad avec la nouvelle config
+            initSignaturePad(configs[index]);
+            
+            statusDiv.innerHTML = `✅ Configuration "${configs[index].name}" activée`;
+            statusDiv.className = 'status success';
+        }
+
+        // 🎯 Initialiser le signature pad avec une configuration
+        function initSignaturePad(config) {
+            if (signaturePad) {
+                signaturePad.off();
+            }
+            
+            // Configuration du canvas
+            resizeCanvas();
+            
+            // Créer le nouveau SignaturePad
+            signaturePad = new SignaturePad(canvas, config.settings);
+            
+            // Event listeners pour feedback
+            signaturePad.addEventListener('beginStroke', () => {
+                statusDiv.innerHTML = `🖊️ Dessin en cours... (${config.name})`;
+                statusDiv.className = 'status warning';
+            });
+            
+            signaturePad.addEventListener('endStroke', () => {
+                statusDiv.innerHTML = `✅ Trait terminé avec ${config.name}`;
+                statusDiv.className = 'status success';
+                
+                // Test de visibilité automatique
+                testVisibility();
+            });
+        }
+
+        // 📏 Redimensionner le canvas
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+            
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        }
+
+        // 👁️ Tester la visibilité des traits
+        function testVisibility() {
+            if (!signaturePad || signaturePad.isEmpty()) return;
+            
+            const imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let nonWhitePixels = 0;
+            
+            // Compter les pixels non-blancs
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+                
+                if (a > 0 && (r < 250 || g < 250 || b < 250)) {
+                    nonWhitePixels++;
+                }
+            }
+            
+            const visibilityScore = (nonWhitePixels / (canvas.width * canvas.height)) * 100;
+            
+            if (visibilityScore > 0.1) {
+                statusDiv.innerHTML = `✅ Signature visible ! Score: ${visibilityScore.toFixed(2)}%`;
+                statusDiv.className = 'status success';
+            } else {
+                statusDiv.innerHTML = `❌ Signature invisible ! Score: ${visibilityScore.toFixed(2)}%`;
+                statusDiv.className = 'status error';
+            }
+        }
+
+        // 🧪 Tests automatiques
+        function runAllTests() {
+            testResultsDiv.innerHTML = '<h3>🧪 Résultats des Tests Automatiques</h3>';
+            
+            configs.forEach((config, index) => {
+                setTimeout(() => {
+                    selectConfig(index);
+                    
+                    // Simuler un trait
+                    setTimeout(() => {
+                        simulateDrawing();
+                        
+                        setTimeout(() => {
+                            const result = analyzeConfig(config, index);
+                            testResultsDiv.innerHTML += result;
+                        }, 500);
+                    }, 100);
+                }, index * 1000);
+            });
+        }
+
+        // ✏️ Simuler un trait pour le test
+        function simulateDrawing() {
+            if (!signaturePad) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Simuler un trait horizontal
+            signaturePad._strokeBegin({
+                clientX: rect.left + centerX - 50,
+                clientY: rect.top + centerY
+            });
+            
+            for (let i = 0; i <= 100; i += 10) {
+                signaturePad._strokeUpdate({
+                    clientX: rect.left + centerX - 50 + i,
+                    clientY: rect.top + centerY + Math.sin(i * 0.1) * 10
+                });
+            }
+            
+            signaturePad._strokeEnd({
+                clientX: rect.left + centerX + 50,
+                clientY: rect.top + centerY
+            });
+        }
+
+        // 📊 Analyser une configuration
+        function analyzeConfig(config, index) {
+            const isEmpty = signaturePad.isEmpty();
+            const dataUrl = isEmpty ? null : signaturePad.toDataURL();
+            const visibilityOk = !isEmpty && dataUrl && dataUrl.length > 1000;
+            
+            const status = visibilityOk ? '✅ SUCCÈS' : '❌ ÉCHEC';
+            const statusClass = visibilityOk ? 'success' : 'error';
+            
+            return `
+                <div class="status ${statusClass}" style="margin: 10px 0;">
+                    <strong>${status} - ${config.name}</strong><br>
+                    Vide: ${isEmpty}, DataURL: ${dataUrl ? dataUrl.length + ' chars' : 'null'}<br>
+                    Recommandé pour iPad: ${visibilityOk ? 'OUI' : 'NON'}
+                </div>
+            `;
+        }
+
+        // 🗑️ Effacer la signature
+        function clearSignature() {
+            if (signaturePad) {
+                signaturePad.clear();
+                statusDiv.innerHTML = 'Signature effacée. Prêt pour un nouveau test.';
+                statusDiv.className = 'status info';
+                resultDiv.innerHTML = '';
+            }
+        }
+
+        // 💾 Enregistrer la signature
+        function saveSignature() {
+            if (!signaturePad || signaturePad.isEmpty()) {
+                statusDiv.innerHTML = '⚠️ Aucune signature à enregistrer !';
+                statusDiv.className = 'status warning';
+                return;
+            }
+            
+            const dataUrl = signaturePad.toDataURL('image/png');
+            const timestamp = new Date().toISOString();
+            
+            statusDiv.innerHTML = '✅ Signature enregistrée avec succès !';
+            statusDiv.className = 'status success';
+            
+            resultDiv.innerHTML = `
+                <h3>📋 Résultat de l'enregistrement :</h3>
+                <p><strong>Configuration:</strong> ${configs[currentConfig].name}</p>
+                <p><strong>Timestamp:</strong> ${timestamp}</p>
+                <p><strong>Taille des données:</strong> ${dataUrl.length} caractères</p>
+                <img src="${dataUrl}" style="max-width: 300px; border: 2px solid #477A0C; border-radius: 10px; background: white;" alt="Signature">
+                <br><br>
+                <textarea readonly style="width: 100%; height: 60px; font-size: 10px; font-family: monospace;">${dataUrl.substring(0, 200)}...</textarea>
+                <br><br>
+                <button onclick="copyToClipboard('${dataUrl.replace(/'/g, "\\'")}')">📋 Copier DataURL</button>
+            `;
+        }
+
+        // 📋 Copier dans le presse-papiers
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('DataURL copié dans le presse-papiers !');
+            });
+        }
+
+        // 🚀 Initialisation
+        window.addEventListener('load', () => {
+            displayDeviceInfo();
+            createConfigCards();
+            selectConfig(0); // Commencer par la config actuelle
+            
+            console.log('🔧 Diagnostic Signature iPad initialisé');
+            console.log('📊 Configurations disponibles:', configs.length);
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
