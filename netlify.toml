@@ -2,6 +2,9 @@
   publish = "dist"
   command = "npm run build"
   base = "."
+  
+# Désactiver tous les plugins temporairement
+[[plugins]]
 
 [build.environment]
   NODE_VERSION = "20.11.1"
