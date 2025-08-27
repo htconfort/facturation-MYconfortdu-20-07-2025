@@ -6,7 +6,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import WizardDemo from './pages/WizardDemo';
 import DebugFooter from './pages/DebugFooter';
-import { BUILD_COMMIT, BUILD_DATE } from './buildInfo';
+import { BUILD_COMMIT, BUILD_BRANCH, BUILD_CONTEXT, BUILD_URL, BUILD_TIME_ISO } from './buildInfo';
 
 // Guard pour borner les steps à [1..7]
 function StepGuard() {
