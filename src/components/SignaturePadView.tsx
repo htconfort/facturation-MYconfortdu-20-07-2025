@@ -80,7 +80,20 @@ export default function SignaturePadView({
       canvasRef.current.width = offsetWidth * ratio;
       canvasRef.current.height = offsetHeight * ratio;
       const ctx = canvasRef.current.getContext('2d');
-      if (ctx) ctx.scale(ratio, ratio);
+      if (ctx) {
+        ctx.scale(ratio, ratio);
+        // 🔧 CRITIQUE: Repeindre fond blanc après resize pour iPad
+        ctx.save();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, offsetWidth, offsetHeight);
+        ctx.restore();
+      }
+      
+      // 🔧 Alternative: utiliser helper si disponible
+      if ((p as any).__repaintBackground) {
+        (p as any).__repaintBackground();
+      }
+      
       p.clear();
       if (data.length > 0) {
         try { p.fromData(data); } catch { /* noop si incompatible */ }
