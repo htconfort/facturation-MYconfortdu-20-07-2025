@@ -1,0 +1,980 @@
+/* ===============================================
+   RESPONSIVE IPAD OPTIMISÉ AVEC SCALE DYNAMIQUE
+   =============================================== */
+
+/* Variables pour les dimensions iPad */
+:root {
+  --ipad-portrait-width: 768px;
+  --ipad-portrait-height: 1024px;
+  --ipad-landscape-width: 1024px;
+  --ipad-landscape-height: 768px;
+  --navigation-height: 60px;
+  --content-height-portrait: calc(100vh - var(--navigation-height));
+  --content-height-landscape: calc(100vh - var(--navigation-height));
+  
+  /* Variables pour optimiser la vue d'ensemble sur iPad */
+  --ipad-content-scale: 0.85;
+  --ipad-font-scale: 0.9;
+  
+  /* Variables spécifiques facturation */
+  --facturation-primary: #477A0C;
+  --facturation-secondary: #5A8F0F;
+  --wizard-step-height: 48px;
+  --ipad-frame-padding: 24px;
+}
+
+/* ===============================================
+   RESET ANTI-ZOOM iOS ET BASES MODERNES
+   =============================================== */
+
+/* Anti "text inflation" iOS */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Évite le re-zoom iOS sur inputs - CRITIQUE */
+input, select, textarea, button {
+  font-size: 16px !important; /* iOS ne zoome pas à 16px+ */
+}
+
+/* Scroll fluide et anti-bounce */
+html, body, #root {
+  overscroll-behavior: contain;
+  touch-action: manipulation;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container principal pour fit scale */
+.fit-scale-container {
+  width: 100svw;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* ===============================================
+   SIMULATION CADRE IPAD PHYSIQUE (STATIQUE)
+   =============================================== */
+
+/* Stage iPad - dimensions fixes 1024x768 */
+.ipad-stage {
+  width: 1024px;
+  height: 768px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 0 0 8px #2a2a2a,
+    0 0 0 12px #1a1a1a,
+    0 0 32px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+/* Effet bordure métallique iPad */
+.ipad-stage::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid rgba(100,100,100,0.3);
+  border-radius: 24px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Bouton Home simulé */
+.ipad-stage::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, #333 0%, #111 100%);
+  border: 1px solid rgba(100,100,100,0.4);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+  z-index: -1;
+}
+
+/* ===============================================
+   LAYOUT WIZARD DANS LE STAGE
+   =============================================== */
+
+/* Application dans le stage iPad */
+.ipad-app-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header facturation compact */
+.ipad-app-header {
+  flex-shrink: 0;
+  height: 32px;
+  background: linear-gradient(to right, var(--facturation-primary), var(--facturation-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ipad-app-header button {
+  font-size: 12px !important;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.ipad-app-header button:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Contenu principal du wizard */
+.ipad-wizard-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
+}
+
+/* Scroll interne contrôlé pour les steps */
+.ipad-step-container {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Footer navigation */
+.ipad-wizard-footer {
+  flex-shrink: 0;
+  height: 48px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+}
+
+/* ===============================================
+   NAVIGATION WIZARD RESPONSIVE
+   =============================================== */
+
+/* Stepper compact */
+.ipad-wizard-stepper {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.ipad-wizard-stepper .step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.ipad-wizard-stepper .step-dot.active {
+  background: var(--facturation-primary);
+  transform: scale(1.2);
+}
+
+.ipad-wizard-stepper .step-dot.completed {
+  background: #10b981;
+}
+
+.ipad-wizard-stepper .step-dot.inactive {
+  background: #d1d5db;
+}
+
+/* Boutons navigation optimisés tactile */
+.ipad-nav-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  min-width: 88px;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.ipad-nav-button:active {
+  transform: scale(0.96);
+}
+
+.ipad-nav-button.prev {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.ipad-nav-button.prev:hover {
+  background: #e5e7eb;
+}
+
+.ipad-nav-button.next {
+  background: var(--facturation-primary);
+  color: white;
+}
+
+.ipad-nav-button.next:hover {
+  background: var(--facturation-secondary);
+}
+
+/* ===============================================
+   OPTIMISATIONS STEPS FACTURATION
+   =============================================== */
+
+/* Densité UI contrôlée pour les formulaires */
+.ipad-form-field {
+  margin-bottom: 12px;
+}
+
+.ipad-form-field label {
+  font-size: 13px !important;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.ipad-form-field input,
+.ipad-form-field select,
+.ipad-form-field textarea {
+  font-size: 16px !important; /* Anti-zoom iOS */
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  width: 100%;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.ipad-form-field input:focus,
+.ipad-form-field select:focus,
+.ipad-form-field textarea:focus {
+  outline: none;
+  border-color: var(--facturation-primary);
+  box-shadow: 0 0 0 3px rgba(71, 122, 12, 0.1);
+}
+
+/* Grilles de formulaires compactes */
+.ipad-form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.ipad-form-grid.three-cols {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.ipad-form-grid.single-col {
+  grid-template-columns: 1fr;
+}
+
+/* Grilles de produits optimisées */
+.ipad-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Cartes produits compactes */
+.ipad-product-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.ipad-product-card:hover {
+  border-color: var(--facturation-primary);
+  box-shadow: 0 2px 8px rgba(71, 122, 12, 0.1);
+}
+
+.ipad-product-card:active {
+  transform: scale(0.98);
+}
+
+.ipad-product-card.selected {
+  border-color: var(--facturation-primary);
+  background: rgba(71, 122, 12, 0.05);
+}
+
+/* ===============================================
+   MESSAGES ET VALIDATIONS
+   =============================================== */
+
+/* Messages de validation compacts */
+.ipad-validation-message {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px !important;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.ipad-validation-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.ipad-validation-message.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.ipad-validation-message.warning {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}
+
+/* ===============================================
+   TABLEAUX ET LISTES COMPACTS
+   =============================================== */
+
+/* Tables responsives */
+.ipad-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px !important;
+}
+
+.ipad-table th,
+.ipad-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.ipad-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 13px !important;
+}
+
+/* Listes avec gaps réduits */
+.ipad-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ipad-list-item {
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ipad-list-item:hover {
+  border-color: var(--facturation-primary);
+}
+
+.ipad-list-item.selected {
+  border-color: var(--facturation-primary);
+  background: rgba(71, 122, 12, 0.05);
+}
+
+/* ===============================================
+   SCROLLBARS PERSONNALISÉES
+   =============================================== */
+
+/* Scrollbars minces et discrètes */
+.ipad-step-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ipad-step-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ipad-step-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.ipad-step-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.4);
+}
+
+/* ===============================================
+   RESPONSIVE BREAKPOINTS SPÉCIFIQUES
+   =============================================== */
+
+/* Ajustements pour différentes tailles d'iPad */
+@media screen and (max-width: 1024px) {
+  .ipad-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .ipad-form-grid.three-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .ipad-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ipad-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===============================================
+   ANIMATIONS ET MICRO-INTERACTIONS
+   =============================================== */
+
+/* Transitions fluides pour navigation */
+.ipad-step-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Animation apparition étapes */
+.ipad-step-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.ipad-step-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s ease;
+}
+
+.ipad-step-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ipad-step-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.3s ease;
+}
+
+/* Feedback tactile universel */
+.ipad-touchable {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.ipad-touchable:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* ===============================================
+   SIMULATION CADRE IPAD PHYSIQUE
+   =============================================== */
+
+/* Container principal pour simulation iPad */
+.ipad-frame-container {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ipad-frame-padding);
+  box-sizing: border-box;
+}
+
+/* Cadre métallique iPad */
+.ipad-device-frame {
+  position: relative;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #000 100%);
+  padding: 24px;
+  border-radius: 32px;
+  box-shadow: 
+    0 0 0 2px rgba(255,255,255,0.1),
+    0 8px 32px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* Bordure métallique fine */
+.ipad-device-frame::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(100,100,100,0.3);
+  border-radius: 24px;
+  pointer-events: none;
+}
+
+/* Bouton Home iPad */
+.ipad-home-button {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, #333 0%, #111 100%);
+  border: 1px solid rgba(100,100,100,0.4);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Écran iPad - dimensions exactes */
+.ipad-screen {
+  width: 1024px;
+  height: 768px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 
+    0 0 0 1px rgba(0,0,0,0.1),
+    inset 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+/* ===============================================
+   OPTIMISATION TAILLE POUR IPAD FACTURATION
+   =============================================== */
+
+/* Détection iPad et tablettes */
+@media only screen 
+  and (min-device-width: 768px) 
+  and (max-device-width: 1024px) 
+  and (-webkit-min-device-pixel-ratio: 1) {
+  
+  /* Réduction globale des éléments pour vue d'ensemble */
+  .ipad-screen {
+    font-size: calc(16px * var(--ipad-font-scale));
+    line-height: 1.4;
+  }
+  
+  /* Navigation wizard plus compacte */
+  .wizard-navigation {
+    height: calc(var(--wizard-step-height) * var(--ipad-content-scale));
+    min-height: calc(var(--wizard-step-height) * var(--ipad-content-scale));
+  }
+  
+  .wizard-navigation button {
+    min-width: calc(120px * var(--ipad-content-scale)) !important;
+    height: calc(var(--wizard-step-height) * var(--ipad-content-scale)) !important;
+    padding: 0 calc(16px * var(--ipad-content-scale)) !important;
+    font-size: calc(14px * var(--ipad-font-scale));
+  }
+  
+  /* Formulaires facturation optimisés */
+  .step-content {
+    padding: calc(16px * var(--ipad-content-scale));
+  }
+  
+  /* Champs de saisie plus compacts */
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    padding: calc(8px * var(--ipad-content-scale));
+    font-size: calc(14px * var(--ipad-font-scale));
+    height: calc(40px * var(--ipad-content-scale));
+  }
+  
+  /* Labels plus compacts */
+  .form-field label {
+    font-size: calc(13px * var(--ipad-font-scale));
+    margin-bottom: calc(4px * var(--ipad-content-scale));
+  }
+  
+  /* Grilles de produits facturation */
+  .products-grid {
+    gap: calc(12px * var(--ipad-content-scale)) !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  /* Cartes produits compactes */
+  .product-card {
+    padding: calc(12px * var(--ipad-content-scale));
+    min-height: calc(120px * var(--ipad-content-scale));
+  }
+  
+  /* Boutons d'action plus compacts */
+  .btn-primary,
+  .btn-secondary {
+    padding: calc(8px * var(--ipad-content-scale)) calc(16px * var(--ipad-content-scale));
+    font-size: calc(14px * var(--ipad-font-scale));
+    min-height: calc(36px * var(--ipad-content-scale));
+  }
+}
+
+/* ===============================================
+   RESET ET BASE POUR IPAD FACTURATION
+   =============================================== */
+
+/* Application dans le cadre iPad */
+.ipad-screen .app-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header facturation compact */
+.ipad-screen .app-header {
+  flex-shrink: 0;
+  height: 28px;
+  background: linear-gradient(to right, var(--facturation-primary), var(--facturation-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Contenu principal du wizard */
+.ipad-screen .wizard-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer navigation */
+.ipad-screen .wizard-footer {
+  flex-shrink: 0;
+  height: 48px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+/* ===============================================
+   NAVIGATION WIZARD RESPONSIVE
+   =============================================== */
+
+/* Stepper compact */
+.wizard-stepper {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.wizard-stepper .step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.wizard-stepper .step-dot.active {
+  background: var(--facturation-primary);
+}
+
+.wizard-stepper .step-dot.completed {
+  background: #10b981;
+}
+
+.wizard-stepper .step-dot.inactive {
+  background: #d1d5db;
+}
+
+/* Boutons navigation */
+.wizard-nav-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-height: 32px;
+  border: none;
+  cursor: pointer;
+}
+
+.wizard-nav-button.prev {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.wizard-nav-button.prev:hover {
+  background: #e5e7eb;
+}
+
+.wizard-nav-button.next {
+  background: var(--facturation-primary);
+  color: white;
+}
+
+.wizard-nav-button.next:hover {
+  background: var(--facturation-secondary);
+}
+
+/* ===============================================
+   STEPS FACTURATION SPÉCIFIQUES
+   =============================================== */
+
+/* Step Facture */
+.step-facture .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Step Client */
+.step-client .client-search {
+  margin-bottom: 16px;
+}
+
+.step-client .client-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Step Produits */
+.step-produits .products-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.step-produits .products-filters {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.step-produits .products-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Step Signature */
+.step-signature .signature-pad {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+/* Step Aperçu */
+.step-apercu .invoice-preview {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ===============================================
+   MEDIA QUERIES IPAD SPÉCIFIQUES
+   =============================================== */
+
+/* iPad Paysage optimal (1024x768) */
+@media screen and (width: 1024px) and (height: 768px),
+       screen and (min-width: 1024px) and (max-width: 1024px) and (orientation: landscape) {
+  
+  /* Ajustements spécifiques paysage */
+  .step-produits .products-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  .product-card {
+    min-height: 100px !important;
+    padding: 8px !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* iPad Portrait (768x1024) */
+@media screen and (width: 768px) and (height: 1024px),
+       screen and (min-width: 768px) and (max-width: 768px) and (orientation: portrait) {
+  
+  .step-produits .products-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ===============================================
+   BOUTONS TACTILES OPTIMISÉS
+   =============================================== */
+
+/* Taille minimum Apple HIG pour le tactile */
+.touch-target,
+button,
+input,
+select,
+.clickable {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Feedback tactile */
+.touch-target:active,
+button:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* ===============================================
+   SCROLLING OPTIMISÉ IPAD
+   =============================================== */
+
+/* Scroll smooth pour les conteneurs */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.5);
+}
+
+/* ===============================================
+   ANIMATIONS ET TRANSITIONS
+   =============================================== */
+
+/* Transitions fluides pour navigation */
+.wizard-step-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Animation apparition étapes */
+.step-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.step-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s ease;
+}
+
+.step-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.step-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.3s ease;
+}
+
+/* ===============================================
+   CORRECTIONS SPÉCIFIQUES FACTURATION
+   =============================================== */
+
+/* Prévisualisation PDF */
+.pdf-preview-container {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Tableau récapitulatif */
+.invoice-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-summary-table th,
+.invoice-summary-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.invoice-summary-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Messages de validation */
+.validation-message {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.validation-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.validation-message.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.validation-message.warning {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}
