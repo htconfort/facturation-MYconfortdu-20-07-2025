@@ -239,14 +239,53 @@ function MainApp() {
       }
       
       console.log('📧 Envoi email facture rapide:', quickInvoice.invoiceNumber);
-      
-      // Utiliser le service N8N existant pour l'envoi
-      await handleSendPDF();
-      
-      showToast(
-        `📧 Email envoyé à ${quickInvoice.clientEmail}`,
-        'success'
+      showToast("📤 Préparation de l'envoi de la facture rapide...", 'success');
+
+      // Nettoyage des données pour la facture rapide
+      const cleanedQuickInvoice = {
+        ...quickInvoice,
+        clientName: sanitizeClientData({ name: quickInvoice.clientName }).name,
+        clientAddress: sanitizeClientData({ address: quickInvoice.clientAddress })
+          .address,
+        clientAddressLine2: sanitizeClientData({
+          addressLine2: quickInvoice.clientAddressLine2,
+        }).addressLine2,
+        clientCity: sanitizeClientData({ city: quickInvoice.clientCity }).city,
+        clientEmail: sanitizeClientData({ email: quickInvoice.clientEmail }).email,
+        clientPhone: sanitizeClientData({ phone: quickInvoice.clientPhone }).phone,
+      };
+
+      console.log('📋 Facture rapide nettoyée:', cleanedQuickInvoice);
+
+      // Générer le PDF pour la facture rapide
+      const pdfBlob = await PDFService.generateInvoicePDF(cleanedQuickInvoice);
+
+      // Convertir en base64
+      const reader = new FileReader();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error('Erreur conversion PDF'));
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      // Envoyer via N8N avec le même service que les factures normales
+      const result = await N8nWebhookService.sendInvoiceToN8n(
+        cleanedQuickInvoice,
+        pdfBase64
       );
+
+      if (result.success) {
+        showToast(
+          `✅ Facture rapide envoyée par email à ${quickInvoice.clientEmail}`,
+          'success'
+        );
+      } else {
+        throw new Error(result.message);
+      }
       
     } catch (error) {
       console.error('❌ Erreur envoi email facture rapide:', error);
