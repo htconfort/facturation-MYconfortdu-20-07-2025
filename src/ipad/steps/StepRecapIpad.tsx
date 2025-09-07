@@ -214,30 +214,30 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F2EFE2] overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
       
-      {/* Header sticky */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b shadow-sm flex-shrink-0">
+      {/* Header compact */}
+      <header className="flex-shrink-0 bg-white/90 backdrop-blur border-b shadow-sm">
         <div className="p-3">
-          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 className="text-lg font-bold text-gray-800 flex items-center gap-2">
             📄 Récapitulatif Final
-            <span className="text-lg font-normal text-blue-600">#{invoiceNumber}</span>
+            <span className="text-base font-normal text-blue-600">#{invoiceNumber}</span>
           </h1>
         </div>
       </header>
 
-      {/* Main content - scrollable */}
-      <main className="flex-1 overflow-y-auto overscroll-contain">
-        <div className="p-4 pb-32 max-w-5xl mx-auto"> {/* Extra padding pour footer */}
+      {/* Main content - scrollable avec padding pour éviter le footer */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-3 pb-24"> {/* Extra padding pour footer */}
           
           {/* Grille responsive 2 colonnes sur iPad */}
-          <div className="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 gap-3">
             
             {/* Colonne gauche */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               
               {/* Informations facture */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   📋 Facture
                 </h3>
@@ -264,7 +264,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               </div>
 
               {/* Client */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   👤 Client
                 </h3>
@@ -295,7 +295,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               </div>
 
               {/* Paiement */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   💳 Paiement
                 </h3>
@@ -328,10 +328,10 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
             </div>
 
             {/* Colonne droite */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               
               {/* Produits */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   📦 Produits ({produits.length})
                 </h3>
@@ -384,7 +384,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               </div>
 
               {/* Livraison */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   🚚 Livraison
                 </h3>
@@ -403,7 +403,7 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               </div>
 
               {/* Signature */}
-              <div className="bg-white rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-3 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                   ✍️ Signature & CGV
                 </h3>
@@ -441,34 +441,27 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
         </div>
       </main>
 
-      {/* Footer vraiment fixe en bas de l'écran, toujours visible */}
-      <footer
-        className="
-          fixed bottom-0 left-0 right-0 z-40
-          bg-white/95 backdrop-blur border-t border-[#477A0C]/20
-          shadow-lg p-4
-          supports-[padding:max(0px)]:pb-[env(safe-area-inset-bottom)]
-        "
-      >
-        <div className="max-w-5xl mx-auto">
+      {/* Footer intégré dans le conteneur iPad */}
+      <footer className="flex-shrink-0 bg-white/95 backdrop-blur border-t border-[#477A0C]/20 shadow-lg p-3">
+        <div className="w-full">
           
           {/* Message d'obligation si pas encore fait */}
           {(!isInvoiceSaved || !isEmailSent) && (
-            <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
-              <p className="text-sm text-orange-800 text-center">
+            <div className="mb-3 p-2 bg-orange-100 border border-orange-300 rounded-lg">
+              <p className="text-xs text-orange-800 text-center">
                 ⚠️ <strong>Enregistrer</strong> et <strong>Envoyer</strong> sont obligatoires pour continuer
               </p>
             </div>
           )}
 
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-5 gap-2">
             
             {/* Bouton Retour */}
             <button
               onClick={onPrev}
-              className="bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors px-4 py-3 flex flex-col items-center justify-center min-h-[70px]"
+              className="bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors px-2 py-2 flex flex-col items-center justify-center min-h-[60px]"
             >
-              <span className="text-lg mb-1">←</span>
+              <span className="text-base mb-1">←</span>
               <div className="text-xs">Retour</div>
             </button>
 
@@ -477,9 +470,9 @@ export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
               <button
                 onClick={handleSaveInvoice}
                 disabled={isLoading}
-                className="w-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[70px]"
+                className="w-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
               >
-                <span className="text-lg mb-1">💾</span>
+                <span className="text-base mb-1">💾</span>
                 <div className="text-center">
                   <div className="text-xs">Enregistrer</div>
                   <div className="text-xs opacity-80">Facture</div>

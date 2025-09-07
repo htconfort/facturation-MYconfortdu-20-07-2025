@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
-import StepsNavigator from '../navigation/StepsNavigator';
 import StepFacture from './steps/StepFacture';
 // import StepClient from './steps/StepClient'; //  remplacé par NoScroll
 import StepClientNoScroll from './steps/StepClientNoScroll';
@@ -66,7 +65,7 @@ export default function IpadWizard() {
   // Plein écran visuel (fixe), compatible iOS Safari
   return (
     <div
-      className='fixed inset-0 bg-white overflow-hidden'
+      className='fixed inset-0 bg-white overflow-hidden flex items-center justify-center'
       style={{
         width: '100vw',
         height: '100dvh',
@@ -76,6 +75,22 @@ export default function IpadWizard() {
         paddingRight: 'env(safe-area-inset-right, 0px)',
       }}
     >
+      {/* Cadre noir simulant un iPad 9ème génération (10,2") */}
+      <div 
+        className='bg-black rounded-2xl p-4 shadow-2xl'
+        style={{
+          width: 'min(90vw, 1080px)',
+          height: 'min(90vh, 810px)',
+          aspectRatio: '4/3'
+        }}
+      >
+        {/* Écran iPad avec contenu - marge 1cm autour de l'application */}
+        <div 
+          className='w-full h-full bg-white rounded-lg overflow-hidden relative'
+          style={{ padding: '1cm' }}
+        >
+          {/* Application optimisée pour remplir tout l'espace avec marge 1cm */}
+          <div className='w-full h-full overflow-hidden bg-gray-100 rounded-lg'>
       {isPortrait ? (
         <div className='w-full h-full flex items-center justify-center p-8 text-center bg-gradient-to-br from-[#477A0C] to-[#5A8F0F]'>
           <div className='bg-white rounded-2xl p-8 shadow-2xl max-w-md'>
@@ -95,7 +110,7 @@ export default function IpadWizard() {
           </div>
         </div>
       ) : (
-        <StepsNavigator>
+        <div className='w-full h-full'>
           <WizardSurface
             step={step}
             onGo={dir => {
@@ -106,8 +121,11 @@ export default function IpadWizard() {
             }}
             onQuit={() => navigate('/')}
           />
-        </StepsNavigator>
+        </div>
       )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
