@@ -20,14 +20,9 @@ export default function ScaledStage({
 
   return (
     <div
-      className={`w-[100svw] h-[100svh] flex items-center justify-center overflow-hidden ${className}`}
+      className={`w-screen h-screen flex items-center justify-center overflow-hidden ${className}`}
       style={{
         padding,
-        // Safe areas iOS
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
         background: 'black',
       }}
     >

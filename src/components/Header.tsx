@@ -10,6 +10,7 @@ import {
   Loader2,
   Bug,
   Tablet,
+  Zap,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -21,6 +22,7 @@ interface HeaderProps {
   onScrollToClient?: () => void;
   onScrollToProducts?: () => void;
   onGoToIpad?: () => void; // Ajout du bouton iPad
+  onShowQuickInvoice?: () => void; // Ajout du bouton Facture Rapide
   invoiceNumber?: string;
   clientName?: string;
   canSendToDrive?: boolean;
@@ -33,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   onShowGoogleDrive,
   onShowDebug,
   onGoToIpad,
+  onShowQuickInvoice,
   invoiceNumber,
   clientName,
   canSendToDrive = false,
@@ -173,6 +176,18 @@ export const Header: React.FC<HeaderProps> = ({
             <Archive size={18} />
             <span className='hidden md:inline'>Factures</span>
           </button>
+
+          {onShowQuickInvoice && (
+            <button
+              onClick={onShowQuickInvoice}
+              className='bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white'
+              title='Créer une facture rapide pour vente immédiate'
+            >
+              <Zap size={18} />
+              <span className='hidden md:inline'>Facture Rapide</span>
+              <span className='hidden lg:inline'>⚡️</span>
+            </button>
+          )}
 
           <button
             onClick={onShowClients}

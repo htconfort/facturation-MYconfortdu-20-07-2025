@@ -11,6 +11,7 @@ import {
   MapPin,
   Edit,
   ArrowLeft,
+  Cloud,
 } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
@@ -42,6 +43,56 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
   >('all');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Fonction de synchronisation simple
+  const handleSyncInvoices = async () => {
+    setIsSyncing(true);
+    try {
+      // Récupérer les factures depuis localStorage
+      const localInvoices = localStorage.getItem('myconfortInvoices');
+      if (localInvoices) {
+        const parsedInvoices: Invoice[] = JSON.parse(localInvoices);
+        
+        // Envoyer chaque facture vers N8N pour synchronisation
+        for (const invoice of parsedInvoices) {
+          const payload = {
+            action: 'sync_invoice',
+            invoice_data: {
+              numero_facture: invoice.invoiceNumber,
+              date_facture: invoice.invoiceDate,
+              client_nom: invoice.clientName,
+              client_email: invoice.clientEmail,
+              montant_ttc: invoice.montantTTC,
+              lieu_evenement: invoice.eventLocation,
+              conseiller: invoice.advisorName,
+              statut: invoice.signature ? 'signee' : 'en_attente',
+              device_id: navigator.userAgent,
+            }
+          };
+
+          try {
+            await fetch('https://hook.eu2.make.com/3n1ysii6g7rqy2lkmzdjbqn3d3nh30kr', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            });
+          } catch (error) {
+            console.warn('Erreur sync pour facture:', invoice.invoiceNumber, error);
+          }
+        }
+        
+        alert('🔄 Synchronisation terminée ! Les factures ont été envoyées au serveur.');
+      }
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+      alert('❌ Erreur lors de la synchronisation');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Filtrer et trier les factures
   const filteredAndSortedInvoices = React.useMemo(() => {
@@ -168,6 +219,25 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
         maxWidth='max-w-7xl'
       >
         <div className='space-y-6'>
+          {/* Bouton de synchronisation */}
+          <div className='flex justify-between items-center'>
+            <div className='text-sm text-gray-600'>
+              {filteredAndSortedInvoices.length} facture{filteredAndSortedInvoices.length > 1 ? 's' : ''} trouvée{filteredAndSortedInvoices.length > 1 ? 's' : ''}
+            </div>
+            <button
+              onClick={handleSyncInvoices}
+              disabled={isSyncing}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                isSyncing 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+            >
+              <Cloud className={`w-4 h-4 ${isSyncing ? 'animate-pulse' : ''}`} />
+              {isSyncing ? 'Synchronisation...' : 'Synchroniser toutes les factures'}
+            </button>
+          </div>
+
           {/* Filtres et recherche */}
           <div className='bg-gray-50 p-4 rounded-lg'>
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
