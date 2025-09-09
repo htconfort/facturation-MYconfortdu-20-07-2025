@@ -156,7 +156,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full bg-myconfort-cream flex flex-col'>
+    <div className='w-full h-full bg-myconfort-cream flex flex-col'>
       {/* Header */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0'>
         <h1 className='text-2xl font-bold text-myconfort-dark'>
@@ -168,7 +168,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
       </div>
 
       {/* Content scrollable */}
-      <div className='flex-1 px-6 py-4 flex flex-col pb-24'>
+      <div className='flex-1 px-6 py-4 flex flex-col pb-24 min-h-0'>
         {/* summary */}
         <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-6'>
           <div className='grid grid-cols-3 gap-4 text-center'>
@@ -493,7 +493,7 @@ function AlmaDetailsPage({
   ];
 
   return (
-    <div className='w-full bg-myconfort-cream flex flex-col'>
+    <div className='w-full h-full bg-myconfort-cream flex flex-col'>
       <div className='px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0'>
         <div className='flex items-center gap-3'>
           <img src={AlmaLogo} alt='Alma' className='h-8' />
@@ -508,7 +508,7 @@ function AlmaDetailsPage({
         </div>
       </div>
 
-      <div className='flex-1 px-6 py-6 flex flex-col pb-24'>
+      <div className='flex-1 px-6 py-6 flex flex-col pb-24 min-h-0'>
         <div className='max-w-2xl mx-auto space-y-4'>
           {options.map(option => (
             <button
@@ -578,7 +578,7 @@ function ChequesDetailsPage({
   const tabs = Array.from({ length: 9 }, (_, i) => i + 2);
 
   return (
-    <div className='w-full bg-myconfort-cream flex flex-col'>
+    <div className='w-full h-full bg-myconfort-cream flex flex-col'>
       {/* Header amber */}
       <div className='px-6 py-4 border-b border-amber-500/30 bg-amber-50 flex-shrink-0'>
         <h1 className='text-2xl font-bold text-amber-700'>
@@ -589,7 +589,7 @@ function ChequesDetailsPage({
         </p>
       </div>
 
-      <div className='flex-1 px-6 py-6 space-y-6 flex flex-col pb-24'>
+      <div className='flex-1 px-6 py-6 space-y-6 flex flex-col pb-24 min-h-0'>
         {/* tabs 2..10 */}
         <div>
           <div className='flex flex-wrap gap-2'>
