@@ -1,26 +1,59 @@
-/* ===== STYLES IPAD ORIENTATION & SCROLL ===== */
+/* ===== STYLES IPAD RESPONSIVE (PORTRAIT + PAYSAGE) ===== */
 
-/* Overlay orientation (portrait) */
-.orientation-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.9);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  padding: 20px;
+/* Adaptations responsive pour les deux orientations */
+@media screen and (max-width: 1024px) {
+  /* Ajustements pour iPad en général */
+  .wizard-step-content {
+    padding: 16px;
+  }
+  
+  /* Taille de police adaptée */
+  html {
+    font-size: 16px;
+  }
 }
 
-/* Afficher l'overlay uniquement en portrait */
-@media (orientation: portrait) {
-  .orientation-overlay {
-    display: flex;
+/* iPad Paysage (1024×768) - Optimisé pour l'espace horizontal */
+@media screen and (orientation: landscape) and (max-width: 1024px) {
+  .wizard-step-content {
+    padding: 12px 20px;
+  }
+  
+  /* Grilles plus larges en paysage */
+  .form-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .products-grid-responsive {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* iPad Portrait (768×1024) - Optimisé pour l'espace vertical */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  .wizard-step-content {
+    padding: 20px 16px;
+  }
+  
+  /* Grilles plus étroites en portrait */
+  .form-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .products-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Navigation plus compacte en portrait */
+  .wizard-navigation {
+    padding: 8px 12px;
+  }
+  
+  /* Headers plus compacts */
+  .step-header h1 {
+    font-size: 1.5rem;
   }
 }
 

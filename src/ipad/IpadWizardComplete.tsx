@@ -60,39 +60,10 @@ export default function IpadWizardComplete() {
           />
         </StepsNavigator>
       </div>
-      
-      {/* Overlay orientation - affiché uniquement en portrait via CSS */}
-      <div className="orientation-overlay">
-        <OrientationMessage />
-      </div>
     </div>
   );
 }
 
-function OrientationMessage() {
-  return (
-    <div className='h-full flex items-center justify-center p-6 bg-gradient-to-br from-amber-100 to-orange-200'>
-      <div className='text-center bg-white p-8 rounded-2xl shadow-2xl max-w-sm mx-auto'>
-        <div className='text-6xl mb-4'>📱</div>
-        <h1 className='text-2xl font-bold text-gray-800 mb-4'>
-          Mode Paysage Requis
-        </h1>
-        <p className='text-gray-600 mb-6 leading-relaxed'>
-          Pour une expérience optimale,{' '}
-          <strong>tournez votre tablette en mode paysage</strong>.
-        </p>
-        <div className='flex justify-center mb-4'>
-          <div className='bg-blue-100 p-3 rounded-lg'>
-            <div className='text-3xl'>🔄</div>
-          </div>
-        </div>
-        <p className='text-sm text-gray-500'>
-          L'application se chargera automatiquement
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function WizardSurface({
   step,
