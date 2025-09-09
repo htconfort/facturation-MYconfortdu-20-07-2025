@@ -447,89 +447,25 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         {/* <div style={{ height: '100px' }} /> */}
       </div>
 
-      {/* Footer fixe */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#F2EFE2',
-        borderTop: '1px solid rgba(20, 40, 29, 0.1)',
-        padding: '16px',
-        height: FOOTER_H,                          // <-- fige la hauteur pour le calc
-        boxSizing: 'border-box',
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '16px',
-        zIndex: 10
-      }}>
+      {/* Footer fixe aligné Step 3 */}
+      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
         <button
           onClick={onPrev}
-          style={{
-            padding: '12px 24px',
-            borderRadius: '25px',
-            backgroundColor: 'white',
-            border: '2px solid #D1D5DB',
-            fontSize: '16px',
-            fontWeight: '500',
-            color: '#14281D',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
         >
           ← Précédent
         </button>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '4px 12px',
-            borderRadius: '25px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            marginBottom: '4px'
-          }}>
-            <div style={{
-              fontSize: '12px',
-              color: '#6B7280'
-            }}>
-              Étape 4/7
-            </div>
+        <div className='flex flex-col items-center'>
+          <div className='bg-white px-3 py-1 rounded-full shadow-lg mb-1'>
+            <div className='text-xs text-gray-500 font-manrope'>Étape 4/7</div>
           </div>
         </div>
         <button
           onClick={isValidPayment ? onNext : () => {}}
           disabled={!isValidPayment}
-          style={{
-            padding: '12px 24px',
-            borderRadius: '25px',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: isValidPayment ? 'pointer' : 'not-allowed',
-            transition: 'all 0.2s',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            backgroundColor: isValidPayment ? '#477A0C' : '#EF4444',
-            color: 'white',
-            border: 'none',
-            opacity: isValidPayment ? 1 : 0.9
-          }}
-          onMouseOver={(e) => {
-            if (isValidPayment) {
-              e.currentTarget.style.backgroundColor = '#5A8F0F';
-            }
-          }}
-          onMouseOut={(e) => {
-            if (isValidPayment) {
-              e.currentTarget.style.backgroundColor = '#477A0C';
-            }
-          }}
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${isValidPayment ? 'bg-myconfort-green text-white hover:bg-myconfort-green/90' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
         >
-          {!isValidPayment ? '⚠️ Paiement requis' : 'Suivant →'}
+          Suivant →
         </button>
       </div>
     </div>
