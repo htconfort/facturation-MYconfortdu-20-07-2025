@@ -43,8 +43,8 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   const [showChequesPage, setShowChequesPage] = useState(false);
 
   // Constantes pour le layout
-  const HEADER_H = 80;   // hauteur header (px)
-  const FOOTER_H = 100;  // hauteur footer (px)
+  const HEADER_H = 60;   // hauteur header (px)
+  const FOOTER_H = 80;   // hauteur footer (px)
 
   // Total TTC à partir des lignes
   const totalAmount: number = (produits ?? []).reduce(
@@ -163,7 +163,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
     }}>
       {/* Header fixe */}
       <div style={{
-        padding: '16px 24px',
+        padding: '8px 16px',
         borderBottom: '1px solid rgba(20, 40, 29, 0.1)',
         backgroundColor: '#F2EFE2',
         position: 'absolute',
@@ -199,12 +199,12 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         left: 0,
         right: 0,
         bottom: FOOTER_H,                           // 100px
-        padding: '16px 24px',
+        padding: '8px 16px',
         overflowY: 'scroll',                        // <- FORCE le scroll
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        paddingBottom: `calc(${FOOTER_H}px + 40px)`, // <- plus d'espace pour être sûr
+        paddingBottom: `calc(${FOOTER_H}px + 16px)`, // espace suffisant
         boxSizing: 'border-box'
       }}>
         {/* Résumé */}
@@ -270,21 +270,21 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         </div>
 
         {/* Acompte */}
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ marginBottom: '12px' }}>
           <label style={{
             display: 'block',
-            fontSize: '14px',
+            fontSize: '12px',
             fontWeight: '500',
             color: '#14281D',
-            marginBottom: '8px'
+            marginBottom: '6px'
           }}>
             Acompte (€) *
           </label>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '8px',
-            marginBottom: '12px'
+            gap: '6px',
+            marginBottom: '8px'
           }}>
             {[20, 30, 40, 50].map(pct => {
               const suggested = Math.round((totalAmount * pct) / 100);
@@ -294,11 +294,11 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                   type="button"
                   onClick={() => setAcompte(suggested)}
                   style={{
-                    padding: '8px 12px',
+                    padding: '6px 8px',
                     backgroundColor: 'rgba(137, 187, 254, 0.2)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600',
                     border: 'none',
                     cursor: 'pointer',
                     transition: 'background-color 0.2s'
@@ -317,77 +317,70 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
             min={0}
             max={totalAmount}
             placeholder="0"
-            className="w-full text-xl font-bold border-gray-300 focus:border-myconfort-green bg-white shadow-sm text-center"
+            className="w-full text-base font-semibold border-gray-300 focus:border-myconfort-green bg-white shadow-sm text-center"
             aria-label="Montant de l'acompte"
           />
         </div>
 
         {/* Mode de règlement de l'acompte */}
         {acompte > 0 && (
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '12px' }}>
             <label style={{
               display: 'block',
-              fontSize: '14px',
+              fontSize: '12px',
               fontWeight: '500',
               color: '#14281D',
-              marginBottom: '12px'
+              marginBottom: '6px'
             }}>
               Mode de règlement de l'acompte *
             </label>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '12px'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 48px)', gap: '8px' }}>
               {[
                 { key: 'Espèces', emoji: '💵' },
                 { key: 'Carte Bleue', emoji: '💳' },
                 { key: 'Chèque comptant', emoji: '🧾' },
                 { key: 'Virement', emoji: '🏦' }
-              ].map(({ key, emoji }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    setDepositMethod(key as PaymentData['depositMethod']);
-                    savePayment({ depositMethod: key as PaymentData['depositMethod'] });
-                  }}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '12px',
-                    border: `2px solid ${depositMethod === key ? '#477A0C' : '#D1D5DB'}`,
-                    backgroundColor: depositMethod === key ? 'rgba(71, 122, 12, 0.1)' : 'white',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: depositMethod === key ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'
-                  }}
-                >
-                  <span style={{ fontSize: '20px' }}>{emoji}</span>
-                  <div style={{
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    color: '#14281D'
-                  }}>
-                    {key}
-                  </div>
-                </button>
-              ))}
+              ].map(({ key, emoji }) => {
+                const isActive = depositMethod === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    title={key}
+                    aria-label={key}
+                    onClick={() => {
+                      setDepositMethod(key as PaymentData['depositMethod']);
+                      savePayment({ depositMethod: key as PaymentData['depositMethod'] });
+                    }}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '8px',
+                      border: `2px solid ${isActive ? '#477A0C' : '#D1D5DB'}`,
+                      backgroundColor: isActive ? 'rgba(71, 122, 12, 0.12)' : 'white',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <span style={{ fontSize: '18px' }}>{emoji}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* --- ZONE PROBLÉMATIQUE → conteneur dédié scroll-friendly --- */}
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ marginBottom: '12px' }}>
           <label style={{
             display: 'block',
-            fontSize: '14px',
+            fontSize: '12px',
             fontWeight: '500',
             color: '#14281D',
-            marginBottom: '12px'
+            marginBottom: '8px'
           }}>
             Mode de règlement du reste *
           </label>
@@ -398,12 +391,9 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
+            gap: '8px',
             alignContent: 'start',
             paddingBottom: 8
-            // Important : si ce bloc est DANS un parent flex, on garantirait minHeight: 0
-            // Ici pas nécessaire, mais je le laisse en mémo :
-            // minHeight: 0,
           }}>
               {/* Espèces */}
               <PaymentCard
