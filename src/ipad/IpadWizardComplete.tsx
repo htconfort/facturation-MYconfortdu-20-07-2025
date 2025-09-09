@@ -44,7 +44,7 @@ export default function IpadWizardComplete() {
   }, [urlStep, setStep, reset, search]);
 
   return (
-    <div data-ui="ipad-wizard-complete" className='relative w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden'>
+    <div data-ui="ipad-wizard-complete" className='relative w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
       {/* Wizard principal */}
       <div className="wizard h-full">
         <StepsNavigator>
@@ -225,6 +225,12 @@ function WizardSurface({
       <div 
         ref={scrollContainerRef}
         className='flex-1 p-2 ipad-scrollable relative'
+        style={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          maxHeight: '100%',
+          height: '100%'
+        }}
       >
         {renderStep}
         

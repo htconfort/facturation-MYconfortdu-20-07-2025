@@ -47,7 +47,7 @@ export default function StepsNavigator({ children }: Props) {
         </div>
       )}
       {/* 🎯 Cadre iPad - Dimensions réduites pour éviter les marges iPad physique */}
-      <div className='w-[950px] h-[650px] bg-myconfort-cream border-6 border-black rounded-lg shadow-2xl overflow-hidden relative'>
+      <div className='w-[950px] h-[650px] bg-myconfort-cream border-6 border-black rounded-lg shadow-2xl relative flex flex-col' style={{ overflow: 'visible' }}>
         {/* Bouton info compact en haut à droite */}
         <button
           onClick={() => setShowInfo(!showInfo)}
@@ -95,8 +95,8 @@ export default function StepsNavigator({ children }: Props) {
           </nav>
         </header>
 
-        {/* Contenu principal dans le cadre iPad - maximum d'espace */}
-        <main className='w-full h-[calc(768px-32px)]'>{children}</main>
+        {/* Contenu principal dans le cadre iPad - maximum d'espace avec scroll */}
+        <main className='w-full flex-1 overflow-visible'>{children}</main>
       </div>
     </div>
   );
