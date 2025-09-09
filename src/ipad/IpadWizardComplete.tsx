@@ -109,7 +109,6 @@ function WizardSurface({
     invoiceNumber,
     invoiceDate,
     eventLocation,
-    advisorName,
     client,
     produits,
     paiement,
@@ -126,10 +125,9 @@ function WizardSurface({
         const hasNumber = invoiceNumber.trim().length > 0;
         const hasDate = invoiceDate.trim().length > 0;
         const hasLocation = eventLocation.trim().length > 0;
-        const hasAdvisor = advisorName && advisorName.trim().length > 0;
         return {
-          isValid: hasNumber && hasDate && hasLocation && hasAdvisor,
-          canProceed: hasNumber && hasDate && hasLocation && hasAdvisor,
+          isValid: hasNumber && hasDate && hasLocation,
+          canProceed: hasNumber && hasDate && hasLocation,
         };
 
       case 'client':
@@ -159,35 +157,16 @@ function WizardSurface({
       default:
         return { isValid: true, canProceed: true };
     }
-  }, [step, invoiceNumber, invoiceDate, eventLocation, advisorName, client, produits, paiement]);
+  }, [step, invoiceNumber, invoiceDate, eventLocation, client, produits, paiement]);
 
   const validateAndGoNext = useCallback(() => {
-    // Pour résoudre les problèmes de déploiement, vérifions directement depuis le store
-    const storeState = useInvoiceWizard.getState();
-    
-    if (step === 'facture') {
-      const hasNumber = (storeState.invoiceNumber || '').trim().length > 0;
-      const hasDate = (storeState.invoiceDate || '').trim().length > 0;
-      const hasLocation = (storeState.eventLocation || '').trim().length > 0;
-      const hasAdvisor = (storeState.advisorName || '').trim().length > 0;
-      
-      if (hasNumber && hasDate && hasLocation && hasAdvisor) {
-        onGo('next');
-        return;
-      } else {
-        alert('Veuillez remplir le lieu de l\'événement et le nom du conseiller');
-        return;
-      }
-    }
-    
-    // Pour les autres étapes, utiliser la validation normale
     const validation = validateCurrentStep();
     if (validation.canProceed) {
       onGo('next');
     } else {
       alert(validation.message || 'Veuillez compléter les champs requis');
     }
-  }, [step, validateCurrentStep, onGo]);
+  }, [validateCurrentStep, onGo]);
 
   const labelFor = useCallback((s: WizardStep): string => {
     switch (s) {
