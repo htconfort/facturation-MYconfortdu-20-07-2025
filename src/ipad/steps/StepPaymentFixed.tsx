@@ -280,61 +280,9 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           }}>
             Acompte (€) *
           </label>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '6px',
-            marginBottom: '8px'
-          }}>
-            {[20, 30, 40, 50].map(pct => {
-              const suggested = Math.round((totalAmount * pct) / 100);
-              return (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => setAcompte(suggested)}
-                  style={{
-                    padding: '6px 8px',
-                    backgroundColor: 'rgba(137, 187, 254, 0.2)',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(137, 187, 254, 0.3)'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(137, 187, 254, 0.2)'}
-                >
-                  {pct}% ({suggested}€)
-                </button>
-              );
-            })}
-          </div>
-          <NumericInput
-            value={acompte}
-            onChange={(value) => setAcompte(Number(value) || 0)}
-            min={0}
-            max={totalAmount}
-            placeholder="0"
-            className="w-full text-base font-semibold border-gray-300 focus:border-myconfort-green bg-white shadow-sm text-center"
-            aria-label="Montant de l'acompte"
-          />
-        </div>
-
-        {/* Mode de règlement de l'acompte */}
-        {acompte > 0 && (
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '12px',
-              fontWeight: '500',
-              color: '#14281D',
-              marginBottom: '6px'
-            }}>
-              Mode de règlement de l'acompte *
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 48px)', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            {/* Modes acompte en carrés compacts */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 40px)', gap: '8px' }}>
               {[
                 { key: 'Espèces', emoji: '💵' },
                 { key: 'Carte Bleue', emoji: '💳' },
@@ -342,6 +290,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                 { key: 'Virement', emoji: '🏦' }
               ].map(({ key, emoji }) => {
                 const isActive = depositMethod === key;
+                const disabled = (acompte || 0) <= 0;
                 return (
                   <button
                     key={key}
@@ -350,19 +299,22 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                     aria-label={key}
                     onClick={() => {
                       setDepositMethod(key as PaymentData['depositMethod']);
-                      savePayment({ depositMethod: key as PaymentData['depositMethod'] });
+                      if ((acompte || 0) > 0) {
+                        savePayment({ depositMethod: key as PaymentData['depositMethod'] });
+                      }
                     }}
                     style={{
-                      width: '48px',
-                      height: '48px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '8px',
                       border: `2px solid ${isActive ? '#477A0C' : '#D1D5DB'}`,
                       backgroundColor: isActive ? 'rgba(71, 122, 12, 0.12)' : 'white',
-                      cursor: 'pointer',
+                      cursor: disabled ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       transition: 'all 0.2s',
+                      opacity: disabled && !isActive ? 0.5 : 1
                     }}
                   >
                     <span style={{ fontSize: '18px' }}>{emoji}</span>
@@ -370,8 +322,22 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                 );
               })}
             </div>
+
+            {/* Montant acompte compact */}
+            <div style={{ width: '140px' }}>
+              <NumericInput
+                value={acompte}
+                onChange={(value) => setAcompte(Number(value) || 0)}
+                min={0}
+                max={totalAmount}
+                placeholder="0"
+                className="w-full h-10 text-base font-semibold border-gray-300 focus:border-myconfort-green bg-white shadow-sm text-center"
+                aria-label="Montant de l'acompte"
+              />
+            </div>
           </div>
-        )}
+        </div>
+
 
         {/* --- ZONE PROBLÉMATIQUE → conteneur dédié scroll-friendly --- */}
         <div style={{ marginBottom: '12px' }}>
