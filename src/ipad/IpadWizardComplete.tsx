@@ -122,12 +122,10 @@ function WizardSurface({
   } => {
     switch (step) {
       case 'facture':
-        const hasNumber = invoiceNumber.trim().length > 0;
-        const hasDate = invoiceDate.trim().length > 0;
-        const hasLocation = eventLocation.trim().length > 0;
+        // Pour StepFacture, laissons la validation se faire dans le composant lui-même
         return {
-          isValid: hasNumber && hasDate && hasLocation,
-          canProceed: hasNumber && hasDate && hasLocation,
+          isValid: true,
+          canProceed: true,
         };
 
       case 'client':

@@ -32,14 +32,28 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   const validateAndNext = () => {
     // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
+      alert('Veuillez remplir le lieu de l\'événement');
       return;
     }
     
     if (!advisorName || advisorName.trim() === '') {
+      alert('Veuillez remplir le nom du conseiller');
       return;
     }
 
-    onNext();
+    // Forcer la sauvegarde de TOUTES les données avant de continuer
+    setInvoiceData({
+      invoiceNumber: invoiceNumber || generateInvoiceNumber(),
+      invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
+      eventLocation,
+    });
+    
+    updateAdvisorName(advisorName);
+    
+    // Attendre un peu que le store soit mis à jour
+    setTimeout(() => {
+      onNext();
+    }, 50);
   };
 
   // État de validation pour les couleurs des cadres
