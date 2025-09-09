@@ -282,13 +282,12 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           </label>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             {/* Modes acompte en carrés compacts */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 40px)', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 40px)', gap: '8px' }}>
               {[
-                { key: 'Espèces', emoji: '💵' },
-                { key: 'Carte Bleue', emoji: '💳' },
-                { key: 'Chèque comptant', emoji: '🧾' },
-                { key: 'Virement', emoji: '🏦' }
-              ].map(({ key, emoji }) => {
+                { key: 'Espèces', label: 'E' },
+                { key: 'Carte Bleue', label: 'CB' },
+                { key: 'Chèque comptant', label: 'CH' },
+              ].map(({ key, label }) => {
                 const isActive = depositMethod === key;
                 const disabled = (acompte || 0) <= 0;
                 return (
@@ -317,7 +316,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                       opacity: disabled && !isActive ? 0.5 : 1
                     }}
                   >
-                    <span style={{ fontSize: '18px' }}>{emoji}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#14281D' }}>{label}</span>
                   </button>
                 );
               })}
