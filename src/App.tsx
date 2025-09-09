@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import MainApp from './MainApp';
-import IpadWizard from './ipad/IpadWizard';
+import IpadWizardComplete from './ipad/IpadWizardComplete';
 import WizardPage from './pages/WizardPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
@@ -44,7 +44,7 @@ export default function App() {
           <Route path='/wizard/step/0' element={<Navigate to='/wizard/step/7' replace />} />
           <Route path='/wizard/step/8' element={<Navigate to='/wizard/step/7' replace />} />
           <Route path='/wizard/step/:n' element={<StepGuard />} />
-          <Route path='/ipad' element={<IpadWizard />} />
+          <Route path='/ipad' element={<IpadWizardComplete />} />
           <Route path='/wizard-demo' element={<WizardDemo />} />
           <Route path='/payment/success' element={<PaymentSuccess />} />
           <Route path='/payment/cancel' element={<PaymentCancel />} />

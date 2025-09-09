@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepsNavigator from '../navigation/StepsNavigator';
+import './ipad-orientation.css';
 
 // Import des composants d'étapes
 import StepFacture from './steps/StepFacture';
 import StepClientNoScroll from './steps/StepClientNoScroll';
 import StepProduits from './steps/StepProduits';
 import StepPaymentNoScroll from './steps/StepPaymentNoScroll';
-import StepPaiementClone from './steps/StepPaiementClone';
 import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
 import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 import StepRecapSimple from './steps/StepRecapSimple';
@@ -19,7 +19,6 @@ const steps: WizardStep[] = [
   'client',
   'produits',
   'paiement',
-  'paiement-clone',
   'livraison',
   'signature',
   'recap',
@@ -35,11 +34,6 @@ export default function IpadWizardComplete() {
   const step = useInvoiceWizard(s => s.step);
   const reset = useInvoiceWizard(s => s.reset);
 
-  // Détection orientation
-  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
-    window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
-  );
-
   useEffect(() => {
     setStep(urlStep);
     
@@ -48,28 +42,10 @@ export default function IpadWizardComplete() {
     }
   }, [urlStep, setStep, reset, search]);
 
-  useEffect(() => {
-    const checkOrientation = () => {
-      const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
-      setOrientation(newOrientation);
-    };
-
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
-  }, []);
-
-  const isPortrait = orientation === 'portrait';
-
   return (
-    <div className='w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden'>
-      {isPortrait ? (
-        <OrientationMessage />
-      ) : (
+    <div data-ui="ipad-wizard-complete" className='relative w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden'>
+      {/* Wizard principal */}
+      <div className="wizard h-full">
         <StepsNavigator>
           <WizardSurface
             step={step}
@@ -82,7 +58,12 @@ export default function IpadWizardComplete() {
             onQuit={() => navigate('/')}
           />
         </StepsNavigator>
-      )}
+      </div>
+      
+      {/* Overlay orientation - affiché uniquement en portrait via CSS */}
+      <div className="orientation-overlay">
+        <OrientationMessage />
+      </div>
     </div>
   );
 }
@@ -193,7 +174,6 @@ function WizardSurface({
       case 'client': return '👤 Client';
       case 'produits': return '📦 Produits';
       case 'paiement': return '💳 Paiement';
-      case 'paiement-clone': return '💳 Paiement (Clone)';
       case 'livraison': return '🚚 Livraison';
       case 'signature': return '✍️ Signature';
       case 'recap': return '📄 Récapitulatif';
@@ -220,8 +200,6 @@ function WizardSurface({
         return <StepProduits {...props} />;
       case 'paiement':
         return <StepPaymentNoScroll {...props} />;
-      case 'paiement-clone':
-        return <StepPaiementClone {...props} />;
       case 'livraison':
         return <StepLivraisonNoScroll {...props} />;
       case 'signature':
