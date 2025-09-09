@@ -28,9 +28,10 @@ export default function StepProduits({
 
   const taxRate = 20; // TVA fixe à 20%
 
-  // Validation : tous les produits doivent avoir un mode de livraison défini
-  const canProceed =
-    produits.length > 0 && produits.every(p => p.isPickupOnSite !== undefined);
+  // Validation optimisée : tous les produits doivent avoir un mode de livraison défini
+  const canProceed = useMemo(() => {
+    return produits.length > 0 && produits.every(p => p.isPickupOnSite !== undefined);
+  }, [produits.length, produits]);
 
   const filteredProducts = useMemo(() => {
     if (!draft.category || draft.category === 'Diverse') return [];
