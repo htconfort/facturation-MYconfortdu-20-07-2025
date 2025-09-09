@@ -134,21 +134,27 @@ export default function StepProduits({
   };
 
   const validateAndNext = () => {
+    console.log('=== VALIDATION PRODUITS ===');
+    console.log('Nombre de produits:', produits.length);
+    console.log('Produits:', produits);
+    
     if (produits.length === 0) {
-      alert('Veuillez ajouter au moins un produit avant de continuer.');
+      console.log('❌ Aucun produit');
       return;
     }
 
     const productsWithoutDeliveryMode = produits.filter(
       p => p.isPickupOnSite === undefined
     );
+    
+    console.log('Produits sans mode livraison:', productsWithoutDeliveryMode.length);
+    
     if (productsWithoutDeliveryMode.length > 0) {
-      alert(
-        `Veuillez définir le mode de livraison pour tous les produits.\n${productsWithoutDeliveryMode.length} produit(s) sans mode de livraison défini.`
-      );
+      console.log('❌ Mode de livraison manquant');
       return;
     }
 
+    console.log('✅ Validation OK - Navigation vers page 4');
     onNext();
   };
 
