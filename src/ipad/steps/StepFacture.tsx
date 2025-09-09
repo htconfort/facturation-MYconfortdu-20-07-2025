@@ -20,11 +20,14 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
 
-    if (!invoiceNumber) {
-      setInvoiceData({ invoiceNumber: generateInvoiceNumber() });
+    if (!invoiceNumber || invoiceNumber.trim() === '') {
+      const newInvoiceNumber = generateInvoiceNumber();
+      console.log('🔢 Génération automatique du numéro de facture:', newInvoiceNumber);
+      setInvoiceData({ invoiceNumber: newInvoiceNumber });
     }
 
-    if (!invoiceDate) {
+    if (!invoiceDate || invoiceDate.trim() === '') {
+      console.log('📅 Génération automatique de la date:', today);
       setInvoiceData({ invoiceDate: today });
     }
   }, [invoiceNumber, invoiceDate, setInvoiceData]);
@@ -94,7 +97,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Facture n°:
                 </span>
                 <input
-                  value={invoiceNumber}
+                  value={invoiceNumber || generateInvoiceNumber()}
                   type='text'
                   className='border-2 border-[#477A0C] rounded-lg px-3 py-2 text-base font-mono text-black bg-white focus:border-[#F55D3E] focus:ring-1 focus:ring-[#89BBFE] transition-all font-bold'
                   readOnly
