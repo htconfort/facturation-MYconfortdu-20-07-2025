@@ -200,11 +200,11 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         right: 0,
         bottom: FOOTER_H,                           // 100px
         padding: '16px 24px',
-        overflowY: 'auto',                          // <- auto (pas scroll forcé)
+        overflowY: 'scroll',                        // <- FORCE le scroll
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        paddingBottom: `calc(${FOOTER_H}px + 24px)`, // <- pour ne jamais être sous le footer
+        paddingBottom: `calc(${FOOTER_H}px + 40px)`, // <- plus d'espace pour être sûr
         boxSizing: 'border-box'
       }}>
         {/* Résumé */}
