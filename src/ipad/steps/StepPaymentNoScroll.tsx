@@ -29,6 +29,7 @@ interface PaymentData {
     | 'Alma 3x'
     | 'Alma 4x';
   depositAmount?: number;
+  depositMethod?: 'Espèces' | 'Carte Bleue' | 'Chèque comptant' | 'Virement';
   almaInstallments?: number; // 2,3,4
   chequesCount?: number; // 2..10
   chequeAmount?: number;
@@ -70,13 +71,16 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
   const [acompte, setAcompte] = useState<number>(
     (paiement as PaymentData)?.depositAmount || 0
   );
+  const [depositMethod, setDepositMethod] = useState<PaymentData['depositMethod']>(
+    (paiement as PaymentData)?.depositMethod || 'Espèces'
+  );
 
   const restePay = Math.max(
     0,
     totalAmount - (Number.isFinite(acompte) ? acompte : 0)
   );
   const isValidPayment =
-    !!selectedMethod && acompte >= 0 && acompte <= totalAmount;
+    !!selectedMethod && acompte >= 0 && acompte <= totalAmount && (acompte === 0 || !!depositMethod);
 
   // helpers
   const savePayment = (data: Partial<PaymentData>) => {
@@ -85,6 +89,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
       ...data,
       method: (data.method ?? selectedMethod) as PaymentData['method'],
       depositAmount: data.depositAmount ?? acompte,
+      depositMethod: data.depositMethod ?? depositMethod,
     });
   };
 
@@ -106,6 +111,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
           savePayment({
             method,
             depositAmount: acompte,
+            depositMethod,
             almaInstallments: installments,
           });
           setShowAlmaPage(false);
@@ -130,6 +136,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
           savePayment({
             method: 'Chèque à venir',
             depositAmount: acompte,
+            depositMethod,
             chequesCount: data.count,
             chequeAmount: data.amount,
             notes: data.notes,
@@ -138,6 +145,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
           updatePaiement({
             method: 'Chèque à venir',
             depositAmount: acompte,
+            depositMethod,
             nombreChequesAVenir: data.count, // ← Utiliser nombreChequesAVenir
             note: data.notes, // ← Utiliser 'note' au lieu de 'notes'
           });
@@ -174,7 +182,9 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
               <div className='text-lg font-bold text-myconfort-blue'>
                 {acompte.toFixed(2)}€
               </div>
-              <div className='text-sm text-myconfort-dark/70'>Acompte</div>
+              <div className='text-sm text-myconfort-dark/70'>
+                Acompte {acompte > 0 && depositMethod && `(${depositMethod})`}
+              </div>
             </div>
             <div>
               <div className='text-lg font-bold text-orange-600'>
@@ -218,6 +228,88 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
           />
         </div>
 
+        {/* Mode de règlement de l'acompte */}
+        {acompte > 0 && (
+          <div className='mb-6'>
+            <label className='block text-sm font-medium text-myconfort-dark mb-3'>
+              Mode de règlement de l'acompte *
+            </label>
+            <div className='grid grid-cols-2 gap-3'>
+              <button
+                type='button'
+                onClick={() => {
+                  setDepositMethod('Espèces');
+                  savePayment({ depositMethod: 'Espèces' });
+                }}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${
+                  depositMethod === 'Espèces'
+                    ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
+                    : 'border-gray-300 bg-white hover:border-myconfort-green/50'
+                }`}
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xl'>💵</span>
+                  <div className='font-semibold text-sm'>Espèces</div>
+                </div>
+              </button>
+
+              <button
+                type='button'
+                onClick={() => {
+                  setDepositMethod('Carte Bleue');
+                  savePayment({ depositMethod: 'Carte Bleue' });
+                }}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${
+                  depositMethod === 'Carte Bleue'
+                    ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
+                    : 'border-gray-300 bg-white hover:border-myconfort-green/50'
+                }`}
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xl'>💳</span>
+                  <div className='font-semibold text-sm'>Carte Bleue</div>
+                </div>
+              </button>
+
+              <button
+                type='button'
+                onClick={() => {
+                  setDepositMethod('Chèque comptant');
+                  savePayment({ depositMethod: 'Chèque comptant' });
+                }}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${
+                  depositMethod === 'Chèque comptant'
+                    ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
+                    : 'border-gray-300 bg-white hover:border-myconfort-green/50'
+                }`}
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xl'>🧾</span>
+                  <div className='font-semibold text-sm'>Chèque comptant</div>
+                </div>
+              </button>
+
+              <button
+                type='button'
+                onClick={() => {
+                  setDepositMethod('Virement');
+                  savePayment({ depositMethod: 'Virement' });
+                }}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${
+                  depositMethod === 'Virement'
+                    ? 'border-myconfort-green bg-myconfort-green/10 shadow-lg'
+                    : 'border-gray-300 bg-white hover:border-myconfort-green/50'
+                }`}
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xl'>🏦</span>
+                  <div className='font-semibold text-sm'>Virement</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Payment methods (6) */}
         <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
           {/* Espèces */}
@@ -228,7 +320,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             emoji='💵'
             onClick={() => {
               setSelectedMethod('Espèces');
-              savePayment({ method: 'Espèces', depositAmount: acompte });
+              savePayment({ method: 'Espèces', depositAmount: acompte, depositMethod });
             }}
           />
 
@@ -240,7 +332,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             emoji='🏦'
             onClick={() => {
               setSelectedMethod('Virement');
-              savePayment({ method: 'Virement', depositAmount: acompte });
+              savePayment({ method: 'Virement', depositAmount: acompte, depositMethod });
             }}
           />
 
@@ -252,7 +344,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
             emoji='💳'
             onClick={() => {
               setSelectedMethod('Carte Bleue');
-              savePayment({ method: 'Carte Bleue', depositAmount: acompte });
+              savePayment({ method: 'Carte Bleue', depositAmount: acompte, depositMethod });
             }}
           />
 
@@ -280,6 +372,7 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
               savePayment({
                 method: 'Chèque au comptant',
                 depositAmount: acompte,
+                depositMethod,
               });
             }}
           />
