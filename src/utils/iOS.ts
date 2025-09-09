@@ -28,6 +28,6 @@ export const getIOSDebugInfo = () => {
     isLegacy,
     userAgent: ua,
     needsCompat: isLegacy,
-    devicePixelRatio: window.devicePixelRatio || 1
+    devicePixelRatio: typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
   };
 };

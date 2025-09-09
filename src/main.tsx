@@ -2,6 +2,13 @@ console.log('### BUILD LIVE ###', new Date().toISOString())
 window.addEventListener('error', e => console.error('[GLOBAL ERROR]', e.message))
 window.addEventListener('unhandledrejection', e => console.error('[UNHANDLED]', e.reason))
 
+// Diagnostic en production
+if (import.meta.env.PROD) {
+  import('./utils/prodDiagnostic.ts').then(({ prodDiagnostic }) => {
+    prodDiagnostic();
+  }).catch(e => console.error('Erreur diagnostic:', e));
+}
+
 // ⚠️ ALERTE CRITIQUE MYCOMFORT ⚠️
 // CE FICHIER A ÉTÉ VALIDÉ LE 6 AOÛT 2025
 // NE PAS MODIFIER LA CONFIGURATION CI-DESSOUS
