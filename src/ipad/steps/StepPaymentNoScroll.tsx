@@ -156,9 +156,9 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full min-h-[100svh] bg-myconfort-cream relative overflow-x-hidden'>
+    <div className='w-full bg-myconfort-cream flex flex-col'>
       {/* Header */}
-      <div className='px-6 py-4 border-b border-myconfort-dark/10'>
+      <div className='px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0'>
         <h1 className='text-2xl font-bold text-myconfort-dark'>
           💳 Mode de Règlement
         </h1>
@@ -167,8 +167,8 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* Content avec padding pour éviter masquage footer */}
-      <div className='px-6 py-4' style={{ paddingBottom: contentPadBottom }}>
+      {/* Content scrollable */}
+      <div className='flex-1 px-6 py-4 flex flex-col pb-24'>
         {/* summary */}
         <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-6'>
           <div className='grid grid-cols-3 gap-4 text-center'>
@@ -395,14 +395,31 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* FloatingFooter - Composant standardisé */}
-      <FloatingFooter
-        leftLabel='← Précédent'
-        onLeft={onPrev}
-        rightLabel='Suivant →'
-        onRight={isValidPayment ? onNext : () => {}}
-        rightDisabled={!isValidPayment}
-      />
+      {/* FOOTER FIXE (toujours visible) */}
+      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
+        <button
+          onClick={onPrev}
+          className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
+        >
+          ← Précédent
+        </button>
+        <div className='flex flex-col items-center'>
+          <div className='bg-white px-3 py-1 rounded-full shadow-lg mb-1'>
+            <div className='text-xs text-gray-500 font-manrope'>Étape 4/7</div>
+          </div>
+        </div>
+        <button
+          onClick={isValidPayment ? onNext : () => {}}
+          disabled={!isValidPayment}
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
+            !isValidPayment
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+              : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
+          }`}
+        >
+          {!isValidPayment ? '⚠️ Paiement requis' : 'Suivant →'}
+        </button>
+      </div>
 
     </div>
   );
@@ -476,8 +493,8 @@ function AlmaDetailsPage({
   ];
 
   return (
-    <div className='w-full min-h-[100svh] bg-myconfort-cream relative overflow-x-hidden'>
-      <div className='px-6 py-4 border-b border-myconfort-dark/10'>
+    <div className='w-full bg-myconfort-cream flex flex-col'>
+      <div className='px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0'>
         <div className='flex items-center gap-3'>
           <img src={AlmaLogo} alt='Alma' className='h-8' />
           <div>
@@ -491,7 +508,7 @@ function AlmaDetailsPage({
         </div>
       </div>
 
-      <div className='px-6 py-6' style={{ paddingBottom: contentPadBottom }}>
+      <div className='flex-1 px-6 py-6 flex flex-col pb-24'>
         <div className='max-w-2xl mx-auto space-y-4'>
           {options.map(option => (
             <button
@@ -516,7 +533,15 @@ function AlmaDetailsPage({
         </div>
       </div>
 
-      <FloatingFooter leftLabel='← Retour' onLeft={onBack} />
+      {/* FOOTER FIXE */}
+      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50'>
+        <button
+          onClick={onBack}
+          className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
+        >
+          ← Retour
+        </button>
+      </div>
     </div>
   );
 }
@@ -553,9 +578,9 @@ function ChequesDetailsPage({
   const tabs = Array.from({ length: 9 }, (_, i) => i + 2);
 
   return (
-    <div className='w-full min-h-[100svh] bg-myconfort-cream relative overflow-x-hidden'>
+    <div className='w-full bg-myconfort-cream flex flex-col'>
       {/* Header amber */}
-      <div className='px-6 py-4 border-b border-amber-500/30 bg-amber-50'>
+      <div className='px-6 py-4 border-b border-amber-500/30 bg-amber-50 flex-shrink-0'>
         <h1 className='text-2xl font-bold text-amber-700'>
           📄 Chèques à venir
         </h1>
@@ -564,10 +589,7 @@ function ChequesDetailsPage({
         </p>
       </div>
 
-      <div
-        className='px-6 py-6 space-y-6'
-        style={{ paddingBottom: contentPadBottom }}
-      >
+      <div className='flex-1 px-6 py-6 space-y-6 flex flex-col pb-24'>
         {/* tabs 2..10 */}
         <div>
           <div className='flex flex-wrap gap-2'>
@@ -630,19 +652,30 @@ function ChequesDetailsPage({
         </div>
       </div>
 
-      {/* FloatingFooter pour page Chèques avec thème amber */}
-      <FloatingFooter
-        leftLabel='← Retour'
-        onLeft={onBack}
-        rightLabel='Confirmer →'
-        onRight={
-          isValid
-            ? () => onComplete({ count: chequeCount, amount: perCheque, notes })
-            : () => {}
-        }
-        rightDisabled={!isValid}
-        className='border-amber-500/30 bg-amber-50/95 supports-[backdrop-filter]:bg-amber-50/80'
-      />
+      {/* FOOTER FIXE pour page Chèques */}
+      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
+        <button
+          onClick={onBack}
+          className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
+        >
+          ← Retour
+        </button>
+        <button
+          onClick={
+            isValid
+              ? () => onComplete({ count: chequeCount, amount: perCheque, notes })
+              : () => {}
+          }
+          disabled={!isValid}
+          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
+            !isValid
+              ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
+              : 'bg-amber-500 text-white hover:bg-amber-600'
+          }`}
+        >
+          Confirmer →
+        </button>
+      </div>
     </div>
   );
 }
