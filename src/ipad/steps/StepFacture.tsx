@@ -43,11 +43,13 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
     // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
       console.log('❌ Lieu d\'événement manquant');
+      alert('Veuillez remplir le lieu de l\'événement');
       return;
     }
     
     if (!advisorName || advisorName.trim() === '') {
       console.log('❌ Nom du conseiller manquant');
+      alert('Veuillez remplir le nom du conseiller');
       return;
     }
 
@@ -63,8 +65,20 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
     
     updateAdvisorName(advisorName);
     
-    console.log('📤 Appel de onNext()');
-    onNext();
+    // Attendre que le store soit mis à jour avant de continuer
+    console.log('⏳ Attente de la mise à jour du store...');
+    setTimeout(() => {
+      const currentState = useInvoiceWizard.getState();
+      console.log('🔍 État du store après mise à jour:', {
+        invoiceNumber: currentState.invoiceNumber,
+        invoiceDate: currentState.invoiceDate,
+        eventLocation: currentState.eventLocation,
+        advisorName: currentState.advisorName,
+      });
+      
+      console.log('📤 Appel de onNext()');
+      onNext();
+    }, 100); // Délai de 100ms pour permettre au store de se mettre à jour
   };
 
   // État de validation pour les couleurs des cadres
