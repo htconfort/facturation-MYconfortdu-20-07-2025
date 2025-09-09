@@ -44,28 +44,55 @@ export default function StepPaymentSimple({ onNext, onPrev }: StepProps) {
     0
   );
 
-  // Reste à payer
-  const restePay = useMemo(() => Math.max(0, totalAmount - acompte), [totalAmount, acompte]);
+  // Reste à payer sécurisé
+  const restePay = useMemo(() => {
+    try {
+      const safeTotal = isNaN(totalAmount) ? 0 : totalAmount;
+      const safeAcompte = isNaN(acompte) ? 0 : acompte;
+      return Math.max(0, safeTotal - safeAcompte);
+    } catch (error) {
+      console.error('Erreur calcul reste à payer:', error);
+      return 0;
+    }
+  }, [totalAmount, acompte]);
 
-  // Validation
+  // Validation sécurisée
   const isValidPayment = useMemo(() => {
-    if (acompte < 0 || acompte > totalAmount) return false;
-    if (acompte > 0 && !depositMethod) return false;
-    if (restePay > 0 && !selectedMethod) return false;
-    return true;
+    try {
+      const safeAcompte = isNaN(acompte) ? 0 : acompte;
+      const safeTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
+      const safeRestePay = isNaN(restePay) ? 0 : restePay;
+      
+      if (safeAcompte < 0 || safeAcompte > safeTotalAmount) return false;
+      if (safeAcompte > 0 && !depositMethod) return false;
+      if (safeRestePay > 0 && !selectedMethod) return false;
+      return true;
+    } catch (error) {
+      console.error('Erreur validation paiement:', error);
+      return false;
+    }
   }, [acompte, totalAmount, depositMethod, restePay, selectedMethod]);
 
   // Sauvegarde sécurisée
   const savePayment = useCallback((data: Partial<PaymentData>) => {
     try {
-      updatePaiement({
+      // Validation des données avant sauvegarde
+      const safeData = {
         ...paiement,
         ...data,
-        depositAmount: acompte,
-        depositMethod,
-      });
+        depositAmount: isNaN(acompte) ? 0 : acompte,
+        depositMethod: depositMethod || '',
+      };
+      
+      // Vérifier que updatePaiement existe
+      if (typeof updatePaiement === 'function') {
+        updatePaiement(safeData);
+      } else {
+        console.warn('updatePaiement is not a function');
+      }
     } catch (error) {
       console.error('Erreur sauvegarde paiement:', error);
+      // Ne pas faire crasher l'app, juste loguer l'erreur
     }
   }, [updatePaiement, paiement, acompte, depositMethod]);
 
@@ -173,7 +200,10 @@ export default function StepPaymentSimple({ onNext, onPrev }: StepProps) {
             </label>
             <NumericInput
               value={acompte}
-              onChange={setAcompte}
+              onChange={(value) => {
+                const numValue = parseFloat(value) || 0;
+                setAcompte(numValue);
+              }}
               min={0}
               max={totalAmount}
               placeholder="0.00"
