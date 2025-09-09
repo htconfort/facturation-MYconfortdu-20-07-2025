@@ -59,52 +59,82 @@
 
 /* ===== SCROLL BARS TOUJOURS VISIBLES SUR IPAD ===== */
 
-/* Force l'affichage des barres de scroll sur WebKit (Safari, iPad) */
+/* SOLUTION ALTERNATIVE: SCROLL CUSTOM POUR IPAD */
 .ipad-scrollable {
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling sur iOS */
-  scrollbar-width: auto !important; /* Force pour Firefox */
-  scrollbar-color: #477A0C #F2EFE2; /* Firefox: thumb, track */
-  overflow-y: scroll !important; /* Force l'affichage */
-  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Styles WebKit pour les barres de scroll - FORCE L'AFFICHAGE */
+/* Masquer les barres de scroll natives sur iPad */
 .ipad-scrollable::-webkit-scrollbar {
-  -webkit-appearance: none !important;
-  width: 14px !important;
-  height: 14px !important;
-  background: rgba(242, 239, 226, 0.8) !important;
+  display: none;
 }
 
-.ipad-scrollable::-webkit-scrollbar-track {
-  background: rgba(242, 239, 226, 0.3) !important;
-  border-radius: 7px !important;
-  border: 1px solid rgba(71, 122, 12, 0.1) !important;
+.ipad-scrollable {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.ipad-scrollable::-webkit-scrollbar-thumb {
-  background: #477A0C !important;
-  border-radius: 7px !important;
-  border: 2px solid rgba(242, 239, 226, 0.5) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3) !important;
+/* BARRE DE SCROLL CUSTOM - TOUJOURS VISIBLE */
+.custom-scrollbar {
+  position: absolute;
+  right: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  background: rgba(71, 122, 12, 0.2);
+  border-radius: 3px;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.ipad-scrollable::-webkit-scrollbar-thumb:hover {
-  background: #5A8F0F !important;
+.custom-scrollbar-thumb {
+  position: absolute;
+  right: 0;
+  width: 6px;
+  background: #477A0C;
+  border-radius: 3px;
+  min-height: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.ipad-scrollable::-webkit-scrollbar-thumb:active {
-  background: #3A6209 !important;
+/* Indicateurs de scroll plus visibles */
+.scroll-indicator-visible {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(71, 122, 12, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  pointer-events: none;
 }
 
-.ipad-scrollable::-webkit-scrollbar-corner {
-  background: rgba(242, 239, 226, 0.8) !important;
+.scroll-indicator-top-visible {
+  top: 16px;
 }
 
-/* Alternative avec une bordure visible pour debug */
-.scroll-debug {
-  border-right: 3px solid #477A0C !important;
-  background: linear-gradient(to right, transparent 0%, transparent calc(100% - 16px), rgba(71, 122, 12, 0.1) calc(100% - 16px), rgba(71, 122, 12, 0.1) 100%) !important;
+.scroll-indicator-bottom-visible {
+  bottom: 16px;
+}
+
+/* Animation pour les indicateurs */
+.scroll-indicator-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.scroll-indicator-hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
 }
 
 /* ===== AMÉLIORATION DU TOUCH SUR IPAD ===== */

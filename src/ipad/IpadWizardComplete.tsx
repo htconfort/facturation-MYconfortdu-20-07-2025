@@ -2,7 +2,7 @@ import { useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepsNavigator from '../navigation/StepsNavigator';
-import { useScrollIndicators } from '../hooks/useScrollIndicators';
+import { useCustomScrollbar } from '../hooks/useCustomScrollbar';
 import './ipad-orientation.css';
 
 // Import des composants d'étapes
@@ -77,7 +77,15 @@ function WizardSurface({
   const stepIndex = steps.indexOf(step);
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === steps.length - 1;
-  const { scrollContainerRef, topIndicatorRef, bottomIndicatorRef } = useScrollIndicators();
+  const { 
+    scrollContainerRef, 
+    scrollbarRef, 
+    thumbRef, 
+    showTopIndicator, 
+    showBottomIndicator, 
+    thumbHeight, 
+    thumbTop 
+  } = useCustomScrollbar();
   const {
     invoiceNumber,
     invoiceDate,
@@ -213,26 +221,37 @@ function WizardSurface({
         </div>
       </div>
 
-      {/* Contenu de l'étape - scrollable */}
+      {/* Contenu de l'étape - scrollable avec barre custom */}
       <div 
         ref={scrollContainerRef}
-        className='flex-1 p-2 ipad-scrollable scroll-debug relative'
-        style={{
-          overflowY: 'scroll',
-          overflowX: 'hidden',
-          WebkitOverflowScrolling: 'touch',
-          paddingRight: '20px' // Espace pour la barre de scroll
-        }}
+        className='flex-1 p-2 ipad-scrollable relative'
       >
-        <div 
-          ref={topIndicatorRef}
-          className="scroll-indicator-top scroll-indicator-hidden"
-        ></div>
         {renderStep}
-        <div 
-          ref={bottomIndicatorRef}
-          className="scroll-indicator-bottom scroll-indicator-hidden"
-        ></div>
+        
+        {/* Barre de scroll custom - toujours visible */}
+        <div ref={scrollbarRef} className="custom-scrollbar">
+          <div 
+            ref={thumbRef}
+            className="custom-scrollbar-thumb"
+            style={{
+              height: `${thumbHeight}px`,
+              top: `${thumbTop}px`
+            }}
+          />
+        </div>
+        
+        {/* Indicateurs de scroll visibles */}
+        {showTopIndicator && (
+          <div className="scroll-indicator-visible scroll-indicator-top-visible scroll-indicator-show">
+            ⬆️ Plus de contenu en haut
+          </div>
+        )}
+        
+        {showBottomIndicator && (
+          <div className="scroll-indicator-visible scroll-indicator-bottom-visible scroll-indicator-show">
+            ⬇️ Plus de contenu en bas
+          </div>
+        )}
       </div>
     </div>
   );
