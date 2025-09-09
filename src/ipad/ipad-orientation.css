@@ -62,33 +62,49 @@
 /* Force l'affichage des barres de scroll sur WebKit (Safari, iPad) */
 .ipad-scrollable {
   -webkit-overflow-scrolling: touch; /* Smooth scrolling sur iOS */
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: auto !important; /* Force pour Firefox */
   scrollbar-color: #477A0C #F2EFE2; /* Firefox: thumb, track */
+  overflow-y: scroll !important; /* Force l'affichage */
+  overflow-x: hidden !important;
 }
 
-/* Styles WebKit pour les barres de scroll */
+/* Styles WebKit pour les barres de scroll - FORCE L'AFFICHAGE */
 .ipad-scrollable::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  -webkit-appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  background: rgba(242, 239, 226, 0.8) !important;
 }
 
 .ipad-scrollable::-webkit-scrollbar-track {
-  background: #F2EFE2;
-  border-radius: 6px;
+  background: rgba(242, 239, 226, 0.3) !important;
+  border-radius: 7px !important;
+  border: 1px solid rgba(71, 122, 12, 0.1) !important;
 }
 
 .ipad-scrollable::-webkit-scrollbar-thumb {
-  background: #477A0C;
-  border-radius: 6px;
-  border: 2px solid #F2EFE2;
+  background: #477A0C !important;
+  border-radius: 7px !important;
+  border: 2px solid rgba(242, 239, 226, 0.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3) !important;
 }
 
 .ipad-scrollable::-webkit-scrollbar-thumb:hover {
-  background: #5A8F0F;
+  background: #5A8F0F !important;
+}
+
+.ipad-scrollable::-webkit-scrollbar-thumb:active {
+  background: #3A6209 !important;
 }
 
 .ipad-scrollable::-webkit-scrollbar-corner {
-  background: #F2EFE2;
+  background: rgba(242, 239, 226, 0.8) !important;
+}
+
+/* Alternative avec une bordure visible pour debug */
+.scroll-debug {
+  border-right: 3px solid #477A0C !important;
+  background: linear-gradient(to right, transparent 0%, transparent calc(100% - 16px), rgba(71, 122, 12, 0.1) calc(100% - 16px), rgba(71, 122, 12, 0.1) 100%) !important;
 }
 
 /* ===== AMÉLIORATION DU TOUCH SUR IPAD ===== */

@@ -216,7 +216,13 @@ function WizardSurface({
       {/* Contenu de l'étape - scrollable */}
       <div 
         ref={scrollContainerRef}
-        className='flex-1 overflow-y-auto overflow-x-hidden p-2 ipad-scrollable relative'
+        className='flex-1 p-2 ipad-scrollable scroll-debug relative'
+        style={{
+          overflowY: 'scroll',
+          overflowX: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+          paddingRight: '20px' // Espace pour la barre de scroll
+        }}
       >
         <div 
           ref={topIndicatorRef}
