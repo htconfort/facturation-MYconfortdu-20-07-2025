@@ -39,7 +39,7 @@ export default function StepsNavigator({ children }: Props) {
   });
 
   return (
-    <div className='w-full h-dvh bg-gray-300 flex items-center justify-center overflow-hidden p-4'>
+    <div className='w-full h-dvh bg-gray-300 flex items-center justify-center p-4'>
       {/* Spinner de chargement (mouline) */}
       {isLoading && (
         <div className='absolute inset-0 flex items-center justify-center z-50'>
@@ -47,7 +47,7 @@ export default function StepsNavigator({ children }: Props) {
         </div>
       )}
       {/* 🎯 Cadre iPad - Dimensions réduites pour éviter les marges iPad physique */}
-      <div className='w-[950px] h-[650px] bg-myconfort-cream border-6 border-black rounded-lg shadow-2xl relative flex flex-col' style={{ overflow: 'visible' }}>
+      <div className='w-[950px] h-[650px] bg-myconfort-cream border-6 border-black rounded-lg shadow-2xl relative flex flex-col overflow-hidden'>
         {/* Bouton info compact en haut à droite */}
         <button
           onClick={() => setShowInfo(!showInfo)}
@@ -95,8 +95,8 @@ export default function StepsNavigator({ children }: Props) {
           </nav>
         </header>
 
-        {/* Contenu principal dans le cadre iPad - maximum d'espace avec scroll */}
-        <main className='w-full flex-1 overflow-visible'>{children}</main>
+        {/* Contenu principal dans le cadre iPad - scrollable */}
+        <main className='w-full flex-1 overflow-y-auto overflow-x-hidden'>{children}</main>
       </div>
     </div>
   );

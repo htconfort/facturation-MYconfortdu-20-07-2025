@@ -211,16 +211,8 @@ function WizardSurface({
         </div>
       </div>
 
-      {/* Contenu de l'étape - scroll simple et direct */}
-      <div 
-        className='flex-1 p-2'
-        style={{
-          overflowY: 'scroll',
-          overflowX: 'hidden',
-          WebkitOverflowScrolling: 'touch',
-          height: '100%'
-        }}
-      >
+      {/* Contenu de l'étape - scroll géré par StepsNavigator */}
+      <div className='flex-1 p-2'>
         {renderStep}
       </div>
     </div>

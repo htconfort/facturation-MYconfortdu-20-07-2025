@@ -152,9 +152,9 @@ export default function StepProduits({
   };
 
   return (
-    <div className='w-full h-full bg-myconfort-cream flex flex-col relative'>
+    <div className='w-full bg-myconfort-cream flex flex-col'>
       {/* 🎯 Header ultra-compact */}
-      <div className='px-4 py-1 border-b border-myconfort-dark/10'>
+      <div className='px-4 py-1 border-b border-myconfort-dark/10 flex-shrink-0'>
         <h1 className='text-2xl font-bold text-myconfort-dark font-manrope'>
           📦 Produits & Services
         </h1>
@@ -163,8 +163,8 @@ export default function StepProduits({
         </p>
       </div>
 
-      {/* 🎯 Contenu principal (scrollable) */}
-      <div className='flex-1 min-h-0 px-4 py-2 overflow-y-auto overflow-x-hidden flex flex-col pb-24'>
+      {/* 🎯 Contenu principal */}
+      <div className='flex-1 px-4 py-2 flex flex-col pb-24'>
         {/* Formulaire d'ajout de produit - ultra-compact */}
         <div className='bg-white rounded-lg p-3 border border-myconfort-dark/10 mb-2'>
           <h3 className='text-base font-medium text-myconfort-dark font-manrope mb-2'>
@@ -335,9 +335,9 @@ export default function StepProduits({
           </div>
         </div>
 
-        {/* Liste des produits ajoutés - scroll interne si nécessaire */}
-        <div className='flex-1 min-h-0 bg-white rounded-lg border border-myconfort-dark/10 overflow-hidden'>
-          <div className='overflow-auto max-h-[50vh]'>
+        {/* Liste des produits ajoutés */}
+        <div className='flex-1 bg-white rounded-lg border border-myconfort-dark/10'>
+          <div>
             <table className='w-full text-left'>
               <thead className='bg-myconfort-green text-white sticky top-0'>
                 <tr>
@@ -567,7 +567,7 @@ export default function StepProduits({
       </div>
 
       {/* 🚀 FOOTER FIXE (toujours visible) */}
-      <div className='sticky bottom-0 left-0 right-0 z-50 flex justify-center gap-4 bg-transparent py-2'>
+      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
         <button
           onClick={onPrev}
           className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
