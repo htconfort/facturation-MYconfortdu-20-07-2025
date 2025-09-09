@@ -8,7 +8,7 @@ import './ipad-orientation.css';
 import StepFacture from './steps/StepFacture';
 import StepClientNoScroll from './steps/StepClientNoScroll';
 import StepProduits from './steps/StepProduits';
-import StepPaymentScrollable from './steps/StepPaymentScrollable';
+import StepPaymentFixed from './steps/StepPaymentFixed';
 import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
 import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
 import StepRecapSimple from './steps/StepRecapSimple';
@@ -168,7 +168,7 @@ function WizardSurface({
       case 'produits':
         return <StepProduits {...props} />;
       case 'paiement':
-        return <StepPaymentScrollable {...props} />;
+        return <StepPaymentFixed {...props} />;
       case 'livraison':
         return <StepLivraisonNoScroll {...props} />;
       case 'signature':
