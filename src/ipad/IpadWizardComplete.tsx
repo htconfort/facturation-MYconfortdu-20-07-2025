@@ -212,9 +212,9 @@ function WizardSurface({
   }, [step, onGo, onQuit, isFirstStep, isLastStep, validateAndGoNext]);
 
   return (
-    <div className='w-full h-full flex flex-col overflow-hidden'>
-      {/* Header compact */}
-      <div className='h-7 flex items-center justify-between px-3 bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] text-white text-xs'>
+    <div className='w-full h-full flex flex-col'>
+      {/* Header compact - fixe */}
+      <div className='h-7 flex items-center justify-between px-3 bg-gradient-to-r from-[#477A0C] to-[#5A8F0F] text-white text-xs flex-shrink-0'>
         <div className='flex items-center gap-1'>
           <div className='text-sm'>🌸</div>
           <span className='font-medium truncate'>{labelFor(step)}</span>
@@ -240,8 +240,8 @@ function WizardSurface({
         </div>
       </div>
 
-      {/* Contenu de l'étape */}
-      <div className='flex-1 overflow-hidden'>{renderStep}</div>
+      {/* Contenu de l'étape - scrollable */}
+      <div className='flex-1 overflow-y-auto overflow-x-hidden p-2'>{renderStep}</div>
     </div>
   );
 }
