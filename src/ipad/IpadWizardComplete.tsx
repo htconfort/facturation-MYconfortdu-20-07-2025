@@ -109,7 +109,6 @@ function WizardSurface({
     invoiceNumber,
     invoiceDate,
     eventLocation,
-    advisorName,
     client,
     produits,
     paiement,
@@ -126,23 +125,9 @@ function WizardSurface({
         const hasNumber = invoiceNumber.trim().length > 0;
         const hasDate = invoiceDate.trim().length > 0;
         const hasLocation = eventLocation.trim().length > 0;
-        const hasAdvisor = advisorName && advisorName.trim().length > 0;
-        
-        console.log('🔍 Validation facture:', {
-          hasNumber,
-          hasDate,
-          hasLocation,
-          hasAdvisor,
-          invoiceNumber,
-          invoiceDate,
-          eventLocation,
-          advisorName
-        });
-        
         return {
-          isValid: hasNumber && hasDate && hasLocation && hasAdvisor,
-          canProceed: hasNumber && hasDate && hasLocation && hasAdvisor,
-          message: !hasAdvisor ? 'Le nom du conseiller est obligatoire' : !hasLocation ? 'Le lieu est obligatoire' : undefined
+          isValid: hasNumber && hasDate && hasLocation,
+          canProceed: hasNumber && hasDate && hasLocation,
         };
 
       case 'client':
@@ -172,27 +157,13 @@ function WizardSurface({
       default:
         return { isValid: true, canProceed: true };
     }
-  }, [step, invoiceNumber, invoiceDate, eventLocation, advisorName, client, produits, paiement]);
+  }, [step, invoiceNumber, invoiceDate, eventLocation, client, produits, paiement]);
 
   const validateAndGoNext = useCallback(() => {
     const validation = validateCurrentStep();
-    console.log('🚨 Tentative de passage à l\'étape suivante:', validation);
-    
     if (validation.canProceed) {
-      console.log('✅ Validation réussie, passage à l\'étape suivante');
       onGo('next');
     } else {
-      console.error('❌ Validation échouée:', validation);
-      
-      // Debug détaillé des valeurs
-      const state = useInvoiceWizard.getState();
-      console.log('🔍 État complet du store:', {
-        invoiceNumber: state.invoiceNumber,
-        invoiceDate: state.invoiceDate,
-        eventLocation: state.eventLocation,
-        advisorName: state.advisorName,
-      });
-      
       alert(validation.message || 'Veuillez compléter les champs requis');
     }
   }, [validateCurrentStep, onGo]);

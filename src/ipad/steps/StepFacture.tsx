@@ -20,65 +20,26 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
 
-    if (!invoiceNumber || invoiceNumber.trim() === '') {
-      const newInvoiceNumber = generateInvoiceNumber();
-      console.log('🔢 Génération automatique du numéro de facture:', newInvoiceNumber);
-      setInvoiceData({ invoiceNumber: newInvoiceNumber });
+    if (!invoiceNumber) {
+      setInvoiceData({ invoiceNumber: generateInvoiceNumber() });
     }
 
-    if (!invoiceDate || invoiceDate.trim() === '') {
-      console.log('📅 Génération automatique de la date:', today);
+    if (!invoiceDate) {
       setInvoiceData({ invoiceDate: today });
     }
   }, [invoiceNumber, invoiceDate, setInvoiceData]);
 
   const validateAndNext = () => {
-    console.log('🔍 Validation dans StepFacture:', {
-      eventLocation,
-      advisorName,
-      invoiceNumber,
-      invoiceDate
-    });
-    
     // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
-      console.log('❌ Lieu d\'événement manquant');
-      alert('Veuillez remplir le lieu de l\'événement');
       return;
     }
     
     if (!advisorName || advisorName.trim() === '') {
-      console.log('❌ Nom du conseiller manquant');
-      alert('Veuillez remplir le nom du conseiller');
       return;
     }
 
-    // S'assurer que toutes les données sont dans le store
-    console.log('✅ Validation réussie dans StepFacture, sauvegarde des données...');
-    
-    // Force la sauvegarde des données avant de continuer
-    setInvoiceData({
-      invoiceNumber: invoiceNumber || generateInvoiceNumber(),
-      invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
-      eventLocation,
-    });
-    
-    updateAdvisorName(advisorName);
-    
-    // Attendre que le store soit mis à jour avant de continuer
-    console.log('⏳ Attente de la mise à jour du store...');
-    setTimeout(() => {
-      const currentState = useInvoiceWizard.getState();
-      console.log('🔍 État du store après mise à jour:', {
-        invoiceNumber: currentState.invoiceNumber,
-        invoiceDate: currentState.invoiceDate,
-        eventLocation: currentState.eventLocation,
-        advisorName: currentState.advisorName,
-      });
-      
-      console.log('📤 Appel de onNext()');
-      onNext();
-    }, 100); // Délai de 100ms pour permettre au store de se mettre à jour
+    onNext();
   };
 
   // État de validation pour les couleurs des cadres
