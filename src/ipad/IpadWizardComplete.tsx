@@ -127,6 +127,18 @@ function WizardSurface({
         const hasDate = invoiceDate.trim().length > 0;
         const hasLocation = eventLocation.trim().length > 0;
         const hasAdvisor = advisorName && advisorName.trim().length > 0;
+        
+        console.log('🔍 DEBUG - Validation step facture:', {
+          invoiceNumber: `"${invoiceNumber}"`,
+          invoiceDate: `"${invoiceDate}"`,
+          eventLocation: `"${eventLocation}"`,
+          advisorName: `"${advisorName}"`,
+          hasNumber,
+          hasDate,
+          hasLocation,
+          hasAdvisor,
+        });
+        
         return {
           isValid: hasNumber && hasDate && hasLocation && hasAdvisor,
           canProceed: hasNumber && hasDate && hasLocation && hasAdvisor,
@@ -162,10 +174,24 @@ function WizardSurface({
   }, [step, invoiceNumber, invoiceDate, eventLocation, advisorName, client, produits, paiement]);
 
   const validateAndGoNext = useCallback(() => {
+    // Forcer la récupération des données les plus récentes du store
+    const currentState = useInvoiceWizard.getState();
+    
+    console.log('🔍 DEBUG - État actuel du store:', {
+      invoiceNumber: currentState.invoiceNumber,
+      invoiceDate: currentState.invoiceDate,
+      eventLocation: currentState.eventLocation,
+      advisorName: currentState.advisorName,
+    });
+    
     const validation = validateCurrentStep();
+    console.log('🔍 DEBUG - Résultat validation:', validation);
+    
     if (validation.canProceed) {
+      console.log('✅ Validation OK, navigation...');
       onGo('next');
     } else {
+      console.error('❌ Validation échouée');
       alert(validation.message || 'Veuillez compléter les champs requis');
     }
   }, [validateCurrentStep, onGo]);
