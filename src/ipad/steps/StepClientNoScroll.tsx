@@ -405,16 +405,6 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* TEST SCROLL - Contenu temporaire pour forcer le scroll */}
-      <div className='mt-8 p-4 bg-blue-100 border-2 border-blue-400 rounded-lg'>
-        <h3 className='text-lg font-bold mb-4'>🧪 Test de Scroll PAGE CLIENT - À SUPPRIMER</h3>
-        {Array.from({length: 15}, (_, i) => (
-          <div key={i} className='p-4 mb-2 bg-white rounded border'>
-            <p>Ligne de test CLIENT {i + 1} pour vérifier le scroll vertical</p>
-            <p>Cette ligne devrait permettre de voir si le scroll fonctionne sur la page 2</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

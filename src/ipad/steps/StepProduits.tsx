@@ -592,16 +592,13 @@ export default function StepProduits({
         </button>
       </div>
 
-      {/* TEST SCROLL - Contenu temporaire pour forcer le scroll */}
-      <div className='mt-8 p-4 bg-green-100 border-2 border-green-400 rounded-lg'>
-        <h3 className='text-lg font-bold mb-4'>🧪 Test de Scroll PAGE PRODUITS - À SUPPRIMER</h3>
-        {Array.from({length: 12}, (_, i) => (
-          <div key={i} className='p-4 mb-2 bg-white rounded border'>
-            <p>Ligne de test PRODUITS {i + 1} pour vérifier le scroll vertical</p>
-            <p>Cette ligne devrait permettre de voir si le scroll fonctionne sur la page 3</p>
-          </div>
-        ))}
-      </div>
+      {/* Zone pour tester le scroll quand il y a beaucoup de produits */}
+      {produits.length >= 2 && (
+        <div style={{ height: '400px', background: 'transparent' }}>
+          {/* Cette zone invisible force le scroll quand il y a 2+ produits */}
+        </div>
+      )}
+
     </div>
   );
 }

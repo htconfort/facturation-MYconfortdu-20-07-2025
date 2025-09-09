@@ -231,16 +231,6 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
         </button>
       </div>
 
-      {/* TEST SCROLL - Contenu temporaire pour forcer le scroll */}
-      <div className='mt-8 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg'>
-        <h3 className='text-lg font-bold mb-4'>🧪 Test de Scroll - À SUPPRIMER</h3>
-        {Array.from({length: 10}, (_, i) => (
-          <div key={i} className='p-4 mb-2 bg-white rounded border'>
-            <p>Ligne de test {i + 1} pour vérifier le scroll vertical</p>
-            <p>Cette ligne devrait permettre de voir si le scroll fonctionne</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepsNavigator from '../navigation/StepsNavigator';
-import { useCustomScrollbar } from '../hooks/useCustomScrollbar';
 import './ipad-orientation.css';
 
 // Import des composants d'étapes
@@ -77,15 +76,6 @@ function WizardSurface({
   const stepIndex = steps.indexOf(step);
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === steps.length - 1;
-  const { 
-    scrollContainerRef, 
-    scrollbarRef, 
-    thumbRef, 
-    showTopIndicator, 
-    showBottomIndicator, 
-    thumbHeight, 
-    thumbTop 
-  } = useCustomScrollbar();
   const {
     invoiceNumber,
     invoiceDate,
@@ -221,43 +211,17 @@ function WizardSurface({
         </div>
       </div>
 
-      {/* Contenu de l'étape - scrollable avec barre custom */}
+      {/* Contenu de l'étape - scroll simple et direct */}
       <div 
-        ref={scrollContainerRef}
-        className='flex-1 p-2 ipad-scrollable relative'
+        className='flex-1 p-2'
         style={{
-          overflowY: 'auto',
+          overflowY: 'scroll',
           overflowX: 'hidden',
-          maxHeight: '100%',
+          WebkitOverflowScrolling: 'touch',
           height: '100%'
         }}
       >
         {renderStep}
-        
-        {/* Barre de scroll custom - toujours visible */}
-        <div ref={scrollbarRef} className="custom-scrollbar">
-          <div 
-            ref={thumbRef}
-            className="custom-scrollbar-thumb"
-            style={{
-              height: `${thumbHeight}px`,
-              top: `${thumbTop}px`
-            }}
-          />
-        </div>
-        
-        {/* Indicateurs de scroll visibles */}
-        {showTopIndicator && (
-          <div className="scroll-indicator-visible scroll-indicator-top-visible scroll-indicator-show">
-            ⬆️ Plus de contenu en haut
-          </div>
-        )}
-        
-        {showBottomIndicator && (
-          <div className="scroll-indicator-visible scroll-indicator-bottom-visible scroll-indicator-show">
-            ⬇️ Plus de contenu en bas
-          </div>
-        )}
       </div>
     </div>
   );

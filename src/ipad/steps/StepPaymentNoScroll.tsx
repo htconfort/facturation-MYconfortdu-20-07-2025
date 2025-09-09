@@ -311,16 +311,6 @@ export default function StepPaymentNoScroll({ onNext, onPrev }: StepProps) {
         rightDisabled={!isValidPayment}
       />
 
-      {/* TEST SCROLL - Contenu temporaire pour forcer le scroll */}
-      <div className='mt-8 p-4 bg-purple-100 border-2 border-purple-400 rounded-lg'>
-        <h3 className='text-lg font-bold mb-4'>🧪 Test de Scroll PAGE PAIEMENT - À SUPPRIMER</h3>
-        {Array.from({length: 8}, (_, i) => (
-          <div key={i} className='p-4 mb-2 bg-white rounded border'>
-            <p>Ligne de test PAIEMENT {i + 1} pour vérifier le scroll vertical</p>
-            <p>Cette ligne devrait permettre de voir si le scroll fonctionne sur la page 4</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
