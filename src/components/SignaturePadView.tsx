@@ -118,6 +118,14 @@ export default function SignaturePadView({
 
     handleResize();
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    // 🔧 ResizeObserver pour réagir aux changements de layout (iOS Safari)
+    let ro: ResizeObserver | null = null;
+    if ('ResizeObserver' in window && canvasRef.current?.parentElement) {
+      ro = new ResizeObserver(() => handleResize());
+      ro.observe(canvasRef.current.parentElement);
+    }
     
     // 🔧 PATCH COMPATIBILITÉ iOS: Listeners tactiles conditionnels selon version
     const canvas = canvasRef.current;
@@ -129,23 +137,25 @@ export default function SignaturePadView({
     };
 
     // Activer listeners non-passifs seulement pour iOS < 18.5 (workaround bug)
-    if (needsLegacyCompat) {
+    if (needsLegacyCompat || iosVersion) {
       console.log(`🔧 Activation patch compatibilité iOS ${iosVersion} (< 18.5)`);
       canvas.addEventListener('touchstart', preventScroll, { passive: false });
       canvas.addEventListener('touchmove', preventScroll, { passive: false });
       canvas.addEventListener('touchend', preventScroll, { passive: false });
-    } else {
-      console.log(`✅ iOS ${iosVersion || 'moderne'} - pas de patch nécessaire`);
     }
 
     setPad(p);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (ro) {
+        try { ro.disconnect(); } catch {}
+      }
       if (resizeRAF) cancelAnimationFrame(resizeRAF);
       
       // Cleanup conditionnel selon version iOS
-      if (needsLegacyCompat) {
+      if (needsLegacyCompat || iosVersion) {
         canvas.removeEventListener('touchstart', preventScroll as any);
         canvas.removeEventListener('touchmove', preventScroll as any);
         canvas.removeEventListener('touchend', preventScroll as any);

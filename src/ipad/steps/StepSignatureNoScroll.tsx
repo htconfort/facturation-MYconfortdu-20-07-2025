@@ -77,10 +77,10 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* 🎯 Contenu principal sans footer caché */}
-      <div className='flex-1 px-6 py-4 flex flex-col'>
+      {/* 🎯 Contenu principal avec zone de signature réduite pour laisser voir le footer */}
+      <div className='flex-1 px-6 py-2 flex flex-col'>
         {/* Zone de signature - prend la place disponible */}
-        <div className='flex-1 bg-white rounded-xl border-2 border-gray-300 p-4 mb-4'>
+        <div className='bg-white rounded-xl border-2 border-gray-300 p-3 mb-3'>
           <div className='h-full flex flex-col'>
             <div className='text-center mb-3'>
               <div className='text-lg font-semibold text-myconfort-dark'>
@@ -92,7 +92,8 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </div>
 
             {/* SignaturePad responsive */}
-            <div className='flex-1 min-h-[200px]'>
+            {/* Hauteur contrôlée pour laisser respirer le footer */}
+            <div className='min-h-[160px] h-[32vh]'>
               <SignaturePadView
                 onSigned={handleSigned}
                 onDrawingStart={onStart}
@@ -100,7 +101,7 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
               />
               
               {/* Boutons de navigation remontés à côté d'Enregistrer */}
-              <div className='flex items-center gap-2 mt-3'>
+              <div className='flex items-center gap-2 mt-2'>
                 <button
                   onClick={onPrev}
                   disabled={isSaving}
