@@ -11,8 +11,7 @@ interface StepProps {
 }
 
 export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
-  const { signature, updateSignature, termsAccepted, setTermsAccepted } =
-    useInvoiceWizard();
+  const { signature, updateSignature } = useInvoiceWizard();
   const [showTermsPage, setShowTermsPage] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,13 +53,7 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
   if (showTermsPage) {
     return (
       <TermsAndConditionsPage
-        termsAccepted={termsAccepted}
-        setTermsAccepted={setTermsAccepted}
         onBack={() => setShowTermsPage(false)}
-        onAccept={() => {
-          setTermsAccepted(true);
-          setShowTermsPage(false);
-        }}
       />
     );
   }
@@ -112,9 +105,9 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
                 
                 <button
                   onClick={handleNext}
-                  disabled={!signature?.dataUrl || !termsAccepted || isSaving || isProcessing}
+                  disabled={!signature?.dataUrl || isSaving || isProcessing}
                   className={`px-4 py-2 rounded-xl min-h-[56px] font-semibold
-                    ${(!signature?.dataUrl || !termsAccepted || isSaving || isProcessing)
+                    ${(!signature?.dataUrl || isSaving || isProcessing)
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
                       : 'bg-myconfort-green text-white hover:opacity-90'}`}
                 >
@@ -124,9 +117,7 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
                       ? '💾 Sauvegarde...'
                       : !signature?.dataUrl
                         ? 'Signez d\'abord'
-                        : !termsAccepted
-                          ? 'Acceptez conditions'
-                          : 'Suivant →'}
+                        : 'Suivant →'}
                 </button>
               </div>
             </div>
@@ -159,29 +150,14 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </div>
           )}
 
-          {/* Conditions générales */}
-          <div className='flex items-center justify-between bg-white p-3 rounded-xl border border-gray-300'>
-            <div className='flex items-center gap-3'>
-              <input
-                type='checkbox'
-                id='terms'
-                checked={termsAccepted}
-                onChange={e => setTermsAccepted(e.target.checked)}
-                className='w-5 h-5 text-myconfort-green'
-              />
-              <label
-                htmlFor='terms'
-                className='text-sm font-medium text-myconfort-dark'
-              >
-                J'accepte les conditions générales
-              </label>
-            </div>
+          {/* Lien vers conditions générales (optionnel) */}
+          <div className='text-center'>
             <button
               onClick={() => setShowTermsPage(true)}
-              className='px-3 py-1 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 
+              className='px-4 py-2 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 
                          rounded-lg text-sm font-medium transition-colors'
             >
-              📋 Lire
+              📋 Consulter les conditions générales
             </button>
           </div>
         </div>
@@ -192,15 +168,9 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
 
 // 🎯 Page secondaire pour les conditions générales
 function TermsAndConditionsPage({
-  termsAccepted,
-  setTermsAccepted,
   onBack,
-  onAccept,
 }: {
-  termsAccepted: boolean;
-  setTermsAccepted: (accepted: boolean) => void;
   onBack: () => void;
-  onAccept: () => void;
 }) {
   return (
     <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden'>
@@ -316,45 +286,16 @@ function TermsAndConditionsPage({
         </div>
       </div>
 
-      {/* Navigation avec checkbox */}
+      {/* Navigation simple */}
       <div className='px-6 py-4 border-t border-myconfort-dark/10'>
-        <div className='flex items-center justify-center mb-4'>
-          <label className='flex items-center gap-3'>
-            <input
-              type='checkbox'
-              checked={termsAccepted}
-              onChange={e => setTermsAccepted(e.target.checked)}
-              className='w-5 h-5 text-myconfort-green'
-            />
-            <span className='font-medium text-myconfort-dark'>
-              J'ai lu et j'accepte les conditions générales
-            </span>
-          </label>
-        </div>
-
-        <div className='flex justify-between items-center'>
+        <div className='flex justify-center'>
           <button
             onClick={onBack}
             className='px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
                        font-bold rounded-xl text-lg transition-all transform hover:scale-105
                        min-h-[56px]'
           >
-            ← Retour
-          </button>
-
-          <button
-            onClick={termsAccepted ? onAccept : undefined}
-            disabled={!termsAccepted}
-            className={`px-12 py-4 font-bold rounded-xl text-lg transition-all transform 
-                        shadow-lg min-h-[56px] ${
-                          !termsAccepted
-                            ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
-                            : 'bg-myconfort-green hover:bg-myconfort-green/90 text-white hover:scale-105'
-                        }`}
-          >
-            {!termsAccepted
-              ? 'Cochez pour accepter les conditions'
-              : 'Accepter et continuer →'}
+            ← Retour à la signature
           </button>
         </div>
       </div>
