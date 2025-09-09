@@ -110,12 +110,10 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Date: <span className='text-green-600'>✓ Auto</span>
                 </label>
                 <input
-                  value={invoiceDate}
-                  onChange={e =>
-                    setInvoiceData({ invoiceDate: e.target.value })
-                  }
+                  value={invoiceDate || new Date().toISOString().split('T')[0]}
                   type='date'
-                  className='border-2 border-green-500 rounded-lg px-3 py-2 text-sm text-black bg-green-50 focus:ring-1 focus:ring-green-300 transition-all font-bold'
+                  className='border-2 border-green-500 rounded-lg px-3 py-2 text-sm text-black bg-green-50 transition-all font-bold'
+                  readOnly
                 />
                 <p className='text-green-600 text-xs font-semibold'>
                   ✅ Date remplie automatiquement
