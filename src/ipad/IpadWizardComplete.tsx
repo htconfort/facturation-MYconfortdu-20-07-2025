@@ -2,6 +2,7 @@ import { useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepsNavigator from '../navigation/StepsNavigator';
+import { useScrollIndicators } from '../hooks/useScrollIndicators';
 import './ipad-orientation.css';
 
 // Import des composants d'étapes
@@ -105,6 +106,7 @@ function WizardSurface({
   const stepIndex = steps.indexOf(step);
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === steps.length - 1;
+  const { scrollContainerRef, topIndicatorRef, bottomIndicatorRef } = useScrollIndicators();
   const {
     invoiceNumber,
     invoiceDate,
@@ -241,7 +243,20 @@ function WizardSurface({
       </div>
 
       {/* Contenu de l'étape - scrollable */}
-      <div className='flex-1 overflow-y-auto overflow-x-hidden p-2'>{renderStep}</div>
+      <div 
+        ref={scrollContainerRef}
+        className='flex-1 overflow-y-auto overflow-x-hidden p-2 ipad-scrollable relative'
+      >
+        <div 
+          ref={topIndicatorRef}
+          className="scroll-indicator-top scroll-indicator-hidden"
+        ></div>
+        {renderStep}
+        <div 
+          ref={bottomIndicatorRef}
+          className="scroll-indicator-bottom scroll-indicator-hidden"
+        ></div>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,134 @@
+/* ===== STYLES IPAD ORIENTATION & SCROLL ===== */
+
+/* Overlay orientation (portrait) */
+.orientation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Afficher l'overlay uniquement en portrait */
+@media (orientation: portrait) {
+  .orientation-overlay {
+    display: flex;
+  }
+}
+
+/* ===== SCROLL BARS TOUJOURS VISIBLES SUR IPAD ===== */
+
+/* Force l'affichage des barres de scroll sur WebKit (Safari, iPad) */
+.ipad-scrollable {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling sur iOS */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #477A0C #F2EFE2; /* Firefox: thumb, track */
+}
+
+/* Styles WebKit pour les barres de scroll */
+.ipad-scrollable::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.ipad-scrollable::-webkit-scrollbar-track {
+  background: #F2EFE2;
+  border-radius: 6px;
+}
+
+.ipad-scrollable::-webkit-scrollbar-thumb {
+  background: #477A0C;
+  border-radius: 6px;
+  border: 2px solid #F2EFE2;
+}
+
+.ipad-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #5A8F0F;
+}
+
+.ipad-scrollable::-webkit-scrollbar-corner {
+  background: #F2EFE2;
+}
+
+/* ===== AMÉLIORATION DU TOUCH SUR IPAD ===== */
+
+/* Zone de touch plus large pour les éléments interactifs */
+.ipad-touch-target {
+  min-height: 44px; /* Apple recommandation */
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Feedback visuel lors du touch */
+.ipad-touch-feedback {
+  transition: all 0.1s ease;
+}
+
+.ipad-touch-feedback:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* Désactiver la sélection de texte sur les éléments UI */
+.ipad-no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* ===== SCROLL INDICATORS POUR FEEDBACK UTILISATEUR ===== */
+
+/* Indicateur visuel qu'il y a du contenu scrollable */
+.scroll-indicator-top,
+.scroll-indicator-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator-top {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(71, 122, 12, 0.2), transparent);
+}
+
+.scroll-indicator-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(71, 122, 12, 0.2), transparent);
+}
+
+/* Masquer les indicateurs quand pas nécessaires */
+.scroll-indicator-hidden {
+  opacity: 0;
+}
+
+/* ===== RESPONSIVE IPAD SPECIFIC ===== */
+
+/* iPad en paysage */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .ipad-scrollable {
+    padding-right: 8px; /* Espace pour la barre de scroll */
+  }
+}
+
+/* iPad en portrait (overlay actif mais styles de secours) */
+@media (max-width: 768px) and (orientation: portrait) {
+  .ipad-scrollable {
+    padding-right: 12px;
+  }
+}
