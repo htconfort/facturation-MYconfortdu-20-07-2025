@@ -109,6 +109,7 @@ function WizardSurface({
     invoiceNumber,
     invoiceDate,
     eventLocation,
+    advisorName,
     client,
     produits,
     paiement,
@@ -125,9 +126,10 @@ function WizardSurface({
         const hasNumber = invoiceNumber.trim().length > 0;
         const hasDate = invoiceDate.trim().length > 0;
         const hasLocation = eventLocation.trim().length > 0;
+        const hasAdvisor = advisorName && advisorName.trim().length > 0;
         return {
-          isValid: hasNumber && hasDate && hasLocation,
-          canProceed: hasNumber && hasDate && hasLocation,
+          isValid: hasNumber && hasDate && hasLocation && hasAdvisor,
+          canProceed: hasNumber && hasDate && hasLocation && hasAdvisor,
         };
 
       case 'client':
@@ -157,7 +159,7 @@ function WizardSurface({
       default:
         return { isValid: true, canProceed: true };
     }
-  }, [step, invoiceNumber, invoiceDate, eventLocation, client, produits, paiement]);
+  }, [step, invoiceNumber, invoiceDate, eventLocation, advisorName, client, produits, paiement]);
 
   const validateAndGoNext = useCallback(() => {
     const validation = validateCurrentStep();
