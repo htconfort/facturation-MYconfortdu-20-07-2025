@@ -77,13 +77,22 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   const [depositMethod, setDepositMethod] = useState<PaymentData['depositMethod']>(
     (paiement as PaymentData)?.depositMethod || 'Espèces'
   );
+  // Flag explicite une fois le panneau "Chèques à venir" complété
+  const [chequesConfigured, setChequesConfigured] = useState<boolean>(
+    (paiement?.method as PaymentData['method']) === 'Chèque à venir'
+  );
 
   const restePay = Math.max(
     0,
     totalAmount - (Number.isFinite(acompte) ? acompte : 0)
   );
   const isValidPayment =
-    !!selectedMethod && acompte >= 0 && acompte <= totalAmount && (acompte === 0 || !!depositMethod);
+    !!selectedMethod &&
+    acompte >= 0 &&
+    acompte <= totalAmount &&
+    (acompte === 0 || !!depositMethod) &&
+    // Si chèque à venir, s'assurer que la config a bien été validée
+    (selectedMethod !== 'Chèque à venir' || chequesConfigured === true);
 
   // Helpers
   const savePayment = (data: Partial<PaymentData>) => {
@@ -146,6 +155,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
             nombreChequesAVenir: data.count,
             note: data.notes,
           });
+          setChequesConfigured(true);
           setShowChequesPage(false);
         }}
       />
@@ -464,6 +474,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           onClick={isValidPayment ? onNext : () => {}}
           disabled={!isValidPayment}
           className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${isValidPayment ? 'bg-myconfort-green text-white hover:bg-myconfort-green/90' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          title={!isValidPayment && selectedMethod === 'Chèque à venir' && !chequesConfigured ? 'Configurer les chèques (1x..10x)' : ''}
         >
           Suivant →
         </button>
