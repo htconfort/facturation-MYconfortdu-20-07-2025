@@ -33,15 +33,37 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   }, [invoiceNumber, invoiceDate, setInvoiceData]);
 
   const validateAndNext = () => {
+    console.log('🔍 Validation dans StepFacture:', {
+      eventLocation,
+      advisorName,
+      invoiceNumber,
+      invoiceDate
+    });
+    
     // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
+      console.log('❌ Lieu d\'événement manquant');
       return;
     }
     
     if (!advisorName || advisorName.trim() === '') {
+      console.log('❌ Nom du conseiller manquant');
       return;
     }
 
+    // S'assurer que toutes les données sont dans le store
+    console.log('✅ Validation réussie dans StepFacture, sauvegarde des données...');
+    
+    // Force la sauvegarde des données avant de continuer
+    setInvoiceData({
+      invoiceNumber: invoiceNumber || generateInvoiceNumber(),
+      invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
+      eventLocation,
+    });
+    
+    updateAdvisorName(advisorName);
+    
+    console.log('📤 Appel de onNext()');
     onNext();
   };
 

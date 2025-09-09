@@ -176,9 +176,23 @@ function WizardSurface({
 
   const validateAndGoNext = useCallback(() => {
     const validation = validateCurrentStep();
+    console.log('🚨 Tentative de passage à l\'étape suivante:', validation);
+    
     if (validation.canProceed) {
+      console.log('✅ Validation réussie, passage à l\'étape suivante');
       onGo('next');
     } else {
+      console.error('❌ Validation échouée:', validation);
+      
+      // Debug détaillé des valeurs
+      const state = useInvoiceWizard.getState();
+      console.log('🔍 État complet du store:', {
+        invoiceNumber: state.invoiceNumber,
+        invoiceDate: state.invoiceDate,
+        eventLocation: state.eventLocation,
+        advisorName: state.advisorName,
+      });
+      
       alert(validation.message || 'Veuillez compléter les champs requis');
     }
   }, [validateCurrentStep, onGo]);
