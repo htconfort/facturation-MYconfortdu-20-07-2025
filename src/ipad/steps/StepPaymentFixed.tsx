@@ -42,6 +42,10 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   const [showAlmaPage, setShowAlmaPage] = useState(false);
   const [showChequesPage, setShowChequesPage] = useState(false);
 
+  // Constantes pour le layout
+  const HEADER_H = 80;   // hauteur header (px)
+  const FOOTER_H = 100;  // hauteur footer (px)
+
   // Total TTC à partir des lignes
   const totalAmount: number = (produits ?? []).reduce(
     (
@@ -151,10 +155,11 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   return (
     <div style={{ 
       width: '100%', 
-      height: '100%', 
+      height: '100svh',             // <- au lieu de 100%
       backgroundColor: '#F2EFE2',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'visible',           // <- NE PAS bloquer le scroll interne
+      WebkitTapHighlightColor: 'transparent'
     }}>
       {/* Header fixe */}
       <div style={{
@@ -165,7 +170,9 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 10
+        zIndex: 10,
+        height: HEADER_H,            // <-- fige la hauteur pour calc précis
+        boxSizing: 'border-box'
       }}>
         <h1 style={{
           fontSize: '24px',
@@ -185,17 +192,20 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* Zone de contenu scrollable avec hauteur fixe */}
+      {/* --- CONTENU SCROLLABLE (calé entre header et footer) --- */}
       <div style={{
         position: 'absolute',
-        top: '80px',
+        top: HEADER_H,                              // 80px
         left: 0,
         right: 0,
-        bottom: '100px',
+        bottom: FOOTER_H,                           // 100px
         padding: '16px 24px',
-        overflowY: 'scroll',
+        overflowY: 'auto',                          // <- auto (pas scroll forcé)
         overflowX: 'hidden',
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+        paddingBottom: `calc(${FOOTER_H}px + 24px)`, // <- pour ne jamais être sous le footer
+        boxSizing: 'border-box'
       }}>
         {/* Résumé */}
         <div style={{
@@ -370,7 +380,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           </div>
         )}
 
-        {/* Modes de paiement */}
+        {/* --- ZONE PROBLÉMATIQUE → conteneur dédié scroll-friendly --- */}
         <div style={{ marginBottom: '24px' }}>
           <label style={{
             display: 'block',
@@ -381,96 +391,105 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
           }}>
             Mode de règlement du reste *
           </label>
+
+          {/* Astuce : on autorise la grille à grandir, et c'est le conteneur principal
+             (ci-dessus) qui scroll. On ajoute un petit padding-bottom local pour
+             éviter tout recouvrement par bordure/bottom fade éventuel. */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: '12px'
+            gap: '12px',
+            alignContent: 'start',
+            paddingBottom: 8
+            // Important : si ce bloc est DANS un parent flex, on garantirait minHeight: 0
+            // Ici pas nécessaire, mais je le laisse en mémo :
+            // minHeight: 0,
           }}>
-            {/* Espèces */}
-            <PaymentCard
-              active={selectedMethod === 'Espèces'}
-              title="Espèces"
-              subtitle="Paiement comptant"
-              emoji="💵"
-              onClick={() => {
-                setSelectedMethod('Espèces');
-                savePayment({ method: 'Espèces', depositAmount: acompte, depositMethod });
-              }}
-            />
+              {/* Espèces */}
+              <PaymentCard
+                active={selectedMethod === 'Espèces'}
+                title="Espèces"
+                subtitle="Paiement comptant"
+                emoji="💵"
+                onClick={() => {
+                  setSelectedMethod('Espèces');
+                  savePayment({ method: 'Espèces', depositAmount: acompte, depositMethod });
+                }}
+              />
 
-            {/* Virement */}
-            <PaymentCard
-              active={selectedMethod === 'Virement'}
-              title="Virement"
-              subtitle="Banque à banque"
-              emoji="🏦"
-              onClick={() => {
-                setSelectedMethod('Virement');
-                savePayment({ method: 'Virement', depositAmount: acompte, depositMethod });
-              }}
-            />
+              {/* Virement */}
+              <PaymentCard
+                active={selectedMethod === 'Virement'}
+                title="Virement"
+                subtitle="Banque à banque"
+                emoji="🏦"
+                onClick={() => {
+                  setSelectedMethod('Virement');
+                  savePayment({ method: 'Virement', depositAmount: acompte, depositMethod });
+                }}
+              />
 
-            {/* Carte bleue */}
-            <PaymentCard
-              active={selectedMethod === 'Carte Bleue'}
-              title="Carte bleue"
-              subtitle="CB comptant"
-              emoji="💳"
-              onClick={() => {
-                setSelectedMethod('Carte Bleue');
-                savePayment({ method: 'Carte Bleue', depositAmount: acompte, depositMethod });
-              }}
-            />
+              {/* Carte bleue */}
+              <PaymentCard
+                active={selectedMethod === 'Carte Bleue'}
+                title="Carte bleue"
+                subtitle="CB comptant"
+                emoji="💳"
+                onClick={() => {
+                  setSelectedMethod('Carte Bleue');
+                  savePayment({ method: 'Carte Bleue', depositAmount: acompte, depositMethod });
+                }}
+              />
 
-            {/* Alma */}
-            <PaymentCard
-              active={selectedMethod?.startsWith('Alma')}
-              title={selectedMethod?.startsWith('Alma') ? selectedMethod : 'Alma'}
-              subtitle={
-                selectedMethod?.startsWith('Alma')
-                  ? 'Configuré ✓'
-                  : '2x, 3x ou 4x →'
-              }
-              custom={<img src={AlmaLogo} alt="Alma" style={{ height: '24px' }} />}
-              onClick={() => setShowAlmaPage(true)}
-            />
+              {/* Alma */}
+              <PaymentCard
+                active={selectedMethod?.startsWith('Alma')}
+                title={selectedMethod?.startsWith('Alma') ? selectedMethod : 'Alma'}
+                subtitle={
+                  selectedMethod?.startsWith('Alma')
+                    ? 'Configuré ✓'
+                    : '2x, 3x ou 4x →'
+                }
+                custom={<img src={AlmaLogo} alt="Alma" style={{ height: '24px' }} />}
+                onClick={() => setShowAlmaPage(true)}
+              />
 
-            {/* Chèque comptant */}
-            <PaymentCard
-              active={selectedMethod === 'Chèque au comptant'}
-              title="Chèque (comptant)"
-              subtitle="Remis à la commande"
-              emoji="🧾"
-              onClick={() => {
-                setSelectedMethod('Chèque au comptant');
-                savePayment({
-                  method: 'Chèque au comptant',
-                  depositAmount: acompte,
-                  depositMethod,
-                });
-              }}
-            />
+              {/* Chèque comptant */}
+              <PaymentCard
+                active={selectedMethod === 'Chèque au comptant'}
+                title="Chèque (comptant)"
+                subtitle="Remis à la commande"
+                emoji="🧾"
+                onClick={() => {
+                  setSelectedMethod('Chèque au comptant');
+                  savePayment({
+                    method: 'Chèque au comptant',
+                    depositAmount: acompte,
+                    depositMethod,
+                  });
+                }}
+              />
 
-            {/* Chèques à venir */}
-            <PaymentCard
-              active={selectedMethod === 'Chèque à venir'}
-              title="Chèques à venir"
-              subtitle={
-                selectedMethod === 'Chèque à venir' && paiement?.nombreChequesAVenir
-                  ? `${paiement.nombreChequesAVenir} chèques de ${(restePay / (paiement.nombreChequesAVenir || 1)).toFixed(2)}€ chacun`
-                  : selectedMethod === 'Chèque à venir'
-                  ? `${(paiement as PaymentData)?.chequesCount || 3} chèques × ${((paiement as PaymentData)?.chequeAmount || 0).toFixed(2)}€`
-                  : 'Planifier le paiement échelonné →'
-              }
-              emoji="📄"
-              highlight="amber"
-              onClick={() => setShowChequesPage(true)}
-            />
+              {/* Chèques à venir */}
+              <PaymentCard
+                active={selectedMethod === 'Chèque à venir'}
+                title="Chèques à venir"
+                subtitle={
+                  selectedMethod === 'Chèque à venir' && paiement?.nombreChequesAVenir
+                    ? `${paiement.nombreChequesAVenir} chèques de ${(restePay / (paiement.nombreChequesAVenir || 1)).toFixed(2)}€ chacun`
+                    : selectedMethod === 'Chèque à venir'
+                    ? `${(paiement as PaymentData)?.chequesCount || 3} chèques × ${((paiement as PaymentData)?.chequeAmount || 0).toFixed(2)}€`
+                    : 'Planifier le paiement échelonné →'
+                }
+                emoji="📄"
+                highlight="amber"
+                onClick={() => setShowChequesPage(true)}
+              />
           </div>
         </div>
 
-        {/* Espace pour le footer */}
-        <div style={{ height: '100px' }}></div>
+        {/* ❌ Supprimé : le faux spacer 100px (inutile grâce au paddingBottom) */}
+        {/* <div style={{ height: '100px' }} /> */}
       </div>
 
       {/* Footer fixe */}
@@ -482,6 +501,8 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         backgroundColor: '#F2EFE2',
         borderTop: '1px solid rgba(20, 40, 29, 0.1)',
         padding: '16px',
+        height: FOOTER_H,                          // <-- fige la hauteur pour le calc
+        boxSizing: 'border-box',
         display: 'flex',
         justifyContent: 'center',
         gap: '16px',
