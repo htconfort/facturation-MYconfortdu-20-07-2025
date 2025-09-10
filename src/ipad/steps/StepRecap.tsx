@@ -1,12 +1,10 @@
-import { useMemo, useState, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
-import { UnifiedPrintService } from '../../services/unifiedPrintService';
-import { N8nWebhookService } from '../../services/n8nWebhookService';
 import { PDFService } from '../../services/pdfService';
-import { saveInvoiceToFile } from '../../utils/invoiceStorage';
-import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
-import { Invoice } from '../../types';
+import { N8nWebhookService } from '../../services/n8nWebhookService';
+import { saveInvoice } from '../../utils/storage';
+import type { Invoice } from '../../types';
 
 interface StepProps {
   onNext: () => void;
@@ -16,491 +14,451 @@ interface StepProps {
   isLastStep: boolean;
 }
 
-export default function StepRecap({ onPrev }: StepProps) {
-  const { client, produits, paiement, livraison, signature, syncToMainInvoice } = useInvoiceWizard();
+export default function StepRecapIpadOptimized({
+  onNext,
+  onPrev,
+  onQuit,
+  isFirstStep,
+  isLastStep,
+}: StepProps) {
+  const {
+    invoiceNumber,
+    invoiceDate,
+    client,
+    produits,
+    paiement,
+    livraison,
+    eventLocation,
+    signature,
+    termsAccepted,
+    advisorName
+  } = useInvoiceWizard();
+
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const invoicePreviewRef = useRef<HTMLDivElement>(null);
+  const [actionHistory, setActionHistory] = useState<string[]>([]);
 
-  // Construction de l'objet Invoice depuis le store Zustand
-  const invoice: Invoice = useMemo(() => {
-    const baseInvoice = syncToMainInvoice();
+  // Calculs des totaux
+  const totals = useMemo(() => {
+    let subtotal = 0;
     
-    // Calculs financiers
-    const totalTTC = produits.reduce((sum, p) => {
-      return sum + calculateProductTotal(
-        Number(p.qty || 0),
-        Number(p.priceTTC || 0),
-        Number(p.discount || 0),
-        p.discountType || 'percent'
+    const details = produits.map(produit => {
+      const lineTotal = calculateProductTotal(
+        produit.qty || 0,
+        produit.priceTTC || 0,
+        produit.discount || 0,
+        produit.discountType || 'fixed'
       );
-    }, 0);
+      subtotal += lineTotal;
+      
+      return {
+        ...produit,
+        lineTotal
+      };
+    });
 
-    const totalHT = totalTTC / 1.2; // TVA 20%
-    const totalTVA = totalTTC - totalHT;
-    const montantRemise = produits.reduce((sum, p) => {
-      const originalTotal = p.priceTTC * p.qty;
-      const discountedTotal = calculateProductTotal(p.qty, p.priceTTC, p.discount, p.discountType);
-      return sum + (originalTotal - discountedTotal);
-    }, 0);
+    const acompte = paiement?.depositAmount || 0;
+    const reste = Math.max(0, subtotal - acompte);
 
     return {
-      ...baseInvoice,
-      montantHT: +totalHT.toFixed(2),
-      montantTTC: +totalTTC.toFixed(2),
-      montantTVA: +totalTVA.toFixed(2),
-      montantRemise: +montantRemise.toFixed(2),
-      taxRate: 20,
-      isSigned: !!signature.dataUrl,
-      signatureDate: signature.dataUrl ? new Date().toISOString() : undefined,
+      details,
+      subtotal,
+      acompte,
+      reste,
+      total: subtotal
     };
-  }, [produits, paiement, client, livraison, signature, syncToMainInvoice]);
+  }, [produits, paiement]);
 
-  // Fonction pour afficher un message temporaire
-  const showMessage = (message: string, isError = false) => {
-    if (isError) {
-      setErrorMessage(message);
-      setSuccessMessage(null);
-    } else {
-      setSuccessMessage(message);
-      setErrorMessage(null);
-    }
+  // Construction de l'objet Invoice pour les actions
+  const invoice: Invoice = useMemo(() => ({
+    // Informations de base
+    invoiceNumber,
+    invoiceDate,
+    eventLocation: eventLocation || '',
     
-    setTimeout(() => {
-      setSuccessMessage(null);
-      setErrorMessage(null);
-    }, 5000);
-  };
+    // Client - Structure plate pour compatibilité webhook
+    clientName: client.name || '',
+    clientEmail: client.email || '',
+    clientPhone: client.phone || '',
+    clientAddress: client.address || '',
+    clientAddressLine2: client.addressLine2 || '',
+    clientPostalCode: client.postalCode || '',
+    clientCity: client.city || '',
+    clientHousingType: client.housingType || '',
+    clientDoorCode: client.doorCode || '',
+    clientSiret: client.siret || '',
+    
+    // Produits
+    products: produits.map(p => ({
+      id: p.id,
+      name: p.designation,
+      category: p.category || '',
+      quantity: p.qty,
+      priceHT: (p.priceTTC || 0) / 1.2,
+      priceTTC: p.priceTTC || 0,
+      discount: p.discount || 0,
+      discountType: p.discountType,
+      totalHT: ((p.priceTTC || 0) / 1.2) * (p.qty || 0),
+      totalTTC: (p.priceTTC || 0) * (p.qty || 0),
+      isPickupOnSite: p.isPickupOnSite
+    })),
+    
+    // Montants (calculés et stockés)
+    montantHT: totals.subtotal / 1.2,
+    montantTTC: totals.subtotal,
+    montantTVA: totals.subtotal - (totals.subtotal / 1.2),
+    montantRemise: 0,
+    taxRate: 20,
+    
+    // Paiement
+    paymentMethod: paiement?.method || '',
+    montantAcompte: paiement?.depositAmount || 0,
+    depositPaymentMethod: paiement?.depositPaymentMethod || '',
+    montantRestant: totals.reste,
+    
+    // Livraison
+    deliveryMethod: livraison?.deliveryMethod || '',
+    deliveryAddress: livraison?.deliveryAddress || '',
+    deliveryNotes: livraison?.deliveryNotes || '',
+    
+    // Signature
+    signature: signature?.dataUrl || '',
+    isSigned: !!signature?.dataUrl,
+    signatureDate: signature?.timestamp || '',
+    
+    // Notes et conseiller
+    invoiceNotes: '',
+    advisorName: advisorName || '',
+    termsAccepted: termsAccepted || false,
+    
+    // Timestamps
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }), [invoiceNumber, invoiceDate, eventLocation, client, produits, paiement, livraison, signature, termsAccepted, advisorName, totals]);
 
-  // Action 1: Enregistrer la facture dans l'onglet factures
+  // Action 1: Enregistrer la facture
   const handleSaveInvoice = async () => {
     try {
       setIsLoading(true);
-      
-      // Convertir au format attendu par invoiceStorage
-      const storageInvoice = {
-        id: `invoice-${Date.now()}`,
-        clientName: invoice.clientName,
-        clientAddress: `${invoice.clientAddress}, ${invoice.clientCity} ${invoice.clientPostalCode}`,
-        clientPhone: invoice.clientPhone,
-        clientEmail: invoice.clientEmail,
-        items: invoice.products.map(p => ({
-          description: p.name,
-          quantity: p.quantity,
-          unitPrice: p.priceTTC,
-          total: p.quantity * p.priceTTC
-        })),
-        subtotal: invoice.montantHT,
-        tax: invoice.montantTVA,
-        total: invoice.montantTTC,
-        date: invoice.invoiceDate,
-        invoiceNumber: invoice.invoiceNumber,
-      };
-      
-      // Sauvegarder via le service de stockage
-      const success = saveInvoiceToFile(storageInvoice);
-      
-      if (success) {
-        showMessage('✅ Facture enregistrée avec succès dans l\'onglet factures');
-      } else {
-        showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
-      }
+      saveInvoice(invoice);
+      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} enregistrée`]);
     } catch (error) {
-      console.error('Erreur sauvegarde facture:', error);
-      showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
+      console.error('Erreur sauvegarde:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Action 2: Imprimer les deux pages (facture + CGV)
+  // Action 2: Imprimer le PDF
   const handlePrintInvoice = async () => {
     try {
       setIsLoading(true);
-      showMessage('🖨️ Préparation de l\'impression...');
-      
-      // Utiliser le service d'impression unifié
-      await UnifiedPrintService.printInvoice(invoice);
-      
-      showMessage('✅ Impression lancée avec succès');
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, '_blank');
+      setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert pour impression`]);
     } catch (error) {
       console.error('Erreur impression:', error);
-      showMessage('❌ Erreur lors de l\'impression', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Action 3: Envoyer par email et drive via N8N
-  const handleSendEmailAndDrive = async () => {
+  // Action 3: Envoyer par email
+  const handleSendEmail = async () => {
     try {
       setIsLoading(true);
-      showMessage('📧 Génération du PDF et envoi en cours...');
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
       
-      // Générer le PDF depuis l'aperçu
-      const pdfBlob = await PDFService.generateInvoicePDF(invoice, invoicePreviewRef);
-      
-      // Convertir le blob en base64
       const reader = new FileReader();
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => {
           const result = reader.result as string;
-          // Extraire seulement la partie base64 (après la virgule)
           const base64 = result.split(',')[1];
           resolve(base64);
         };
-        reader.onerror = () => reject(new Error('Erreur conversion PDF'));
+        reader.onerror = reject;
         reader.readAsDataURL(pdfBlob);
       });
-      
-      // Envoyer via N8N
-      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
-      
-      if (result.success) {
-        showMessage('✅ Facture envoyée par email et sauvegardée sur Drive avec succès');
-      } else {
-        showMessage(`❌ Erreur lors de l'envoi: ${result.message}`, true);
-      }
+
+      await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
+      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} envoyée par email`]);
     } catch (error) {
-      console.error('Erreur envoi email/drive:', error);
-      showMessage('❌ Erreur lors de l\'envoi par email et drive', true);
+      console.error('Erreur envoi:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatEUR = (amount: number) =>
-    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
-
-  const produitsALivrer = produits.filter(p => !p.isPickupOnSite);
-  const produitsAEmporter = produits.filter(p => p.isPickupOnSite);
+  // États des actions
+  const isInvoiceSaved = actionHistory.some(action => action.includes('enregistrée'));
+  const isEmailSent = actionHistory.some(action => action.includes('envoyée par email'));
+  const isPdfGenerated = actionHistory.some(action => action.includes('ouvert pour impression'));
 
   return (
-    <div className="py-8">
-      {/* Header avec code couleur harmonisé */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4">
-          7
+    <div className="h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
+      
+      {/* Header ultra-compact */}
+      <div className="bg-white border-b border-[#477A0C]/20 p-2 flex-shrink-0">
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-[#477A0C]">
+            📋 Récap Final - {invoiceNumber}
+          </h2>
         </div>
-        <h2 className="text-3xl font-bold text-[#477A0C] mb-2">📋 Récapitulatif Final</h2>
-        <p className="text-gray-600 text-lg">
-          Vérification complète avant génération de la facture
-        </p>
       </div>
 
-      <div className="max-w-6xl mx-auto space-y-6">
-
-        {/* Messages d'état */}
-        {successMessage && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl text-center">
-            {successMessage}
-          </div>
-        )}
-        
-        {errorMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-center">
-            {errorMessage}
-          </div>
-        )}
-
-        {/* Aperçu de la facture */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            📄 Aperçu de la facture
-          </h3>
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <InvoicePreviewModern 
-              ref={invoicePreviewRef}
-              invoice={invoice}
-              className="bg-white"
-            />
-          </div>
-        </section>
-
-        {/* Informations client */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">👤</span>
-            Informations Client
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <strong>Nom :</strong> {client.name}
-            </div>
-            <div>
-              <strong>Email :</strong> {client.email}
-            </div>
-            <div>
-              <strong>Téléphone :</strong> {client.phone}
-            </div>
-            <div>
-              <strong>Adresse :</strong> {client.address}
-              {client.addressLine2 && <div className="text-gray-600">{client.addressLine2}</div>}
-            </div>
-            <div>
-              <strong>Code postal :</strong> {client.postalCode}
-            </div>
-            <div>
-              <strong>Ville :</strong> {client.city}
-            </div>
-            {client.siret && (
-              <div>
-                <strong>SIRET :</strong> {client.siret}
-              </div>
-            )}
-            {client.housingType && (
-              <div>
-                <strong>Type de logement :</strong> {client.housingType}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Produits commandés */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">📦</span>
-            Produits Commandés
-          </h3>
+      {/* CONTENU PRINCIPAL - GRILLE 3 COLONNES - TOUT VISIBLE */}
+      <div className="flex-1 p-3 overflow-hidden">
+        <div className="h-full grid grid-cols-3 gap-3">
           
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-3 px-2 font-semibold">Désignation</th>
-                  <th className="text-center py-3 px-2 font-semibold">Qté</th>
-                  <th className="text-right py-3 px-2 font-semibold">Prix unit. TTC</th>
-                  <th className="text-right py-3 px-2 font-semibold">Remise</th>
-                  <th className="text-center py-3 px-2 font-semibold">Livraison</th>
-                  <th className="text-right py-3 px-2 font-semibold">Total TTC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {produits.map((produit) => (
-                  <tr key={produit.id} className="border-b border-gray-100">
-                    <td className="py-3 px-2">
-                      <div className="font-medium">{produit.designation}</div>
-                      {produit.category && <div className="text-sm text-gray-500">{produit.category}</div>}
-                    </td>
-                    <td className="text-center py-3 px-2">{produit.qty}</td>
-                    <td className="text-right py-3 px-2">{formatEUR(produit.priceTTC)}</td>
-                    <td className="text-right py-3 px-2">
-                      {produit.discount > 0 ? (
-                        <span className="text-green-600">
-                          -{produit.discount}
-                          {produit.discountType === 'percent' ? '%' : '€'}
-                        </span>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        produit.isPickupOnSite 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {produit.isPickupOnSite ? '🚗 Emporter' : '📦 Livrer'}
-                      </span>
-                    </td>
-                    <td className="text-right py-3 px-2 font-semibold">
-                      {formatEUR(calculateProductTotal(
-                        produit.qty,
-                        produit.priceTTC,
-                        produit.discount || 0,
-                        produit.discountType || 'percent'
-                      ))}
-                    </td>
-                  </tr>
+          {/* COLONNE 1: Infos Facture + Client */}
+          <div className="space-y-3 overflow-hidden">
+            {/* Facture */}
+            <div className="bg-white rounded-lg p-3 shadow-md">
+              <h3 className="font-bold text-gray-800 mb-2 text-sm">🧾 Facture</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Date :</span>
+                  <span className="font-medium">{invoiceDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Lieu :</span>
+                  <span className="font-medium truncate">{eventLocation}</span>
+                </div>
+                {advisorName && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Conseiller :</span>
+                    <span className="font-medium truncate">{advisorName}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Client */}
+            <div className="bg-white rounded-lg p-3 shadow-md">
+              <h3 className="font-bold text-gray-800 mb-2 text-sm">👤 Client</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Nom :</span>
+                  <span className="font-medium truncate">{client.name || 'Non renseigné'}</span>
+                </div>
+                {client.email && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Email :</span>
+                    <span className="font-medium text-xs truncate">{client.email}</span>
+                  </div>
+                )}
+                {client.phone && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tél :</span>
+                    <span className="font-medium">{client.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Paiement + Livraison */}
+            <div className="bg-white rounded-lg p-3 shadow-md flex-1">
+              <h3 className="font-bold text-gray-800 mb-2 text-sm">💳 Paiement & 🚚 Livraison</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Mode :</span>
+                  <span className="font-medium">{paiement?.method || 'Non défini'}</span>
+                </div>
+                {paiement?.depositAmount && paiement.depositAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Acompte :</span>
+                    <span className="font-medium text-green-600">{paiement.depositAmount.toFixed(2)} €</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-1 border-t border-gray-200">
+                  <span className="text-gray-600">Livraison :</span>
+                  <span className="font-medium">{livraison?.deliveryMethod || 'Non défini'}</span>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  {signature?.dataUrl ? (
+                    <div className="flex items-center gap-1">
+                      <div className="w-6 h-4 bg-gray-100 rounded border overflow-hidden">
+                        <img src={signature.dataUrl} alt="Signature" className="w-full h-full object-contain"/>
+                      </div>
+                      <span className="text-green-600 font-medium text-xs">✅ Signée</span>
+                    </div>
+                  ) : (
+                    <span className="text-orange-600 text-xs">⚠️ Signature manquante</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* COLONNE 2: Produits + Total */}
+          <div className="space-y-3 overflow-hidden">
+            <div className="bg-white rounded-lg p-3 shadow-md h-full flex flex-col">
+              <h3 className="font-bold text-gray-800 mb-2 text-sm">📦 Produits ({produits.length})</h3>
+              
+              {/* Liste produits avec scroll limité */}
+              <div className="flex-1 space-y-1 overflow-y-auto" style={{maxHeight: '280px'}}>
+                {totals.details.map((produit, index) => (
+                  <div key={index} className="border-b border-gray-100 pb-1 last:border-b-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 pr-1">
+                        <div className="font-medium text-xs text-gray-800 truncate">
+                          {produit.designation}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {produit.qty} × {produit.priceTTC?.toFixed(2)}€
+                          {produit.isPickupOnSite ? ' 📦' : ' 🚚'}
+                        </div>
+                      </div>
+                      <div className="font-medium text-xs text-gray-800">
+                        {produit.lineTotal.toFixed(2)}€
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+              
+              {/* Total - Toujours visible */}
+              <div className="border-t border-gray-300 pt-2 mt-2 flex-shrink-0">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-800 text-sm">Total TTC :</span>
+                  <span className="font-bold text-lg text-blue-600">{totals.total.toFixed(2)} €</span>
+                </div>
+                {totals.acompte > 0 && (
+                  <>
+                    <div className="flex justify-between text-xs text-gray-600 mt-1">
+                      <span>Acompte versé :</span>
+                      <span>-{totals.acompte.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-orange-600 text-xs mt-1">
+                      <span>Reste à régler :</span>
+                      <span>{totals.reste.toFixed(2)} €</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Totaux */}
-          <div className="bg-gray-50 rounded-xl p-4 mt-4">
-            <div className="flex justify-between py-2">
-              <span>Total HT :</span>
-              <span className="font-semibold">{formatEUR(invoice.montantHT)}</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span>TVA (20%) :</span>
-              <span className="font-semibold">{formatEUR(invoice.montantTVA)}</span>
-            </div>
-            <div className="flex justify-between py-3 border-t-2 border-gray-300 text-xl font-bold text-[#477A0C]">
-              <span>Total TTC :</span>
-              <span>{formatEUR(invoice.montantTTC)}</span>
-            </div>
-          </div>
-        </section>
+          {/* COLONNE 3: BOUTONS D'ACTION - TOUJOURS VISIBLES */}
+          <div className="space-y-3 overflow-hidden">
+            
+            {/* Message d'obligation */}
+            {(!isInvoiceSaved || !isEmailSent) && (
+              <div className="p-2 bg-orange-100 border border-orange-300 rounded-lg">
+                <p className="text-xs text-orange-800 text-center font-medium">
+                  ⚠️ Enregistrer + Envoyer obligatoires
+                </p>
+              </div>
+            )}
 
-        {/* Modalités de paiement */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">💳</span>
-            Modalités de Paiement
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <strong>Mode de règlement :</strong> {paiement.method}
-            </div>
-            {paiement.depositAmount && paiement.depositAmount > 0 && (
-              <div>
-                <strong>Acompte :</strong> {formatEUR(paiement.depositAmount)}
+            {/* LES 3 BOUTONS ESSENTIELS - TOUJOURS VISIBLES */}
+            <div className="space-y-3">
+              
+              {/* 1. Enregistrer Facture - OBLIGATOIRE */}
+              <div className="relative">
+                <button
+                  onClick={handleSaveInvoice}
+                  disabled={isLoading}
+                  className="w-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                >
+                  <span className="text-base mb-1">💾</span>
+                  <div className="text-center">
+                    <div className="text-xs">Enregistrer</div>
+                    <div className="text-xs opacity-80">Facture</div>
+                  </div>
+                </button>
+                {!isInvoiceSaved && (
+                  <div className="absolute -top-1 -left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
+                    !
+                  </div>
+                )}
+                {isInvoiceSaved && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
+                    ✓
+                  </div>
+                )}
               </div>
-            )}
-            {paiement.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
-              <div>
-                <strong>Nombre de chèques :</strong> {paiement.nombreChequesAVenir} fois
-              </div>
-            )}
-            {paiement.remainingAmount && paiement.remainingAmount > 0 && (
-              <div>
-                <strong>Montant par chèque :</strong> {formatEUR(paiement.remainingAmount / (paiement.nombreChequesAVenir || 1))}
-              </div>
-            )}
-          </div>
-          
-          {paiement.note && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <strong>Notes :</strong> {paiement.note}
-            </div>
-          )}
-        </section>
 
-        {/* Modalités de livraison */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">🚚</span>
-            Modalités de Livraison
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold text-green-800 mb-2">À emporter ({produitsAEmporter.length})</h4>
-              {produitsAEmporter.length > 0 ? (
-                <ul className="text-sm text-green-700">
-                  {produitsAEmporter.map(p => (
-                    <li key={p.id}>• {p.designation} (x{p.qty})</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm">Aucun produit à emporter</p>
+              {/* 2. Imprimer PDF A4 */}
+              <div className="relative">
+                <button
+                  onClick={handlePrintInvoice}
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                >
+                  <span className="text-base mb-1">🖨️</span>
+                  <div className="text-center">
+                    <div className="text-xs">Imprimer</div>
+                    <div className="text-xs opacity-80">PDF A4</div>
+                  </div>
+                </button>
+                {isPdfGenerated && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
+                    ✓
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Envoyer Email - OBLIGATOIRE */}
+              <div className="relative">
+                <button
+                  onClick={handleSendEmail}
+                  disabled={isLoading || !client.email}
+                  className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                >
+                  <span className="text-base mb-1">📧</span>
+                  <div className="text-center">
+                    <div className="text-xs">Envoyer</div>
+                    <div className="text-xs opacity-80">Email</div>
+                  </div>
+                </button>
+                {!isEmailSent && (
+                  <div className="absolute -top-1 -left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
+                    !
+                  </div>
+                )}
+                {isEmailSent && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
+                    ✓
+                  </div>
+                )}
+              </div>
+
+              {/* Boutons navigation */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  onClick={onPrev}
+                  className="bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors py-2 flex flex-col items-center justify-center"
+                >
+                  <span className="text-sm">←</span>
+                  <div className="text-xs">Retour</div>
+                </button>
+
+                <button
+                  onClick={onNext}
+                  disabled={!isInvoiceSaved || !isEmailSent}
+                  className={`rounded-lg font-bold transition-colors py-2 flex flex-col items-center justify-center ${
+                    isInvoiceSaved && isEmailSent
+                      ? 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  <span className="text-sm">🆕</span>
+                  <div className="text-xs">Nouvelle</div>
+                </button>
+              </div>
+
+              {/* Status en cours */}
+              {isLoading && (
+                <div className="text-center pt-2">
+                  <div className="inline-flex items-center gap-2 bg-white px-3 py-2 rounded-lg border text-xs">
+                    <div className="animate-spin text-[#477A0C]">⏳</div>
+                    <span className="text-gray-700">Traitement...</span>
+                  </div>
+                </div>
               )}
             </div>
-            
-            <div>
-              <h4 className="font-semibold text-blue-800 mb-2">À livrer ({produitsALivrer.length})</h4>
-              {produitsALivrer.length > 0 ? (
-                <ul className="text-sm text-blue-700">
-                  {produitsALivrer.map(p => (
-                    <li key={p.id}>• {p.designation} (x{p.qty})</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm">Aucun produit à livrer</p>
-              )}
-            </div>
           </div>
-
-          {livraison.deliveryMethod && (
-            <div className="mt-4">
-              <strong>Mode de livraison :</strong> {livraison.deliveryMethod}
-            </div>
-          )}
-
-          {livraison.deliveryNotes && (
-            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-              <strong>Notes de livraison :</strong> {livraison.deliveryNotes}
-            </div>
-          )}
-        </section>
-
-        {/* Signature */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">✍️</span>
-            Signature Client
-          </h3>
-          
-          {signature.dataUrl ? (
-            <div className="text-center">
-              <img 
-                src={signature.dataUrl} 
-                alt="Signature du client" 
-                className="max-w-md mx-auto border rounded-lg shadow-sm"
-              />
-              <p className="text-sm text-gray-600 mt-2">
-                Signé le {signature.timestamp ? new Date(signature.timestamp).toLocaleString('fr-FR') : ''}
-              </p>
-            </div>
-          ) : (
-            <p className="text-red-600">⚠️ Aucune signature enregistrée</p>
-          )}
-        </section>
-
-        {/* Actions principales */}
-        <section className="bg-gradient-to-r from-[#477A0C]/10 to-[#477A0C]/20 rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]">
-          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
-            <span className="mr-2">�</span>
-            Actions Principales
-          </h3>
-          
-          <p className="text-green-700 mb-6">
-            Toutes les informations ont été collectées avec succès. Vous pouvez maintenant :
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              type="button"
-              onClick={handleSaveInvoice}
-              disabled={isLoading}
-              className="bg-[#477A0C] hover:bg-[#5A8F0F] disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
-            >
-              <span className="mr-2">�</span>
-              {isLoading ? 'Enregistrement...' : 'Enregistrer Facture'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={handlePrintInvoice}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
-            >
-              <span className="mr-2">�️</span>
-              {isLoading ? 'Impression...' : 'Imprimer les 2 Pages'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleSendEmailAndDrive}
-              disabled={isLoading}
-              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
-            >
-              <span className="mr-2">�</span>
-              {isLoading ? 'Envoi en cours...' : 'Envoyer Email & Drive'}
-            </button>
-          </div>
-        </section>
-
-        {/* Navigation */}
-        <div className="flex gap-4 justify-center">
-          <button
-            type="button"
-            onClick={onPrev}
-            className="px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all"
-          >
-            ← Signature
-          </button>
-
-          <button
-            type="button"
-            className="bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
-          >
-            🆕 Nouvelle Commande
-          </button>
         </div>
       </div>
     </div>
