@@ -673,28 +673,28 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           <div className='p-4 space-y-3'>
             <div>
               <h3 className='font-bold text-[#477A0C] mb-1'>
-                Art. 1 - LOI HAMMON
+                Art. 1 - Loi applicable et rétractation
               </h3>
               <p className='text-justify'>
-                Les achats effectués sur les foires expositions et salon, à l'exception de ceux faisant l'objet d'un contrat de crédit à la consommation, ne sont pas soumis aux articles L311-10 et L311-15 (délai de rétractation de sept jours) du code de la consommation.
+                Pas de rétractation en foires/salons (art. L224-59). Pour ventes à distance : 14j sauf produits sur mesure (art. L221-28).
               </p>
             </div>
 
             <div>
               <h3 className='font-bold text-[#477A0C] mb-1'>
-                Art. 2 - Délais de Livraison
+                Art. 2 - Délais de livraison
               </h3>
               <p className='text-justify'>
-                Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.
+                Délais indicatifs. Aucun retard ne justifie annulation ou indemnisation sauf engagement écrit. Force majeure exonératoire.
               </p>
             </div>
 
             <div>
               <h3 className='font-bold text-[#477A0C] mb-1'>
-                Art. 3 - Risques de Transport
+                Art. 3 - Transfert des risques
               </h3>
               <p className='text-justify'>
-                Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d'avaries ou de pertes, de faire toutes réserves, et d'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d'un produit est basée sur la présence du produit en stock et sur l'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.
+                Transport aux risques du destinataire. Réserves obligatoires sur bon de livraison et confirmation sous 48h. Sans réserves = accepté.
               </p>
             </div>
 
