@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
-import { PDFService } from '../../services/pdfService';
+import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
-import { saveInvoice } from '../../utils/storage';
-import type { Invoice } from '../../types';
+import { PDFService } from '../../services/pdfService';
+import { saveInvoiceToFile } from '../../utils/invoiceStorage';
+import { InvoicePreviewModern } from '../../components/InvoicePreviewModern';
+import { Invoice } from '../../types';
 
 interface StepProps {
   onNext: () => void;
@@ -14,561 +16,493 @@ interface StepProps {
   isLastStep: boolean;
 }
 
-export default function StepRecapIpad({ onNext, onPrev }: StepProps) {
-  const {
-    client,
-    produits,
-    paiement,
-    livraison,
-    invoiceNumber,
-    invoiceDate,
-    eventLocation,
-    signature,
-    termsAccepted,
-    advisorName
-  } = useInvoiceWizard();
-
-  const [isProcessing, setIsProcessing] = useState(false);
+export default function StepRecap({ onPrev }: StepProps) {
+  const { client, produits, paiement, livraison, signature, syncToMainInvoice } = useInvoiceWizard();
   const [isLoading, setIsLoading] = useState(false);
-  const [actionHistory, setActionHistory] = useState<string[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const invoicePreviewRef = useRef<HTMLDivElement>(null);
 
-  // Calculs des totaux (DOIT être défini AVANT invoice)
-  const totals = useMemo(() => {
-    let subtotal = 0;
+  // Construction de l'objet Invoice depuis le store Zustand
+  const invoice: Invoice = useMemo(() => {
+    const baseInvoice = syncToMainInvoice();
     
-    const details = produits.map(produit => {
-      const lineTotal = calculateProductTotal(
-        produit.qty || 0,
-        produit.priceTTC || 0,
-        produit.discount || 0,
-        produit.discountType || 'fixed'
+    // Calculs financiers
+    const totalTTC = produits.reduce((sum, p) => {
+      return sum + calculateProductTotal(
+        Number(p.qty || 0),
+        Number(p.priceTTC || 0),
+        Number(p.discount || 0),
+        p.discountType || 'percent'
       );
-      subtotal += lineTotal;
-      
-      return {
-        ...produit,
-        lineTotal
-      };
-    });
+    }, 0);
 
-    const acompte = paiement?.depositAmount || 0;
-    const reste = Math.max(0, subtotal - acompte);
+    const totalHT = totalTTC / 1.2; // TVA 20%
+    const totalTVA = totalTTC - totalHT;
+    const montantRemise = produits.reduce((sum, p) => {
+      const originalTotal = p.priceTTC * p.qty;
+      const discountedTotal = calculateProductTotal(p.qty, p.priceTTC, p.discount, p.discountType);
+      return sum + (originalTotal - discountedTotal);
+    }, 0);
 
     return {
-      details,
-      subtotal,
-      acompte,
-      reste,
-      total: subtotal
+      ...baseInvoice,
+      montantHT: +totalHT.toFixed(2),
+      montantTTC: +totalTTC.toFixed(2),
+      montantTVA: +totalTVA.toFixed(2),
+      montantRemise: +montantRemise.toFixed(2),
+      taxRate: 20,
+      isSigned: !!signature.dataUrl,
+      signatureDate: signature.dataUrl ? new Date().toISOString() : undefined,
     };
-  }, [produits, paiement]);
+  }, [produits, paiement, client, livraison, signature, syncToMainInvoice]);
 
-  // Construction de l'objet Invoice pour les actions
-  const invoice: Invoice = useMemo(() => ({
-    // Informations de base
-    invoiceNumber,
-    invoiceDate,
-    eventLocation: eventLocation || '',
+  // Fonction pour afficher un message temporaire
+  const showMessage = (message: string, isError = false) => {
+    if (isError) {
+      setErrorMessage(message);
+      setSuccessMessage(null);
+    } else {
+      setSuccessMessage(message);
+      setErrorMessage(null);
+    }
     
-    // Client - Structure plate pour compatibilité webhook
-    clientName: client.name || '',
-    clientEmail: client.email || '',
-    clientPhone: client.phone || '',
-    clientAddress: client.address || '',
-    clientAddressLine2: client.addressLine2 || '',
-    clientPostalCode: client.postalCode || '',
-    clientCity: client.city || '',
-    clientHousingType: client.housingType || '',
-    clientDoorCode: client.doorCode || '',
-    clientSiret: client.siret || '',
-    
-    // Produits
-    products: produits.map(p => ({
-      id: p.id,
-      name: p.designation,
-      category: p.category || '',
-      quantity: p.qty,
-      priceHT: p.priceTTC / 1.2, // Approximation
-      priceTTC: p.priceTTC,
-      discount: p.discount,
-      discountType: p.discountType,
-      totalHT: (p.qty * p.priceTTC / 1.2) - (p.discountType === 'fixed' ? p.discount : (p.qty * p.priceTTC / 1.2) * p.discount / 100),
-      totalTTC: (p.qty * p.priceTTC) - (p.discountType === 'fixed' ? p.discount : (p.qty * p.priceTTC) * p.discount / 100),
-      isPickupOnSite: p.isPickupOnSite
-    })),
-    
-    // Montants (calculés et stockés)
-    montantHT: totals.subtotal / 1.2, // Approximation en attendant calcul précis
-    montantTTC: totals.subtotal,
-    montantTVA: totals.subtotal - (totals.subtotal / 1.2),
-    montantRemise: 0, // À calculer
-    taxRate: 20,
-    
-    // Paiement
-    paymentMethod: paiement?.method || '',
-    montantAcompte: paiement?.depositAmount || 0,
-    depositPaymentMethod: paiement?.depositPaymentMethod || '',
-    montantRestant: totals.reste,
-    nombreChequesAVenir: paiement?.nombreChequesAVenir || 0, // ✅ Ajout pour le PDF
-    
-    // Livraison
-    deliveryMethod: livraison?.deliveryMethod || '',
-    deliveryAddress: livraison?.deliveryAddress || '',
-    deliveryNotes: livraison?.deliveryNotes || '',
-    
-    // Signature
-    signature: signature?.dataUrl || '',
-    isSigned: !!signature?.dataUrl,
-    signatureDate: signature?.timestamp || '',
-    
-    // Notes et conseiller
-    invoiceNotes: '',
-    advisorName: advisorName || '',
-    termsAccepted: termsAccepted || false,
-    
-    // Timestamps
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }), [invoiceNumber, invoiceDate, eventLocation, client, produits, paiement, livraison, signature, termsAccepted, advisorName, totals]);
+    setTimeout(() => {
+      setSuccessMessage(null);
+      setErrorMessage(null);
+    }, 5000);
+  };
 
-  // Action 1: Enregistrer la facture
+  // Action 1: Enregistrer la facture dans l'onglet factures
   const handleSaveInvoice = async () => {
     try {
       setIsLoading(true);
-      saveInvoice(invoice);
-      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} enregistrée`]);
+      
+      // Convertir au format attendu par invoiceStorage
+      const storageInvoice = {
+        id: `invoice-${Date.now()}`,
+        clientName: invoice.clientName,
+        clientAddress: `${invoice.clientAddress}, ${invoice.clientCity} ${invoice.clientPostalCode}`,
+        clientPhone: invoice.clientPhone,
+        clientEmail: invoice.clientEmail,
+        items: invoice.products.map(p => ({
+          description: p.name,
+          quantity: p.quantity,
+          unitPrice: p.priceTTC,
+          total: p.quantity * p.priceTTC
+        })),
+        subtotal: invoice.montantHT,
+        tax: invoice.montantTVA,
+        total: invoice.montantTTC,
+        date: invoice.invoiceDate,
+        invoiceNumber: invoice.invoiceNumber,
+      };
+      
+      // Sauvegarder via le service de stockage
+      const success = saveInvoiceToFile(storageInvoice);
+      
+      if (success) {
+        showMessage('✅ Facture enregistrée avec succès dans l\'onglet factures');
+      } else {
+        showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
+      }
     } catch (error) {
-      console.error('Erreur sauvegarde:', error);
+      console.error('Erreur sauvegarde facture:', error);
+      showMessage('❌ Erreur lors de l\'enregistrement de la facture', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Action 2: Imprimer le PDF
+  // Action 2: Imprimer les deux pages (facture + CGV)
   const handlePrintInvoice = async () => {
     try {
       setIsLoading(true);
-      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
-      const url = URL.createObjectURL(pdfBlob);
+      showMessage('🖨️ Préparation de l\'impression...');
       
-      const w = window.open(url, '_blank');
-      if (!w) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `facture-${invoice.invoiceNumber}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+      // Utiliser le service d'impression unifié
+      await UnifiedPrintService.printInvoice(invoice);
       
-      setActionHistory(prev => [...prev, `PDF facture ${invoice.invoiceNumber} ouvert pour impression`]);
+      showMessage('✅ Impression lancée avec succès');
     } catch (error) {
       console.error('Erreur impression:', error);
+      showMessage('❌ Erreur lors de l\'impression', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Action 3: Envoyer par email
-  const handleSendEmail = async () => {
+  // Action 3: Envoyer par email et drive via N8N
+  const handleSendEmailAndDrive = async () => {
     try {
       setIsLoading(true);
-      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
+      showMessage('📧 Génération du PDF et envoi en cours...');
       
+      // Générer le PDF depuis l'aperçu
+      const pdfBlob = await PDFService.generateInvoicePDF(invoice, invoicePreviewRef);
+      
+      // Convertir le blob en base64
       const reader = new FileReader();
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => {
           const result = reader.result as string;
+          // Extraire seulement la partie base64 (après la virgule)
           const base64 = result.split(',')[1];
           resolve(base64);
         };
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error('Erreur conversion PDF'));
         reader.readAsDataURL(pdfBlob);
       });
-
-      await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
-
-      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} envoyée par email`]);
+      
+      // Envoyer via N8N
+      const result = await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
+      
+      if (result.success) {
+        showMessage('✅ Facture envoyée par email et sauvegardée sur Drive avec succès');
+      } else {
+        showMessage(`❌ Erreur lors de l'envoi: ${result.message}`, true);
+      }
     } catch (error) {
-      console.error('Erreur envoi:', error);
+      console.error('Erreur envoi email/drive:', error);
+      showMessage('❌ Erreur lors de l\'envoi par email et drive', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // États des actions
-  const isInvoiceSaved = actionHistory.some(action => action.includes('enregistrée'));
-  const isEmailSent = actionHistory.some(action => action.includes('envoyée par email'));
-  const isPdfGenerated = actionHistory.some(action => action.includes('ouvert pour impression'));
+  const formatEUR = (amount: number) =>
+    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
 
-  // Changeons aussi la couleur du background principal pour respecter vos couleurs
-  if (isProcessing) {
-    return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
-        <div className="text-center bg-white p-8 rounded-2xl shadow-lg max-w-md">
-          <div className="animate-spin text-5xl mb-4">⏳</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Finalisation en cours...</h2>
-          <p className="text-gray-600">Génération de la facture</p>
-        </div>
-      </div>
-    );
-  }
+  const produitsALivrer = produits.filter(p => !p.isPickupOnSite);
+  const produitsAEmporter = produits.filter(p => p.isPickupOnSite);
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
-      
-      {/* Header compact */}
-      <header className="flex-shrink-0 bg-white/90 backdrop-blur border-b shadow-sm">
-        <div className="p-3">
-          <h1 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            📄 Récapitulatif Final
-            <span className="text-base font-normal text-blue-600">#{invoiceNumber}</span>
-          </h1>
+    <div className="py-8">
+      {/* Header avec code couleur harmonisé */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[#477A0C] text-white rounded-full text-2xl font-bold mb-4">
+          7
         </div>
-      </header>
+        <h2 className="text-3xl font-bold text-[#477A0C] mb-2">📋 Récapitulatif Final</h2>
+        <p className="text-gray-600 text-lg">
+          Vérification complète avant génération de la facture
+        </p>
+      </div>
 
-      {/* Main content - scrollable avec padding pour éviter le footer */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-3 pb-24"> {/* Extra padding pour footer */}
-          
-          {/* Grille responsive 2 colonnes sur iPad */}
-          <div className="grid grid-cols-2 gap-3">
-            
-            {/* Colonne gauche */}
-            <div className="space-y-3">
-              
-              {/* Informations facture */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  📋 Facture
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Numéro :</span>
-                    <span className="font-medium">{invoiceNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Date :</span>
-                    <span className="font-medium">{invoiceDate}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Lieu :</span>
-                    <span className="font-medium">{eventLocation}</span>
-                  </div>
-                  {advisorName && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Conseiller :</span>
-                      <span className="font-medium">{advisorName}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+      <div className="max-w-6xl mx-auto space-y-6">
 
-              {/* Client */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  👤 Client
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Nom :</span>
-                    <span className="font-medium">{client.name || 'Non renseigné'}</span>
-                  </div>
-                  {client.email && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Email :</span>
-                      <span className="font-medium text-xs">{client.email}</span>
-                    </div>
-                  )}
-                  {client.phone && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Tél :</span>
-                      <span className="font-medium">{client.phone}</span>
-                    </div>
-                  )}
-                  {client.address && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Adresse :</span>
-                      <span className="font-medium text-xs">{client.address}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+        {/* Messages d'état */}
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl text-center">
+            {successMessage}
+          </div>
+        )}
+        
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-center">
+            {errorMessage}
+          </div>
+        )}
 
-              {/* Paiement */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  💳 Paiement
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Mode :</span>
-                    <span className="font-medium">{paiement?.method || 'Non défini'}</span>
-                  </div>
-                  {paiement?.depositAmount && paiement.depositAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Acompte :</span>
-                      <span className="font-medium text-green-600">{paiement.depositAmount.toFixed(2)} €</span>
-                    </div>
-                  )}
-                  
-                  {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Chèques à venir :</span>
-                      <span className="font-medium">{paiement.nombreChequesAVenir} chèques de {(totals.reste / paiement.nombreChequesAVenir).toFixed(2)} €</span>
-                    </div>
-                  )}
-                  {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Montant total des chèques :</span>
-                      <span className="font-medium text-blue-600">{totals.reste.toFixed(2)} €</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+        {/* Aperçu de la facture */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            📄 Aperçu de la facture
+          </h3>
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <InvoicePreviewModern 
+              ref={invoicePreviewRef}
+              invoice={invoice}
+              className="bg-white"
+            />
+          </div>
+        </section>
+
+        {/* Informations client */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">👤</span>
+            Informations Client
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <strong>Nom :</strong> {client.name}
             </div>
-
-            {/* Colonne droite */}
-            <div className="space-y-3">
-              
-              {/* Produits */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  📦 Produits ({produits.length})
-                </h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {totals.details.map((produit, index) => (
-                    <div key={index} className="border-b border-gray-100 pb-2 last:border-b-0">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 pr-2">
-                          <div className="font-medium text-sm text-gray-800 truncate">
-                            {produit.designation}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {produit.qty} × {produit.priceTTC?.toFixed(2)}€
-                            {produit.isPickupOnSite ? ' 📦' : ' 🚚'}
-                          </div>
-                        </div>
-                        <div className="font-medium text-sm text-gray-800">
-                          {produit.lineTotal.toFixed(2)}€
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Total */}
-                <div className="border-t-2 border-gray-300 pt-2 mt-3">
-                  {/* Remise effectuée */}
-                  <div className="flex justify-between items-center mb-2 text-sm text-green-600">
-                    <span>Remise effectuée 20% :</span>
-                    <span>-{(totals.total * 0.2).toFixed(2)} €</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-gray-800">Total TTC :</span>
-                    <span className="font-bold text-xl text-blue-600">{totals.total.toFixed(2)} €</span>
-                  </div>
-                  {totals.acompte > 0 && (
-                    <>
-                      <div className="flex justify-between text-sm text-gray-600 mt-1">
-                        <span>Acompte versé :</span>
-                        <span>-{totals.acompte.toFixed(2)} €</span>
-                      </div>
-                      <div className="flex justify-between font-medium text-orange-600 mt-1">
-                        <span>Reste à régler :</span>
-                        <span>{totals.reste.toFixed(2)} €</span>
-                      </div>
-                    </>
-                  )}
-                </div>
+            <div>
+              <strong>Email :</strong> {client.email}
+            </div>
+            <div>
+              <strong>Téléphone :</strong> {client.phone}
+            </div>
+            <div>
+              <strong>Adresse :</strong> {client.address}
+              {client.addressLine2 && <div className="text-gray-600">{client.addressLine2}</div>}
+            </div>
+            <div>
+              <strong>Code postal :</strong> {client.postalCode}
+            </div>
+            <div>
+              <strong>Ville :</strong> {client.city}
+            </div>
+            {client.siret && (
+              <div>
+                <strong>SIRET :</strong> {client.siret}
               </div>
-
-              {/* Livraison */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  🚚 Livraison
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Mode :</span>
-                    <span className="font-medium">{livraison?.deliveryMethod || 'Non défini'}</span>
-                  </div>
-                  {livraison?.deliveryNotes && (
-                    <div>
-                      <span className="text-gray-600">Notes :</span>
-                      <p className="text-xs text-gray-800 mt-1">{livraison.deliveryNotes}</p>
-                    </div>
-                  )}
-                </div>
+            )}
+            {client.housingType && (
+              <div>
+                <strong>Type de logement :</strong> {client.housingType}
               </div>
+            )}
+          </div>
+        </section>
 
-              {/* Signature */}
-              <div className="bg-white rounded-lg p-3 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  ✍️ Signature & CGV
-                </h3>
-                <div className="flex items-center justify-between">
-                  {signature?.dataUrl ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={signature.dataUrl} 
-                          alt="Signature" 
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      </div>
-                      <div className="text-xs">
-                        <div className="text-green-600 font-medium">✅ Signée</div>
-                        {signature.timestamp && (
-                          <div className="text-gray-500">
-                            {new Date(signature.timestamp).toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-orange-600 text-sm">⚠️ Signature manquante</div>
-                  )}
-                </div>
-                <div className="mt-2">
-                  <div className={`text-sm font-medium ${termsAccepted ? 'text-green-600' : 'text-orange-600'}`}>
-                    {termsAccepted ? '✅ CGV acceptées' : '⚠️ CGV non acceptées'}
-                  </div>
-                </div>
-              </div>
+        {/* Produits commandés */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">📦</span>
+            Produits Commandés
+          </h3>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-3 px-2 font-semibold">Désignation</th>
+                  <th className="text-center py-3 px-2 font-semibold">Qté</th>
+                  <th className="text-right py-3 px-2 font-semibold">Prix unit. TTC</th>
+                  <th className="text-right py-3 px-2 font-semibold">Remise</th>
+                  <th className="text-center py-3 px-2 font-semibold">Livraison</th>
+                  <th className="text-right py-3 px-2 font-semibold">Total TTC</th>
+                </tr>
+              </thead>
+              <tbody>
+                {produits.map((produit) => (
+                  <tr key={produit.id} className="border-b border-gray-100">
+                    <td className="py-3 px-2">
+                      <div className="font-medium">{produit.designation}</div>
+                      {produit.category && <div className="text-sm text-gray-500">{produit.category}</div>}
+                    </td>
+                    <td className="text-center py-3 px-2">{produit.qty}</td>
+                    <td className="text-right py-3 px-2">{formatEUR(produit.priceTTC)}</td>
+                    <td className="text-right py-3 px-2">
+                      {produit.discount > 0 ? (
+                        <span className="text-green-600">
+                          -{produit.discount}
+                          {produit.discountType === 'percent' ? '%' : '€'}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        produit.isPickupOnSite 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {produit.isPickupOnSite ? '🚗 Emporter' : '📦 Livrer'}
+                      </span>
+                    </td>
+                    <td className="text-right py-3 px-2 font-semibold">
+                      {formatEUR(calculateProductTotal(
+                        produit.qty,
+                        produit.priceTTC,
+                        produit.discount || 0,
+                        produit.discountType || 'percent'
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totaux */}
+          <div className="bg-gray-50 rounded-xl p-4 mt-4">
+            <div className="flex justify-between py-2">
+              <span>Total HT :</span>
+              <span className="font-semibold">{formatEUR(invoice.montantHT)}</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span>TVA (20%) :</span>
+              <span className="font-semibold">{formatEUR(invoice.montantTVA)}</span>
+            </div>
+            <div className="flex justify-between py-3 border-t-2 border-gray-300 text-xl font-bold text-[#477A0C]">
+              <span>Total TTC :</span>
+              <span>{formatEUR(invoice.montantTTC)}</span>
             </div>
           </div>
-        </div>
-      </main>
+        </section>
 
-      {/* Footer intégré dans le conteneur iPad */}
-      <footer className="flex-shrink-0 bg-white/95 backdrop-blur border-t border-[#477A0C]/20 shadow-lg p-3">
-        <div className="w-full">
+        {/* Modalités de paiement */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">💳</span>
+            Modalités de Paiement
+          </h3>
           
-          {/* Message d'obligation si pas encore fait */}
-          {(!isInvoiceSaved || !isEmailSent) && (
-            <div className="mb-3 p-2 bg-orange-100 border border-orange-300 rounded-lg">
-              <p className="text-xs text-orange-800 text-center">
-                ⚠️ <strong>Enregistrer</strong> et <strong>Envoyer</strong> sont obligatoires pour continuer
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <strong>Mode de règlement :</strong> {paiement.method}
+            </div>
+            {paiement.depositAmount && paiement.depositAmount > 0 && (
+              <div>
+                <strong>Acompte :</strong> {formatEUR(paiement.depositAmount)}
+              </div>
+            )}
+            {paiement.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
+              <div>
+                <strong>Nombre de chèques :</strong> {paiement.nombreChequesAVenir} fois
+              </div>
+            )}
+            {paiement.remainingAmount && paiement.remainingAmount > 0 && (
+              <div>
+                <strong>Montant par chèque :</strong> {formatEUR(paiement.remainingAmount / (paiement.nombreChequesAVenir || 1))}
+              </div>
+            )}
+          </div>
+          
+          {paiement.note && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <strong>Notes :</strong> {paiement.note}
+            </div>
+          )}
+        </section>
+
+        {/* Modalités de livraison */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">🚚</span>
+            Modalités de Livraison
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-green-800 mb-2">À emporter ({produitsAEmporter.length})</h4>
+              {produitsAEmporter.length > 0 ? (
+                <ul className="text-sm text-green-700">
+                  {produitsAEmporter.map(p => (
+                    <li key={p.id}>• {p.designation} (x{p.qty})</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm">Aucun produit à emporter</p>
+              )}
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-blue-800 mb-2">À livrer ({produitsALivrer.length})</h4>
+              {produitsALivrer.length > 0 ? (
+                <ul className="text-sm text-blue-700">
+                  {produitsALivrer.map(p => (
+                    <li key={p.id}>• {p.designation} (x{p.qty})</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm">Aucun produit à livrer</p>
+              )}
+            </div>
+          </div>
+
+          {livraison.deliveryMethod && (
+            <div className="mt-4">
+              <strong>Mode de livraison :</strong> {livraison.deliveryMethod}
+            </div>
+          )}
+
+          {livraison.deliveryNotes && (
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+              <strong>Notes de livraison :</strong> {livraison.deliveryNotes}
+            </div>
+          )}
+        </section>
+
+        {/* Signature */}
+        <section className="bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">✍️</span>
+            Signature Client
+          </h3>
+          
+          {signature.dataUrl ? (
+            <div className="text-center">
+              <img 
+                src={signature.dataUrl} 
+                alt="Signature du client" 
+                className="max-w-md mx-auto border rounded-lg shadow-sm"
+              />
+              <p className="text-sm text-gray-600 mt-2">
+                Signé le {signature.timestamp ? new Date(signature.timestamp).toLocaleString('fr-FR') : ''}
               </p>
             </div>
+          ) : (
+            <p className="text-red-600">⚠️ Aucune signature enregistrée</p>
           )}
+        </section>
 
-          <div className="grid grid-cols-5 gap-2">
-            
-            {/* Bouton Retour */}
+        {/* Actions principales */}
+        <section className="bg-gradient-to-r from-[#477A0C]/10 to-[#477A0C]/20 rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]">
+          <h3 className="text-xl font-semibold text-[#477A0C] mb-4 flex items-center">
+            <span className="mr-2">�</span>
+            Actions Principales
+          </h3>
+          
+          <p className="text-green-700 mb-6">
+            Toutes les informations ont été collectées avec succès. Vous pouvez maintenant :
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
-              onClick={onPrev}
-              className="bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors px-2 py-2 flex flex-col items-center justify-center min-h-[60px]"
+              type="button"
+              onClick={handleSaveInvoice}
+              disabled={isLoading}
+              className="bg-[#477A0C] hover:bg-[#5A8F0F] disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
             >
-              <span className="text-base mb-1">←</span>
-              <div className="text-xs">Retour</div>
+              <span className="mr-2">�</span>
+              {isLoading ? 'Enregistrement...' : 'Enregistrer Facture'}
             </button>
-
-            {/* 1. Enregistrer Facture - OBLIGATOIRE - Couleur MyConfort */}
-            <div className="relative">
-              <button
-                onClick={handleSaveInvoice}
-                disabled={isLoading}
-                className="w-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
-              >
-                <span className="text-base mb-1">💾</span>
-                <div className="text-center">
-                  <div className="text-xs">Enregistrer</div>
-                  <div className="text-xs opacity-80">Facture</div>
-                </div>
-              </button>
-              {!isInvoiceSaved && (
-                <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
-                  !
-                </div>
-              )}
-              {isInvoiceSaved && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                  ✓
-                </div>
-              )}
-            </div>
-
-            {/* 2. Imprimer PDF A4 */}
-            <div className="relative">
-              <button
-                onClick={handlePrintInvoice}
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[70px]"
-              >
-                <span className="text-lg mb-1">🖨️</span>
-                <div className="text-center">
-                  <div className="text-xs">Imprimer</div>
-                  <div className="text-xs opacity-80">PDF A4</div>
-                </div>
-              </button>
-              {isPdfGenerated && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                  ✓
-                </div>
-              )}
-            </div>
-
-            {/* 3. Envoyer Email - OBLIGATOIRE */}
-            <div className="relative">
-              <button
-                onClick={handleSendEmail}
-                disabled={isLoading || !client.email}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[70px]"
-              >
-                <span className="text-lg mb-1">📧</span>
-                <div className="text-center">
-                  <div className="text-xs">Envoyer</div>
-                  <div className="text-xs opacity-80">Email</div>
-                </div>
-              </button>
-              {!isEmailSent && (
-                <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
-                  !
-                </div>
-              )}
-              {isEmailSent && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                  ✓
-                </div>
-              )}
-            </div>
-
-            {/* Bouton Nouvelle commande - Redirige directement vers l'étape 1 */}
+            
             <button
-              onClick={() => {
-                if (isInvoiceSaved && isEmailSent) {
-                  // Réinitialise le wizard et va à l'étape 1
-                  window.location.href = '/ipad?step=facture';
-                }
-              }}
-              disabled={!isInvoiceSaved || !isEmailSent}
-              className={`rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[70px] ${
-                isInvoiceSaved && isEmailSent
-                  ? 'bg-[#477A0C] hover:bg-[#3A6A0A] text-white'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              type="button"
+              onClick={handlePrintInvoice}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
             >
-              <span className="text-lg mb-1">🆕</span>
-              <div className="text-center">
-                <div className="text-xs">Nouvelle</div>
-                <div className="text-xs opacity-80">Commande</div>
-              </div>
+              <span className="mr-2">�️</span>
+              {isLoading ? 'Impression...' : 'Imprimer les 2 Pages'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleSendEmailAndDrive}
+              disabled={isLoading}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center"
+            >
+              <span className="mr-2">�</span>
+              {isLoading ? 'Envoi en cours...' : 'Envoyer Email & Drive'}
             </button>
           </div>
+        </section>
 
-          {/* Status en cours */}
-          {isLoading && (
-            <div className="mt-3 text-center">
-              <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg border">
-                <div className="animate-spin text-[#477A0C]">⏳</div>
-                <span className="text-sm text-gray-700">Traitement en cours...</span>
-              </div>
-            </div>
-          )}
+        {/* Navigation */}
+        <div className="flex gap-4 justify-center">
+          <button
+            type="button"
+            onClick={onPrev}
+            className="px-8 py-4 rounded-xl border-2 border-gray-300 text-lg font-semibold hover:bg-gray-50 transition-all"
+          >
+            ← Signature
+          </button>
+
+          <button
+            type="button"
+            className="bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+          >
+            🆕 Nouvelle Commande
+          </button>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
