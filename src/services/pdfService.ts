@@ -57,67 +57,67 @@ const COMPANY = {
   bic: 'PSSTFRPPXXX',
 };
 
-/** —— CGV 15 articles (texte exemple compact à adapter) —— */
+/** —— CGV 15 articles (texte légal officiel MYCONFORT) —— */
 const CGV_ITEMS: Array<{ title: string; text: string }> = [
   {
-    title: '1. Objet',
-    text: 'Les présentes conditions régissent les ventes de MYCONFORT.',
+    title: 'Art. 1 - LOI HAMMON',
+    text: 'Les achats effectués sur les foires expositions et salon, à l\'exception de ceux faisant l\'objet d\'un contrat de crédit à la consommation, ne sont pas soumis aux articles L311-10 et L311-15 (délai de rétractation de sept jours) du code de la consommation.',
   },
   {
-    title: '2. Produits',
-    text: "Descriptions et caractéristiques indicatives ; tolérances d'usage.",
+    title: 'Art. 2 - Délais de Livraison',
+    text: 'Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.',
   },
   {
-    title: '3. Prix',
-    text: 'Prix TTC en euros, TVA 20 % ; offres valables dans la limite des stocks.',
+    title: 'Art. 3 - Risques de Transport',
+    text: 'Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d\'avaries ou de pertes, de faire toutes réserves, et d\'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d\'un produit est basée sur la présence du produit en stock et sur l\'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.',
   },
   {
-    title: '4. Commande',
-    text: 'Validation après paiement ou acompte ; confirmation par email.',
+    title: 'Art. 4 - Acceptation des Conditions',
+    text: 'Toute livraison est soumise à l\'acceptation expresse des présentes conditions de vente. Le transporteur dépose les colis à l\'adresse indiquée, mais n\'est pas habilité à monter à l\'étage (CGV du transporteur). Le client aura toute faculté de réceptionner les fournitures au moment de la livraison. Il lui appartient à ce moment d\'en prendre après contrôle l\'entière responsabilité.',
   },
   {
-    title: '5. Paiement',
-    text: 'CB Banque Populaire, virement, chèques ; pénalités de retard légales.',
+    title: 'Art. 5 - Réclamations',
+    text: 'Les réclamations concernant la qualité de la marchandise, à l\'exclusion de tout litige de transport, devront être formulées par écrit dans les huit jours qui suivent la livraison par lettre recommandée avec accusé de réception.',
   },
   {
-    title: '6. Acompte',
-    text: 'Acompte non remboursable sauf obligation légale ; solde à la livraison.',
+    title: 'Art. 6 - Retours',
+    text: 'Aucun retour de marchandises ne pourra être effectué sans notre consentement écrit, ce consentement n\'impliquant aucune reconnaissance.',
   },
   {
-    title: '7. Livraison',
-    text: "Délais indicatifs 48 h ouvrées ; pas de reprise d'anciens matelas.",
+    title: 'Art. 7 - Tailles des Matelas',
+    text: 'Étant donné que les mousses viscoélastiques utilisées pour la réalisation de nos matelas sont thermosensibles, cette caractéristique peut faire apparaître des dilatations pouvant faire varier leurs tailles de quelques centimètres (plus ou moins 5 cm). Les tailles standard de matelas sont données à titre indicatif, et ne constituent pas une obligation contractuelle de délivrance pouvant faire l\'objet de non conformité, d\'échange ou d\'annulation de la commande.',
   },
   {
-    title: '8. Réception',
-    text: 'Réserves à formuler à la livraison ; défauts apparents sous 48 h.',
+    title: 'Art. 8 - Odeur des Matériaux',
+    text: 'Par l\'acceptation expresse des présentes conditions de vente l\'acheteur est informé que la spécificité des mousses viscoélastiques conçues avec des polyols à base naturelle (huile de ricin) ainsi que les matières de conditionnement peuvent émettre une légère odeur qui s\'estompe après déballage, cela ne constitue pas un vice rédhibitoire ou un défaut pouvant faire l\'objet de non conformité au sens de l\'article 1604 et 1641 du code civil.',
   },
   {
-    title: '9. Garantie',
-    text: "Jusqu'à 15 ans selon référence ; exclusions: mauvaise utilisation/usure.",
+    title: 'Art. 9 - Règlements et Remises',
+    text: 'Sauf convention expresse, aucun rabais, ristourne ou escompte sur facture ne pourra être exigé par l\'acheteur en cas de règlement comptant. Les conditions de garantie comprennent l\'intégralité des mousses. Les textiles et accessoires ne sont pas soumis à garantie.',
   },
   {
-    title: '10. Retours',
-    text: 'Hors droit de rétractation légal non applicable aux biens personnalisés.',
+    title: 'Art. 10 - Paiement',
+    text: 'Nos factures sont payables selon les modalités suivantes : Par chèque ou virement à réception de facture. Par carte bancaire ou espèce.',
   },
   {
-    title: '11. SAV',
-    text: 'Service client Saint-Hippolyte — htconfort@me.com — 06 61 48 60 23.',
+    title: 'Art. 11 - Pénalités de Retard',
+    text: 'En cas de non-paiement d\'une facture à son échéance, nous nous réservons le droit d\'augmenter son montant de 10% avec un minimum de 300 € sans préjudice des intérêts de retard. De même, nous pourrons résilier la vente de plein droit et sans sommation par renvoi d\'une simple lettre recommandée.',
   },
   {
-    title: '12. Données',
-    text: "Traitements RGPD ; droit d'accès/rectification/suppression.",
+    title: 'Art. 12 - Exigibilité',
+    text: 'Le non-paiement d\'une seule échéance rend exigible de plein droit le solde dû sur toutes les échéances à venir.',
   },
   {
-    title: '13. Force majeure',
-    text: "Suspension/exonération en cas d'événement irrésistible et imprévisible.",
+    title: 'Art. 13 - Livraison Incomplète ou Non-Conforme',
+    text: 'Il se peut que le colis soit endommagé ou que le contenu de celui-ci ait été partiellement ou totalement dérobé. Si vous constatez une telle erreur, veuillez le mentionner sur le bon du transporteur et refuser le produit. Dans le cas où vous prendriez connaissance de cette erreur après le départ du transporteur, veuillez nous signaler celle-ci par mail à l\'adresse myconfort66@gmail.com ou par téléphone dans un délai maximum de 72h ouvrables suivant la réception de la commande.',
   },
   {
-    title: '14. Droit applicable',
-    text: 'Droit français ; tentative amiable avant toute action.',
+    title: 'Art. 14 - Litiges',
+    text: 'Tout litige, même en cas de recours en garantie ou de pluralité de défendeur est, à défaut d\'accord amiable de la compétence du Tribunal de Commerce de PERPIGNAN dans le ressort duquel se trouve notre siège social. Ou de la compétence des Tribunaux de Commerce dans le ressort duquel se trouve notre prestataire.',
   },
   {
-    title: '15. Juridiction',
-    text: "Tribunaux compétents du ressort du siège social en cas d'échec amiable.",
+    title: 'Art. 15 - Horaires de Livraison',
+    text: 'Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l\'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l\'adresse de livraison. Si vous souhaitez discuter d\'une modification de l\'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l\'adresse myconfort66@gmail.com.',
   },
 ];
 
