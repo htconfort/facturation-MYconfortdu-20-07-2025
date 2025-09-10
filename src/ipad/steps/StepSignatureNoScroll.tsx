@@ -13,23 +13,48 @@ interface StepProps {
 export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
   const { signature, updateSignature } = useInvoiceWizard();
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  
+  // Debug pour identifier le problème de navigation
+  console.log('🔧 StepSignatureNoScroll - État signature:', {
+    hasSignature: !!signature?.dataUrl,
+    timestamp: signature?.timestamp,
+    navigationFunctions: { onNext: typeof onNext, onPrev: typeof onPrev }
+  });
 
-  // Même logique que le mode normal - simple et directe
+  // Sauvegarder la signature sans navigation automatique pour éviter les conflits
   const handleSaveSignature = (signatureDataUrl: string) => {
+    console.log('📝 Signature sauvegardée:', {
+      hasData: !!signatureDataUrl,
+      length: signatureDataUrl?.length,
+      timestamp: new Date().toISOString()
+    });
+    
     updateSignature({ 
       dataUrl: signatureDataUrl, 
       timestamp: new Date().toISOString() 
     });
     setShowSignaturePad(false);
-    // Navigation automatique après signature comme dans StepSignature
-    setTimeout(() => {
-      onNext();
-    }, 300); // Petit délai pour que l'UI se mette à jour
+    
+    console.log('✅ Signature mise à jour dans le store - attente clic Suivant');
+    // PAS de navigation automatique - on laisse l'utilisateur cliquer sur "Suivant"
   };
 
   const handleNext = () => {
-    if (!signature?.dataUrl) return;
-    onNext();
+    console.log('🚀 StepSignatureNoScroll - handleNext appelé:', {
+      hasSignature: !!signature?.dataUrl,
+      willProceed: !!signature?.dataUrl
+    });
+    
+    if (!signature?.dataUrl) {
+      console.log('❌ Pas de signature - navigation bloquée');
+      return;
+    }
+    
+    console.log('✅ Navigation vers étape suivante...');
+    // Ajout d'un délai pour éviter les conflits de navigation
+    setTimeout(() => {
+      onNext();
+    }, 100);
   };
 
 
