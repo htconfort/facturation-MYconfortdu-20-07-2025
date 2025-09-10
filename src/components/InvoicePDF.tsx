@@ -664,16 +664,10 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           <div className='p-4 space-y-3'>
             <div>
               <h3 className='font-bold text-[#477A0C] mb-1'>
-                Art. 1 - Livraison
+                Art. 1 - LOI HAMMON
               </h3>
               <p className='text-justify'>
-                Une fois la commande expédiée, vous serez contacté par SMS ou
-                mail pour programmer la livraison en fonction de vos
-                disponibilités (à la journée ou demi-journée). Le transporteur
-                livre le produit au pas de porte ou en bas de l'immeuble.
-                Veuillez vérifier que les dimensions du produit permettent son
-                passage dans les escaliers, couloirs et portes. Aucun service
-                d'installation ou de reprise de l'ancienne literie n'est prévu.
+                Les achats effectués sur les foires expositions et salon, à l'exception de ceux faisant l'objet d'un contrat de crédit à la consommation, ne sont pas soumis aux articles L311-10 et L311-15 (délai de rétractation de sept jours) du code de la consommation.
               </p>
             </div>
 
@@ -682,11 +676,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 2 - Délais de Livraison
               </h3>
               <p className='text-justify'>
-                Les délais de livraison sont donnés à titre indicatif et ne
-                constituent pas un engagement ferme. En cas de retard, aucune
-                indemnité ou annulation ne sera acceptée, notamment en cas de
-                force majeure. Nous déclinons toute responsabilité en cas de
-                délai dépassé.
+                Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.
               </p>
             </div>
 
@@ -695,11 +685,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 3 - Risques de Transport
               </h3>
               <p className='text-justify'>
-                Les marchandises voyagent aux risques du destinataire. En cas
-                d'avarie ou de perte, il appartient au client de faire les
-                réserves nécessaires obligatoire sur le bordereau du
-                transporteur. En cas de non-respect de cette obligation on ne
-                peut pas se retourner contre le transporteur.
+                Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d'avaries ou de pertes, de faire toutes réserves, et d'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d'un produit est basée sur la présence du produit en stock et sur l'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.
               </p>
             </div>
 
@@ -708,10 +694,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 4 - Acceptation des Conditions
               </h3>
               <p className='text-justify'>
-                Toute livraison implique l'acceptation des présentes conditions.
-                Le transporteur livre à l'adresse indiquée sans monter les
-                étages. Le client est responsable de vérifier et d'accepter les
-                marchandises lors de la livraison.
+                Toute livraison est soumise à l'acceptation expresse des présentes conditions de vente. Le transporteur dépose les colis à l'adresse indiquée, mais n'est pas habilité à monter à l'étage (CGV du transporteur). Le client aura toute faculté de réceptionner les fournitures au moment de la livraison. Il lui appartient à ce moment d'en prendre après contrôle l'entière responsabilité.
               </p>
             </div>
 
@@ -720,9 +703,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 5 - Réclamations
               </h3>
               <p className='text-justify'>
-                Les réclamations concernant la qualité des marchandises doivent
-                être formulées par écrit dans les huit jours suivant la
-                livraison, par lettre recommandée avec accusé de réception.
+                Les réclamations concernant la qualité de la marchandise, à l'exclusion de tout litige de transport, devront être formulées par écrit dans les huit jours qui suivent la livraison par lettre recommandée avec accusé de réception.
               </p>
             </div>
 
@@ -731,8 +712,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 6 - Retours
               </h3>
               <p className='text-justify'>
-                Aucun retour de marchandises ne sera accepté sans notre accord
-                écrit préalable. Cet accord n'implique aucune reconnaissance.
+                Aucun retour de marchandises ne pourra être effectué sans notre consentement écrit, ce consentement n'impliquant aucune reconnaissance.
               </p>
             </div>
 
@@ -741,11 +721,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 7 - Tailles des Matelas
               </h3>
               <p className='text-justify'>
-                Les dimensions des matelas peuvent varier de +/- 5 cm en raison
-                de la thermosensibilité des mousses viscoélastiques. Les tailles
-                standards sont données à titre indicatif et ne constituent pas
-                une obligation contractuelle. Les matelas sur mesure doivent
-                inclure les spécifications exactes du cadre de lit.
+                Étant donné que les mousses viscoélastiques utilisées pour la réalisation de nos matelas sont thermosensibles, cette caractéristique peut faire apparaître des dilatations pouvant faire varier leurs tailles de quelques centimètres (plus ou moins 5 cm). Les tailles standard de matelas sont données à titre indicatif, et ne constituent pas une obligation contractuelle de délivrance pouvant faire l'objet de non conformité, d'échange ou d'annulation de la commande.
               </p>
             </div>
 
@@ -754,10 +730,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 8 - Odeur des Matériaux
               </h3>
               <p className='text-justify'>
-                Les mousses viscoélastiques naturelles (à base d'huile de ricin)
-                et les matériaux de conditionnement peuvent émettre une légère
-                odeur qui disparaît après déballage. Cela ne constitue pas un
-                défaut.
+                Par l'acceptation expresse des présentes conditions de vente l'acheteur est informé que la spécificité des mousses viscoélastiques conçues avec des polyols à base naturelle (huile de ricin) ainsi que les matières de conditionnement peuvent émettre une légère odeur qui s'estompe après déballage, cela ne constitue pas un vice rédhibitoire ou un défaut pouvant faire l'objet de non conformité au sens de l'article 1604 et 1641 du code civil.
               </p>
             </div>
 
@@ -766,9 +739,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 9 - Règlements et Remises
               </h3>
               <p className='text-justify'>
-                Sauf accord express, aucun rabais ou escompte ne sera appliqué
-                pour paiement comptant. La garantie couvre les mousses, mais pas
-                les textiles et accessoires.
+                Sauf convention expresse, aucun rabais, ristourne ou escompte sur facture ne pourra être exigé par l'acheteur en cas de règlement comptant. Les conditions de garantie comprennent l'intégralité des mousses. Les textiles et accessoires ne sont pas soumis à garantie.
               </p>
             </div>
 
@@ -777,8 +748,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 10 - Paiement
               </h3>
               <p className='text-justify'>
-                Les factures sont payables par chèque, virement, carte bancaire
-                ou espèce à réception.
+                Nos factures sont payables selon les modalités suivantes : Par chèque ou virement à réception de facture. Par carte bancaire ou espèce.
               </p>
             </div>
 
@@ -787,20 +757,16 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 11 - Pénalités de Retard
               </h3>
               <p className='text-justify'>
-                En cas de non-paiement, une majoration de 10% avec un minimum de
-                300 € sera appliquée, sans préjudice des intérêts de retard.
-                Nous nous réservons le droit de résilier la vente sans
-                sommation.
+                En cas de non-paiement d'une facture à son échéance, nous nous réservons le droit d'augmenter son montant de 10% avec un minimum de 300 € sans préjudice des intérêts de retard. De même, nous pourrons résilier la vente de plein droit et sans sommation par renvoi d'une simple lettre recommandée.
               </p>
             </div>
 
             <div>
               <h3 className='font-bold text-[#477A0C] mb-1'>
-                Art. 12 - Exigibilité en Cas de Non-Paiement
+                Art. 12 - Exigibilité
               </h3>
               <p className='text-justify'>
-                Le non-paiement d'une échéance rend immédiatement exigible le
-                solde de toutes les échéances à venir.
+                Le non-paiement d'une seule échéance rend exigible de plein droit le solde dû sur toutes les échéances à venir.
               </p>
             </div>
 
@@ -809,10 +775,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 13 - Livraison Incomplète ou Non-Conforme
               </h3>
               <p className='text-justify'>
-                En cas de livraison endommagée ou non conforme, mentionnez-le
-                sur le bon de livraison et refusez le produit. Si l'erreur est
-                constatée après le départ du transporteur, contactez-us sous 72h
-                ouvrables.
+                Il se peut que le colis soit endommagé ou que le contenu de celui-ci ait été partiellement ou totalement dérobé. Si vous constatez une telle erreur, veuillez le mentionner sur le bon du transporteur et refuser le produit. Dans le cas où vous prendriez connaissance de cette erreur après le départ du transporteur, veuillez nous signaler celle-ci par mail à l'adresse myconfort66@gmail.com ou par téléphone dans un délai maximum de 72h ouvrables suivant la réception de la commande.
               </p>
             </div>
 
@@ -821,8 +784,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 14 - Litiges
               </h3>
               <p className='text-justify'>
-                Tout litige sera de la compétence exclusive du Tribunal de
-                Commerce de Perpignan ou du tribunal compétent du prestataire.
+                Tout litige, même en cas de recours en garantie ou de pluralité de défendeur est, à défaut d'accord amiable de la compétence du Tribunal de Commerce de PERPIGNAN dans le ressort duquel se trouve notre siège social. Ou de la compétence des Tribunaux de Commerce dans le ressort duquel se trouve notre prestataire.
               </p>
             </div>
 
@@ -831,12 +793,13 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                 Art. 15 - Horaires de Livraison
               </h3>
               <p className='text-justify'>
-                Les livraisons sont effectuées du lundi au vendredi (hors jours
-                fériés). Une personne majeure doit être présente à l'adresse
-                lors de la livraison. Toute modification d'adresse après
-                commande doit être signalée immédiatement à
-                myconfort66@gmail.com.
+                Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l'adresse de livraison. Si vous souhaitez discuter d'une modification de l'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l'adresse myconfort66@gmail.com.
               </p>
+            </div>
+            
+            {/* Date de mise à jour */}
+            <div className='text-center mt-4 text-xs text-gray-600'>
+              Les présentes Conditions générales ont été mises à jour le 1 Janvier 2017
             </div>
           </div>
 

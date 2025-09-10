@@ -671,59 +671,84 @@ export class UnifiedPrintService {
           
           <div class="cgv-content">
             <div class="cgv-section">
-              <h4>1. OBJET</h4>
-              <p>Les présentes conditions générales de vente régissent les relations contractuelles entre HT CONFORT et ses clients pour la fourniture et l'installation d'équipements de climatisation et de chauffage.</p>
+              <h4>Art. 1 - LOI HAMMON</h4>
+              <p>Les achats effectués sur les foires expositions et salon, à l'exception de ceux faisant l'objet d'un contrat de crédit à la consommation, ne sont pas soumis aux articles L311-10 et L311-15 (délai de rétractation de sept jours) du code de la consommation.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>2. PRIX ET PAIEMENT</h4>
-              <p>Les prix sont exprimés en euros TTC. Le paiement est exigible à réception de facture. En cas de retard de paiement, des pénalités de retard au taux de 3% par mois sont automatiquement appliquées, ainsi qu'une indemnité forfaitaire pour frais de recouvrement de 40€.</p>
+              <h4>Art. 2 - Délais de Livraison</h4>
+              <p>Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>3. DÉLAIS D'EXÉCUTION</h4>
-              <p>Les délais d'intervention sont donnés à titre indicatif. Un retard dans l'exécution ne peut donner lieu à annulation de la commande, pénalités ou dommages-intérêts.</p>
+              <h4>Art. 3 - Risques de Transport</h4>
+              <p>Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d'avaries ou de pertes, de faire toutes réserves, et d'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d'un produit est basée sur la présence du produit en stock et sur l'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>4. GARANTIES</h4>
-              <p>Nous garantissons nos installations contre tout vice de fabrication pendant 2 ans à compter de la réception des travaux. Cette garantie ne couvre pas l'usure normale, les dommages résultant d'un mauvais usage ou d'un défaut d'entretien.</p>
+              <h4>Art. 4 - Acceptation des Conditions</h4>
+              <p>Toute livraison est soumise à l'acceptation expresse des présentes conditions de vente. Le transporteur dépose les colis à l'adresse indiquée, mais n'est pas habilité à monter à l'étage (CGV du transporteur). Le client aura toute faculté de réceptionner les fournitures au moment de la livraison. Il lui appartient à ce moment d'en prendre après contrôle l'entière responsabilité.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>5. RESPONSABILITÉ</h4>
-              <p>Notre responsabilité est limitée au montant de la facture. Nous ne saurions être tenus responsables des dommages indirects ou immatériels.</p>
+              <h4>Art. 5 - Réclamations</h4>
+              <p>Les réclamations concernant la qualité de la marchandise, à l'exclusion de tout litige de transport, devront être formulées par écrit dans les huit jours qui suivent la livraison par lettre recommandée avec accusé de réception.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>6. PROPRIÉTÉ</h4>
-              <p>Les équipements livrés demeurent notre propriété jusqu'au paiement intégral du prix. En cas de non-paiement, nous nous réservons le droit de reprendre les équipements installés.</p>
+              <h4>Art. 6 - Retours</h4>
+              <p>Aucun retour de marchandises ne pourra être effectué sans notre consentement écrit, ce consentement n'impliquant aucune reconnaissance.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>7. DROIT DE RÉTRACTATION</h4>
-              <p>Conformément à l'article L.121-21 du Code de la consommation, le client dispose d'un délai de 14 jours pour exercer son droit de rétractation, sauf exceptions prévues par la loi.</p>
+              <h4>Art. 7 - Tailles des Matelas</h4>
+              <p>Étant donné que les mousses viscoélastiques utilisées pour la réalisation de nos matelas sont thermosensibles, cette caractéristique peut faire apparaître des dilatations pouvant faire varier leurs tailles de quelques centimètres (plus ou moins 5 cm). Les tailles standard de matelas sont données à titre indicatif, et ne constituent pas une obligation contractuelle de délivrance pouvant faire l'objet de non conformité, d'échange ou d'annulation de la commande.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>8. LITIGES</h4>
-              <p>Tout litige relatif à l'interprétation ou à l'exécution des présentes conditions générales sera de la compétence exclusive des tribunaux de Paris. Le droit français est seul applicable.</p>
+              <h4>Art. 8 - Odeur des Matériaux</h4>
+              <p>Par l'acceptation expresse des présentes conditions de vente l'acheteur est informé que la spécificité des mousses viscoélastiques conçues avec des polyols à base naturelle (huile de ricin) ainsi que les matières de conditionnement peuvent émettre une légère odeur qui s'estompe après déballage, cela ne constitue pas un vice rédhibitoire ou un défaut pouvant faire l'objet de non conformité au sens de l'article 1604 et 1641 du code civil.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>9. DONNÉES PERSONNELLES</h4>
-              <p>Les données personnelles collectées sont traitées conformément au RGPD. Elles sont utilisées uniquement dans le cadre de la relation commerciale et ne sont pas transmises à des tiers.</p>
+              <h4>Art. 9 - Règlements et Remises</h4>
+              <p>Sauf convention expresse, aucun rabais, ristourne ou escompte sur facture ne pourra être exigé par l'acheteur en cas de règlement comptant. Les conditions de garantie comprennent l'intégralité des mousses. Les textiles et accessoires ne sont pas soumis à garantie.</p>
             </div>
 
             <div class="cgv-section">
-              <h4>10. ACCEPTATION</h4>
-              <p>La signature du présent devis/facture emporte acceptation pleine et entière des présentes conditions générales de vente.</p>
+              <h4>Art. 10 - Paiement</h4>
+              <p>Nos factures sont payables selon les modalités suivantes : Par chèque ou virement à réception de facture. Par carte bancaire ou espèce.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 11 - Pénalités de Retard</h4>
+              <p>En cas de non-paiement d'une facture à son échéance, nous nous réservons le droit d'augmenter son montant de 10% avec un minimum de 300 € sans préjudice des intérêts de retard. De même, nous pourrons résilier la vente de plein droit et sans sommation par renvoi d'une simple lettre recommandée.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 12 - Exigibilité</h4>
+              <p>Le non-paiement d'une seule échéance rend exigible de plein droit le solde dû sur toutes les échéances à venir.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 13 - Livraison Incomplète ou Non-Conforme</h4>
+              <p>Il se peut que le colis soit endommagé ou que le contenu de celui-ci ait été partiellement ou totalement dérobé. Si vous constatez une telle erreur, veuillez le mentionner sur le bon du transporteur et refuser le produit. Dans le cas où vous prendriez connaissance de cette erreur après le départ du transporteur, veuillez nous signaler celle-ci par mail à l'adresse myconfort66@gmail.com ou par téléphone dans un délai maximum de 72h ouvrables.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 14 - Litiges</h4>
+              <p>Tout litige, même en cas de recours en garantie ou de pluralité de défendeur est, à défaut d'accord amiable de la compétence du Tribunal de Commerce de PERPIGNAN dans le ressort duquel se trouve notre siège social. Ou de la compétence des Tribunaux de Commerce dans le ressort duquel se trouve notre prestataire.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 15 - Horaires de Livraison</h4>
+              <p>Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l'adresse de livraison. Si vous souhaitez discuter d'une modification de l'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l'adresse myconfort66@gmail.com.</p>
             </div>
           </div>
 
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #477A0C; color: #477A0C; font-weight: bold;">
-            HT CONFORT - Votre spécialiste climatisation et chauffage<br>
-            <span style="font-size: 11px; color: #666;">Conditions générales disponibles sur demande | Version du ${new Date().toLocaleDateString('fr-FR')}</span>
+            MYCONFORT - Votre spécialiste matelas et literie<br>
+            <span style="font-size: 11px; color: #666;">Les présentes Conditions générales ont été mises à jour le 1 Janvier 2017</span>
           </div>
         </div>
       </body>

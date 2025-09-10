@@ -621,53 +621,56 @@ export class CompactPrintService {
             <h3>CONDITIONS GÉNÉRALES DE VENTE</h3>
             <div class="cgv-content">
               <div class="cgv-column">
-                <p><strong>Art. 1 - Livraison</strong><br>
-                Une fois la commande expédiée, vous serez contacté par SMS ou mail pour programmer la livraison. Le transporteur livre au pas de porte. Vérifiez les dimensions pour le passage. Aucun service d'installation prévu.</p>
+                <p><strong>Art. 1 - LOI HAMMON</strong><br>
+                Les achats effectués sur les foires expositions et salon, à l'exception de ceux faisant l'objet d'un contrat de crédit à la consommation, ne sont pas soumis aux articles L311-10 et L311-15 (délai de rétractation de sept jours) du code de la consommation.</p>
                 
                 <p><strong>Art. 2 - Délais de Livraison</strong><br>
-                Délais indicatifs, pas d'engagement ferme. En cas de retard, aucune indemnité. Déclinons toute responsabilité en cas de force majeure.</p>
+                Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.</p>
                 
                 <p><strong>Art. 3 - Risques de Transport</strong><br>
-                Marchandises aux risques du destinataire. Réserves obligatoires sur bordereau transporteur en cas d'avarie.</p>
+                Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d'avaries ou de pertes, de faire toutes réserves, et d'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d'un produit est basée sur la présence du produit en stock et sur l'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.</p>
                 
-                <p><strong>Art. 4 - Acceptation</strong><br>
-                Livraison implique acceptation des conditions. Transporteur livre sans monter étages. Client responsable vérification.</p>
+                <p><strong>Art. 4 - Acceptation des Conditions</strong><br>
+                Toute livraison est soumise à l'acceptation expresse des présentes conditions de vente. Le transporteur dépose les colis à l'adresse indiquée, mais n'est pas habilité à monter à l'étage (CGV du transporteur). Le client aura toute faculté de réceptionner les fournitures au moment de la livraison. Il lui appartient à ce moment d'en prendre après contrôle l'entière responsabilité.</p>
                 
                 <p><strong>Art. 5 - Réclamations</strong><br>
-                Réclamations qualité par écrit sous 8 jours, lettre recommandée avec AR.</p>
+                Les réclamations concernant la qualité de la marchandise, à l'exclusion de tout litige de transport, devront être formulées par écrit dans les huit jours qui suivent la livraison par lettre recommandée avec accusé de réception.</p>
                 
                 <p><strong>Art. 6 - Retours</strong><br>
-                Aucun retour sans accord écrit préalable. Accord n'implique aucune reconnaissance.</p>
+                Aucun retour de marchandises ne pourra être effectué sans notre consentement écrit, ce consentement n'impliquant aucune reconnaissance.</p>
                 
-                <p><strong>Art. 7 - Tailles Matelas</strong><br>
-                Dimensions +/- 5 cm possibles (thermosensibilité mousses). Tailles indicatives. Matelas sur mesure : spécifications exactes requises.</p>
+                <p><strong>Art. 7 - Tailles des Matelas</strong><br>
+                Étant donné que les mousses viscoélastiques utilisées pour la réalisation de nos matelas sont thermosensibles, cette caractéristique peut faire apparaître des dilatations pouvant faire varier leurs tailles de quelques centimètres (plus ou moins 5 cm). Les tailles standard de matelas sont données à titre indicatif, et ne constituent pas une obligation contractuelle de délivrance pouvant faire l'objet de non conformité, d'échange ou d'annulation de la commande.</p>
                 
-                <p><strong>Art. 8 - Odeur Matériaux</strong><br>
-                Mousses naturelles peuvent émettre légère odeur qui disparaît. Ne constitue pas défaut.</p>
+                <p><strong>Art. 8 - Odeur des Matériaux</strong><br>
+                Par l'acceptation expresse des présentes conditions de vente l'acheteur est informé que la spécificité des mousses viscoélastiques conçues avec des polyols à base naturelle (huile de ricin) ainsi que les matières de conditionnement peuvent émettre une légère odeur qui s'estompe après déballage, cela ne constitue pas un vice rédhibitoire ou un défaut pouvant faire l'objet de non conformité au sens de l'article 1604 et 1641 du code civil.</p>
               </div>
               
               <div class="cgv-column">
-                <p><strong>Art. 9 - Règlements</strong><br>
-                Sauf accord express, aucun rabais pour paiement comptant. Garantie mousses, pas textiles/accessoires.</p>
+                <p><strong>Art. 9 - Règlements et Remises</strong><br>
+                Sauf convention expresse, aucun rabais, ristourne ou escompte sur facture ne pourra être exigé par l'acheteur en cas de règlement comptant. Les conditions de garantie comprennent l'intégralité des mousses. Les textiles et accessoires ne sont pas soumis à garantie.</p>
                 
                 <p><strong>Art. 10 - Paiement</strong><br>
-                Factures payables par chèque, virement, carte bancaire ou espèce à réception.</p>
+                Nos factures sont payables selon les modalités suivantes : Par chèque ou virement à réception de facture. Par carte bancaire ou espèce.</p>
                 
-                <p><strong>Art. 11 - Pénalités Retard</strong><br>
-                Non-paiement : majoration 10% min. 300€, intérêts de retard. Droit de résiliation sans sommation.</p>
+                <p><strong>Art. 11 - Pénalités de Retard</strong><br>
+                En cas de non-paiement d'une facture à son échéance, nous nous réservons le droit d'augmenter son montant de 10% avec un minimum de 300 € sans préjudice des intérêts de retard. De même, nous pourrons résilier la vente de plein droit et sans sommation par renvoi d'une simple lettre recommandée.</p>
                 
                 <p><strong>Art. 12 - Exigibilité</strong><br>
-                Non-paiement échéance rend exigible solde toutes échéances à venir.</p>
+                Le non-paiement d'une seule échéance rend exigible de plein droit le solde dû sur toutes les échéances à venir.</p>
                 
-                <p><strong>Art. 13 - Livraison Non-Conforme</strong><br>
-                Livraison endommagée : mentionner sur bon, refuser produit. Erreur constatée après : contact sous 72h ouvrables.</p>
+                <p><strong>Art. 13 - Livraison Incomplète ou Non-Conforme</strong><br>
+                Il se peut que le colis soit endommagé ou que le contenu de celui-ci ait été partiellement ou totalement dérobé. Si vous constatez une telle erreur, veuillez le mentionner sur le bon du transporteur et refuser le produit. Dans le cas où vous prendriez connaissance de cette erreur après le départ du transporteur, veuillez nous signaler celle-ci par mail à l'adresse myconfort66@gmail.com ou par téléphone dans un délai maximum de 72h ouvrables suivant la réception de la commande.</p>
                 
                 <p><strong>Art. 14 - Litiges</strong><br>
-                Compétence exclusive Tribunal Commerce Perpignan ou tribunal du prestataire.</p>
+                Tout litige, même en cas de recours en garantie ou de pluralité de défendeur est, à défaut d'accord amiable de la compétence du Tribunal de Commerce de PERPIGNAN dans le ressort duquel se trouve notre siège social. Ou de la compétence des Tribunaux de Commerce dans le ressort duquel se trouve notre prestataire.</p>
                 
-                <p><strong>Art. 15 - Horaires Livraison</strong><br>
-                Lundi-vendredi hors fériés. Personne majeure présente obligatoire. Modification adresse : myconfort66@gmail.com.</p>
+                <p><strong>Art. 15 - Horaires de Livraison</strong><br>
+                Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l'adresse de livraison. Si vous souhaitez discuter d'une modification de l'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l'adresse myconfort66@gmail.com.</p>
               </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #666;">
+              Les présentes Conditions générales ont été mises à jour le 1 Janvier 2017
             </div>
           </div>
 
