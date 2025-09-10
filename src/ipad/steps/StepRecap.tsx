@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import { PDFService } from '../../services/pdfService';
+import { UnifiedPrintService } from '../../services/unifiedPrintService';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
 import { saveInvoice } from '../../utils/storage';
 import type { Invoice } from '../../types';
@@ -148,58 +149,165 @@ export default function StepRecapIpadOptimized({
     }
   };
 
-  // Action 2: Imprimer le PDF - Compatible iPad
+  // Action 2: Imprimer - Méthode native compatible iPad
   const handlePrintInvoice = async () => {
     try {
       setIsLoading(true);
-      console.log('🖨️ Génération PDF pour impression...');
+      console.log('🖨️ Lancement impression native...');
       
-      const pdfBlob = await PDFService.generateInvoicePDF(invoice);
-      const url = URL.createObjectURL(pdfBlob);
-      
-      // Detection iPad/Mobile pour méthode d'ouverture appropriée
+      // Détection device pour méthode d'impression appropriée
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       if (isIOS || isMobile) {
-        // Pour iPad/Mobile : créer un lien de téléchargement
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Facture_${invoice.invoiceNumber}_${new Date().toISOString().split('T')[0]}.pdf`;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // iPad/Mobile : impression directe via window.print()
+        console.log('📱 Impression directe iPad/Mobile...');
         
-        console.log('📱 PDF téléchargé pour iPad/Mobile');
-        setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} téléchargé (iPad)`]);
+        // Créer une div cachée avec le contenu de la facture
+        const printContent = createPrintableInvoice();
+        const printDiv = document.createElement('div');
+        printDiv.innerHTML = printContent;
+        printDiv.style.display = 'none';
+        printDiv.id = 'invoice-print-content';
+        
+        // Ajouter au DOM
+        document.body.appendChild(printDiv);
+        
+        // CSS pour l'impression
+        const printStyles = document.createElement('style');
+        printStyles.innerHTML = `
+          @media print {
+            body * { visibility: hidden; }
+            #invoice-print-content, #invoice-print-content * { visibility: visible; }
+            #invoice-print-content { 
+              position: absolute; 
+              left: 0; 
+              top: 0; 
+              width: 100%; 
+              background: white;
+              font-family: Arial, sans-serif;
+              font-size: 12px;
+              line-height: 1.4;
+            }
+          }
+        `;
+        document.head.appendChild(printStyles);
+        
+        // Lancer l'impression
+        setTimeout(() => {
+          window.print();
+          
+          // Nettoyer après impression
+          setTimeout(() => {
+            document.body.removeChild(printDiv);
+            document.head.removeChild(printStyles);
+          }, 1000);
+        }, 500);
+        
+        setActionHistory(prev => [...prev, `Impression lancée pour ${invoice.invoiceNumber} (iPad)`]);
+        
       } else {
-        // Pour Desktop : ouvrir dans nouvel onglet
+        // Desktop : PDF dans nouvel onglet
+        console.log('🖥️ Génération PDF Desktop...');
+        const pdfBlob = await PDFService.generateInvoicePDF(invoice);
+        const url = URL.createObjectURL(pdfBlob);
+        
         const printWindow = window.open(url, '_blank');
         if (printWindow) {
           printWindow.focus();
-          console.log('🖥️ PDF ouvert pour impression (Desktop)');
+          // Lancer l'impression quand le PDF est chargé
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.print();
+            }, 1000);
+          };
           setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert pour impression`]);
         } else {
-          // Fallback si popup bloqué
+          // Fallback téléchargement si popup bloqué
           const link = document.createElement('a');
           link.href = url;
-          link.target = '_blank';
+          link.download = `Facture_${invoice.invoiceNumber}_${new Date().toISOString().split('T')[0]}.pdf`;
           link.click();
-          console.log('🔗 PDF ouvert via lien (Fallback)');
-          setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert (fallback)`]);
+          setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} téléchargé (fallback)`]);
         }
+        
+        // Nettoyer l'URL après délai
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
       }
-      
-      // Nettoyer l'URL après un délai
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
       
     } catch (error) {
       console.error('❌ Erreur impression:', error);
-      setActionHistory(prev => [...prev, `Erreur: ${error.message || 'Impossible de générer le PDF'}`]);
+      setActionHistory(prev => [...prev, `Erreur: ${error.message || 'Impossible d\'imprimer'}`]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Fonction helper pour créer le contenu imprimable
+  const createPrintableInvoice = () => {
+    return `
+      <div style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <header style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #477A0C; margin: 0; font-size: 24px;">FACTURE</h1>
+          <p style="margin: 5px 0; font-size: 14px;">N° ${invoice.invoiceNumber}</p>
+          <p style="margin: 5px 0; font-size: 14px;">Date: ${invoice.invoiceDate}</p>
+        </header>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+          <div style="flex: 1;">
+            <h3 style="color: #477A0C; margin-bottom: 10px;">HT Confort</h3>
+            <p>15 Rue des Artisans<br>66680 Canohès<br>Tél: 04 68 07 43 82<br>Email: myconfort66@gmail.com</p>
+          </div>
+          <div style="flex: 1; text-align: right;">
+            <h3 style="color: #477A0C; margin-bottom: 10px;">Client</h3>
+            <p><strong>${client.name}</strong><br>
+            ${client.address || ''}<br>
+            ${client.postalCode || ''} ${client.city || ''}<br>
+            ${client.phone || ''}</p>
+          </div>
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+          <thead>
+            <tr style="background-color: #477A0C; color: white;">
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Produit</th>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Qté</th>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Prix TTC</th>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${produits.map(produit => `
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">${produit.designation}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${produit.qty}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${produit.priceTTC}€</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${(produit.qty * produit.priceTTC).toFixed(2)}€</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div style="text-align: right; margin-bottom: 30px;">
+          <div style="display: inline-block; text-align: left;">
+            <p style="margin: 5px 0;"><strong>Total TTC: ${totals.totalTTC.toFixed(2)}€</strong></p>
+            <p style="margin: 5px 0;">Mode de paiement: ${paiement.method}</p>
+          </div>
+        </div>
+        
+        ${signature?.dataUrl ? `
+          <div style="margin-top: 30px;">
+            <p><strong>Signature client:</strong></p>
+            <img src="${signature.dataUrl}" style="max-height: 100px; border: 1px solid #ddd;">
+            <p style="font-size: 12px; margin: 5px 0;">Signé le ${signature.timestamp ? new Date(signature.timestamp).toLocaleDateString('fr-FR') : 'N/A'}</p>
+          </div>
+        ` : ''}
+        
+        <footer style="margin-top: 50px; text-align: center; font-size: 12px; color: #666;">
+          <p>Merci de votre confiance !</p>
+        </footer>
+      </div>
+    `;
   };
 
   // Action 3: Envoyer par email
