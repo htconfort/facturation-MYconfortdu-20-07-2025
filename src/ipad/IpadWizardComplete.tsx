@@ -11,7 +11,7 @@ import StepProduits from './steps/StepProduits';
 import StepPaymentFixed from './steps/StepPaymentFixed';
 import StepLivraisonNoScroll from './steps/StepLivraisonNoScroll';
 import StepSignatureNoScroll from './steps/StepSignatureNoScroll';
-import StepRecapSimple from './steps/StepRecapSimple';
+import StepRecap from './steps/StepRecap';
 import StepNouvellesCommandes from './steps/StepNouvellesCommandes';
 
 const steps: WizardStep[] = [
@@ -174,7 +174,7 @@ function WizardSurface({
       case 'signature':
         return <StepSignatureNoScroll {...props} />;
       case 'recap':
-        return <StepRecapSimple {...props} />;
+        return <StepRecap {...props} />;
       case 'nouvelles-commandes':
         return <StepNouvellesCommandes {...props} />;
       default:
