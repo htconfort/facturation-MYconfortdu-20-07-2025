@@ -538,6 +538,15 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
               </div>
             </div>
           )}
+
+          {/* Acceptation des CGV */}
+          <div className='mt-4 flex justify-center'>
+            <div className='bg-green-50 border-2 border-[#477A0C] rounded-lg px-4 py-2'>
+              <p className='text-[#477A0C] font-bold text-sm text-center'>
+                ✓ Conditions générales de vente acceptées par le client
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Informations de paiement et notes */}
@@ -794,6 +803,15 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
               </h3>
               <p className='text-justify'>
                 Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l'adresse de livraison. Si vous souhaitez discuter d'une modification de l'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l'adresse myconfort66@gmail.com.
+              </p>
+            </div>
+
+            <div>
+              <h3 className='font-bold text-[#477A0C] mb-1'>
+                Art. 16 - Modalités de Livraison
+              </h3>
+              <p className='text-justify'>
+                Conformément à la réglementation du transport, nos produits sont livrés au rez-de-chaussée à l'adresse indiquée. Le client est informé par email et SMS avant livraison. Une personne majeure doit impérativement être présente pour réceptionner la marchandise. Pour des raisons de sécurité et de responsabilité, nos transporteurs ne sont pas habilités à monter les articles aux étages supérieurs.
               </p>
             </div>
             

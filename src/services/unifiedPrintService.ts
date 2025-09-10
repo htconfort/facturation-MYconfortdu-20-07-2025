@@ -656,6 +656,13 @@ export class UnifiedPrintService {
                 Bon pour accord et exécution
               </div>
 
+              <!-- Acceptation CGV -->
+              <div style="background: #f8f9fa; border: 2px solid #477A0C; border-radius: 8px; padding: 8px; margin: 10px 0; text-align: center;">
+                <div style="color: #477A0C; font-weight: bold; font-size: 12px;">
+                  ✓ Conditions générales de vente acceptées par le client
+                </div>
+              </div>
+
               <!-- Article de loi -->
               <div class="law-article">
                 ⚖️ Article L.441-6 du Code de commerce ⚖️<br>
@@ -743,6 +750,11 @@ export class UnifiedPrintService {
             <div class="cgv-section">
               <h4>Art. 15 - Horaires de Livraison</h4>
               <p>Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l'adresse de livraison. Si vous souhaitez discuter d'une modification de l'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l'adresse myconfort66@gmail.com.</p>
+            </div>
+
+            <div class="cgv-section">
+              <h4>Art. 16 - Modalités de Livraison</h4>
+              <p>Conformément à la réglementation du transport, nos produits sont livrés au rez-de-chaussée à l'adresse indiquée. Le client est informé par email et SMS avant livraison. Une personne majeure doit impérativement être présente pour réceptionner la marchandise. Pour des raisons de sécurité et de responsabilité, nos transporteurs ne sont pas habilités à monter les articles aux étages supérieurs.</p>
             </div>
           </div>
 

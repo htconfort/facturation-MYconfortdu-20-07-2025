@@ -119,6 +119,10 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
     title: 'Art. 15 - Horaires de Livraison',
     text: 'Livraison lundi-vendredi (hors fériés), personne +18 ans présente obligatoire. Modification adresse après commande : contact myconfort66@gmail.com.',
   },
+  {
+    title: 'Art. 16 - Modalités de Livraison',
+    text: 'Conformément à la réglementation du transport, nos produits sont livrés au rez-de-chaussée à l\'adresse indiquée. Le client est informé par email et SMS avant livraison. Une personne majeure doit impérativement être présente pour réceptionner la marchandise. Pour des raisons de sécurité et de responsabilité, nos transporteurs ne sont pas habilités à monter les articles aux étages supérieurs.',
+  },
 ];
 
 /** Optimise une signature (dataURL) pour réduire sa taille */
@@ -477,6 +481,14 @@ export const PDFService = {
         y += 15;
       }
     }
+
+    // ————— Acceptation des CGV —————
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 122, 12); // Vert MYCONFORT
+    doc.text('✓ Conditions générales de vente acceptées par le client', MARGIN, y);
+    doc.setTextColor(0, 0, 0); // Retour au noir
 
     // ————— Information légale Article L224-59 —————
     y += 10;
