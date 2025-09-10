@@ -65,11 +65,11 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
   },
   {
     title: 'Art. 2 - Délais de Livraison',
-    text: 'Sauf convention expresse, le retard dans les délais de livraison ne peut donner lieu à indemnité ou annulation de la commande, et notamment en cas de force majeure ou événement propre à retarder ou suspendre la livraison des marchandises. Les délais sont donnés à titre indicatif et ne constituent pas un engagement ferme. Ne pouvant pas maîtriser les plannings des transporteurs nous déclinons toute responsabilité en cas de délai dépassé.',
+    text: 'Sauf convention expresse, le retard dans les délais ne peut donner lieu à indemnité ou annulation, notamment en cas de force majeure. Délais indicatifs sans engagement ferme. Aucune responsabilité en cas de délai dépassé.',
   },
   {
     title: 'Art. 3 - Risques de Transport',
-    text: 'Nos fournitures même convenues franco, voyagent aux risques et périls du destinataire, à qui il appartient, en cas d\'avaries ou de pertes, de faire toutes réserves, et d\'exercer tout recours auprès des transporteurs seuls responsables. La date de livraison estimée d\'un produit est basée sur la présence du produit en stock et sur l\'adresse de livraison que vous nous avez fournie et est soumise à la réception de votre paiement de ce produit.',
+    text: 'Fournitures aux risques du destinataire. En cas d\'avaries : réserves obligatoires auprès des transporteurs seuls responsables. Date de livraison basée sur stock et paiement reçu.',
   },
   {
     title: 'Art. 4 - Acceptation des Conditions',
@@ -85,11 +85,11 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
   },
   {
     title: 'Art. 7 - Tailles des Matelas',
-    text: 'Étant donné que les mousses viscoélastiques utilisées pour la réalisation de nos matelas sont thermosensibles, cette caractéristique peut faire apparaître des dilatations pouvant faire varier leurs tailles de quelques centimètres (plus ou moins 5 cm). Les tailles standard de matelas sont données à titre indicatif, et ne constituent pas une obligation contractuelle de délivrance pouvant faire l\'objet de non conformité, d\'échange ou d\'annulation de la commande.',
+    text: 'Mousses thermosensibles : variations possibles ±5cm. Tailles indicatives sans obligation contractuelle. Pas de non-conformité, échange ou annulation pour variations dimensionnelles.',
   },
   {
     title: 'Art. 8 - Odeur des Matériaux',
-    text: 'Par l\'acceptation expresse des présentes conditions de vente l\'acheteur est informé que la spécificité des mousses viscoélastiques conçues avec des polyols à base naturelle (huile de ricin) ainsi que les matières de conditionnement peuvent émettre une légère odeur qui s\'estompe après déballage, cela ne constitue pas un vice rédhibitoire ou un défaut pouvant faire l\'objet de non conformité au sens de l\'article 1604 et 1641 du code civil.',
+    text: 'Mousses à base naturelle (huile de ricin) : légère odeur possible qui s\'estompe. Ne constitue pas un vice rédhibitoire (art. 1604/1641 Code civil).',
   },
   {
     title: 'Art. 9 - Règlements et Remises',
@@ -108,8 +108,8 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
     text: 'Le non-paiement d\'une seule échéance rend exigible de plein droit le solde dû sur toutes les échéances à venir.',
   },
   {
-    title: 'Art. 13 - Livraison Incomplète ou Non-Conforme',
-    text: 'Il se peut que le colis soit endommagé ou que le contenu de celui-ci ait été partiellement ou totalement dérobé. Si vous constatez une telle erreur, veuillez le mentionner sur le bon du transporteur et refuser le produit. Dans le cas où vous prendriez connaissance de cette erreur après le départ du transporteur, veuillez nous signaler celle-ci par mail à l\'adresse myconfort66@gmail.com ou par téléphone dans un délai maximum de 72h ouvrables suivant la réception de la commande.',
+    title: 'Art. 13 - Livraison Non-Conforme',
+    text: 'Colis endommagé : mentionner sur bon transporteur et refuser. Erreur constatée après : signaler sous 72h ouvrables à myconfort66@gmail.com.',
   },
   {
     title: 'Art. 14 - Litiges',
@@ -117,7 +117,7 @@ const CGV_ITEMS: Array<{ title: string; text: string }> = [
   },
   {
     title: 'Art. 15 - Horaires de Livraison',
-    text: 'Nous ne pouvons livrer les produits que du lundi au vendredi (excepté les jours fériés) et une personne âgée de plus de 18 ans doit être présente à l\'adresse de livraison quand le produit est livré. Une fois que vous avez passé une commande, il est difficile de modifier l\'adresse de livraison. Si vous souhaitez discuter d\'une modification de l\'adresse de livraison après avoir passé une commande, veuillez nous contacter dès que possible à l\'adresse myconfort66@gmail.com.',
+    text: 'Livraison lundi-vendredi (hors fériés), personne +18 ans présente obligatoire. Modification adresse après commande : contact myconfort66@gmail.com.',
   },
 ];
 
@@ -490,49 +490,72 @@ export const PDFService = {
     const legalLines = doc.splitTextToSize(legalText, w - MARGIN * 2);
     doc.text(legalLines, MARGIN, y + 4);
 
-    // ————— PAGE 2 — CGV (2 colonnes)
+    // ————— PAGE 2 — CGV (2 colonnes optimisées)
     doc.addPage('a4', 'portrait');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text('Conditions Générales de Vente', MARGIN, 20);
+    doc.setFontSize(13);
+    doc.text('Conditions Générales de Vente', MARGIN, 18);
 
-    // Deux colonnes : 90 mm chacune (A4 largeur ≈ 210 mm → 210 - 2*15 = 180 mm utiles)
-    const colWidth = (w - MARGIN * 2 - 6) / 2; // 3 mm de gouttière de chaque côté
-    const leftX = MARGIN;
-    const cgvRightX = MARGIN + colWidth + 6;
-    let yLeft = 28;
-    let yRight = 28;
+    // Optimisation: colonnes plus larges avec marges réduites
+    const cgvMargin = 12; // Réduit de 15 à 12
+    const colGutter = 4; // Réduit de 6 à 4
+    const colWidth = (w - cgvMargin * 2 - colGutter) / 2;
+    const leftX = cgvMargin;
+    const cgvRightX = cgvMargin + colWidth + colGutter;
+    let yLeft = 25;
+    let yRight = 25;
 
+    // Police plus petite et espacement réduit
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.2);
+    doc.setFontSize(8.2); // Réduit de 9.2 à 8.2
+    const lineHeight = 3.8; // Réduit de 4.4 à 3.8
+    const articleSpacing = 6; // Réduit de 9 à 6
 
     CGV_ITEMS.forEach(item => {
-      const block = [`${item.title}`, item.text];
-      const blockLines = doc.splitTextToSize(block.join(' — '), colWidth);
+      // Séparation titre et texte pour une meilleure gestion
+      const titleLines = doc.splitTextToSize(item.title, colWidth);
+      const textLines = doc.splitTextToSize(item.text, colWidth);
+      
+      const titleHeight = titleLines.length * lineHeight;
+      const textHeight = textLines.length * lineHeight;
+      const blockHeight = titleHeight + textHeight + articleSpacing;
 
-      // Choix de la colonne (remplir gauche, puis droite)
-      const lineHeight = 4.4;
-      const blockHeight = blockLines.length * lineHeight + 2;
-
-      const canLeft = yLeft + blockHeight < 285; // garder marge bas
+      // Vérification si ça rentre dans la colonne gauche
+      const canLeft = yLeft + blockHeight < 275; // Limite plus basse pour plus d'espace
       const useLeft = canLeft && yLeft <= yRight;
 
       if (useLeft) {
+        // Colonne gauche
         doc.setFont('helvetica', 'bold');
-        doc.text(item.title, leftX, yLeft);
+        doc.setFontSize(8.5); // Titre légèrement plus gros
+        doc.text(titleLines, leftX, yLeft);
+        
         doc.setFont('helvetica', 'normal');
-        const txt = doc.splitTextToSize(item.text, colWidth);
-        doc.text(txt, leftX, yLeft + 5);
-        yLeft += txt.length * lineHeight + 9;
+        doc.setFontSize(8.0); // Texte plus compact
+        doc.text(textLines, leftX, yLeft + titleHeight + 2);
+        
+        yLeft += blockHeight;
       } else {
+        // Colonne droite
         doc.setFont('helvetica', 'bold');
-        doc.text(item.title, cgvRightX, yRight);
+        doc.setFontSize(8.5);
+        doc.text(titleLines, cgvRightX, yRight);
+        
         doc.setFont('helvetica', 'normal');
-        const txt = doc.splitTextToSize(item.text, colWidth);
-        doc.text(txt, cgvRightX, yRight + 5);
-        yRight += txt.length * lineHeight + 9;
+        doc.setFontSize(8.0);
+        doc.text(textLines, cgvRightX, yRight + titleHeight + 2);
+        
+        yRight += blockHeight;
       }
     });
+
+    // Date de mise à jour compacte
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100); // Gris
+    const dateText = 'Conditions générales mises à jour le 1 Janvier 2017';
+    const textWidth = doc.getTextWidth(dateText);
+    doc.text(dateText, (w - textWidth) / 2, 280); // Centré en bas
 
     drawFooter(doc, 2);
 
