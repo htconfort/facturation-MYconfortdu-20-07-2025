@@ -637,93 +637,108 @@ export default function StepRecap({ onPrev }: StepProps) {
               </div>
             )}
 
-            {/* ACTIONS CONDENSÉES */}
-            <div className='bg-gradient-to-r from-myconfort-green/10 to-myconfort-green/20 rounded-lg p-3 shadow-sm border border-myconfort-green flex-1'>
-              <div className='text-sm font-semibold text-myconfort-dark mb-2 text-center'>⚡ Actions</div>
+            {/* ACTIONS PRINCIPALES - SECTION BIEN VISIBLE */}
+            <div className='bg-gradient-to-r from-myconfort-green/20 to-myconfort-green/30 rounded-xl p-4 shadow-lg border-2 border-myconfort-green'>
+              <div className='text-base font-bold text-myconfort-dark mb-3 text-center'>⚡ Actions Principales</div>
 
               {/* Indicateur de progression */}
               {isLoading && (
-                <div className='flex items-center justify-center gap-2 mb-2'>
-                  <div className='w-4 h-4 border-2 border-myconfort-green border-t-transparent rounded-full animate-spin'></div>
-                  <span className='text-xs font-medium'>Traitement...</span>
+                <div className='flex items-center justify-center gap-2 mb-3'>
+                  <div className='w-5 h-5 border-2 border-myconfort-green border-t-transparent rounded-full animate-spin'></div>
+                  <span className='text-sm font-medium'>Traitement...</span>
                 </div>
               )}
 
-              {/* Actions principales en grille 1x3 */}
-              <div className='grid grid-cols-1 gap-2 mb-2'>
-                {/* 1. Enregistrer facture - OBLIGATOIRE */}
+              {/* 3 BOUTONS D'ACTIONS PRINCIPALES */}
+              <div className='space-y-3 mb-3'>
+                
+                {/* 1. 💾 ENREGISTRER FACTURE - OBLIGATOIRE */}
                 <div className='relative'>
                   <button
                     onClick={handleSaveInvoice}
                     disabled={isLoading}
-                    className={`w-full p-2 rounded-lg font-bold text-xs transition-all ${
+                    className={`w-full p-3 rounded-xl font-bold text-sm transition-all shadow-md ${
                       isInvoiceSaved
-                        ? 'bg-green-100 text-green-700 border border-green-300'
-                        : 'bg-myconfort-green text-white hover:opacity-90'
+                        ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                        : 'bg-myconfort-green text-white hover:opacity-90 hover:scale-105'
                     }`}
                   >
                     <div className='flex items-center justify-center gap-2'>
-                      <span className='text-sm'>💾</span>
-                      <span>Enregistrer Facture</span>
+                      <span className='text-lg'>💾</span>
+                      <div className='text-center'>
+                        <div>Enregistrer Facture</div>
+                        {!isInvoiceSaved && <div className='text-xs opacity-80'>OBLIGATOIRE</div>}
+                      </div>
                     </div>
                   </button>
                   {!isInvoiceSaved && (
-                    <div className='absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full font-bold'>
-                      !
+                    <div className='absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
+                      OBLIGATOIRE
                     </div>
                   )}
                 </div>
 
-                {/* 2. Imprimer facture */}
+                {/* 2. 🖨️ IMPRIMER FACTURE */}
                 <button
                   onClick={handlePrintInvoice}
                   disabled={isLoading}
-                  className='w-full p-2 rounded-lg bg-blue-600 text-white font-bold text-xs hover:opacity-90 transition-all'
+                  className='w-full p-3 rounded-xl bg-blue-600 text-white font-bold text-sm hover:opacity-90 hover:scale-105 transition-all shadow-md'
                 >
                   <div className='flex items-center justify-center gap-2'>
-                    <span className='text-sm'>🖨️</span>
-                    <span>Imprimer (PDF A4)</span>
+                    <span className='text-lg'>🖨️</span>
+                    <div className='text-center'>
+                      <div>Imprimer Facture</div>
+                      <div className='text-xs opacity-80'>PDF A4 Premium</div>
+                    </div>
                   </div>
                 </button>
 
-                {/* 3. Envoyer Email + Drive - OBLIGATOIRE */}
+                {/* 3. 📧 ENVOYER EMAIL - OBLIGATOIRE */}
                 <div className='relative'>
                   <button
                     onClick={handleSendEmailAndDrive}
                     disabled={isLoading}
-                    className={`w-full p-2 rounded-lg font-bold text-xs transition-all ${
+                    className={`w-full p-3 rounded-xl font-bold text-sm transition-all shadow-md ${
                       isEmailSent
-                        ? 'bg-green-100 text-green-700 border border-green-300'
-                        : 'bg-purple-600 text-white hover:opacity-90'
+                        ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                        : 'bg-purple-600 text-white hover:opacity-90 hover:scale-105'
                     }`}
                   >
                     <div className='flex items-center justify-center gap-2'>
-                      <span className='text-sm'>📧</span>
-                      <span>Envoyer Email</span>
+                      <span className='text-lg'>📧</span>
+                      <div className='text-center'>
+                        <div>Envoyer Email</div>
+                        {!isEmailSent && <div className='text-xs opacity-80'>OBLIGATOIRE</div>}
+                      </div>
                     </div>
                   </button>
                   {!isEmailSent && (
-                    <div className='absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full font-bold'>
-                      !
+                    <div className='absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold'>
+                      OBLIGATOIRE
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Status compact */}
-              <div className='flex justify-center gap-4 text-xs'>
-                <span className={isInvoiceSaved ? 'text-green-600' : 'text-gray-400'}>
-                  {isInvoiceSaved ? '✅' : '⭕'} Enreg.
-                </span>
-                <span className={isEmailSent ? 'text-green-600' : 'text-gray-400'}>
-                  {isEmailSent ? '✅' : '⭕'} Email
-                </span>
+              {/* Status des actions */}
+              <div className='pt-3 border-t border-myconfort-green/30'>
+                <div className='flex justify-center gap-6 text-sm'>
+                  <span className={`flex items-center gap-1 font-medium ${isInvoiceSaved ? 'text-green-600' : 'text-gray-500'}`}>
+                    {isInvoiceSaved ? '✅' : '⭕'} Enregistré
+                  </span>
+                  <span className={`flex items-center gap-1 font-medium ${isEmailSent ? 'text-green-600' : 'text-gray-500'}`}>
+                    {isEmailSent ? '✅' : '⭕'} Envoyé
+                  </span>
+                </div>
               </div>
 
-              {/* Message d'avertissement compact */}
+              {/* Message d'avertissement */}
               {!canProceed && (
-                <div className='bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-center text-xs font-medium mt-2'>
-                  ⚠️ Actions obligatoires manquantes
+                <div className='bg-amber-100 border border-amber-300 text-amber-800 p-3 rounded-xl text-center text-sm font-medium mt-3'>
+                  <div className='flex items-center justify-center gap-2'>
+                    <span>⚠️</span>
+                    <span>Actions obligatoires requises</span>
+                  </div>
                 </div>
               )}
             </div>
