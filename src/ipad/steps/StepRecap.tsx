@@ -314,7 +314,13 @@ export default function StepRecapIpadOptimized({
   const handleSendEmail = async () => {
     try {
       setIsLoading(true);
+      console.log('📧 Début envoi email...', {
+        clientEmail: client.email,
+        invoiceNumber: invoice.invoiceNumber
+      });
+      
       const pdfBlob = await PDFService.generateInvoicePDF(invoice);
+      console.log('📄 PDF généré:', { size: pdfBlob.size });
       
       const reader = new FileReader();
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
@@ -326,11 +332,14 @@ export default function StepRecapIpadOptimized({
         reader.onerror = reject;
         reader.readAsDataURL(pdfBlob);
       });
+      console.log('🔄 PDF converti en base64:', { length: pdfBase64.length });
 
       await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
+      console.log('✅ Email envoyé avec succès');
       setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} envoyée par email`]);
     } catch (error) {
-      console.error('Erreur envoi:', error);
+      console.error('❌ Erreur envoi email:', error);
+      setActionHistory(prev => [...prev, `Erreur envoi: ${error.message || 'Erreur inconnue'}`]);
     } finally {
       setIsLoading(false);
     }
@@ -340,6 +349,15 @@ export default function StepRecapIpadOptimized({
   const isInvoiceSaved = actionHistory.some(action => action.includes('enregistrée'));
   const isEmailSent = actionHistory.some(action => action.includes('envoyée par email'));
   const isPdfGenerated = actionHistory.some(action => action.includes('ouvert pour impression'));
+
+  // Debug état du bouton email
+  const emailButtonDisabled = isLoading || !client.email;
+  console.log('🔍 Debug bouton email:', {
+    isLoading,
+    clientEmail: client.email,
+    emailButtonDisabled,
+    isEmailSent
+  });
 
   return (
     <div className="h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
@@ -606,16 +624,36 @@ export default function StepRecapIpadOptimized({
               <div className="relative flex-1">
                 <button
                   onClick={handleSendEmail}
-                  disabled={isLoading || !client.email}
-                  className="w-full h-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
+                  disabled={emailButtonDisabled}
+                  className="w-full h-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px] active:scale-95"
                 >
-                  <span className="text-lg mb-1">📧</span>
-                  <div className="text-center">
-                    <div className="text-sm">Envoyer</div>
-                    <div className="text-xs opacity-80">Email</div>
-                  </div>
+                  {isLoading ? (
+                    <>
+                      <span className="text-lg mb-1 animate-spin">⏳</span>
+                      <div className="text-center">
+                        <div className="text-sm">Envoi...</div>
+                        <div className="text-xs opacity-80">Email en cours</div>
+                      </div>
+                    </>
+                  ) : !client.email ? (
+                    <>
+                      <span className="text-lg mb-1">❌</span>
+                      <div className="text-center">
+                        <div className="text-sm">Pas d'email</div>
+                        <div className="text-xs opacity-80">Client sans email</div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg mb-1">📧</span>
+                      <div className="text-center">
+                        <div className="text-sm">Envoyer</div>
+                        <div className="text-xs opacity-80">Email</div>
+                      </div>
+                    </>
+                  )}
                 </button>
-                {!isEmailSent && (
+                {!isEmailSent && !emailButtonDisabled && (
                   <div className="absolute -top-1 -left-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
                     !
                   </div>
