@@ -22,6 +22,13 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
     livraison.deliveryMethod && livraison.deliveryMethod.trim().length > 0
   );
 
+  // Debug: log pour identifier le problème
+  console.log('StepLivraisonNoScroll - Debug:', {
+    deliveryMethod: livraison.deliveryMethod,
+    isValid,
+    livraison
+  });
+
   // Page secondaire pour les détails
   if (showDetailsPage) {
     return (
@@ -56,10 +63,15 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           </div>
           <button
             type='button'
-            onClick={onNext}
-            className='bg-[#477A0C] hover:bg-[#5A8F0F] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg border-2 border-[#477A0C] transition-all'
+            onClick={isValid ? onNext : undefined}
+            disabled={!isValid}
+            className={`px-6 py-3 rounded-xl text-lg font-bold shadow-lg border-2 transition-all ${
+              !isValid
+                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed border-red-500'
+                : 'bg-[#477A0C] hover:bg-[#5A8F0F] text-white border-[#477A0C]'
+            }`}
           >
-            Suivant →
+            {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
           </button>
         </div>
       </div>
