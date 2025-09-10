@@ -178,17 +178,17 @@ export default function StepProduits({
             ➕ Ajouter un produit
           </h3>
 
-          {/* Grille 3×2 pour optimiser l'espace horizontal */}
-          <div className='grid grid-cols-3 gap-2 mb-2'>
+          {/* Grille 3×2 pour optimiser l'espace horizontal - CHAMPS PLUS LARGES POUR IPAD */}
+          <div className='grid grid-cols-3 gap-3 mb-3'>
             {/* Catégorie (OBLIGATOIRE) */}
-            <div className='space-y-1'>
-              <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
+            <div className='space-y-2'>
+              <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
                 Catégorie <span className='text-red-600 font-bold'>*</span>
               </label>
               <select
                 value={draft.category}
                 onChange={e => handleCategoryChange(e.target.value)}
-                className='w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                className='w-full px-4 py-3 text-base border-2 rounded-xl font-manrope transition-colors duration-150 min-h-[56px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green cursor-pointer'
               >
                 <option value=''>Sélectionner une catégorie</option>
                 {extendedCategories.map(category => (
@@ -200,8 +200,8 @@ export default function StepProduits({
             </div>
 
             {/* Produit (OBLIGATOIRE) */}
-            <div className='space-y-1'>
-              <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
+            <div className='space-y-2'>
+              <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
                 Produit <span className='text-red-600 font-bold'>*</span>
               </label>
               {draft.category === 'Diverse' ? (
@@ -213,14 +213,14 @@ export default function StepProduits({
                     setDraft(d => ({ ...d, designation: e.target.value }))
                   }
                   disabled={!draft.category}
-                  className='w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500'
+                  className='w-full px-4 py-3 text-base border-2 rounded-xl font-manrope transition-colors duration-150 min-h-[56px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500'
                 />
               ) : (
                 <select
                   value={draft.designation}
                   onChange={e => handleProductChange(e.target.value)}
                   disabled={!draft.category}
-                  className='w-full px-3 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500'
+                  className='w-full px-4 py-3 text-base border-2 rounded-xl font-manrope transition-colors duration-150 min-h-[56px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green disabled:bg-gray-100 disabled:text-gray-500 cursor-pointer'
                 >
                   <option value=''>
                     {draft.category
@@ -237,8 +237,8 @@ export default function StepProduits({
             </div>
 
             {/* Quantité (OBLIGATOIRE) */}
-            <div className='space-y-1'>
-              <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
+            <div className='space-y-2'>
+              <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
                 Qté <span className='text-red-600 font-bold'>*</span>
               </label>
               <NumericInput
@@ -247,17 +247,17 @@ export default function StepProduits({
                   setDraft(d => ({ ...d, qty: Number(value) || 1 }))
                 }
                 min={1}
-                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green min-h-[56px] px-4 py-3 text-base rounded-xl'
                 aria-label="Quantité"
               />
             </div>
           </div>
 
-          {/* Ligne 2 : Prix + Remise + Bouton */}
-          <div className='grid grid-cols-4 gap-2'>
+          {/* Ligne 2 : Prix + Remise + Bouton - CHAMPS PLUS LARGES */}
+          <div className='grid grid-cols-4 gap-3'>
             {/* Prix TTC (OBLIGATOIRE) */}
-            <div className='space-y-1'>
-              <label className='flex items-center gap-1 text-sm font-medium text-myconfort-dark font-manrope'>
+            <div className='space-y-2'>
+              <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
                 Prix TTC (€) <span className='text-red-600 font-bold'>*</span>
               </label>
               <NumericInput
@@ -270,20 +270,20 @@ export default function StepProduits({
                 }
                 min={0}
                 step="0.01"
-                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                className='w-full text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green min-h-[56px] px-4 py-3 text-base rounded-xl'
                 aria-label="Prix TTC en euros"
               />
             </div>
 
             {/* Remise (optionnelle) */}
-            <div className='space-y-1 col-span-2'>
-              <label className='flex items-center gap-1 text-sm font-medium text-gray-600 font-manrope'>
+            <div className='space-y-2 col-span-2'>
+              <label className='flex items-center gap-1 text-base font-medium text-gray-600 font-manrope'>
                 Remise (optionnel)
                 {draft.discount > 0 && (
                   <span className='text-myconfort-green ml-1 font-bold'>✓</span>
                 )}
               </label>
-              <div className='flex gap-1'>
+              <div className='flex gap-2'>
                 <select
                   value={draft.discountType}
                   onChange={e =>
@@ -292,7 +292,7 @@ export default function StepProduits({
                       discountType: e.target.value as 'percent' | 'fixed',
                     }))
                   }
-                  className='w-12 px-1 py-2 text-sm border-2 rounded-lg font-manrope transition-colors duration-150 min-h-[40px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
+                  className='w-16 px-2 py-3 text-base border-2 rounded-xl font-manrope transition-colors duration-150 min-h-[56px] focus:outline-none focus:ring-0 border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green cursor-pointer'
                 >
                   <option value='percent'>%</option>
                   <option value='fixed'>€</option>
@@ -308,15 +308,15 @@ export default function StepProduits({
                   min={0}
                   step="0.01"
                   placeholder="0"
-                  className='flex-1 text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green'
+                  className='flex-1 text-myconfort-dark border-gray-200 hover:border-myconfort-green focus:border-myconfort-green min-h-[56px] px-4 py-3 text-base rounded-xl'
                   aria-label="Montant de la remise"
                 />
               </div>
             </div>
 
             {/* Bouton Ajouter */}
-            <div className='space-y-1'>
-              <label className='text-sm font-medium text-transparent'>
+            <div className='space-y-2'>
+              <label className='text-base font-medium text-transparent'>
                 Action
               </label>
               <button
@@ -327,7 +327,7 @@ export default function StepProduits({
                   draft.qty <= 0 ||
                   draft.priceTTC <= 0
                 }
-                className={`w-full px-3 py-2 rounded-lg text-sm font-medium font-manrope text-white transition-all min-h-[40px] ${
+                className={`w-full px-4 py-3 rounded-xl text-base font-medium font-manrope text-white transition-all min-h-[56px] ${
                   !draft.category ||
                   !draft.designation ||
                   draft.qty <= 0 ||
@@ -336,7 +336,7 @@ export default function StepProduits({
                     : 'bg-myconfort-green hover:bg-myconfort-green/90 shadow-lg'
                 }`}
               >
-                Ajouter
+                ➕ Ajouter
               </button>
             </div>
           </div>
