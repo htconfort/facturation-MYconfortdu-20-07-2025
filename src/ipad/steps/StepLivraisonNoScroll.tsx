@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 
 interface StepProps {
@@ -12,6 +12,7 @@ interface StepProps {
 export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   const { livraison, updateLivraison, produits, client } = useInvoiceWizard();
   const [showDetailsPage, setShowDetailsPage] = useState(false);
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
 
   // Analyser les produits
   const produitsALivrer = produits.filter(p => !p.isPickupOnSite);
@@ -22,10 +23,20 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
     livraison.deliveryMethod && livraison.deliveryMethod.trim().length > 0
   );
 
+  // Délai pour éviter les problèmes de timing depuis la signature
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsNavigationReady(true);
+    }, 500); // 500ms de délai pour stabiliser la navigation
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   // Debug: log pour identifier le problème
   console.log('StepLivraisonNoScroll - Debug:', {
     deliveryMethod: livraison.deliveryMethod,
     isValid,
+    isNavigationReady,
     livraison
   });
 
@@ -49,30 +60,16 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
 
   return (
     <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative'>
-      {/* 🎯 Header fixe avec bouton Suivant */}
+      {/* 🎯 Header simple sans bouton */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h1 className='text-2xl font-bold text-myconfort-dark'>
-              🚚 Modalités de Livraison
-            </h1>
-            <p className='text-myconfort-dark/70 text-sm'>
-              Étape 5/7 • {produitsALivrer.length} produits à livrer,{' '}
-              {produitsAEmporter.length} à emporter
-            </p>
-          </div>
-          <button
-            type='button'
-            onClick={isValid ? onNext : undefined}
-            disabled={!isValid}
-            className={`px-6 py-3 rounded-xl text-lg font-bold shadow-lg border-2 transition-all ${
-              !isValid
-                ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed border-red-500'
-                : 'bg-[#477A0C] hover:bg-[#5A8F0F] text-white border-[#477A0C]'
-            }`}
-          >
-            {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
-          </button>
+        <div>
+          <h1 className='text-2xl font-bold text-myconfort-dark'>
+            🚚 Modalités de Livraison
+          </h1>
+          <p className='text-myconfort-dark/70 text-sm'>
+            Étape 5/7 • {produitsALivrer.length} produits à livrer,{' '}
+            {produitsAEmporter.length} à emporter
+          </p>
         </div>
       </div>
 
@@ -201,15 +198,15 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           </div>
         </div>
         <button
-          onClick={isValid ? onNext : undefined}
-          disabled={!isValid}
+          onClick={isValid && isNavigationReady ? onNext : undefined}
+          disabled={!isValid || !isNavigationReady}
           className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${
-            !isValid
+            !isValid || !isNavigationReady
               ? 'bg-red-500 hover:bg-red-600 text-white cursor-not-allowed opacity-90'
               : 'bg-myconfort-green text-white hover:bg-myconfort-green/90'
           }`}
         >
-          {!isValid ? '⚠️ Mode requis' : 'Suivant →'}
+          {!isNavigationReady ? '⏳ Chargement...' : !isValid ? '⚠️ Mode requis' : 'Suivant →'}
         </button>
       </div>
     </div>

@@ -21,6 +21,10 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
       timestamp: new Date().toISOString() 
     });
     setShowSignaturePad(false);
+    // Navigation automatique après signature comme dans StepSignature
+    setTimeout(() => {
+      onNext();
+    }, 300); // Petit délai pour que l'UI se mette à jour
   };
 
   const handleNext = () => {
