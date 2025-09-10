@@ -1,6 +1,7 @@
 // StepPaymentFixed.tsx - Solution ultra-simple avec scroll garanti
 import { useState } from 'react';
 import { useInvoiceWizard } from '../../store/useInvoiceWizard';
+import type { PartialPayment } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import AlmaLogo from '../../assets/images/Alma_orange.png';
 import NumericInput from '../../components/NumericInput';
@@ -41,6 +42,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   // Pages secondaires
   const [showAlmaPage, setShowAlmaPage] = useState(false);
   const [showChequesPage, setShowChequesPage] = useState(false);
+  const [showPartialPage, setShowPartialPage] = useState(false);
 
   // Constantes pour le layout
   const HEADER_H = 60;   // hauteur header (px)
@@ -106,6 +108,26 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   };
 
   // Pages secondaires
+  if (showPartialPage) {
+    return (
+      <PartialPaymentPage
+        totalAmount={restePay}
+        onBack={() => setShowPartialPage(false)}
+        onSave={partialPayments => {
+          savePayment({
+            method: 'Règlement Partiel',
+            depositAmount: acompte,
+            depositMethod,
+            partialPayments,
+          });
+          setSelectedMethod('Règlement Partiel');
+          setShowPartialPage(false);
+        }}
+        existingPartialPayments={paiement?.partialPayments || []}
+      />
+    );
+  }
+
   if (showAlmaPage) {
     return (
       <AlmaDetailsPage
@@ -450,6 +472,20 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                 highlight="amber"
                 onClick={() => setShowChequesPage(true)}
               />
+
+              {/* Règlement Partiel - NOUVEAU */}
+              <PaymentCard
+                active={selectedMethod === 'Règlement Partiel'}
+                title="Règlement Partiel"
+                subtitle={
+                  selectedMethod === 'Règlement Partiel' && paiement?.partialPayments?.length
+                    ? `${paiement.partialPayments.length} paiements configurés`
+                    : 'Diviser entre plusieurs personnes →'
+                }
+                emoji="👥"
+                highlight="blue"
+                onClick={() => setShowPartialPage(true)}
+              />
           </div>
         </div>
 
@@ -499,10 +535,10 @@ function PaymentCard({
   emoji?: string;
   custom?: React.ReactNode;
   onClick: () => void;
-  highlight?: 'amber';
+  highlight?: 'amber' | 'blue';
 }) {
-  const activeColor = highlight === 'amber' ? '#F59E0B' : '#477A0C';
-  const activeBg = highlight === 'amber' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(71, 122, 12, 0.1)';
+  const activeColor = highlight === 'amber' ? '#F59E0B' : highlight === 'blue' ? '#3B82F6' : '#477A0C';
+  const activeBg = highlight === 'amber' ? 'rgba(245, 158, 11, 0.1)' : highlight === 'blue' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(71, 122, 12, 0.1)';
 
   return (
     <button
@@ -1003,6 +1039,198 @@ function ChequesDetailsPage({
         >
           Confirmer →
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------ PartialPaymentPage Component ------------------ */
+function PartialPaymentPage({
+  totalAmount,
+  onBack,
+  onSave,
+  existingPartialPayments = [],
+}: {
+  totalAmount: number;
+  onBack: () => void;
+  onSave: (partialPayments: PartialPayment[]) => void;
+  existingPartialPayments: PartialPayment[];
+}) {
+  const [partialPayments, setPartialPayments] = useState<PartialPayment[]>(
+    existingPartialPayments.length > 0 
+      ? existingPartialPayments 
+      : [{ method: 'Carte Bleue', amount: 0, personName: '' }]
+  );
+
+  const currentTotal = partialPayments.reduce((sum, p) => sum + p.amount, 0);
+  const isValid = Math.abs(currentTotal - totalAmount) < 0.01 && partialPayments.every(p => p.amount > 0);
+
+  const addPayment = () => {
+    setPartialPayments([...partialPayments, { method: 'Espèces', amount: 0, personName: '' }]);
+  };
+
+  const removePayment = (index: number) => {
+    if (partialPayments.length > 1) {
+      setPartialPayments(partialPayments.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePayment = (index: number, field: keyof PartialPayment, value: string | number) => {
+    const updated = [...partialPayments];
+    if (field === 'amount') {
+      updated[index] = { ...updated[index], [field]: Number(value) || 0 };
+    } else {
+      updated[index] = { ...updated[index], [field]: value };
+    }
+    setPartialPayments(updated);
+  };
+
+  const paymentMethods: PartialPayment['method'][] = ['Carte Bleue', 'Espèces', 'Virement', 'Chèque au comptant'];
+
+  return (
+    <div className="w-full h-full bg-myconfort-cream flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+          >
+            ←
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-myconfort-dark">👥 Règlement Partiel</h1>
+            <p className="text-sm text-myconfort-dark/70">
+              Total à répartir : {totalAmount.toFixed(2)}€
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenu */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-2xl mx-auto space-y-6">
+          
+          {/* Résumé */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Total configuré :</span>
+              <span className={`font-bold text-lg ${
+                Math.abs(currentTotal - totalAmount) < 0.01 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {currentTotal.toFixed(2)}€
+              </span>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-sm text-gray-600">Reste à répartir :</span>
+              <span className={`font-medium ${
+                Math.abs(totalAmount - currentTotal) < 0.01 ? 'text-green-600' : 'text-orange-600'
+              }`}>
+                {(totalAmount - currentTotal).toFixed(2)}€
+              </span>
+            </div>
+          </div>
+
+          {/* Liste des paiements */}
+          <div className="space-y-4">
+            {partialPayments.map((payment, index) => (
+              <div key={index} className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-myconfort-dark">
+                    Paiement #{index + 1}
+                  </h3>
+                  {partialPayments.length > 1 && (
+                    <button
+                      onClick={() => removePayment(index)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Méthode de paiement */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Méthode
+                    </label>
+                    <select
+                      value={payment.method}
+                      onChange={e => updatePayment(index, 'method', e.target.value as PartialPayment['method'])}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {paymentMethods.map(method => (
+                        <option key={method} value={method}>{method}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Montant */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Montant (€)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={payment.amount || ''}
+                      onChange={e => updatePayment(index, 'amount', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  {/* Nom de la personne */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Personne (optionnel)
+                    </label>
+                    <input
+                      type="text"
+                      value={payment.personName || ''}
+                      onChange={e => updatePayment(index, 'personName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nom de la personne"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bouton ajouter */}
+          <button
+            onClick={addPayment}
+            className="w-full px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-xl transition-colors"
+          >
+            ➕ Ajouter un paiement
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="p-6 border-t border-gray-200 flex-shrink-0">
+        <div className="flex gap-4 max-w-2xl mx-auto">
+          <button
+            onClick={onBack}
+            className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition-colors"
+          >
+            ← Retour
+          </button>
+          <button
+            onClick={() => onSave(partialPayments)}
+            disabled={!isValid}
+            className={`flex-1 px-6 py-3 font-medium rounded-xl transition-colors ${
+              isValid
+                ? 'bg-myconfort-green hover:bg-myconfort-green/90 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {isValid ? '✓ Valider' : '⚠️ Montants incorrects'}
+          </button>
+        </div>
       </div>
     </div>
   );

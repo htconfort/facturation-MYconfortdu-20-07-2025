@@ -35,6 +35,12 @@ interface Produit {
   isPickupOnSite?: boolean; // true = emporter, false = à livrer
 }
 
+export interface PartialPayment {
+  method: 'Carte Bleue' | 'Espèces' | 'Virement' | 'Chèque au comptant';
+  amount: number;
+  personName?: string; // Nom de la personne pour ce paiement
+}
+
 interface PaymentData {
   method:
     | 'Carte Bleue'
@@ -48,6 +54,7 @@ interface PaymentData {
     | 'Alma 2x'
     | 'Alma 3x'
     | 'Alma 4x'
+    | 'Règlement Partiel'
     | '';
   depositRate?: number; // %
   depositAmount?: number;
@@ -56,6 +63,8 @@ interface PaymentData {
   note?: string;
   nombreChequesAVenir?: number;
   nombreFoisAlma?: number; // Nombre de fois pour Alma (2, 3, ou 4)
+  // 💳 Règlement partiel
+  partialPayments?: PartialPayment[]; // Liste des paiements partiels
   // 💳 Mollie payment state
   paymentStatus?: 'idle' | 'processing' | 'succeeded' | 'failed' | 'cancelled';
   paymentId?: string;
