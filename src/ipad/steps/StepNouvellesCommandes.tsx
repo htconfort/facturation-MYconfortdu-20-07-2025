@@ -111,45 +111,33 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
               🚀 Créer une nouvelle commande
             </button>
 
-            {/* Actions secondaires */}
-            <div className='flex gap-4 justify-center'>
+            {/* Action secondaire */}
+            <div className='flex justify-center'>
               <button
                 onClick={() => window.location.reload()}
-                className='px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                           font-medium rounded-lg transition-all'
+                className='px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 
+                           font-bold rounded-xl text-lg transition-all shadow-lg min-h-[56px]'
               >
                 🔄 Recharger l'application
-              </button>
-
-              <button
-                onClick={() => window.open('/', '_blank')}
-                className='px-6 py-3 bg-myconfort-blue hover:bg-myconfort-blue/90 text-white 
-                           font-medium rounded-lg transition-all'
-              >
-                🏠 Accueil (nouvel onglet)
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* 🎯 Boutons navigation flottants */}
-      <div className='absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
+      {/* 🎯 Bouton navigation flottant - aligné avec les autres */}
+      <div className='absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50'>
         <button
           onClick={onPrev}
           disabled={isResetting}
           className={`px-8 py-4 font-bold rounded-xl text-lg transition-all shadow-lg min-h-[56px] ${
             isResetting
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800 transform hover:scale-105'
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
           }`}
         >
           ← Retour au récap
         </button>
-
-        <div className='px-4 py-4 text-sm text-myconfort-dark/60 flex items-center'>
-          Fin du processus de commande
-        </div>
       </div>
     </div>
   );
