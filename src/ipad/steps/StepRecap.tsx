@@ -148,16 +148,55 @@ export default function StepRecapIpadOptimized({
     }
   };
 
-  // Action 2: Imprimer le PDF
+  // Action 2: Imprimer le PDF - Compatible iPad
   const handlePrintInvoice = async () => {
     try {
       setIsLoading(true);
+      console.log('🖨️ Génération PDF pour impression...');
+      
       const pdfBlob = await PDFService.generateInvoicePDF(invoice);
       const url = URL.createObjectURL(pdfBlob);
-      window.open(url, '_blank');
-      setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert pour impression`]);
+      
+      // Detection iPad/Mobile pour méthode d'ouverture appropriée
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isIOS || isMobile) {
+        // Pour iPad/Mobile : créer un lien de téléchargement
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Facture_${invoice.invoiceNumber}_${new Date().toISOString().split('T')[0]}.pdf`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('📱 PDF téléchargé pour iPad/Mobile');
+        setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} téléchargé (iPad)`]);
+      } else {
+        // Pour Desktop : ouvrir dans nouvel onglet
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.focus();
+          console.log('🖥️ PDF ouvert pour impression (Desktop)');
+          setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert pour impression`]);
+        } else {
+          // Fallback si popup bloqué
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.click();
+          console.log('🔗 PDF ouvert via lien (Fallback)');
+          setActionHistory(prev => [...prev, `PDF ${invoice.invoiceNumber} ouvert (fallback)`]);
+        }
+      }
+      
+      // Nettoyer l'URL après un délai
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      
     } catch (error) {
-      console.error('Erreur impression:', error);
+      console.error('❌ Erreur impression:', error);
+      setActionHistory(prev => [...prev, `Erreur: ${error.message || 'Impossible de générer le PDF'}`]);
     } finally {
       setIsLoading(false);
     }
@@ -428,13 +467,25 @@ export default function StepRecapIpadOptimized({
                 <button
                   onClick={handlePrintInvoice}
                   disabled={isLoading}
-                  className="w-full h-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
+                  className="w-full h-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px] active:scale-95"
                 >
-                  <span className="text-lg mb-1">🖨️</span>
-                  <div className="text-center">
-                    <div className="text-sm">Imprimer</div>
-                    <div className="text-xs opacity-80">PDF A4</div>
-                  </div>
+                  {isLoading ? (
+                    <>
+                      <span className="text-lg mb-1 animate-spin">⏳</span>
+                      <div className="text-center">
+                        <div className="text-sm">Génération...</div>
+                        <div className="text-xs opacity-80">PDF en cours</div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg mb-1">🖨️</span>
+                      <div className="text-center">
+                        <div className="text-sm">Imprimer</div>
+                        <div className="text-xs opacity-80">PDF A4</div>
+                      </div>
+                    </>
+                  )}
                 </button>
                 {isPdfGenerated && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
