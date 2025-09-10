@@ -213,7 +213,7 @@ export default function StepRecapIpadOptimized({
           {/* COLONNE 1: Infos Facture + Client */}
           <div className="space-y-3 overflow-hidden">
             {/* Facture */}
-            <div className="bg-white rounded-lg p-3 shadow-md">
+            <div className="bg-white rounded-lg p-3 shadow-md flex-1">
               <h3 className="font-bold text-gray-800 mb-2 text-sm">🧾 Facture</h3>
               <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
@@ -234,7 +234,7 @@ export default function StepRecapIpadOptimized({
             </div>
 
             {/* Client */}
-            <div className="bg-white rounded-lg p-3 shadow-md">
+            <div className="bg-white rounded-lg p-3 shadow-md flex-1">
               <h3 className="font-bold text-gray-800 mb-2 text-sm">👤 Client</h3>
               <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
@@ -251,6 +251,30 @@ export default function StepRecapIpadOptimized({
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tél :</span>
                     <span className="font-medium">{client.phone}</span>
+                  </div>
+                )}
+                {client.address && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Adresse :</span>
+                    <span className="font-medium text-xs">{client.address}</span>
+                  </div>
+                )}
+                {client.addressLine2 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Complément :</span>
+                    <span className="font-medium text-xs">{client.addressLine2}</span>
+                  </div>
+                )}
+                {(client.postalCode || client.city) && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Ville :</span>
+                    <span className="font-medium text-xs">{client.postalCode} {client.city}</span>
+                  </div>
+                )}
+                {client.siret && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">SIRET :</span>
+                    <span className="font-medium text-xs">{client.siret}</span>
                   </div>
                 )}
               </div>
@@ -270,14 +294,34 @@ export default function StepRecapIpadOptimized({
                     <span className="font-medium text-green-600">{paiement.depositAmount.toFixed(2)} €</span>
                   </div>
                 )}
+                {paiement?.nombreChequesAVenir && paiement.nombreChequesAVenir > 0 && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Chèques :</span>
+                      <span className="font-medium text-blue-600">{paiement.nombreChequesAVenir} fois</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Par chèque :</span>
+                      <span className="font-medium text-blue-600">
+                        {((totals.total - (paiement.depositAmount || 0)) / paiement.nombreChequesAVenir).toFixed(2)} €
+                      </span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between pt-1 border-t border-gray-200">
                   <span className="text-gray-600">Livraison :</span>
                   <span className="font-medium">{livraison?.deliveryMethod || 'Non défini'}</span>
                 </div>
-                <div className="flex items-center gap-2 pt-1">
+                {livraison?.deliveryNotes && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Notes :</span>
+                    <span className="font-medium text-xs truncate">{livraison.deliveryNotes}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-1 border-t border-gray-200">
                   {signature?.dataUrl ? (
-                    <div className="flex items-center gap-1">
-                      <div className="w-6 h-4 bg-gray-100 rounded border overflow-hidden">
+                    <div className="flex items-center gap-1 flex-1">
+                      <div className="w-8 h-6 bg-gray-100 rounded border overflow-hidden">
                         <img src={signature.dataUrl} alt="Signature" className="w-full h-full object-contain"/>
                       </div>
                       <span className="text-green-600 font-medium text-xs">✅ Signée</span>
@@ -340,7 +384,7 @@ export default function StepRecapIpadOptimized({
           </div>
 
           {/* COLONNE 3: BOUTONS D'ACTION - TOUJOURS VISIBLES */}
-          <div className="space-y-3 overflow-hidden">
+          <div className="flex flex-col space-y-3 overflow-hidden h-full">
             
             {/* Message d'obligation */}
             {(!isInvoiceSaved || !isEmailSent) && (
@@ -352,18 +396,18 @@ export default function StepRecapIpadOptimized({
             )}
 
             {/* LES 3 BOUTONS ESSENTIELS - TOUJOURS VISIBLES */}
-            <div className="space-y-3">
+            <div className="flex flex-col space-y-3 flex-1">
               
               {/* 1. Enregistrer Facture - OBLIGATOIRE */}
-              <div className="relative">
+              <div className="relative flex-1">
                 <button
                   onClick={handleSaveInvoice}
                   disabled={isLoading}
-                  className="w-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                  className="w-full h-full bg-[#477A0C] hover:bg-[#3A6A0A] disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
                 >
-                  <span className="text-base mb-1">💾</span>
+                  <span className="text-lg mb-1">💾</span>
                   <div className="text-center">
-                    <div className="text-xs">Enregistrer</div>
+                    <div className="text-sm">Enregistrer</div>
                     <div className="text-xs opacity-80">Facture</div>
                   </div>
                 </button>
@@ -380,15 +424,15 @@ export default function StepRecapIpadOptimized({
               </div>
 
               {/* 2. Imprimer PDF A4 */}
-              <div className="relative">
+              <div className="relative flex-1">
                 <button
                   onClick={handlePrintInvoice}
                   disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                  className="w-full h-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
                 >
-                  <span className="text-base mb-1">🖨️</span>
+                  <span className="text-lg mb-1">🖨️</span>
                   <div className="text-center">
-                    <div className="text-xs">Imprimer</div>
+                    <div className="text-sm">Imprimer</div>
                     <div className="text-xs opacity-80">PDF A4</div>
                   </div>
                 </button>
@@ -400,15 +444,15 @@ export default function StepRecapIpadOptimized({
               </div>
 
               {/* 3. Envoyer Email - OBLIGATOIRE */}
-              <div className="relative">
+              <div className="relative flex-1">
                 <button
                   onClick={handleSendEmail}
                   disabled={isLoading || !client.email}
-                  className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center h-16"
+                  className="w-full h-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-xl font-bold transition-colors shadow-lg flex flex-col items-center justify-center min-h-[60px]"
                 >
-                  <span className="text-base mb-1">📧</span>
+                  <span className="text-lg mb-1">📧</span>
                   <div className="text-center">
-                    <div className="text-xs">Envoyer</div>
+                    <div className="text-sm">Envoyer</div>
                     <div className="text-xs opacity-80">Email</div>
                   </div>
                 </button>
