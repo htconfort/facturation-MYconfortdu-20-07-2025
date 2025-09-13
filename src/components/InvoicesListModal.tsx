@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FileText,
   Eye,
@@ -17,6 +17,8 @@ import { Modal } from './ui/Modal';
 import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 import { SimpleModalPreview } from './SimpleModalPreview';
+import { fullSyncInvoices } from '../services/invoiceSyncService';
+import { loadInvoices, saveInvoices } from '../utils/storage';
 
 interface InvoicesListModalProps {
   isOpen: boolean;
@@ -44,51 +46,27 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [visibleInvoices, setVisibleInvoices] = useState<Invoice[]>(invoices);
 
-  // Fonction de synchronisation simple
+  // Suivre les changements de props pour l'initialisation/rafraîchissement
+  useEffect(() => {
+    setVisibleInvoices(invoices);
+  }, [invoices]);
+
+  // Synchronisation complète: push → pull → merge + mise à jour UI/local
   const handleSyncInvoices = async () => {
     setIsSyncing(true);
     try {
-      // Récupérer les factures depuis localStorage
-      const localInvoices = localStorage.getItem('myconfortInvoices');
-      if (localInvoices) {
-        const parsedInvoices: Invoice[] = JSON.parse(localInvoices);
-        
-        // Envoyer chaque facture vers N8N pour synchronisation
-        for (const invoice of parsedInvoices) {
-          const payload = {
-            action: 'sync_invoice',
-            invoice_data: {
-              numero_facture: invoice.invoiceNumber,
-              date_facture: invoice.invoiceDate,
-              client_nom: invoice.clientName,
-              client_email: invoice.clientEmail,
-              montant_ttc: invoice.montantTTC,
-              lieu_evenement: invoice.eventLocation,
-              conseiller: invoice.advisorName,
-              statut: invoice.signature ? 'signee' : 'en_attente',
-              device_id: navigator.userAgent,
-            }
-          };
-
-          try {
-            await fetch('https://hook.eu2.make.com/3n1ysii6g7rqy2lkmzdjbqn3d3nh30kr', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload),
-            });
-          } catch (error) {
-            console.warn('Erreur sync pour facture:', invoice.invoiceNumber, error);
-          }
-        }
-        
-        alert('🔄 Synchronisation terminée ! Les factures ont été envoyées au serveur.');
+      const local = loadInvoices();
+      const result = await fullSyncInvoices(local);
+      if (result.success) {
+        saveInvoices(result.mergedInvoices);
+        setVisibleInvoices(result.mergedInvoices);
+      } else {
+        console.error('Échec synchronisation:', result.message);
       }
     } catch (error) {
       console.error('Erreur de synchronisation:', error);
-      alert('❌ Erreur lors de la synchronisation');
     } finally {
       setIsSyncing(false);
     }
@@ -96,7 +74,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
 
   // Filtrer et trier les factures
   const filteredAndSortedInvoices = React.useMemo(() => {
-    const filtered = invoices.filter(invoice => {
+    const filtered = visibleInvoices.filter(invoice => {
       const matchesSearch =
         invoice.invoiceNumber
           .toLowerCase()
@@ -166,7 +144,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [invoices, searchTerm, sortBy, sortOrder, filterStatus]);
+  }, [visibleInvoices, searchTerm, sortBy, sortOrder, filterStatus]);
 
   const handlePreviewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -328,7 +306,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
               <tbody>
                 {filteredAndSortedInvoices.map((invoice, index) => {
                   const total = calculateInvoiceTotal(invoice);
-                  const originalIndex = invoices.findIndex(
+                  const originalIndex = visibleInvoices.findIndex(
                     inv =>
                       inv.invoiceNumber === invoice.invoiceNumber &&
                       inv.invoiceDate === invoice.invoiceDate
@@ -416,7 +394,9 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                         )}
                       </td>
                       <td className='border border-gray-300 px-4 py-3 text-center'>
-                        {invoice.emailSent ? (
+                        {(
+                          (invoice as unknown as { emailSent?: boolean }).emailSent
+                        ) ? (
                           <div className='flex flex-col items-center space-y-1'>
                             <span
                               className='text-2xl'
@@ -424,10 +404,14 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                             >
                               ✅
                             </span>
-                            {invoice.emailSentDate && (
+                            {(
+                              (invoice as unknown as { emailSentDate?: string })
+                                .emailSentDate
+                            ) && (
                               <span className='text-xs text-green-600 font-semibold'>
                                 {new Date(
-                                  invoice.emailSentDate
+                                  (invoice as unknown as { emailSentDate: string })
+                                    .emailSentDate
                                 ).toLocaleDateString('fr-FR')}
                               </span>
                             )}

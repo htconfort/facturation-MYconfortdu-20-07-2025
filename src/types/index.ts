@@ -92,6 +92,10 @@ export interface Invoice {
   isSigned: boolean;
   signatureDate?: string;
 
+  // Suivi email (optionnel)
+  emailSent?: boolean;
+  emailSentDate?: string;
+
   // Notes et conseiller
   invoiceNotes: string;
   advisorName: string;

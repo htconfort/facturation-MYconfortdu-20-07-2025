@@ -8,6 +8,7 @@ import { ClientListModal } from './components/ClientListModal';
 import { InvoicesListModal } from './components/InvoicesListModal';
 import { ProductsListModal } from './components/ProductsListModal';
 import { QuickInvoiceModal } from './components/QuickInvoiceModal';
+import { InvoicesSyncTab } from './components/InvoicesSyncTab';
 import PDFPreviewModal from './components/PDFPreviewModal';
 import { PDFGuideModal } from './components/PDFGuideModal';
 import { GoogleDriveModal } from './components/GoogleDriveModal';
@@ -94,6 +95,7 @@ function MainApp() {
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showProductsList, setShowProductsList] = useState(false);
   const [showQuickInvoice, setShowQuickInvoice] = useState(false);
+  const [showSyncTab, setShowSyncTab] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [showPDFGuide, setShowPDFGuide] = useState(false);
   const [showGoogleDriveConfig, setShowGoogleDriveConfig] = useState(false);
@@ -889,6 +891,7 @@ function MainApp() {
         onShowInvoices={() => setShowInvoicesList(true)}
         onShowProducts={() => setShowProductsList(true)}
         onShowQuickInvoice={() => setShowQuickInvoice(true)}
+        onShowSync={() => setShowSyncTab(true)}
         onShowGoogleDrive={handleSendPDF}
         onShowDebug={() => setShowDebugCenter(true)}
         onGoToIpad={() => navigate('/ipad?step=facture')}
@@ -1235,6 +1238,13 @@ function MainApp() {
         invoices={invoices}
         onLoadInvoice={handleLoadInvoice}
         onDeleteInvoice={handleDeleteInvoice}
+      />
+
+      <InvoicesSyncTab
+        isOpen={showSyncTab}
+        onClose={() => setShowSyncTab(false)}
+        invoices={invoices}
+        onInvoicesUpdated={setInvoices}
       />
 
       <ProductsListModal
