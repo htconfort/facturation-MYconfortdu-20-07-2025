@@ -1,8 +1,20 @@
 import { Invoice } from '../types';
 
-// Configuration N8N pour la synchronisation des factures
-const N8N_SYNC_URL = 'https://myconfort.n8n.cloud/webhook/sync-factures';
-const N8N_GET_FACTURES_URL = 'https://myconfort.n8n.cloud/webhook/get-factures';
+// Configuration N8N pour la synchronisation des factures (via variables d'environnement Vite)
+const N8N_SYNC_URL = import.meta.env.VITE_N8N_SYNC_URL as string | undefined;
+const N8N_GET_FACTURES_URL = import.meta.env.VITE_N8N_GET_FACTURES_URL as string | undefined;
+
+function assertUrls(): void {
+  if (!N8N_SYNC_URL || !N8N_GET_FACTURES_URL) {
+    const message =
+      'URLs N8N manquantes: configure VITE_N8N_SYNC_URL et VITE_N8N_GET_FACTURES_URL';
+    console.error(message, {
+      VITE_N8N_SYNC_URL: N8N_SYNC_URL,
+      VITE_N8N_GET_FACTURES_URL: N8N_GET_FACTURES_URL,
+    });
+    throw new Error(message);
+  }
+}
 
 export interface SyncResponse {
   success: boolean;
@@ -13,9 +25,10 @@ export interface SyncResponse {
 // Envoyer toutes les factures locales vers N8N pour centralisation
 export const syncLocalInvoicesToCloud = async (invoices: Invoice[]): Promise<SyncResponse> => {
   try {
+    assertUrls();
     console.log('🔄 Synchronisation des factures locales vers le cloud...', invoices.length);
     
-    const response = await fetch(N8N_SYNC_URL, {
+    const response = await fetch(N8N_SYNC_URL!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,11 +56,12 @@ export const syncLocalInvoicesToCloud = async (invoices: Invoice[]): Promise<Syn
       message: `${invoices.length} factures synchronisées avec succès`,
       data: result
     };
-  } catch (error) {
-    console.error('❌ Erreur lors de la synchronisation:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erreur lors de la synchronisation:', message);
     return {
       success: false,
-      message: `Erreur de synchronisation: ${error.message}`,
+      message: `Erreur de synchronisation: ${message}`,
     };
   }
 };
@@ -55,9 +69,10 @@ export const syncLocalInvoicesToCloud = async (invoices: Invoice[]): Promise<Syn
 // Récupérer toutes les factures depuis N8N
 export const getAllInvoicesFromCloud = async (): Promise<SyncResponse> => {
   try {
+    assertUrls();
     console.log('📥 Récupération des factures depuis le cloud...');
     
-    const response = await fetch(N8N_GET_FACTURES_URL, {
+    const response = await fetch(N8N_GET_FACTURES_URL!, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -76,11 +91,12 @@ export const getAllInvoicesFromCloud = async (): Promise<SyncResponse> => {
       message: `${result.invoices?.length || 0} factures récupérées du cloud`,
       data: result.invoices || []
     };
-  } catch (error) {
-    console.error('❌ Erreur lors de la récupération:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erreur lors de la récupération:', message);
     return {
       success: false,
-      message: `Erreur de récupération: ${error.message}`,
+      message: `Erreur de récupération: ${message}`,
     };
   }
 };
@@ -155,11 +171,12 @@ export const fullSyncInvoices = async (localInvoices: Invoice[]): Promise<{
       mergedInvoices
     };
 
-  } catch (error) {
-    console.error('❌ Erreur lors de la synchronisation complète:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erreur lors de la synchronisation complète:', message);
     return {
       success: false,
-      message: `Erreur de synchronisation: ${error.message}`,
+      message: `Erreur de synchronisation: ${message}`,
       mergedInvoices: localInvoices // Retourner au moins les factures locales
     };
   }
@@ -180,9 +197,10 @@ function getDeviceId(): string {
 // Envoyer une seule facture vers N8N (pour les nouvelles factures)
 export const syncSingleInvoiceToCloud = async (invoice: Invoice): Promise<SyncResponse> => {
   try {
+    assertUrls();
     console.log('📤 Envoi de la facture vers le cloud:', invoice.invoiceNumber);
     
-    const response = await fetch(N8N_SYNC_URL, {
+    const response = await fetch(N8N_SYNC_URL!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -209,11 +227,12 @@ export const syncSingleInvoiceToCloud = async (invoice: Invoice): Promise<SyncRe
       message: 'Facture synchronisée avec succès',
       data: result
     };
-  } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi de la facture:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erreur lors de l\'envoi de la facture:', message);
     return {
       success: false,
-      message: `Erreur d'envoi: ${error.message}`,
+      message: `Erreur d'envoi: ${message}`,
     };
   }
 };
