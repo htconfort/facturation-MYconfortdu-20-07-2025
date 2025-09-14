@@ -2,6 +2,24 @@
 
 Date: 2025-09-14
 
+## Version vulgarisée (grand public)
+- À quoi ça sert: le bouton bleu « Synchro » met à jour, en un clic, la liste de TOUTES les factures réalisées sur les iPad d’un même point de vente (mêmes réglages). Peu importe quelle vendeuse a créé la facture, tout le monde voit la liste complète et à jour.
+- Où voir le résultat: ouvrez le bouton noir « Factures » dans le haut de l’écran. La liste affichée est réconciliée (sans doublons) après chaque synchro.
+- Comment l’utiliser (3 étapes simples):
+  1) Appuyez sur le bouton bleu « Sync » dans la barre du haut.
+  2) Dans la fenêtre qui s’ouvre, appuyez sur « Synchroniser toutes les factures ».
+  3) Quand c’est terminé, fermez la fenêtre et appuyez sur le bouton noir « Factures » pour voir la liste à jour.
+- Ce que la synchro fait concrètement:
+  - Envoie vos nouvelles factures locales vers le serveur sécurisé (si internet OK).
+  - Récupère toutes les factures du magasin (celles des autres iPad aussi).
+  - Range et fusionne proprement (pas de doublons; on garde la version la plus récente de chaque facture).
+- Conditions pour que ça marche:
+  - Tous les iPad du magasin doivent utiliser la même adresse de synchronisation (réglée par l’admin).
+  - Il faut une connexion internet au moment de lancer la synchro.
+- En cas de souci:
+  - Si internet est coupé: l’envoi peut être repoussé, mais la récupération se fera dès que la connexion revient.
+  - Si un message d’erreur s’affiche, relancez la synchro plus tard; vos factures locales restent sauvegardées.
+
 ## Emplacement UI
 - Header principal: bouton « Sync » (bleu) ajouté dans `src/components/Header.tsx` via prop `onShowSync`.
 - Composant modal dédié: `src/components/InvoicesSyncTab.tsx`.
