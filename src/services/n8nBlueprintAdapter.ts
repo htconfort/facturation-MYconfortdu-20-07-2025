@@ -133,7 +133,7 @@ export class N8nBlueprintAdapter {
         invoice.paymentMethod &&
         invoice.paymentMethod.toLowerCase().includes('virement')
           ? `<div style="margin-top: 20px; padding: 15px; background-color: #e1f5fe; border: 1px solid #2563eb; border-radius: 8px;">
-             <h3 style="margin: 0 0 10px 0; color: #2563eb; font-size: 14px;">📋 Coordonnées bancaires pour votre virement</h3>
+             <h3 style="margin: 0 0 10px 0; color: #ffffff; font-size: 14px;">📋 Coordonnées bancaires pour votre virement</h3>
              <div style="font-size: 12px; line-height: 1.4;">
                <div><strong>Bénéficiaire :</strong> MYCONFORT</div>
                <div><strong>IBAN :</strong> FR76 1660 7000 1708 1216 3980 964</div>
