@@ -468,9 +468,10 @@ export default function StepProduits({
                           />
                         </div>
                       </td>
-                      <td className='px-1 py-2 text-center'>
+                      <td className='px-2 py-3 text-center'>
                         <select
-                          className={`w-16 px-1 py-1 text-xs font-medium border rounded font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 ${
+                          aria-label="Mode de livraison"
+                          className={`min-w-[180px] px-4 py-3 text-base font-medium border rounded-xl font-manrope transition-colors duration-150 focus:outline-none focus:ring-0 min-h-[56px] ${
                             p.isPickupOnSite === undefined
                               ? 'border-yellow-500 bg-yellow-100 text-yellow-800 focus:border-yellow-600'
                               : p.isPickupOnSite
@@ -496,18 +497,18 @@ export default function StepProduits({
                             }
                           }}
                         >
-                          <option value='' className='text-black font-medium'>
+                          <option value='' className='text-black font-medium text-base'>
                             ⚠️ À choisir
                           </option>
                           <option
                             value='livrer'
-                            className='text-black font-medium'
+                            className='text-black font-medium text-base'
                           >
                             📦 À livrer
                           </option>
                           <option
                             value='emporter'
-                            className='text-black font-medium'
+                            className='text-black font-medium text-base'
                           >
                             🚗 Emporter
                           </option>

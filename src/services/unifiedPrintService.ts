@@ -53,6 +53,12 @@ export class UnifiedPrintService {
   }
 
   private static generateModernPrint(invoice: Invoice, total: number): string {
+    // Coordonnées bancaires (variables d'environnement avec valeurs par défaut fournies)
+    const companyName = (import.meta as any).env?.VITE_COMPANY_NAME || 'MYCONFORT';
+    const companyIban = (import.meta as any).env?.VITE_COMPANY_IBAN || 'FR76 1660 7000 1708 1216 3980 964';
+    const companyBic = (import.meta as any).env?.VITE_COMPANY_BIC || 'CCBPFRPPPPG';
+    const companyBank = (import.meta as any).env?.VITE_COMPANY_BANK || 'Banque Populaire du Sud';
+
     return `
       <!DOCTYPE html>
       <html>
@@ -562,10 +568,10 @@ export class UnifiedPrintService {
                 <div class="rib-section">
                   <div class="rib-header">📋 Coordonnées bancaires pour virement</div>
                   <div class="rib-info">
-                    <div><strong>Bénéficiaire:</strong> MYCONFORT</div>
-                    <div><strong>IBAN:</strong> FR76 1660 7000 1708 1216 3980 964</div>
-                    <div><strong>BIC:</strong> CCBPFRPPPPG</div>
-                    <div><strong>Banque:</strong> Banque Populaire du Sud</div>
+                    <div><strong>Bénéficiaire:</strong> ${companyName}</div>
+                    <div><strong>IBAN:</strong> ${companyIban}</div>
+                    <div><strong>BIC:</strong> ${companyBic}</div>
+                    <div><strong>Banque:</strong> ${companyBank}</div>
                     <div style="margin-top: 4px; font-style: italic; color: #666; font-size: 10px;">
                       Merci d'indiquer le numéro de facture en référence
                     </div>

@@ -1,19 +1,27 @@
 import { Invoice } from '../types';
 
 // Configuration N8N pour la synchronisation des factures (via variables d'environnement Vite)
-const N8N_SYNC_URL = import.meta.env.VITE_N8N_SYNC_URL as string | undefined;
-const N8N_GET_FACTURES_URL = import.meta.env.VITE_N8N_GET_FACTURES_URL as string | undefined;
+const N8N_SYNC_URL = import.meta.env.VITE_N8N_SYNC_URL as string | undefined; // push
+const N8N_GET_FACTURES_URL = import.meta.env.VITE_N8N_GET_FACTURES_URL as string | undefined; // pull
 
-function assertUrls(): void {
-  if (!N8N_SYNC_URL || !N8N_GET_FACTURES_URL) {
-    const message =
-      'URLs N8N manquantes: configure VITE_N8N_SYNC_URL et VITE_N8N_GET_FACTURES_URL';
-    console.error(message, {
-      VITE_N8N_SYNC_URL: N8N_SYNC_URL,
-      VITE_N8N_GET_FACTURES_URL: N8N_GET_FACTURES_URL,
-    });
+function getSyncUrlOrThrow(): string {
+  const url = N8N_SYNC_URL || N8N_GET_FACTURES_URL;
+  if (!url) {
+    const message = 'URL de synchronisation N8N manquante: configure VITE_N8N_SYNC_URL (ou VITE_N8N_GET_FACTURES_URL)';
+    console.error(message);
     throw new Error(message);
   }
+  return url;
+}
+
+function getPullUrlOrThrow(): string {
+  const url = N8N_GET_FACTURES_URL || N8N_SYNC_URL;
+  if (!url) {
+    const message = 'URL de récupération N8N manquante: configure VITE_N8N_GET_FACTURES_URL (ou VITE_N8N_SYNC_URL)';
+    console.error(message);
+    throw new Error(message);
+  }
+  return url;
 }
 
 export interface SyncResponse {
@@ -25,10 +33,10 @@ export interface SyncResponse {
 // Envoyer toutes les factures locales vers N8N pour centralisation
 export const syncLocalInvoicesToCloud = async (invoices: Invoice[]): Promise<SyncResponse> => {
   try {
-    assertUrls();
+    const syncUrl = getSyncUrlOrThrow();
     console.log('🔄 Synchronisation des factures locales vers le cloud...', invoices.length);
     
-    const response = await fetch(N8N_SYNC_URL!, {
+    const response = await fetch(syncUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,10 +77,10 @@ export const syncLocalInvoicesToCloud = async (invoices: Invoice[]): Promise<Syn
 // Récupérer toutes les factures depuis N8N
 export const getAllInvoicesFromCloud = async (): Promise<SyncResponse> => {
   try {
-    assertUrls();
+    const getUrl = getPullUrlOrThrow();
     console.log('📥 Récupération des factures depuis le cloud...');
     
-    const response = await fetch(N8N_GET_FACTURES_URL!, {
+    const response = await fetch(getUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -161,8 +169,15 @@ export const fullSyncInvoices = async (localInvoices: Invoice[]): Promise<{
       throw new Error(cloudResult.message);
     }
 
-    // 3. Fusionner les données
-    const mergedInvoices = mergeInvoices(localInvoices, cloudResult.data);
+    // 3. Normaliser les factures cloud au format de l'app
+    const normalizedCloudInvoices: Invoice[] = (Array.isArray(cloudResult.data)
+      ? cloudResult.data
+      : [])
+      .map((inv: any) => normalizeCloudInvoice(inv))
+      .filter(Boolean) as unknown as Invoice[];
+
+    // 4. Fusionner les données
+    const mergedInvoices = mergeInvoices(localInvoices, normalizedCloudInvoices);
 
     console.log('🎉 Synchronisation complète réussie!');
     return {
@@ -194,13 +209,72 @@ function getDeviceId(): string {
   return deviceId;
 }
 
+// Normalise une facture venant du workflow N8N (client imbriqué, champs différents)
+function normalizeCloudInvoice(raw: any): Invoice | null {
+  if (!raw) return null;
+  const client = raw.client || {};
+  const invoiceNumber: string = String(raw.invoiceNumber || raw.id || '').trim();
+  if (!invoiceNumber) return null;
+
+  const invoiceDate: string = String(raw.invoiceDate || raw.createdAt || new Date().toISOString()).slice(0, 10);
+
+  const montantTTC: number = Number(raw.totalTTC ?? raw.total_ttc ?? 0);
+  const montantHT: number = Number(raw.totalHT ?? raw.total_ht ?? 0);
+  const montantTVA: number = Number(raw.montantTVA ?? raw.vat ?? 0);
+  const acompte: number = Number(raw.deposit ?? raw.acompte ?? 0);
+  const montantRestant: number = Number(raw.remaining ?? raw.montant_restant ?? 0);
+
+  const createdAt: string = String(raw.createdAt || invoiceDate);
+  const updatedAt: string = String(raw.lastUpdate || raw.updatedAt || createdAt);
+
+  const out: Invoice = {
+    invoiceNumber,
+    invoiceDate,
+    eventLocation: String(raw.eventLocation || ''),
+    clientName: String(raw.clientName || client.name || ''),
+    clientEmail: String(raw.clientEmail || client.email || ''),
+    clientPhone: String(raw.clientPhone || client.phone || ''),
+    clientAddress: String(raw.clientAddress || client.address || ''),
+    clientAddressLine2: String(client.addressLine2 || ''),
+    clientPostalCode: String(raw.clientPostalCode || client.postalCode || ''),
+    clientCity: String(raw.clientCity || client.city || ''),
+    clientHousingType: String(raw.clientHousingType || client.housingType || ''),
+    clientDoorCode: String(raw.clientDoorCode || client.doorCode || ''),
+    clientSiret: String(raw.clientSiret || ''),
+    products: Array.isArray(raw.products) ? raw.products : [],
+    montantHT,
+    montantTTC,
+    montantTVA,
+    montantRemise: Number(raw.montantRemise ?? 0),
+    taxRate: Number(raw.taxRate ?? 20),
+    paymentMethod: String(raw.paymentMethod || ''),
+    montantAcompte: acompte,
+    depositPaymentMethod: String(raw.depositPaymentMethod || ''),
+    montantRestant,
+    deliveryMethod: String(raw.deliveryMethod || ''),
+    deliveryAddress: String(raw.deliveryAddress || ''),
+    deliveryNotes: String(raw.deliveryNotes || ''),
+    signature: String(raw.signature || ''),
+    isSigned: Boolean(raw.isSigned || false),
+    signatureDate: raw.signatureDate ? String(raw.signatureDate) : undefined,
+    invoiceNotes: String(raw.invoiceNotes || ''),
+    advisorName: String(raw.advisor || raw.advisorName || ''),
+    termsAccepted: Boolean(raw.termsAccepted || false),
+    nombreChequesAVenir: Number(raw.nombreChequesAVenir ?? 0),
+    createdAt,
+    updatedAt,
+  };
+
+  return out;
+}
+
 // Envoyer une seule facture vers N8N (pour les nouvelles factures)
 export const syncSingleInvoiceToCloud = async (invoice: Invoice): Promise<SyncResponse> => {
   try {
-    assertUrls();
+    const syncUrl = getSyncUrlOrThrow();
     console.log('📤 Envoi de la facture vers le cloud:', invoice.invoiceNumber);
     
-    const response = await fetch(N8N_SYNC_URL!, {
+    const response = await fetch(syncUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

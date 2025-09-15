@@ -554,10 +554,10 @@ export class CompactPrintService {
                   <h4 style="margin: 8px 0 4px 0; font-size: 11px; font-weight: bold; color: #2563eb;">COORDONNÉES BANCAIRES</h4>
                   <div class="rib-info">
                     <div style="font-size: 9px; line-height: 1.3;">
-                      <div><strong>Bénéficiaire:</strong> MYCONFORT</div>
-                      <div><strong>IBAN:</strong> FR76 1660 7000 1708 1216 3980 964</div>
-                      <div><strong>BIC:</strong> CCBPFRPPPPG</div>
-                      <div><strong>Banque:</strong> Banque Populaire du Sud</div>
+                      <div><strong>Bénéficiaire:</strong> ${(import.meta as any).env?.VITE_COMPANY_NAME || 'MYCONFORT'}</div>
+                      <div><strong>IBAN:</strong> ${(import.meta as any).env?.VITE_COMPANY_IBAN || 'FR76 1660 7000 1708 1216 3980 964'}</div>
+                      <div><strong>BIC:</strong> ${(import.meta as any).env?.VITE_COMPANY_BIC || 'CCBPFRPPPPG'}</div>
+                      <div><strong>Banque:</strong> ${(import.meta as any).env?.VITE_COMPANY_BANK || 'Banque Populaire du Sud'}</div>
                       <div style="margin-top: 4px; font-style: italic; color: #666;">
                         Merci d'indiquer le numéro de facture en référence
                       </div>

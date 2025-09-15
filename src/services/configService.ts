@@ -26,6 +26,9 @@ interface AppConfig {
     email: string;
     address: string;
     siret: string;
+    iban?: string;
+    bic?: string;
+    bankName?: string;
   };
 
   // 📄 PDF
@@ -89,6 +92,9 @@ class ConfigService {
         email: import.meta.env.VITE_COMPANY_EMAIL || 'contact@htconfort.com',
         address: import.meta.env.VITE_COMPANY_ADDRESS || 'Adresse à configurer',
         siret: import.meta.env.VITE_COMPANY_SIRET || 'SIRET à configurer',
+        iban: import.meta.env.VITE_COMPANY_IBAN || '',
+        bic: import.meta.env.VITE_COMPANY_BIC || '',
+        bankName: import.meta.env.VITE_COMPANY_BANK || '',
       },
 
       pdf: {

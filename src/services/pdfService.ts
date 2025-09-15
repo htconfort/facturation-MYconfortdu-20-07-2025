@@ -53,8 +53,8 @@ const COMPANY = {
   email: 'htconfort@gmail.com',
   website: 'htconfort.com',
   siret: '824 313 530 00027',
-  iban: 'FR76 1234 5678 9012 3456 7890 123',
-  bic: 'PSSTFRPPXXX',
+  iban: (import.meta as any).env?.VITE_COMPANY_IBAN || 'FR76 1660 7000 1708 1216 3980 964',
+  bic: (import.meta as any).env?.VITE_COMPANY_BIC || 'CCBPFRPPPPG',
 };
 
 /** —— CGV 16 articles (texte légal officiel MYCONFORT - 10 septembre 2025) —— */
