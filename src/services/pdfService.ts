@@ -5,6 +5,7 @@ import autoTableImport from 'jspdf-autotable';
 const autoTable = autoTableImport as unknown as (doc: jsPDF, opts: any) => void;
 
 import type { Invoice } from '../types';
+import { calculateProductTotal } from '../utils/calculations';
 
 export type PDFBlob = Blob;
 
@@ -356,23 +357,30 @@ export const PDFService = {
     ].filter(Boolean);
     cData.forEach((l, i) => doc.text(l, clientX, 40 + i * 4.6));
 
-    // Tableau Produits
+    // Tableau Produits avec colonne Remise et totaux remisés
     const body = (invoiceData.products || []).map(p => {
       const designation = p.name || p.category || '—';
       const qty = Number(p.quantity ?? 0);
       const unitTTC = Number(p.priceTTC ?? 0);
-      const totalTTC = qty * unitTTC;
+      const discount = Number(p.discount || 0);
+      const discountType = p.discountType === 'amount' ? 'fixed' : 'percent';
+      const totalTTC = calculateProductTotal(qty, unitTTC, discount, discountType);
+      const discountDisplay =
+        discount > 0
+          ? `${discount}${discountType === 'percent' ? '%' : '€'}`
+          : '-';
       return [
         designation,
         String(qty),
         unitTTC.toFixed(2) + ' €',
+        discountDisplay,
         totalTTC.toFixed(2) + ' €',
       ];
     });
 
     autoTable(doc, {
       startY: 35 + companyLines.length * 4.6 + 20,
-      head: [['Désignation', 'Qté', 'PU TTC', 'Total TTC']],
+      head: [['Désignation', 'Qté', 'PU TTC', 'Remise', 'Total TTC']],
       body,
       theme: 'grid',
       headStyles: {
@@ -385,7 +393,8 @@ export const PDFService = {
       columnStyles: {
         1: { halign: 'center' },
         2: { halign: 'right' },
-        3: { halign: 'right' },
+        3: { halign: 'center' },
+        4: { halign: 'right' },
       },
       // Footer à chaque page rendue par autotable
       didDrawPage: () => {
@@ -399,6 +408,15 @@ export const PDFService = {
     const afterTableY = (doc as any).lastAutoTable?.finalY ?? 120;
 
     // Totaux (colonne droite)
+    const totalDiscount = (invoiceData.products || []).reduce((sum, p) => {
+      const qty = Number(p.quantity || 0);
+      const unitTTC = Number(p.priceTTC || 0);
+      const discount = Number((p as any).discount || 0);
+      const discountType = (p as any).discountType === 'amount' ? 'fixed' : 'percent';
+      const original = qty * unitTTC;
+      const discounted = calculateProductTotal(qty, unitTTC, discount, discountType);
+      return sum + (original - discounted);
+    }, 0);
     autoTable(doc, {
       startY: afterTableY + 6,
       body: [
@@ -414,6 +432,18 @@ export const PDFService = {
       columnStyles: { 0: { halign: 'left' } },
       margin: { left: w - 100 - MARGIN, right: MARGIN },
     });
+
+    // Affichage informatif de la remise totale appliquée
+    if (totalDiscount > 0) {
+      autoTable(doc, {
+        startY: ((doc as any).lastAutoTable?.finalY ?? afterTableY + 6) + 2,
+        body: [['Remise totale appliquée', `- ${totalDiscount.toFixed(2)} €`]],
+        theme: 'plain',
+        styles: { fontSize: 9, halign: 'right', textColor: [71, 122, 12] },
+        columnStyles: { 0: { halign: 'left' } },
+        margin: { left: w - 100 - MARGIN, right: MARGIN },
+      });
+    }
 
     let y = (doc as any).lastAutoTable.finalY + 8;
     // Mode de règlement
