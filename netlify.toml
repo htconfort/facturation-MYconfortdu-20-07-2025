@@ -8,6 +8,13 @@
   CI = "false"
   GENERATE_SOURCEMAP = "false"
 
+# Proxy N8N (évite CORS et fiabilise l'envoi email)
+[[redirects]]
+  from = "/api/n8n/*"
+  to = "/.netlify/functions/n8n-proxy/:splat"
+  status = 200
+  force = true
+
 # Headers en prod longue durée pour les assets
 [[headers]]
   for = "/assets/*"
