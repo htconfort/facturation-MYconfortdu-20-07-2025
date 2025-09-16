@@ -138,8 +138,8 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
           <div className='border-2 border-gray-300 rounded mb-4 bg-white'>
             <canvas
               ref={canvasRef}
-              className='w-full h-48 touch-none'
-              style={{ touchAction: 'none' }}
+              id='signatureCanvas'
+              className='w-full h-48 touch-none select-none pointer-events-auto'
               onTouchStart={e => e.stopPropagation()}
               onTouchMove={e => e.stopPropagation()}
               onTouchEnd={e => e.stopPropagation()}
