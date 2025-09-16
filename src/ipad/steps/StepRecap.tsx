@@ -152,6 +152,7 @@ export default function StepRecapIpadOptimized({
         saveInvoice(invoice);
         console.log('POSTSIG:saved');
         // Génération PDF (optimisation signature journale en interne)
+        console.log('POSTSIG:optimized (via PDFService)');
         const pdfBlob = await PDFService.generateInvoicePDF(invoice);
         console.log('POSTSIG:pdf', { size: pdfBlob.size });
         setActionHistory(prev => [...prev, `Post-signature: PDF prêt (${pdfBlob.size}o)`]);
