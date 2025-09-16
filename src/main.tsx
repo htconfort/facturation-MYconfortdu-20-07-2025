@@ -1,3 +1,7 @@
+import { ensureFreshBuild } from './versionGuard';
+import { BUILD_COMMIT } from './buildInfo';
+ensureFreshBuild(BUILD_COMMIT);
+
 console.log('### BUILD LIVE ###', new Date().toISOString())
 window.addEventListener('error', e => console.error('[GLOBAL ERROR]', e.message))
 window.addEventListener('unhandledrejection', e => console.error('[UNHANDLED]', e.reason))
