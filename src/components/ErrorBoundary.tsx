@@ -65,7 +65,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 inquiétez pas, vos données sont sauvegardées.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left'>
                   <summary className='cursor-pointer font-medium text-red-800 mb-2'>
                     Détails techniques (développement)

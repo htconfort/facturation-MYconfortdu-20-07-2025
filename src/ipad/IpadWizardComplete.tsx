@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useInvoiceWizard, type WizardStep } from '../store/useInvoiceWizard';
 import StepsNavigator from '../navigation/StepsNavigator';
@@ -33,14 +33,25 @@ export default function IpadWizardComplete() {
   const setStep = useInvoiceWizard(s => s.setStep);
   const step = useInvoiceWizard(s => s.step);
   const reset = useInvoiceWizard(s => s.reset);
+  const getCurrentStepIndex = useCallback(() => steps.indexOf(step), [step]);
+  const [hydrated, setHydrated] = useState(false);
 
+  // Hydrate une fois depuis l'URL, puis l'état devient maître
   useEffect(() => {
-    setStep(urlStep);
-    
-    if (urlStep === 'facture' && search.includes('step=facture')) {
-      reset();
+    if (!hydrated) {
+      setStep(urlStep);
+      if (urlStep === 'facture' && search.includes('step=facture')) {
+        reset();
+      }
+      setHydrated(true);
     }
-  }, [urlStep, setStep, reset, search]);
+  }, [hydrated, urlStep, setStep, reset, search]);
+
+  // Sync URL depuis l'état (remplace l’historique)
+  useEffect(() => {
+    if (!hydrated) return;
+    navigate(`/ipad?step=${step}`, { replace: true });
+  }, [step, hydrated, navigate]);
 
   return (
     <div data-ui="ipad-wizard-complete" className='relative w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
@@ -50,10 +61,10 @@ export default function IpadWizardComplete() {
           <WizardSurface
             step={step}
             onGo={dir => {
-              const idx = steps.indexOf(step);
+              const idx = getCurrentStepIndex();
               const next = steps[idx + (dir === 'next' ? 1 : -1)];
               if (!next) return;
-              navigate(`/ipad?step=${next}`);
+              setStep(next); // état maître -> URL sera mise à jour par l'effet ci-dessus
             }}
             onQuit={() => navigate('/')}
           />
@@ -133,7 +144,8 @@ function WizardSurface({
     if (validation.canProceed) {
       onGo('next');
     } else {
-      alert(validation.message || 'Veuillez compléter les champs requis');
+      // Pas d'alert(), laisser l’UI des steps gérer l’erreur (toast/modal)
+      console.warn('Validation échouée:', validation.message || 'Champs requis manquants');
     }
   }, [validateCurrentStep, onGo]);
 
