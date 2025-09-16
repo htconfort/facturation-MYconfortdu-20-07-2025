@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { X, RotateCcw, Check } from 'lucide-react';
+import { useSingleFlight } from '../hooks/useSingleFlight';
 
 interface SignaturePadProps {
   isOpen: boolean;
@@ -94,15 +95,14 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
   };
 
-  const saveSignature = async () => {
-    if (!signaturePad || signaturePad.isEmpty() || saving) return;
+  const saveOnce = useSingleFlight(async () => {
     setError(null);
     setSaving(true);
     try {
       const dataURL = exportDataUrl();
       if (!dataURL) {
         setError('Erreur: impossible d’exporter la signature.');
-        return;
+        return false;
       }
       const ok = await Promise.resolve(onSave(dataURL));
       if (ok) {
@@ -110,12 +110,19 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       } else {
         setError('La sauvegarde de la signature a échoué.');
       }
+      return ok;
     } catch (err: any) {
       setError(err?.message || 'Une erreur est survenue lors de la sauvegarde.');
+      return false;
     } finally {
       setSaving(false);
     }
-  };
+  });
+
+  const saveSignature = useCallback(() => {
+    if (saving) return;
+    void saveOnce();
+  }, [saveOnce, saving]);
 
   if (!isOpen) return null;
 
@@ -181,7 +188,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
                 className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${saving ? 'bg-[#477A0C]/60 cursor-not-allowed' : 'bg-[#477A0C] hover:bg-[#3A6A0A]'} text-white`}
               >
                 <Check className='w-4 h-4' />
-                <span>{saving ? 'Sauvegarde…' : 'Valider'}</span>
+                <span>{saving ? 'Enregistrement...' : 'Valider'}</span>
               </button>
             </div>
           </div>
