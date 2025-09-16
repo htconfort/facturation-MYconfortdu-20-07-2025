@@ -21,79 +21,47 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
     navigationFunctions: { onNext: typeof onNext, onPrev: typeof onPrev }
   });
 
-  // Sauvegarder la signature sans navigation automatique pour éviter les conflits
-  const handleSaveSignature = (signatureDataUrl: string) => {
-    console.log('📝 Signature sauvegardée:', {
-      hasData: !!signatureDataUrl,
-      length: signatureDataUrl?.length,
-      timestamp: new Date().toISOString()
-    });
-    
-    updateSignature({ 
-      dataUrl: signatureDataUrl, 
-      timestamp: new Date().toISOString() 
-    });
-    setShowSignaturePad(false);
-    
-    console.log('✅ Signature mise à jour dans le store - attente clic Suivant');
-    // PAS de navigation automatique - on laisse l'utilisateur cliquer sur "Suivant"
+  // Sauvegarde transactionnelle + navigation après succès seulement
+  const handleSaveSignature = async (signatureDataUrl: string): Promise<boolean> => {
+    try {
+      updateSignature({ dataUrl: signatureDataUrl, timestamp: new Date().toISOString() });
+      setShowSignaturePad(false);
+      // Navigation après que le store ait été mis à jour
+      setTimeout(() => {
+        onNext();
+      }, 120);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleNext = () => {
-    console.log('🚀 StepSignatureNoScroll - handleNext appelé:', {
-      hasSignature: !!signature?.dataUrl,
-      willProceed: !!signature?.dataUrl
-    });
-    
-    if (!signature?.dataUrl) {
-      console.log('❌ Pas de signature - navigation bloquée');
-      return;
-    }
-    
-    console.log('✅ Navigation vers étape suivante...');
-    // Ajout d'un délai pour éviter les conflits de navigation
-    setTimeout(() => {
-      onNext();
-    }, 100);
+    if (!signature?.dataUrl) return;
+    onNext();
   };
 
-
   return (
-    <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative'>
-      {/* Header */}
-      <div className='px-6 py-4 border-b border-myconfort-dark/10'>
-        <h1 className='text-2xl font-bold text-myconfort-dark'>
-          ✍️ Signature du Client
-        </h1>
-        <p className='text-myconfort-dark/70 text-sm'>
-          Étape 6/7 • Signature obligatoire pour finaliser
-        </p>
-      </div>
-
-      {/* Contenu principal - Même logique que le mode normal */}
-      <div className='flex-1 px-6 py-6 flex flex-col justify-center items-center'>
-        
-        {/* Zone de signature ou aperçu */}
+    <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative p-6'>
+      <div className='flex-1 flex items-center justify-center'>
         {signature?.dataUrl ? (
-          <div className='bg-white rounded-xl border-2 border-myconfort-green p-6 w-full max-w-md text-center'>
-            <div className='text-lg font-semibold text-myconfort-green mb-4'>
-              ✓ Signature enregistrée
+          <div className='bg-white rounded-xl border-2 border-gray-300 p-6 text-center'>
+            <div className='text-lg font-semibold text-myconfort-dark mb-4'>
+              ✔️ Signature enregistrée
             </div>
             <img
               src={signature.dataUrl}
               alt='Signature'
-              className='max-h-32 mx-auto object-contain border rounded'
+              className='mx-auto max-h-40 rounded border'
             />
-            <div className='text-xs text-myconfort-dark/70 mt-2'>
-              {signature.timestamp &&
-                new Date(signature.timestamp).toLocaleString()}
+            <div className='text-xs text-gray-500 mt-2'>
+              {signature.timestamp}
             </div>
             <button
               onClick={() => setShowSignaturePad(true)}
-              className='mt-4 px-4 py-2 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 
-                         rounded-lg text-sm font-medium transition-colors'
+              className='mt-4 px-6 py-3 bg-myconfort-blue/20 hover:bg-myconfort-blue/30 text-myconfort-dark font-semibold rounded-xl'
             >
-              ✏️ Modifier la signature
+              Refaire la signature
             </button>
           </div>
         ) : (
@@ -103,39 +71,32 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
             </div>
             <button
               onClick={() => setShowSignaturePad(true)}
-              className='px-6 py-3 bg-myconfort-green hover:bg-myconfort-green/90 
-                         text-white font-semibold rounded-xl transition-colors'
+              className='px-6 py-3 bg-myconfort-green hover:bg-myconfort-green/90 text-white font-semibold rounded-xl transition-colors'
             >
               ✍️ Cliquer pour signer
             </button>
           </div>
         )}
-
       </div>
 
-      {/* Footer navigation - Même style que les autres steps */}
+      {/* Footer navigation */}
       <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4'>
         <button
           onClick={onPrev}
-          className='px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 
-                     font-semibold rounded-xl min-h-[56px] min-w-[120px]'
+          className='px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl min-h-[56px] min-w-[120px]'
         >
           ← Précédent
         </button>
-        
         <button
           onClick={handleNext}
           disabled={!signature?.dataUrl}
-          className={`px-6 py-3 font-semibold rounded-xl min-h-[56px] min-w-[120px]
-            ${!signature?.dataUrl
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
-              : 'bg-myconfort-green text-white hover:opacity-90'}`}
+          className={`px-6 py-3 font-semibold rounded-xl min-h-[56px] min-w-[120px] ${!signature?.dataUrl ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60' : 'bg-myconfort-green text-white hover:opacity-90'}`}
         >
           {!signature?.dataUrl ? 'Signez d\'abord' : 'Suivant →'}
         </button>
       </div>
 
-      {/* Modal SignaturePad - Exactement le même que le mode normal */}
+      {/* Modal SignaturePad */}
       <SignaturePad
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}

@@ -4,7 +4,7 @@ import { X, RotateCcw, Check } from 'lucide-react';
 interface SignaturePadProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (signature: string) => void;
+  onSave: (signature: string) => Promise<boolean> | boolean; // return success flag
 }
 
 export const SignaturePad: React.FC<SignaturePadProps> = ({
@@ -15,63 +15,105 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signaturePad, setSignaturePad] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
-      // Dynamically import SignaturePad
-      import('signature_pad').then(SignaturePadModule => {
-        const SignaturePad = SignaturePadModule.default;
-        const canvas = canvasRef.current!;
+    if (!isOpen || !canvasRef.current) return;
 
-        // Set canvas size
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * window.devicePixelRatio;
-        canvas.height = rect.height * window.devicePixelRatio;
+    let cleanupFns: Array<() => void> = [];
 
-        const ctx = canvas.getContext('2d')!;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    import('signature_pad').then(SignaturePadModule => {
+      const SignaturePad = SignaturePadModule.default;
+      const canvas = canvasRef.current!;
 
-        const pad = new SignaturePad(canvas, {
-          backgroundColor: 'rgb(255, 255, 255)',
-          penColor: 'rgb(0, 0, 0)',
-          minWidth: 1,
-          maxWidth: 3,
-        });
+      // Set canvas size (device pixel ratio for crisp drawing)
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
 
-        setSignaturePad(pad);
+      const ctx = canvas.getContext('2d')!;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(ratio, ratio);
 
-        // Add event listeners
-        const startDrawing = () => setIsDrawing(true);
-        const stopDrawing = () => setIsDrawing(false);
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        return () => {
-          canvas.removeEventListener('mousedown', startDrawing);
-          canvas.removeEventListener('touchstart', startDrawing);
-          canvas.removeEventListener('mouseup', stopDrawing);
-          canvas.removeEventListener('touchend', stopDrawing);
-        };
+      const pad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)', // opaque background for reliable PNG
+        penColor: 'rgb(0, 0, 0)',
+        minWidth: 1,
+        maxWidth: 3,
+        throttle: 16,
       });
-    }
+
+      setSignaturePad(pad);
+
+      // Pointer/touch handling: prevent scroll only inside the canvas
+      const startDrawing = () => setIsDrawing(true);
+      const stopDrawing = () => setIsDrawing(false);
+
+      const preventScroll = (e: TouchEvent) => {
+        // Avoid iOS scroll/zoom while signing
+        e.preventDefault();
+      };
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('touchstart', startDrawing, { passive: false } as any);
+      canvas.addEventListener('touchend', stopDrawing as any, { passive: false } as any);
+      canvas.addEventListener('touchmove', preventScroll, { passive: false } as any);
+
+      cleanupFns.push(() => canvas.removeEventListener('mousedown', startDrawing));
+      cleanupFns.push(() => canvas.removeEventListener('mouseup', stopDrawing));
+      cleanupFns.push(() => canvas.removeEventListener('touchstart', startDrawing as any));
+      cleanupFns.push(() => canvas.removeEventListener('touchend', stopDrawing as any));
+      cleanupFns.push(() => canvas.removeEventListener('touchmove', preventScroll as any));
+    });
+
+    return () => {
+      cleanupFns.forEach(fn => {
+        try { fn(); } catch {}
+      });
+    };
   }, [isOpen]);
 
   const clearSignature = () => {
     if (signaturePad) {
       signaturePad.clear();
+      setError(null);
     }
   };
 
-  const saveSignature = () => {
-    if (signaturePad && !signaturePad.isEmpty()) {
-      const dataURL = signaturePad.toDataURL();
-      onSave(dataURL);
-      onClose();
-    } else {
-      alert('Veuillez fournir une signature avant de valider.');
+  const exportDataUrl = (): string | null => {
+    if (!signaturePad || signaturePad.isEmpty()) return null;
+    try {
+      // Prefer dataURL for compatibility (Safari/WebView)
+      const dataURL = signaturePad.toDataURL('image/png');
+      return dataURL;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const saveSignature = async () => {
+    if (!signaturePad || signaturePad.isEmpty() || saving) return;
+    setError(null);
+    setSaving(true);
+    try {
+      const dataURL = exportDataUrl();
+      if (!dataURL) {
+        setError('Erreur: impossible d’exporter la signature.');
+        return;
+      }
+      const ok = await Promise.resolve(onSave(dataURL));
+      if (ok) {
+        onClose();
+      } else {
+        setError('La sauvegarde de la signature a échoué.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Une erreur est survenue lors de la sauvegarde.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -98,19 +140,27 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
               ref={canvasRef}
               className='w-full h-48 touch-none'
               style={{ touchAction: 'none' }}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchMove={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
             />
           </div>
 
           <div className='text-sm text-gray-600 mb-4 text-center'>
-            {isDrawing
-              ? 'Signature en cours...'
-              : 'Signez dans la zone ci-dessus'}
+            {isDrawing ? 'Signature en cours…' : 'Signez dans la zone ci-dessus'}
           </div>
+
+          {error && (
+            <div className='mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2'>
+              {error}
+            </div>
+          )}
 
           <div className='flex justify-between'>
             <button
               onClick={clearSignature}
               className='bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-all'
+              disabled={saving}
             >
               <RotateCcw className='w-4 h-4' />
               <span>Effacer</span>
@@ -120,15 +170,18 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
               <button
                 onClick={onClose}
                 className='bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all'
+                disabled={saving}
               >
                 Annuler
               </button>
               <button
                 onClick={saveSignature}
-                className='bg-[#477A0C] hover:bg-[#3A6A0A] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-all'
+                disabled={saving}
+                aria-busy={saving}
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${saving ? 'bg-[#477A0C]/60 cursor-not-allowed' : 'bg-[#477A0C] hover:bg-[#3A6A0A]'} text-white`}
               >
                 <Check className='w-4 h-4' />
-                <span>Valider</span>
+                <span>{saving ? 'Sauvegarde…' : 'Valider'}</span>
               </button>
             </div>
           </div>
