@@ -15,6 +15,14 @@
   status = 200
   force = true
 
+# Désactive le cache navigateur pendant le debug (peut être retiré ensuite)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
 # Headers en prod longue durée pour les assets
 [[headers]]
   for = "/assets/*"
