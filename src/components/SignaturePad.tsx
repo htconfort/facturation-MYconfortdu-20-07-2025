@@ -95,10 +95,42 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
   };
 
+  // Refuser les signatures "point" en vérifiant la complexité des traits
+  const isSignatureSufficient = (): boolean => {
+    try {
+      if (!signaturePad) return false;
+      const strokes = signaturePad.toData?.() || [];
+      const pointCount = strokes.reduce((sum: number, s: any) => sum + (s.points?.length || 0), 0);
+      if (pointCount >= 8) return true;
+      // BBox simple
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      strokes.forEach((s: any) => {
+        (s.points || []).forEach((p: any) => {
+          if (typeof p.x === 'number' && typeof p.y === 'number') {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y > maxY) maxY = p.y;
+          }
+        });
+      });
+      const width = Math.max(0, maxX - minX);
+      const height = Math.max(0, maxY - minY);
+      const area = width * height;
+      return area > 800; // seuil minimal
+    } catch {
+      return true; // en cas d'impossibilité de mesurer, ne pas bloquer
+    }
+  };
+
   const saveOnce = useSingleFlight(async () => {
     setError(null);
     setSaving(true);
     try {
+      if (!isSignatureSufficient()) {
+        setError('Signature trop courte. Veuillez signer lisiblement.');
+        return false;
+      }
       const dataURL = exportDataUrl();
       if (!dataURL) {
         setError('Erreur: impossible d’exporter la signature.');
@@ -147,9 +179,6 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
               ref={canvasRef}
               id='signatureCanvas'
               className='w-full h-48 touch-none select-none pointer-events-auto'
-              onTouchStart={e => e.stopPropagation()}
-              onTouchMove={e => e.stopPropagation()}
-              onTouchEnd={e => e.stopPropagation()}
             />
           </div>
 
