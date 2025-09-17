@@ -193,53 +193,25 @@ export default function StepRecapIpadOptimized({
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       if (isIOS || isMobile) {
-        // iPad/Mobile : impression directe via window.print()
-        console.log('📱 Impression directe iPad/Mobile...');
-        
-        // Créer une div cachée avec le contenu de la facture
-        const printContent = createPrintableInvoice();
-        const printDiv = document.createElement('div');
-        printDiv.innerHTML = printContent;
-        printDiv.style.display = 'none';
-        printDiv.id = 'invoice-print-content';
-        
-        // Ajouter au DOM
-        document.body.appendChild(printDiv);
-        
-        // CSS pour l'impression
-        const printStyles = document.createElement('style');
-        printStyles.innerHTML = `
-          @media print {
-            body * { visibility: hidden; }
-            #invoice-print-content, #invoice-print-content * { visibility: visible; }
-            #invoice-print-content { 
-              position: absolute; 
-              left: 0; 
-              top: 0; 
-              width: 100%; 
-              background: white;
-              font-family: Arial, sans-serif;
-              font-size: 12px;
-              line-height: 1.4;
-            }
-          }
-        `;
-        document.head.appendChild(printStyles);
-        
-        // Lancer l'impression
-        setTimeout(() => {
-          window.print();
-          
-          // Nettoyer après impression
-          setTimeout(() => {
-            document.head.removeChild(printStyles);
-            document.body.removeChild(printDiv);
-          }, 100);
-        }, 50);
-        
-        setActionHistory(prev => [...prev, 'Facture ouverte pour impression (iPad/Mobile)']);
+        // iPad/Mobile : Fallback fiable via PDF blob + ouverture nouvelle vue (impression via feuille de partage)
+        console.log('📱 Impression iOS/mobile via PDF fallback...');
+        const pdfBlob = await PDFService.generateInvoicePDF(invoice);
+        const url = URL.createObjectURL(pdfBlob);
+        const win = window.open(url, '_blank');
+        if (!win) {
+          console.warn('⚠️ Impossible d’ouvrir un nouvel onglet. Tentative de téléchargement.');
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `facture-${invoice.invoiceNumber}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+        // Libérer l’URL plus tard
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        setActionHistory(prev => [...prev, 'Facture ouverte (PDF iOS/mobile)']);
       } else {
-        // Desktop : utiliser le service unifié
+        // Desktop : utiliser le service unifié ou la fenêtre d’impression
         console.log('🖨️ Impression via service unifié (desktop)...');
         await UnifiedPrintService.printInvoice(invoice);
         setActionHistory(prev => [...prev, 'Facture ouverte pour impression (Desktop)']);
