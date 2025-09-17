@@ -20,6 +20,19 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper: strokes sufficiency fallback (uses library API)
+  const hasSufficientStrokes = useCallback((): boolean => {
+    try {
+      if (!signaturePad?.toData) return false;
+      const strokes = signaturePad.toData() || [];
+      // Sum all points
+      const pointCount = strokes.reduce((sum: number, s: any) => sum + (s.points?.length || 0), 0);
+      return pointCount >= 12 || strokes.length >= 2; // relaxed acceptance
+    } catch {
+      return false;
+    }
+  }, [signaturePad]);
+
   useEffect(() => {
     if (!isOpen || !canvasRef.current) return;
 
@@ -43,10 +56,10 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       ctx.fillRect(0, 0, rect.width, rect.height);
 
       const pad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(255, 255, 255)', // opaque background for reliable PNG
+        backgroundColor: 'rgb(255, 255, 255)',
         penColor: '#0f172a',
-        minWidth: 1.5,
-        maxWidth: 3.5,
+        minWidth: 2,   // slightly thicker for reliability
+        maxWidth: 4,
         throttle: 16,
       });
 
@@ -57,7 +70,6 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       const stopDrawing = () => setIsDrawing(false);
 
       const preventScroll = (e: TouchEvent) => {
-        // Avoid iOS scroll/zoom while signing
         e.preventDefault();
       };
 
@@ -100,7 +112,6 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const exportDataUrl = (): string | null => {
     if (!signaturePad || signaturePad.isEmpty()) return null;
     try {
-      // Prefer dataURL for compatibility (Safari/WebView)
       const dataURL = signaturePad.toDataURL('image/png');
       return dataURL;
     } catch (e) {
@@ -113,8 +124,9 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     setSaving(true);
     try {
       const canvas = canvasRef.current;
-      if (!canvas || !hasInkOnCanvas(canvas)) {
-        setError('Signature vide ou illisible. Veuillez signer lisiblement.');
+      const hasPixels = canvas ? hasInkOnCanvas(canvas, 20, 30) : false; // relaxed tolerance
+      if (!hasPixels && !hasSufficientStrokes()) {
+        setError('Signature trop courte. Veuillez signer lisiblement.');
         return false;
       }
       const dataURL = exportDataUrl();
