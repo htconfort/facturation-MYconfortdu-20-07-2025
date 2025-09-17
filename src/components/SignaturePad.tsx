@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { X, RotateCcw, Check } from 'lucide-react';
 import { useSingleFlight } from '../hooks/useSingleFlight';
+import { hasInkOnCanvas } from '../utils/signatureStrict';
 
 interface SignaturePadProps {
   isOpen: boolean;
@@ -37,12 +38,15 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       const ctx = canvas.getContext('2d')!;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(ratio, ratio);
+      // Paint white background to avoid transparent exports
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, rect.height);
 
       const pad = new SignaturePad(canvas, {
         backgroundColor: 'rgb(255, 255, 255)', // opaque background for reliable PNG
-        penColor: 'rgb(0, 0, 0)',
-        minWidth: 1,
-        maxWidth: 3,
+        penColor: '#0f172a',
+        minWidth: 1.5,
+        maxWidth: 3.5,
         throttle: 16,
       });
 
@@ -78,8 +82,17 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   }, [isOpen]);
 
   const clearSignature = () => {
-    if (signaturePad) {
+    if (signaturePad && canvasRef.current) {
       signaturePad.clear();
+      // repaint white background
+      const c = canvasRef.current;
+      const rect = c.getBoundingClientRect();
+      const ctx = c.getContext('2d');
+      if (ctx) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+      }
       setError(null);
     }
   };
@@ -95,40 +108,13 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
   };
 
-  // Refuser les signatures "point" en vérifiant la complexité des traits
-  const isSignatureSufficient = (): boolean => {
-    try {
-      if (!signaturePad) return false;
-      const strokes = signaturePad.toData?.() || [];
-      const pointCount = strokes.reduce((sum: number, s: any) => sum + (s.points?.length || 0), 0);
-      if (pointCount >= 8) return true;
-      // BBox simple
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      strokes.forEach((s: any) => {
-        (s.points || []).forEach((p: any) => {
-          if (typeof p.x === 'number' && typeof p.y === 'number') {
-            if (p.x < minX) minX = p.x;
-            if (p.y < minY) minY = p.y;
-            if (p.x > maxX) maxX = p.x;
-            if (p.y > maxY) maxY = p.y;
-          }
-        });
-      });
-      const width = Math.max(0, maxX - minX);
-      const height = Math.max(0, maxY - minY);
-      const area = width * height;
-      return area > 800; // seuil minimal
-    } catch {
-      return true; // en cas d'impossibilité de mesurer, ne pas bloquer
-    }
-  };
-
   const saveOnce = useSingleFlight(async () => {
     setError(null);
     setSaving(true);
     try {
-      if (!isSignatureSufficient()) {
-        setError('Signature trop courte. Veuillez signer lisiblement.');
+      const canvas = canvasRef.current;
+      if (!canvas || !hasInkOnCanvas(canvas)) {
+        setError('Signature vide ou illisible. Veuillez signer lisiblement.');
         return false;
       }
       const dataURL = exportDataUrl();
