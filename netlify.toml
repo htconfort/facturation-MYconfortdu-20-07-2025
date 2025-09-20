@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build:netlify"
+  command = "npm run build:netlify || npm run build:netlify-fallback"
   publish = "dist"
 
 # 📊 Optimisations de déploiement Netlify
@@ -11,6 +11,7 @@
 # 4. ✅ Cache amélioré avec pré-build des dépendances
 # 5. ✅ Console logs supprimés en production
 # 6. ✅ Nommage optimisé pour le cache navigateur
+# 7. ✅ Fallback robuste si build-info échoue
 #
 # Résultat attendu : Build ~3-4s au lieu de 6-7s
 
