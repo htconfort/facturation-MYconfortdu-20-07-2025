@@ -1,27 +1,15 @@
 import { Invoice } from '../types';
+import { WebhookUrlHelper } from '../utils/webhookUrlHelper';
 
-// Configuration N8N pour la synchronisation des factures (via variables d'environnement Vite)
-const N8N_SYNC_URL = import.meta.env.VITE_N8N_SYNC_URL as string | undefined; // push
-const N8N_GET_FACTURES_URL = import.meta.env.VITE_N8N_GET_FACTURES_URL as string | undefined; // pull
-
+// Utiliser systématiquement le proxy Netlify `/api/n8n/*` via l'utilitaire centralisé
 function getSyncUrlOrThrow(): string {
-  const url = N8N_SYNC_URL || N8N_GET_FACTURES_URL;
-  if (!url) {
-    const message = 'URL de synchronisation N8N manquante: configure VITE_N8N_SYNC_URL (ou VITE_N8N_GET_FACTURES_URL)';
-    console.error(message);
-    throw new Error(message);
-  }
-  return url;
+  // Endpoint principal de push côté n8n
+  return WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
 }
 
 function getPullUrlOrThrow(): string {
-  const url = N8N_GET_FACTURES_URL || N8N_SYNC_URL;
-  if (!url) {
-    const message = 'URL de récupération N8N manquante: configure VITE_N8N_GET_FACTURES_URL (ou VITE_N8N_SYNC_URL)';
-    console.error(message);
-    throw new Error(message);
-  }
-  return url;
+  // Endpoint de récupération (pull) si exposé côté n8n
+  return WebhookUrlHelper.getWebhookUrl('webhook/sync/invoices');
 }
 
 export interface SyncResponse {
