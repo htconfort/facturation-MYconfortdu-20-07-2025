@@ -1,12 +1,12 @@
-import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
+const js = require('@eslint/js');
+const globals = require('globals');
+const reactHooks = require('eslint-plugin-react-hooks');
+const reactRefresh = require('eslint-plugin-react-refresh');
+const tseslint = require('typescript-eslint');
 
 const isCI = process.env.CI === 'true';
 
-export default tseslint.config(
+module.exports = tseslint.config(
   { ignores: ['dist', '**/*_Backup.*', '**/*_backup.*'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -30,12 +30,12 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': isCI ? ['warn', { argsIgnorePattern: '^_' }] : 'off',
       'no-unused-vars': isCI ? ['warn', { argsIgnorePattern: '^_' }] : 'off',
       'no-case-declarations': 'off',
-      
+
       // ❌ PAS DE RÈGLES TYPE-CHECKED (trop complexes pour l'instant)
       // '@typescript-eslint/no-unsafe-assignment': isCI ? 'warn' : 'off',
       // '@typescript-eslint/no-unsafe-member-access': isCI ? 'warn' : 'off',
       // '@typescript-eslint/no-unsafe-call': isCI ? 'warn' : 'off',
-      
+
       // ✅ RÈGLES CONSTANTES (bonnes pratiques)
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [

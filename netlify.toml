@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build:netlify || npm run build:netlify-fallback"
+  command = "npm run build:netlify || npm run build:netlify-fallback || npm run build:netlify-simple"
   publish = "dist"
 
 # 📊 Optimisations de déploiement Netlify
