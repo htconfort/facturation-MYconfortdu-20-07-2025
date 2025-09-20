@@ -270,8 +270,8 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
           </div>
 
           {/* Liste des factures */}
-          <div className='overflow-x-auto'>
-            <table className='w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm'>
+          <div className='max-h-[60vh] overflow-y-auto overflow-x-auto'>
+            <table className='w-full min-w-[1200px] border-collapse bg-white rounded-lg overflow-hidden shadow-sm'>
               <thead>
                 <tr className='bg-[#477A0C] text-[#F2EFE2]'>
                   <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
