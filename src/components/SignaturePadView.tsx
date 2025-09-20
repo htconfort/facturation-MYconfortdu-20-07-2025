@@ -150,7 +150,9 @@ export default function SignaturePadView({
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
       if (ro) {
-        try { ro.disconnect(); } catch {}
+        try { ro.disconnect(); } catch {
+          // Ignore disconnect errors
+        }
       }
       if (resizeRAF) cancelAnimationFrame(resizeRAF);
       

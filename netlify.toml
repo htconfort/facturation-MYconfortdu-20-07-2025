@@ -1,12 +1,26 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = "dist"
+
+# 📊 Optimisations de déploiement Netlify
+# =======================================
+#
+# 1. ✅ Erreur de lint corrigée (duplicate key "border")
+# 2. ✅ Build optimisé avec mode production
+# 3. ✅ Chunks optimisés (react-core, pdf-utils, ui-utils, vendor, app)
+# 4. ✅ Cache amélioré avec pré-build des dépendances
+# 5. ✅ Console logs supprimés en production
+# 6. ✅ Nommage optimisé pour le cache navigateur
+#
+# Résultat attendu : Build ~3-4s au lieu de 6-7s
 
 [build.environment]
   NODE_VERSION = "20.19.0"
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
+  VITE_COMPRESS = "true"
+  VITE_DROP_CONSOLE = "true"
 
 # Proxy N8N (évite CORS et fiabilise l'envoi email)
 [[redirects]]

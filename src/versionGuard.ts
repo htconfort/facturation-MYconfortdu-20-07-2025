@@ -9,7 +9,9 @@ export async function ensureFreshBuild(commit: string) {
           const keys = await caches.keys();
           await Promise.all(keys.map(k => caches.delete(k)));
         }
-      } catch {}
+      } catch {
+        // Ignore cache deletion errors
+      }
       try {
         const anyIndexed = (indexedDB as any);
         const dbs = typeof anyIndexed?.databases === 'function' ? await anyIndexed.databases() : [];
@@ -18,7 +20,9 @@ export async function ensureFreshBuild(commit: string) {
             dbs.map((d: any) => d?.name && indexedDB.deleteDatabase(d.name))
           );
         }
-      } catch {}
+      } catch {
+        // Ignore cache deletion errors
+      }
       localStorage.setItem(KEY, commit);
       location.reload();
       return;

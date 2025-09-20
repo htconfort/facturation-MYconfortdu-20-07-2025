@@ -861,11 +861,10 @@ function ChequesDetailsPage({
                   fontSize: '14px',
                   fontWeight: 'bold',
                   transition: 'all 0.2s',
-                  border: 'none',
+                  border: chequeCount === n ? 'none' : '1px solid rgba(245, 158, 11, 0.4)',
                   cursor: 'pointer',
                   backgroundColor: chequeCount === n ? '#F59E0B' : 'white',
                   color: chequeCount === n ? 'white' : '#B45309',
-                  border: chequeCount === n ? 'none' : '1px solid rgba(245, 158, 11, 0.4)',
                   boxShadow: chequeCount === n ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
                 }}
                 onMouseOver={(e) => {
