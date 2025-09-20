@@ -26,13 +26,16 @@ import { loadInvoices, saveInvoices } from '../utils/storage';
  * Problème résolu:
  * - Suppression du conflit overflow-x-auto + overflow-y-auto sur le même élément
  * - Structure en deux conteneurs séparés: un pour scroll vertical, un pour scroll horizontal
- * - Réduction de la largeur minimale de 1200px à 900px pour plus de responsivité
- * - Optimisation des largeurs de colonnes pour un affichage plus compact
+ * - Réduction de la largeur minimale de 1200px → 900px → 750px pour plus de responsivité
+ * - Optimisation drastique des largeurs de colonnes pour affichage compact
+ * - Largeurs optimisées: N°Facture(80px), Date(80px), Client(100px), Email(120px), Lieu(80px), Montant(100px), Statut(80px), Actions(100px)
+ * - Texte réduit en taille (text-sm) pour économiser l'espace
  *
  * Test:
- * 1. Ouvrir la modal des factures (bouton "Factures" dans le header)
+ * 1. Ouvrir la modal des factures (bouton noir "Factures" dans le header)
  * 2. Réduire la largeur de la fenêtre pour voir le scroll horizontal apparaître
  * 3. Vérifier que le scroll horizontal fonctionne sans conflit avec le scroll vertical
+ * 4. Toutes les colonnes doivent être visibles avec scroll horizontal
  */
 
 interface InvoicesListModalProps {
@@ -287,23 +290,23 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
           {/* Liste des factures */}
           <div className='max-h-[60vh] overflow-y-auto'>
             <div className='overflow-x-auto'>
-              <table className='w-full min-w-[900px] border-collapse bg-white rounded-lg overflow-hidden shadow-sm'>
+              <table className='w-full min-w-[750px] border-collapse bg-white rounded-lg overflow-hidden shadow-sm'>
               <thead>
                 <tr className='bg-[#477A0C] text-[#F2EFE2]'>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[80px]'>
                     N° Facture
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[80px]'>
                     Date
                   </th>
-                  <th className='border border-gray-300 px-3 py-3 text-left font-bold min-w-[120px]'>
+                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[100px]'>
                     Client
                   </th>
-                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[140px]'>
+                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[120px]'>
                     Email
                   </th>
-                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[100px]'>
-                    Lieu d'événement
+                  <th className='border border-gray-300 px-2 py-3 text-left font-bold min-w-[80px]'>
+                    Lieu
                   </th>
                   <th className='border border-gray-300 px-4 py-3 text-right font-bold'>
                     Montant TTC
@@ -314,7 +317,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                   <th className='border border-gray-300 px-4 py-3 text-center font-bold'>
                     Email
                   </th>
-                  <th className='border border-gray-300 px-2 py-3 text-center font-bold min-w-[120px]'>
+                  <th className='border border-gray-300 px-2 py-3 text-center font-bold min-w-[100px]'>
                     Actions
                   </th>
                 </tr>
@@ -333,8 +336,8 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                       key={`${invoice.invoiceNumber}-${index}`}
                       className='hover:bg-gray-50'
                     >
-                      <td className='border border-gray-300 px-4 py-3'>
-                        <div className='font-bold text-[#477A0C]'>
+                      <td className='border border-gray-300 px-2 py-3'>
+                        <div className='font-bold text-[#477A0C] text-sm'>
                           {invoice.invoiceNumber}
                         </div>
                         {invoice.products.length > 0 && (
@@ -344,20 +347,20 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                           </div>
                         )}
                       </td>
-                      <td className='border border-gray-300 px-4 py-3'>
+                      <td className='border border-gray-300 px-2 py-3'>
                         <div className='flex items-center space-x-1'>
                           <Calendar className='w-4 h-4 text-gray-400' />
-                          <span className='text-black font-semibold'>
+                          <span className='text-black font-semibold text-sm'>
                             {new Date(invoice.invoiceDate).toLocaleDateString(
                               'fr-FR'
                             )}
                           </span>
                         </div>
                       </td>
-                      <td className='border border-gray-300 px-3 py-3'>
+                      <td className='border border-gray-300 px-2 py-3'>
                         <div className='flex items-center space-x-1'>
                           <User className='w-4 h-4 text-gray-400' />
-                          <span className='font-bold text-black'>
+                          <span className='font-bold text-black text-sm'>
                             {invoice.clientName}
                           </span>
                         </div>
@@ -443,7 +446,7 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
                           </div>
                         )}
                       </td>
-                      <td className='border border-gray-300 px-2 py-3'>
+                      <td className='border border-gray-300 px-1 py-3'>
                         <div className='flex justify-center space-x-1'>
                           <div className='flex flex-col items-center'>
                             <span className='text-xs text-blue-600 font-medium mb-1'>
