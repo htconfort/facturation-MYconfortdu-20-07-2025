@@ -254,14 +254,16 @@ function AppContent() {
     }
   };
 
-  const handleSaveSignature = (signature: string) => {
+  const handleSaveSignature = (signature: string): boolean => {
     try {
       setInvoice(prev => ({ ...prev, signature }));
       setShowSignaturePad(false);
       success('Signature ajoutée avec succès');
+      return true;
     } catch (err) {
       console.error('Erreur signature:', err);
       error('Impossible de sauvegarder la signature');
+      return false;
     }
   };
 

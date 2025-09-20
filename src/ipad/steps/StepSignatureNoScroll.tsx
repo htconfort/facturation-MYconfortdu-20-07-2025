@@ -31,7 +31,8 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
         onNext();
       }, 120);
       return true;
-    } catch {
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de signature:', error);
       return false;
     }
   };

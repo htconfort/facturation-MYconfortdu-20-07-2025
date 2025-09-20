@@ -812,9 +812,10 @@ function MainApp() {
     }
   };
 
-  const handleSaveSignature = (signature: string) => {
+  const handleSaveSignature = (signature: string): boolean => {
     setInvoice(prev => ({ ...prev, signature }));
     showToast('Signature enregistrée - Facture prête pour envoi !', 'success');
+    return true;
   };
 
   // 🆕 CRÉER UNE NOUVELLE FACTURE
