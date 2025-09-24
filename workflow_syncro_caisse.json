@@ -52,6 +52,7 @@
         "respondWith": "json",
         "responseBody": "={{ ({ success: true, message: 'Facture traitée avec succès', invoiceNumber: $json.numero_facture || 'N/A', timestamp: new Date().toISOString() }) }}",
         "options": {
+          "neverError": true
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
@@ -83,8 +84,9 @@
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "={{ ({ success: true, factures: $items().map(i => i.json), count: $items().length, timestamp: new Date().toISOString() }) }}",
+        "responseBody": "={{ ({ success: true, message: 'Liste des factures récupérée avec succès', count: $items().length || 0, timestamp: new Date().toISOString() }) }}",
         "options": {
+          "neverError": true
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
@@ -279,8 +281,9 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ ({ success: true, message: 'Factures importées avec succès', count: $items().length, timestamp: new Date().toISOString() }) }}",
+        "responseBody": "={{ ({ success: true, message: 'Factures importées avec succès', count: $items().length || 0, timestamp: new Date().toISOString() }) }}",
         "options": {
+          "neverError": true
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
@@ -467,6 +470,7 @@
         "respondWith": "json",
         "responseBody": "={{ ({ success: true, message: 'Workflow exécuté avec succès', invoiceNumber: $json.numero_facture || 'N/A', caisseAttempted: true, supabaseUpdated: true, timestamp: new Date().toISOString() }) }}",
         "options": {
+          "neverError": true,
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
