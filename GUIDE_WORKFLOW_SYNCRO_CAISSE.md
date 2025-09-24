@@ -224,6 +224,16 @@ Si vous obtenez : `"This webhook is not registered for GET requests. Did you mea
 - ✅ `curl -X POST https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture` (POST)
 - ✅ `curl https://n8n.srv765811.hstgr.cloud/webhook/caisse/factures` (GET - endpoint séparé)
 
+### **Erreur "Referenced node is unexecuted" :**
+Si vous obtenez : `"Referenced node is unexecuted"` dans les logs n8n
+
+**Cause :** Un node "Respond to Webhook" fait référence à un node non exécuté dans `$items()`
+
+**Solution Appliquée :**
+- ✅ **Réponses statiques** au lieu de références croisées
+- ✅ **Réponses structurées** avec status et timestamp
+- ✅ **Gestion d'erreurs** indépendante des nodes exécutés
+
 ---
 
 ## 🎉 **Avantages de cette Architecture**

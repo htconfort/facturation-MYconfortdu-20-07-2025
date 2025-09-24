@@ -19,7 +19,14 @@ status=$(echo "$response" | head -n 1 | cut -d' ' -f2)
 
 if [ "$status" = "200" ]; then
     echo -e "${GREEN}✅ SUCCESS - Webhook POST fonctionne${NC}"
-    echo "Réponse: $(echo "$response" | tail -n 1 | jq -r '.message // "OK"' 2>/dev/null || echo "$response" | tail -n 1)"
+    response_json=$(echo "$response" | tail -n 1)
+    if echo "$response_json" | jq -e '.success' >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ Réponse structurée valide${NC}"
+        echo "Message: $(echo "$response_json" | jq -r '.message')"
+        echo "Facture: $(echo "$response_json" | jq -r '.invoiceNumber // "N/A"')"
+    else
+        echo -e "${YELLOW}⚠️  Réponse non structurée (ancien format)${NC}"
+    fi
 else
     echo -e "${RED}❌ FAILED - Status: $status${NC}"
     echo "Réponse: $(echo "$response" | tail -n 1)"
@@ -33,7 +40,15 @@ status=$(echo "$response" | head -n 1 | cut -d' ' -f2)
 
 if [ "$status" = "200" ]; then
     echo -e "${GREEN}✅ SUCCESS - Webhook GET fonctionne${NC}"
-    echo "Réponse: $(echo "$response" | tail -n 1 | jq '. | length' 2>/dev/null || echo "$response" | tail -n 1)"
+    response_json=$(echo "$response" | tail -n 1)
+    if echo "$response_json" | jq -e '.success' >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ Réponse structurée valide${NC}"
+        echo "Nombre de factures: $(echo "$response_json" | jq '.count // 0')"
+        echo "Timestamp: $(echo "$response_json" | jq -r '.timestamp' 2>/dev/null || echo 'N/A')"
+    else
+        echo -e "${YELLOW}⚠️  Réponse non structurée (ancien format)${NC}"
+        echo "Données brutes: $(echo "$response_json" | jq '. | length' 2>/dev/null || echo 'Format JSON')"
+    fi
 else
     echo -e "${RED}❌ FAILED - Status: $status${NC}"
     echo "Réponse: $(echo "$response" | tail -n 1)"
@@ -67,7 +82,8 @@ echo "==================="
 echo "1. ✅ Importer le workflow n8n workflow_syncro_caisse.json"
 echo "2. ✅ Tester avec les méthodes HTTP correctes (POST pour factures)"
 echo "3. ✅ Vérifier l'archivage dans Supabase"
-echo "4. 🔄 Activer les fonctions Netlify si souhaité"
+echo "4. ✅ Vérifier les réponses structurées des nodes Respond"
+echo "5. 🔄 Activer les fonctions Netlify si souhaité"
 
 echo
 echo "📊 RAPPORT COMPLET:"
