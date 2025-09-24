@@ -55,6 +55,17 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
+# Configuration des Netlify Functions
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+
+# Alias pour l'endpoint webhook de la caisse (plus propre)
+[[redirects]]
+  from = "/api/caisse/webhook/facture"
+  to = "/.netlify/functions/caisse-facture"
+  status = 200
+
 # SPA fallback
 [[redirects]]
   from = "/*"
