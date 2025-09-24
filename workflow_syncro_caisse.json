@@ -50,7 +50,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ ({ inserted: $items('HTTP - Supabase Upsert', 0, 0)?.json, list: $json }) }}",
+        "responseBody": "={{ ({ success: true, message: 'Facture traitée avec succès', invoiceNumber: $json.numero_facture || 'N/A', timestamp: new Date().toISOString() }) }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -83,7 +83,7 @@
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "={{ JSON.stringify($items().map(i => i.json)) }}",
+        "responseBody": "={{ ({ success: true, factures: $items().map(i => i.json), count: $items().length, timestamp: new Date().toISOString() }) }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -279,7 +279,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ ({ ok: true, count: $items().length }) }}",
+        "responseBody": "={{ ({ success: true, message: 'Factures importées avec succès', count: $items().length, timestamp: new Date().toISOString() }) }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -465,7 +465,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ ({ caisse: $items('Caisse Push (direct)', 0, 0)?.json, supabase: $json }) }}",
+        "responseBody": "={{ ({ success: true, message: 'Workflow exécuté avec succès', invoiceNumber: $json.numero_facture || 'N/A', caisseAttempted: true, supabaseUpdated: true, timestamp: new Date().toISOString() }) }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
