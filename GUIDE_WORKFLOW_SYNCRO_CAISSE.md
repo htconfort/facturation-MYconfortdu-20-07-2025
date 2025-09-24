@@ -16,18 +16,23 @@ App Facturation → Webhook n8n → App Caisse (CA instant) + Supabase (archivag
 ### **1. POST /caisse/facture**
 - **Description** : Réception des factures depuis l'app Facturation
 - **URL** : `https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture`
-- **Méthode** : POST
+- **Méthode** : POST uniquement
 - **Body** : Facture au format app Facturation
+- **Note** : Ce webhook n'accepte que les POST (pas les GET)
 
 ### **2. GET /caisse/factures**
 - **Description** : Liste paginée des factures depuis Supabase
 - **URL** : `https://n8n.srv765811.hstgr.cloud/webhook/caisse/factures`
+- **Méthode** : GET uniquement
 - **Paramètres** : `?limit=50&since=2025-01-01T00:00:00Z` (optionnels)
+- **Note** : Webhook séparé pour les requêtes GET
 
 ### **3. POST /webhook/caisse/factures/upsert**
 - **Description** : Import en batch de factures (pour synchronisation)
 - **URL** : `https://n8n.srv765811.hstgr.cloud/webhook/webhook/caisse/factures/upsert`
+- **Méthode** : POST uniquement
 - **Body** : Array de factures ou `{ invoices: [...] }`
+- **Note** : Pour l'import en masse de plusieurs factures
 
 ---
 
@@ -134,16 +139,43 @@ curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' \
 curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' \
   -H 'Content-Type: application/json' \
   -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
+
+# Si 404, vérifier que l'app Caisse est bien démarrée
+curl -i 'https://caissemycomfort2025.netlify.app/' -s | head -n 3
 ```
 
-### **Test 2 : Workflow n8n Complet**
+### **Test 2 : Workflow n8n Complet (POST)**
 ```bash
+# POST - Envoi d'une facture
 curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture' \
   -H 'Content-Type: application/json' \
+  -X POST \
   -d '{"numero_facture":"TEST-001","date_facture":"2025-01-23","nom_client":"Test Client","montant_ttc":280,"vendeuse":"Sylvie","produits":[{"nom":"Matelas","quantite":1,"prix_ttc":280}]}'
 ```
 
-### **Test 3 : Vérification CA Instant**
+### **Test 3 : Listing Factures (GET)**
+```bash
+# GET - Liste des factures
+curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/factures' \
+  -H 'Content-Type: application/json' \
+  -X GET
+
+# GET - Avec paramètres de pagination
+curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/factures?limit=10&since=2025-01-01' \
+  -H 'Content-Type: application/json' \
+  -X GET
+```
+
+### **Test 4 : Import Batch (POST)**
+```bash
+# POST - Import en batch de factures
+curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/webhook/caisse/factures/upsert' \
+  -H 'Content-Type: application/json' \
+  -X POST \
+  -d '[{"numero_facture":"BATCH-001","date_facture":"2025-01-23","nom_client":"Batch Client","montant_ttc":560,"vendeuse":"Sylvie"}]'
+```
+
+### **Test 5 : Vérification CA Instant**
 1. Aller dans l'app Caisse
 2. Vérifier que le CA de la vendeuse a été mis à jour
 3. Vérifier les logs console pour confirmation
@@ -171,14 +203,26 @@ curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture' \
 
 ### **Erreurs Possibles :**
 1. **400 Bad Request** : Payload invalide (amount, vendorId manquants)
-2. **404 Not Found** : Endpoint Caisse non disponible
+2. **404 Not Found** : Endpoint Caisse non disponible ou méthode HTTP incorrecte
 3. **500 Internal Error** : Erreur Supabase ou transformation
 
 ### **Résolutions :**
 1. **Vérifier payload** : `amount` > 0, `vendorId` non vide
-2. **Vérifier endpoint** : `curl https://caissemycomfort2025.netlify.app/api/caisse/facture`
-3. **Vérifier credentials** : Service role Supabase valide
-4. **Vérifier alias** : `curl https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
+2. **Vérifier méthode HTTP** :
+   - `/caisse/facture` : POST uniquement
+   - `/caisse/factures` : GET uniquement
+   - Ne pas utiliser GET sur `/caisse/facture`
+3. **Vérifier endpoint** : `curl https://caissemycomfort2025.netlify.app/api/caisse/facture`
+4. **Vérifier credentials** : Service role Supabase valide
+5. **Vérifier alias** : `curl https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
+
+### **Message d'Erreur Spécifique :**
+Si vous obtenez : `"This webhook is not registered for GET requests. Did you mean to make a POST request?"`
+
+**Solution :**
+- ❌ `curl https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture` (GET)
+- ✅ `curl -X POST https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture` (POST)
+- ✅ `curl https://n8n.srv765811.hstgr.cloud/webhook/caisse/factures` (GET - endpoint séparé)
 
 ---
 
