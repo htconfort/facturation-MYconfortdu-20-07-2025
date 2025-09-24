@@ -1,0 +1,108 @@
+{
+  "name": "Caisse Sync - Direct Push v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "caisse/facture",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type, X-Secret" }
+            ]
+          }
+        }
+      },
+      "id": "w1-webhook",
+      "name": "Webhook Facture",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [160, -100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json || {};\nconst produits = Array.isArray(input.produits) ? input.produits : (Array.isArray(input.items) ? input.items : []);\nfunction num(v, d=0){ const n=Number(v); return Number.isFinite(n)?n:d; }\nconst out = {\n  numero_facture: String(input.numero_facture || input.id || input.invoiceNumber || `AUTO-${Date.now()}`),\n  date_facture: String(input.date_facture || input.invoiceDate || new Date().toISOString().slice(0,10)),\n  nom_client: input.nom_client || input.client?.name || 'Client',\n  montant_ttc: num(input.montant_ttc, NaN),\n  payment_method: input.payment_method || input.payment?.method || 'card',\n  vendeuse: String(input.vendeuse || input.vendorName || 'Sylvie'),\n  vendorId: String((input.vendorId || input.vendor_id || input.vendeuse || 'Sylvie')).toLowerCase(),\n  produits: produits.map(p=>({\n    nom: p.nom || p.name || 'Produit',\n    quantite: num(p.quantite ?? p.quantity ?? p.qty ?? 1, 1),\n    prix_ttc: num(p.prix_ttc ?? p.unitPriceTTC ?? p.priceTTC ?? p.price ?? 0, 0),\n    remise: num(p.remise ?? p.discount ?? 0, 0)\n  }))\n};\nif (!(out.produits && out.produits.length)) out.produits = [];\nif (!(out.montant_ttc>0)) {\n  const ttcFromLines = out.produits.reduce((s,p)=> s + p.quantite * p.prix_ttc * (1 - (p.remise||0)), 0);\n  out.montant_ttc = +ttcFromLines.toFixed(2);\n}\nreturn [{ json: out }];"
+      },
+      "id": "w2-normalize",
+      "name": "Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, -100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build le payload final attendu par l'app Caisse (clé/valeurs propres)\nconst d = $json || {};\nfunction num(v, d=0){ const n=Number(v); return Number.isFinite(n)?n:d; }\nconst produits = Array.isArray(d.produits) ? d.produits.map(p=>({\n  nom: p.nom || 'Produit',\n  quantite: num(p.quantite,1),\n  prix_ttc: num(p.prix_ttc,0),\n  remise: num(p.remise,0)\n})) : [];\nconst out = {\n  numero_facture: String(d.numero_facture || `AUTO-${Date.now()}`),\n  date_facture: String(d.date_facture || new Date().toISOString().slice(0,10)),\n  nom_client: d.nom_client || 'Client',\n  montant_ttc: num(d.montant_ttc, produits.reduce((s,p)=> s + p.quantite*p.prix_ttc*(1-(p.remise||0)), 0)),\n  payment_method: d.payment_method || 'card',\n  vendeuse: String(d.vendeuse || 'Sylvie'),\n  vendorId: String((d.vendorId || 'sylvie')).toLowerCase(),\n  produits\n};\nif (!out.numero_facture) throw new Error('numero_facture vide');\nif (!(out.montant_ttc>0)) throw new Error('montant_ttc <= 0');\nif (!produits.length) throw new Error('produits vide');\nreturn [{ json: out }];"
+      },
+      "id": "w3-build-payload",
+      "name": "Build Payload Caisse (Code)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [540, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "w4-http-caisse",
+      "name": "Caisse Push (direct)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ success: true, message: 'Facture synchronisée avec succès', invoiceNumber: $json.numero_facture || 'N/A', caisseAttempted: true, timestamp: new Date().toISOString() }) }}",
+        "options": {
+          "neverError": true,
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "application/json" },
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" }
+            ]
+          }
+        }
+      },
+      "id": "w5-respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, -100],
+      "neverOutputData": false,
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "Webhook Facture": { "main": [ [ { "node": "Normalize", "type": "main", "index": 0 } ] ] },
+    "Normalize": { "main": [ [ { "node": "Build Payload Caisse (Code)", "type": "main", "index": 0 } ] ] },
+    "Build Payload Caisse (Code)": { "main": [ [ { "node": "Caisse Push (direct)", "type": "main", "index": 0 } ] ] },
+    "Caisse Push (direct)": { "main": [ [ { "node": "Respond", "type": "main", "index": 0 } ] ] }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "meta": {},
+  "active": false
+}
