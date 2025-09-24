@@ -440,6 +440,17 @@
         ]
       ]
     },
+    "HTTP - Supabase Upsert": {
+      "main": [
+        [
+          {
+            "node": "respond-caisse-supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Caisse Push (direct)": {
       "main": [
         [
@@ -451,11 +462,47 @@
         ]
       ]
     },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ caisse: $items('Caisse Push (direct)', 0, 0)?.json, supabase: $json }) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-caisse-supabase",
+      "name": "Respond Caisse + Supabase",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -100
+      ]
+    },
     "Build Payload Caisse (Code)": {
       "main": [
         [
           {
             "node": "Caisse Push (direct)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caisse Push (direct)": {
+      "main": [
+        [
+          {
+            "node": "respond-caisse-supabase",
             "type": "main",
             "index": 0
           }
