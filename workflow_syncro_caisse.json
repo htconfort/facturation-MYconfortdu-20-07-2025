@@ -1,0 +1,464 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "caisse/facture",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2ca9ac8b-2102-450d-b43e-9f2059d647a3",
+      "name": "Webhook Facture",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -100
+      ],
+      "webhookId": "c03f98e3-c88b-4465-81c1-0f08c06d7fa8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json;\nconst output = {\n  numero_facture: String(input.numero_facture || input.id || ''),\n  date_facture: String(input.date_facture || input.invoiceDate || new Date().toISOString().slice(0,10)),\n  nom_client: input.nom_client || input.client?.name || 'Client',\n  montant_ttc: Number(input.montant_ttc || input.totalTTC || input.amount || 0),\n  payment_method: input.payment_method || input.payment?.method || 'card',\n  vendeuse: input.vendeuse || input.vendorName || 'Externe',\n  vendorId: input.vendorId || 'external',\n  produits: Array.isArray(input.produits) ? input.produits.map(p => ({\n    nom: p.nom || p.name || 'designation','productName','title']) ?? `Article ${i+1}`,\n    quantite: Number(p.quantite || p.qty ?? 1,1),\n    prix_ttc: Number(p.prix_ttc || p.unitPriceTTC || p.priceTTC || 0),\n    remise: Number(p.remise || p.discount || 0)\n  })) : []\n};\nreturn [ { json: output } ];"
+      },
+      "id": "dff6d1dc-606b-4ed5-a5d1-819b8eb5a07c",
+      "name": "Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ inserted: $items('HTTP - Supabase Upsert', 0, 0)?.json, list: $json }) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              }
+            ]
+          }
+        }
+      },
+      "id": "f6581cd5-e3c9-42c0-9b39-b4d113a85e19",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify($items().map(i => i.json)) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "21484e00-8e99-4c5f-af67-5c9bfd969ee2",
+      "name": "Respond (GET)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "path": "caisse/factures",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c067bb8b-cdf9-4dd5-8b35-b8a986614589",
+      "name": "Webhook Factures (GET)1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        140,
+        400
+      ],
+      "webhookId": "9d9c47ff-06f1-47ca-add8-681a1bfb4325"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $json.query || {}; const limit = Number(q.limit ?? 50); const since = q.since;\nlet url = 'https://doxvtfojavrjrmwpafnf.supabase.co/rest/v1/factures_ordre?select=*&order=created_at.desc&limit=' + limit;\nif (since) url += '&created_at=gte.' + encodeURIComponent(since);\nreturn [{ json: { url } }];"
+      },
+      "id": "75021b2c-4f4e-4b7d-add1-365551c16f89",
+      "name": "Build List URL1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "REPLACE_WITH_SERVICE_ROLE"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + 'REPLACE_WITH_SERVICE_ROLE' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "3c06ed40-5dc9-4799-b217-7cdd003b2b9b",
+      "name": "HTTP - Supabase List1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        560,
+        400
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "U1l72tOzDt8ERdPV",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook/caisse/factures/upsert",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              }
+            ]
+          }
+        }
+      },
+      "id": "f7b01ba6-937a-46fb-9597-f77b7739cf73",
+      "name": "Webhook (POST)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        140
+      ],
+      "webhookId": "38e9a791-0a74-4797-9422-13eb9341ae4d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transforme ce qui arrive en liste d'items {json: facture}\nconst body = $json.body ?? $json;\nconst list = Array.isArray(body) ? body : (Array.isArray(body?.invoices) ? body.invoices : [body]);\nreturn list.map(f => ({ json: f }));"
+      },
+      "id": "305c6aec-ea86-4b72-87e2-c075f1bfbf54",
+      "name": "EnsureArray → Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://doxvtfojavrjrmwpafnf.supabase.co/rest/v1/factures?on_conflict=numero_facture",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "3cd070f9-f819-4f51-b44b-31fa13f55a32",
+      "name": "HTTP - Supabase Upsert (unit)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        540,
+        140
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "U1l72tOzDt8ERdPV",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ ok: true, count: $items().length }) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "fe06c252-16f1-46f1-a8ca-c5c290f3f656",
+      "name": "Respond (POST)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        -100
+      ],
+      "id": "026af131-ff62-486f-9fef-911a835f2c04",
+      "name": "Caisse Push (direct)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fabrique le JSON exact attendu par la Caisse, à partir de ce qu'on a\nconst d = $json || {};\n\nfunction num(v, def = 0) { const n = Number(v ?? def); return Number.isFinite(n) ? n : def; }\nfunction pick(obj, keys) {\n  for (const k of keys) {\n    const v = k.split('.').reduce((o, kk) => (o && o[kk] !== undefined ? o[kk] : undefined), obj);\n    if (v !== undefined && v !== null && String(v).trim?.() !== '') return v;\n  }\n  return undefined;\n}\n\n// 1) Produits → [{nom, prix_ht, quantite}]\nconst candidates = [d.produits, d.items, d.products, d.lignes, d.orderLines];\nconst raw = candidates.find(a => Array.isArray(a) && a.length) || [];\nconst produits = raw.map((p, i) => {\n  const nom = pick(p, ['nom','name','designation','productName','title']) ?? `Article ${i+1}`;\n  const qte = num(p.quantite ?? p.qty ?? 1, 1);\n  // préférer prix_ht; sinon recalcul depuis prix_ttc à 20%\n  const prix_ht = num(p.prix_ht ?? p.unitPriceHT ?? (p.prix_ttc ? p.prix_ttc / 1.2 : 0));\n  return { nom, prix_ht, quantite: qte };\n});\n\n// 2) Montant TTC: global si présent, sinon somme TTC des lignes, sinon HT*1.2\nconst ht = produits.reduce((s,p)=> s + num(p.prix_ht) * num(p.quantite,1), 0);\nconst ttcGlobal = num(d.montant_ttc ?? d.total_ttc ?? d.totalTTC ?? d.amount ?? d.montant_total);\nconst ttcFromLines = raw.reduce((s,p)=>{\n  const q = num(p.quantite ?? p.qty ?? 1,1);\n  const ligneTTC = num(p.total_ttc ?? p.totalTTC ?? (p.prix_ttc ?? p.unitPriceTTC) * q);\n  return s + (ligneTTC || 0);\n}, 0);\nconst montant_ttc = ttcGlobal || ttcFromLines || +(ht * 1.2).toFixed(2);\n\n// 3) Vendeuse et vendorId (force valeurs sûres si absentes)\nconst vendeuse = String(d.vendeuse || d.conseiller || d.vendorName || 'Sylvie');\nconst vendorId = String((d.vendorId || vendeuse))\n  .toLowerCase()\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')\n  .replace(/[^a-z0-9_-]/g,'');\n\n// 4) Champs de base\nconst out = {\n  numero_facture: String(d.numero_facture || d.invoiceNumber || `AUTO-${Date.now()}`),\n  date_facture: String(d.date_facture || d.invoiceDate || new Date().toISOString().slice(0,10)),\n  nom_client: d.nom_client || d.nom_du_client || d.clientName || 'Client',\n  montant_ttc,\n  payment_method: d.payment_method || d.mode_paiement || 'card',\n  vendeuse,\n  vendorId,\n  produits\n};\n\nreturn [{ json: out }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        -100
+      ],
+      "id": "efdfb95a-ccc8-40a7-a8c2-b1f65fc22a72",
+      "name": "Build Payload Caisse (Code)"
+    }
+  ],
+  "connections": {
+    "Webhook Facture": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Build Payload Caisse (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Factures (GET)1": {
+      "main": [
+        [
+          {
+            "node": "Build List URL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build List URL1": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Supabase List1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Supabase List1": {
+      "main": [
+        [
+          {
+            "node": "Respond (GET)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (POST)": {
+      "main": [
+        [
+          {
+            "node": "EnsureArray → Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnsureArray → Items": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Supabase Upsert (unit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Supabase Upsert (unit)": {
+      "main": [
+        [
+          {
+            "node": "Respond (POST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caisse Push (direct)": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Payload Caisse (Code)": {
+      "main": [
+        [
+          {
+            "node": "Caisse Push (direct)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "5d9cac87218bcaff66f8a4e73a062b0a58cfc262086b23ca1d8617d5a9d9516a"
+  }
+}
