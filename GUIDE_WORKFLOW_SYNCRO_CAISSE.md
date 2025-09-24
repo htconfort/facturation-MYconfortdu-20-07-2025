@@ -78,7 +78,8 @@ async function sendInvoiceToCaisse(invoice: Invoice, pdfBase64?: string) {
   - `produits` → Articles avec prix HT, quantités
 
 ### **3. Envoi vers App Caisse (Caisse Push)**
-- **URL** : `https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
+- **URL** : `https://caissemycomfort2025.netlify.app/api/caisse/facture`
+- **Alias** : `https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
 - **Payload** : Format optimisé pour mise à jour CA instant
 - **Réponse** : `{"ok": true, "caUpdated": true, "amount": 280, "vendor": "sylvie"}`
 
@@ -93,6 +94,12 @@ async function sendInvoiceToCaisse(invoice: Invoice, pdfBase64?: string) {
 
 ### **Test 1 : Endpoint Caisse Direct**
 ```bash
+# URL principale
+curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/facture' \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
+
+# Alias (aussi disponible)
 curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' \
   -H 'Content-Type: application/json' \
   -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
@@ -138,8 +145,9 @@ curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture' \
 
 ### **Résolutions :**
 1. **Vérifier payload** : `amount` > 0, `vendorId` non vide
-2. **Vérifier endpoint** : `curl https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
+2. **Vérifier endpoint** : `curl https://caissemycomfort2025.netlify.app/api/caisse/facture`
 3. **Vérifier credentials** : Service role Supabase valide
+4. **Vérifier alias** : `curl https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture`
 
 ---
 

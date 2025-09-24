@@ -66,6 +66,12 @@
   to = "/.netlify/functions/caisse-facture"
   status = 200
 
+# Alias alternatif pour compatibilité avec workflow n8n existant
+[[redirects]]
+  from = "/api/caisse/facture"
+  to = "/.netlify/functions/caisse-facture"
+  status = 200
+
 # SPA fallback
 [[redirects]]
   from = "/*"

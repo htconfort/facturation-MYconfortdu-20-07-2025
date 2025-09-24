@@ -308,7 +308,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture",
+        "url": "https://caissemycomfort2025.netlify.app/api/caisse/facture",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
