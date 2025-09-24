@@ -56,6 +56,29 @@ else
     echo "Réponse: $(echo "$response" | tail -n 1)"
 fi
 
+# Test 4: Option alternative - Envoi direct vers app Caisse
+echo
+echo "📡 Test 4 - Option alternative (immédiate):"
+echo "curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture'"
+response=$(curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' -H 'Content-Type: application/json' -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}' -s 2>/dev/null)
+status_alt=$(echo "$response" | head -n 1 | cut -d' ' -f2)
+
+if [ "$status_alt" = "200" ]; then
+    echo -e "${GREEN}✅ SUCCESS - App Caisse répond directement${NC}"
+    echo "Réponse: $(echo "$response" | tail -n 1)"
+    echo
+    echo -e "${GREEN}🎉 SOLUTION ALTERNATIVE DISPONIBLE IMMÉDIATEMENT!${NC}"
+    echo
+    echo "🚀 PROCHAINES ÉTAPES (OPTION ALTERNATIVE):"
+    echo "======================================="
+    echo "1. 📥 Importer le workflow n8n workflow_syncro_caisse.json"
+    echo "2. 🧪 Tester avec le workflow n8n complet"
+    echo "3. 🔄 Intégrer dans l'app Facturation (option directe)"
+    echo "4. ✅ Vérifier que le CA instant se met à jour"
+else
+    echo -e "${YELLOW}⚠️  Envoi direct non disponible (fonctions Netlify inactives)${NC}"
+fi
+
 echo
 echo "🔧 DIAGNOSTIC:"
 echo "=============="
@@ -79,6 +102,10 @@ if [ "$status" != "200" ]; then
     echo "- Direct: https://caissemycomfort2025.netlify.app/.netlify/functions/caisse-facture"
     echo "- Principal: https://caissemycomfort2025.netlify.app/api/caisse/facture"
     echo "- Alias: https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture"
+    echo
+    if [ "$status_alt" = "200" ]; then
+        echo -e "${GREEN}✅ SOLUTION ALTERNATIVE: Utiliser l'envoi direct vers l'app Caisse${NC}"
+    fi
 else
     echo -e "${GREEN}🎉 TOUS LES TESTS RÉUSSISSENT - DÉPLOIEMENT OK!${NC}"
     echo

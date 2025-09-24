@@ -33,8 +33,9 @@ App Facturation → Webhook n8n → App Caisse (CA instant) + Supabase (archivag
 
 ## 🔧 **Configuration Requise**
 
-### **Dans l'app Facturation (n8nWebhookService.ts) :**
+### **Option 1 : Architecture Optimale (après activation Netlify Functions)**
 ```tsx
+// Dans n8nWebhookService.ts
 const promises = [
   sendInvoiceToN8n(invoice, pdfBase64),  // Archivage
   sendInvoiceToCaisse(invoice, pdfBase64) // CA instant
@@ -45,6 +46,28 @@ async function sendInvoiceToCaisse(invoice: Invoice, pdfBase64?: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(invoice)
+  });
+  return await response.json();
+}
+```
+
+### **Option 2 : Solution Alternative Immédiate**
+```tsx
+// Envoi direct vers l'app Caisse (contourne n8n)
+async function sendInvoiceToCaisseDirect(invoice: Invoice, pdfBase64?: string) {
+  const payload = {
+    amount: invoice.totalTTC,
+    vendorId: invoice.vendorId || 'sylvie',
+    date: invoice.date || new Date().toISOString().slice(0,10),
+    invoiceNumber: invoice.invoiceNumber,
+    vendorName: invoice.vendorName,
+    clientName: invoice.client?.name || 'Client'
+  };
+
+  const response = await fetch('https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
   return await response.json();
 }
@@ -94,12 +117,20 @@ async function sendInvoiceToCaisse(invoice: Invoice, pdfBase64?: string) {
 
 ### **Test 1 : Endpoint Caisse Direct**
 ```bash
-# URL principale
+# URL principale (après activation des fonctions Netlify)
 curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/facture' \
   -H 'Content-Type: application/json' \
   -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
 
-# Alias (aussi disponible)
+# Alias (après activation des fonctions Netlify)
+curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
+```
+
+### **Test 1 BIS : Solution Alternative (immédiate)**
+```bash
+# Test direct de l'app Caisse (sans passer par n8n)
 curl -i 'https://caissemycomfort2025.netlify.app/api/caisse/webhook/facture' \
   -H 'Content-Type: application/json' \
   -d '{"amount":280,"vendorId":"sylvie","date":"2025-01-23","invoiceNumber":"F-TEST"}'
@@ -177,13 +208,18 @@ curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture' \
 
 ## 🚀 **Prochaines Étapes**
 
-### **Court terme :**
-1. **Tester le workflow** avec des factures de test
-2. **Intégrer dans l'app Facturation** (n8nWebhookService.ts)
-3. **Vérifier le CA instant** se met à jour
+### **Immédiat (Option Alternative) :**
+1. **Tester l'envoi direct** vers l'app Caisse
+2. **Vérifier le CA instant** se met à jour
+3. **Intégrer dans l'app Facturation** avec l'option 2
+
+### **Court terme (Architecture Optimale) :**
+1. **Activer les fonctions Netlify** (voir section suivante)
+2. **Tester le workflow n8n** complet
+3. **Monitorer les performances** en production
 
 ### **Moyen terme :**
-1. **Monitorer les performances** en production
+1. **Migrer vers l'architecture optimale** une fois les fonctions Netlify actives
 2. **Ajouter des métriques** (nombre de factures traitées)
 3. **Optimiser les transformations** si nécessaire
 
@@ -191,6 +227,30 @@ curl -i 'https://n8n.srv765811.hstgr.cloud/webhook/caisse/facture' \
 1. **Supprimer progressivement** la complexité n8n
 2. **Automatiser complètement** le CA instant
 3. **Étendre aux autres fonctionnalités** (annulations, modifications)
+
+---
+
+## 🔧 **Activation des Fonctions Netlify (Pour Plus Tard)**
+
+### **Problème Actuel :**
+- ✅ **Fonction créée** : `netlify/functions/caisse-facture.js`
+- ✅ **Configuration ajoutée** : `netlify.toml` avec règles de redirection
+- ❌ **Fonction non déployée** : Netlify n'a pas redéployé les fonctions existantes
+
+### **Étapes pour Activer :**
+1. **Aller sur** : https://app.netlify.com/sites/caissemycomfort2025
+2. **Onglet "Functions"** : Vérifier si les fonctions sont listées
+3. **Si absentes** : Déclencher un nouveau déploiement via "Deploy settings"
+4. **Forcer le redéploiement** : Push une modification mineure pour forcer le déploiement des fonctions
+
+### **Vérification :**
+```bash
+curl -i 'https://caissemycomfort2025.netlify.app/.netlify/functions/caisse-facture' \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":280,"vendorId":"sylvie"}'
+```
+
+**Attendu :** `200 OK` avec réponse JSON
 
 ---
 
