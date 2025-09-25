@@ -32,6 +32,9 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
     // Paiement
     paymentMethod: 'Espèces',
     
+    // Conseillère/Vendeuse
+    advisorName: '',
+    
     // Notes
     notes: '',
   });
@@ -148,7 +151,7 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
 
       // Notes
       invoiceNotes: formData.notes,
-      advisorName: 'Facture rapide',
+      advisorName: formData.advisorName || 'Facture rapide',
       termsAccepted: true,
 
       // Chèques
@@ -161,8 +164,8 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
   };
 
   const handleSave = async () => {
-    if (!formData.clientName || !formData.productDescription || !formData.productPrice) {
-      alert('Veuillez remplir les champs obligatoires');
+    if (!formData.clientName || !formData.productDescription || !formData.productPrice || !formData.advisorName) {
+      alert('Veuillez remplir tous les champs obligatoires (Client, Produit, Prix et Conseillère/Vendeuse)');
       return;
     }
 
@@ -185,6 +188,7 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
           productPrice: '',
           quantity: '1',
           paymentMethod: 'Espèces',
+          advisorName: '',
           notes: '',
         });
         setProductSearch('');
@@ -217,7 +221,7 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
   };
 
   const { totalHT, tva, totalTTC } = calculateTotals();
-  const isFormValid = formData.clientName && formData.productDescription && formData.productPrice;
+  const isFormValid = formData.clientName && formData.productDescription && formData.productPrice && formData.advisorName;
 
   if (showSuccess) {
     return (
@@ -444,6 +448,20 @@ export const QuickInvoiceModal: React.FC<QuickInvoiceModalProps> = ({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Conseillère/Vendeuse */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Conseillère/Vendeuse *
+              </label>
+              <input
+                type="text"
+                value={formData.advisorName}
+                onChange={(e) => handleInputChange('advisorName', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black font-semibold"
+                placeholder="Nom de la conseillère/vendeuse"
+              />
             </div>
 
             {/* Notes optionnelles */}

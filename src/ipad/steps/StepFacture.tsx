@@ -11,7 +11,7 @@ interface StepProps {
 }
 
 export default function StepFacture({ onNext, onQuit }: StepProps) {
-  const { invoiceNumber, invoiceDate, eventLocation, advisorName, setInvoiceData, updateAdvisorName, updateEventLocation } =
+  const { invoiceNumber, invoiceDate, eventLocation, advisorName, setInvoiceData, updateAdvisorName } =
     useInvoiceWizard();
   const [hasEditedLocation, setHasEditedLocation] = useState(false);
   const [hasEditedAdvisor, setHasEditedAdvisor] = useState(false);
@@ -32,28 +32,14 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   const validateAndNext = () => {
     // Le lieu d'événement ET le conseiller sont obligatoires
     if (!eventLocation || eventLocation.trim() === '') {
-      alert('Veuillez remplir le lieu de l\'événement');
       return;
     }
     
     if (!advisorName || advisorName.trim() === '') {
-      alert('Veuillez remplir le nom du conseiller');
       return;
     }
 
-    // Forcer la sauvegarde de TOUTES les données avant de continuer
-    setInvoiceData({
-      invoiceNumber: invoiceNumber || generateInvoiceNumber(),
-      invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
-      eventLocation,
-    });
-    
-    updateAdvisorName(advisorName);
-    
-    // Attendre un peu que le store soit mis à jour
-    setTimeout(() => {
-      onNext();
-    }, 50);
+    onNext();
   };
 
   // État de validation pour les couleurs des cadres
@@ -108,7 +94,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Facture n°:
                 </span>
                 <input
-                  value={invoiceNumber || generateInvoiceNumber()}
+                  value={invoiceNumber}
                   type='text'
                   className='border-2 border-[#477A0C] rounded-lg px-3 py-2 text-base font-mono text-black bg-white focus:border-[#F55D3E] focus:ring-1 focus:ring-[#89BBFE] transition-all font-bold'
                   readOnly
@@ -121,7 +107,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Date: <span className='text-green-600'>✓ Auto</span>
                 </label>
                 <input
-                  value={invoiceDate || new Date().toISOString().split('T')[0]}
+                  value={invoiceDate}
                   onChange={e =>
                     setInvoiceData({ invoiceDate: e.target.value })
                   }
@@ -141,7 +127,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                 <input
                   value={eventLocation}
                   onChange={e => {
-                    updateEventLocation(e.target.value);
+                    setInvoiceData({ eventLocation: e.target.value });
                     setHasEditedLocation(true);
                   }}
                   type='text'
@@ -230,7 +216,6 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
             : '✅ Suivant: Client →'}
         </button>
       </div>
-
     </div>
   );
 }

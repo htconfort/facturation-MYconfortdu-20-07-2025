@@ -11,7 +11,6 @@ import {
   Bug,
   Tablet,
   Zap,
-  Cloud,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -24,7 +23,6 @@ interface HeaderProps {
   onScrollToProducts?: () => void;
   onGoToIpad?: () => void; // Ajout du bouton iPad
   onShowQuickInvoice?: () => void; // Ajout du bouton Facture Rapide
-  onShowSync?: () => void; // Ajout du bouton Sync
   invoiceNumber?: string;
   clientName?: string;
   canSendToDrive?: boolean;
@@ -38,7 +36,6 @@ export const Header: React.FC<HeaderProps> = ({
   onShowDebug,
   onGoToIpad,
   onShowQuickInvoice,
-  onShowSync,
   invoiceNumber,
   clientName,
   canSendToDrive = false,
@@ -179,18 +176,6 @@ export const Header: React.FC<HeaderProps> = ({
             <Archive size={18} />
             <span className='hidden md:inline'>Factures</span>
           </button>
-
-          {/* Bouton Sync */}
-          {onShowSync && (
-            <button
-              onClick={onShowSync}
-              className='bg-blue-600 hover:bg-blue-700 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center space-x-2 font-bold shadow-md transition-all hover:scale-105 text-white'
-              title='Synchroniser toutes les factures'
-            >
-              <Cloud size={18} />
-              <span className='hidden md:inline'>Sync</span>
-            </button>
-          )}
 
           {onShowQuickInvoice && (
             <button
