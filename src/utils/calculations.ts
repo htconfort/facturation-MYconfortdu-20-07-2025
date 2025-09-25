@@ -68,11 +68,24 @@ export function generateInvoiceNumber(sessionId?: string, onReady?: (num: string
 
   const doGeneration = (): string => {
     lastGeneratedTimestamp = Date.now();
-    const lastInvoiceNumber = localStorage.getItem('lastInvoiceNumber') || `${year}-000`;
+    const lastInvoiceNumber = localStorage.getItem('lastInvoiceNumber') || `${year}000`;
     
     try {
-      const lastNumber = parseInt(lastInvoiceNumber.split('-')[1]) || 0;
-      const newNumber = `${year}-${String(lastNumber + 1).padStart(3, '0')}`;
+      // Extraire le numéro depuis le format YYYYNNN
+      const yearFromStorage = lastInvoiceNumber.substring(0, 4);
+      const numberFromStorage = lastInvoiceNumber.substring(4);
+      
+      // Si l'année a changé, recommencer à 1
+      if (yearFromStorage !== year.toString()) {
+        const newNumber = `${year}001`;
+        localStorage.setItem('lastInvoiceNumber', newNumber);
+        console.log(`🔢 Nouvelle année détectée: ${yearFromStorage} → ${year}, nouveau numéro: ${newNumber}`);
+        onReady?.(newNumber);
+        return newNumber;
+      }
+      
+      const lastNumber = parseInt(numberFromStorage) || 0;
+      const newNumber = `${year}${String(lastNumber + 1).padStart(3, '0')}`;
 
       // ✅ ATOMIC: Sauvegarder seulement si c'est une vraie génération
       localStorage.setItem('lastInvoiceNumber', newNumber);
@@ -118,13 +131,22 @@ export const getNextInvoiceNumber = (): string => {
   const now = new Date();
   const year = now.getFullYear();
   const lastInvoiceNumber =
-    localStorage.getItem('lastInvoiceNumber') || `${year}-000`;
+    localStorage.getItem('lastInvoiceNumber') || `${year}000`;
 
   try {
-    const lastNumber = parseInt(lastInvoiceNumber.split('-')[1]) || 0;
-    return `${year}-${String(lastNumber + 1).padStart(3, '0')}`;
+    // Extraire le numéro depuis le format YYYYNNN
+    const yearFromStorage = lastInvoiceNumber.substring(0, 4);
+    const numberFromStorage = lastInvoiceNumber.substring(4);
+    
+    // Si l'année a changé, recommencer à 1
+    if (yearFromStorage !== year.toString()) {
+      return `${year}001`;
+    }
+    
+    const lastNumber = parseInt(numberFromStorage) || 0;
+    return `${year}${String(lastNumber + 1).padStart(3, '0')}`;
   } catch (_error) {
-    return `${year}-001`;
+    return `${year}001`;
   }
 };
 

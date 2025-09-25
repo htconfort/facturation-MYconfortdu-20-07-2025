@@ -15,21 +15,20 @@ export const StepInvoice: React.FC = () => {
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Auto-generate invoice number if empty
+  // Auto-generate invoice number and date
   useEffect(() => {
-    if (!numeroFacture) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const time =
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0');
-
-      const autoNumber = `FAC-${year}${month}${day}-${time}`;
-      setNumeroFacture(autoNumber);
-    }
-  }, [numeroFacture]);
+    const now = new Date();
+    const today = now.toISOString().split('T')[0]; // Format YYYY-MM-DD
+    
+    // Toujours générer un nouveau numéro de facture au démarrage
+    const { generateInvoiceNumber } = require('../../utils/calculations');
+    const autoNumber = generateInvoiceNumber();
+    console.log('🔢 Génération numéro facture StepInvoice:', autoNumber);
+    setNumeroFacture(autoNumber);
+    
+    // Toujours mettre à jour la date avec la date du jour
+    setDateFacture(today);
+  }, []); // Exécuter une seule fois au montage
 
   // Validation
   const validateForm = () => {
@@ -118,7 +117,7 @@ export const StepInvoice: React.FC = () => {
               }
               focus:outline-none focus:ring-0
             `}
-            placeholder='Ex: FAC-20250824-1430'
+            placeholder='Ex: 2025001'
             autoComplete='off'
           />
           {errors.numero && (

@@ -20,14 +20,15 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
 
-    if (!invoiceNumber) {
-      setInvoiceData({ invoiceNumber: generateInvoiceNumber() });
-    }
+    // Toujours générer un nouveau numéro de facture au démarrage
+    const newInvoiceNumber = generateInvoiceNumber();
+    console.log('🔢 Génération numéro facture:', newInvoiceNumber);
+    setInvoiceData({ invoiceNumber: newInvoiceNumber });
 
     if (!invoiceDate) {
       setInvoiceData({ invoiceDate: today });
     }
-  }, [invoiceNumber, invoiceDate, setInvoiceData]);
+  }, [setInvoiceData]); // Supprimer les dépendances pour éviter les boucles
 
   const validateAndNext = () => {
     // Le lieu d'événement ET le conseiller sont obligatoires
