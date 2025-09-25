@@ -15,16 +15,22 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
     useInvoiceWizard();
   const [hasEditedLocation, setHasEditedLocation] = useState(false);
   const [hasEditedAdvisor, setHasEditedAdvisor] = useState(false);
+  const [localInvoiceNumber, setLocalInvoiceNumber] = useState('');
+  const [localInvoiceDate, setLocalInvoiceDate] = useState('');
 
-  // Générer automatiquement un numéro de facture et la date du jour si vides
+  // Générer automatiquement un numéro de facture et la date du jour
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
 
-    // Toujours générer un nouveau numéro de facture au démarrage
+    // Générer un nouveau numéro de facture
     const newInvoiceNumber = generateInvoiceNumber();
     console.log('🔢 Génération numéro facture StepFacture:', newInvoiceNumber);
     
-    // Mettre à jour les deux en une seule fois
+    // Mettre à jour l'état local immédiatement
+    setLocalInvoiceNumber(newInvoiceNumber);
+    setLocalInvoiceDate(today);
+    
+    // Mettre à jour le store
     setInvoiceData({ 
       invoiceNumber: newInvoiceNumber,
       invoiceDate: today 
@@ -96,7 +102,7 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Facture n°: <span className='text-green-600'>✓ Auto</span>
                 </span>
                 <input
-                  value={invoiceNumber || 'Génération...'}
+                  value={localInvoiceNumber || invoiceNumber || ''}
                   type='text'
                   className='border-2 border-[#477A0C] rounded-lg px-3 py-2 text-base font-mono text-black bg-green-50 focus:border-[#F55D3E] focus:ring-1 focus:ring-[#89BBFE] transition-all font-bold'
                   readOnly
@@ -112,10 +118,11 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                   Date: <span className='text-green-600'>✓ Auto</span>
                 </label>
                 <input
-                  value={invoiceDate}
-                  onChange={e =>
-                    setInvoiceData({ invoiceDate: e.target.value })
-                  }
+                  value={localInvoiceDate || invoiceDate || ''}
+                  onChange={e => {
+                    setLocalInvoiceDate(e.target.value);
+                    setInvoiceData({ invoiceDate: e.target.value });
+                  }}
                   type='date'
                   className='border-2 border-green-500 rounded-lg px-3 py-2 text-sm text-black bg-green-50 focus:ring-1 focus:ring-green-300 transition-all font-bold'
                 />
