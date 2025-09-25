@@ -22,13 +22,14 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
 
     // Toujours générer un nouveau numéro de facture au démarrage
     const newInvoiceNumber = generateInvoiceNumber();
-    console.log('🔢 Génération numéro facture:', newInvoiceNumber);
-    setInvoiceData({ invoiceNumber: newInvoiceNumber });
-
-    if (!invoiceDate) {
-      setInvoiceData({ invoiceDate: today });
-    }
-  }, [setInvoiceData]); // Supprimer les dépendances pour éviter les boucles
+    console.log('🔢 Génération numéro facture StepFacture:', newInvoiceNumber);
+    
+    // Mettre à jour les deux en une seule fois
+    setInvoiceData({ 
+      invoiceNumber: newInvoiceNumber,
+      invoiceDate: today 
+    });
+  }, []); // Exécuter une seule fois au montage
 
   const validateAndNext = () => {
     // Le lieu d'événement ET le conseiller sont obligatoires
@@ -92,14 +93,17 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
               {/* Numéro de facture */}
               <div className='flex flex-col space-y-1'>
                 <span className='font-bold text-black text-sm'>
-                  Facture n°:
+                  Facture n°: <span className='text-green-600'>✓ Auto</span>
                 </span>
                 <input
-                  value={invoiceNumber}
+                  value={invoiceNumber || 'Génération...'}
                   type='text'
-                  className='border-2 border-[#477A0C] rounded-lg px-3 py-2 text-base font-mono text-black bg-white focus:border-[#F55D3E] focus:ring-1 focus:ring-[#89BBFE] transition-all font-bold'
+                  className='border-2 border-[#477A0C] rounded-lg px-3 py-2 text-base font-mono text-black bg-green-50 focus:border-[#F55D3E] focus:ring-1 focus:ring-[#89BBFE] transition-all font-bold'
                   readOnly
                 />
+                <p className='text-green-600 text-xs font-semibold'>
+                  ✅ Numéro généré automatiquement
+                </p>
               </div>
 
               {/* Date facture */}
