@@ -10,9 +10,11 @@ interface ProductWithDeliveryStatus {
 // 🚀 SERVICE D'ENVOI VERS N8N AVEC VALIDATION
 export class N8nWebhookService {
   private static get WEBHOOK_URL() {
-    const url = WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
-    console.log('🔗 N8nWebhookService - Using webhook URL:', url);
-    return url;
+    const base = WebhookUrlHelper.getWebhookUrl('webhook/facture-universelle');
+    const key = WebhookUrlHelper.getSessionKey();
+    const urlWithKey = WebhookUrlHelper.appendQueryParams(base, { key });
+    console.log('🔗 N8nWebhookService - Using webhook URL:', urlWithKey);
+    return urlWithKey;
   }
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
 
@@ -50,6 +52,8 @@ export class N8nWebhookService {
 
       // 2. 📦 STRUCTURE DU PAYLOAD IDENTIQUE AU COMMIT FONCTIONNEL e54c7f9
       const webhookPayload = {
+        // ✅ Session key pour N8N Chat session/Key param
+        key: WebhookUrlHelper.getSessionKey(),
         // PDF data
         nom_facture: `Facture_MYCONFORT_${invoice.invoiceNumber}`,
         fichier_facture: pdfBase64, // Base64 du PDF

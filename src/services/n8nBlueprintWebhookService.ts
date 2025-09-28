@@ -81,8 +81,14 @@ export class N8nBlueprintWebhookService {
 
       try {
         console.log('📤 ENVOI MULTIPART/FORM-DATA VERS N8N...');
+        
+        // Ajout clé de session en tant que champ et en query param
+        const { WebhookUrlHelper } = await import('../utils/webhookUrlHelper');
+        const key = WebhookUrlHelper.getSessionKey();
+        formData.set('key', key);
+        const urlWithKey = WebhookUrlHelper.appendQueryParams(this.WEBHOOK_URL, { key });
 
-        const response = await fetch(this.WEBHOOK_URL, {
+        const response = await fetch(urlWithKey, {
           method: 'POST',
           // ⚠️ PAS de Content-Type header - laissé au navigateur pour multipart/form-data
           headers: {
