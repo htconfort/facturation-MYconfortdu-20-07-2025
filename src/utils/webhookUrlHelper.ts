@@ -7,8 +7,17 @@
  */
 
 import { configService } from '../services/configService';
+import { getCurrentSession, ensureOpenSession } from '../services/sessionService';
 
 export class WebhookUrlHelper {
+  private static isProd(): boolean {
+    try {
+      const meta = (import.meta as unknown as { env?: { PROD?: boolean } });
+      return Boolean(meta.env && meta.env.PROD);
+    } catch {
+      return false;
+    }
+  }
   /**
    * Retourne l'URL du webhook adaptée à l'environnement
    */
@@ -17,14 +26,14 @@ export class WebhookUrlHelper {
   ): string {
     // 🚀 UTILISER LE PROXY NETLIFY/VITE POUR ÉVITER CORS EN DÉVELOPPEMENT ET PRODUCTION
     console.log('🔍 WebhookUrlHelper - Environment check:', {
-      isProd: import.meta.env.PROD,
+      isProd: this.isProd(),
       hostname: window.location.hostname,
       willUseProxy:
-        import.meta.env.PROD || window.location.hostname === 'localhost',
+        this.isProd() || window.location.hostname === 'localhost',
     });
 
     // En production (Netlify) ET en développement local, utilise le proxy pour éviter CORS
-    if (import.meta.env.PROD || window.location.hostname === 'localhost') {
+    if (this.isProd() || window.location.hostname === 'localhost') {
       const proxyUrl = `/api/n8n/${endpoint}`;
       console.log('✅ Using proxy URL:', proxyUrl);
       return proxyUrl;
@@ -41,6 +50,44 @@ export class WebhookUrlHelper {
     // Sinon, construire l'URL complète
     const cleanBaseUrl = baseUrl.replace(/\/$/, ''); // Enlever le / final si présent
     return `${cleanBaseUrl}/${endpoint}`;
+  }
+
+  /**
+   * Ajoute des paramètres de requête à une URL (relative ou absolue)
+   */
+  static appendQueryParams(
+    url: string,
+    params: Record<string, string | number | boolean | undefined | null>
+  ): string {
+    try {
+      // Supporte les URLs relatives en utilisant l'origine courante
+      const base = url.startsWith('http')
+        ? new URL(url)
+        : new URL(url, window.location.origin);
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          base.searchParams.set(key, String(value));
+        }
+      });
+
+      // Si l'URL initiale était relative, retourner un chemin relatif
+      if (!url.startsWith('http')) {
+        return base.pathname + (base.search ? base.search : '');
+      }
+      return base.toString();
+    } catch {
+      // En cas d'échec, retourner l'URL d'origine
+      return url;
+    }
+  }
+
+  /**
+   * Retourne un identifiant de session stable pour servir de clé (key)
+   */
+  static getSessionKey(): string {
+    const session = getCurrentSession() ?? ensureOpenSession().data ?? null;
+    return session?.id ?? 'anonymous';
   }
 
   /**
@@ -63,7 +110,7 @@ export class WebhookUrlHelper {
    * Vérifie si on est en mode proxy (production)
    */
   static isUsingProxy(): boolean {
-    return import.meta.env.PROD;
+    return this.isProd();
   }
 
   /**
@@ -76,7 +123,7 @@ export class WebhookUrlHelper {
     directUrl: string;
   } {
     return {
-      environment: import.meta.env.PROD ? 'production' : 'development',
+      environment: this.isProd() ? 'production' : 'development',
       usingProxy: this.isUsingProxy(),
       webhookUrl: this.getWebhookUrl(),
       directUrl: this.getDirectUrl(),

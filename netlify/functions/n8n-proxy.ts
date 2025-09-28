@@ -1,4 +1,5 @@
-import type { Handler } from '@netlify/functions';
+// Type minimal pour compat Netlify sans dépendance de types
+type Handler = (event: any) => Promise<{ statusCode: number; headers?: Record<string, string>; body: string }>;
 
 // Proxy sécurisé vers n8n, en lisant l'URL depuis les variables d'environnement
 // Usage: /api/n8n/<endpoint> (ex: /api/n8n/webhook/facture-universelle)
@@ -20,7 +21,7 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    const baseUrl = process.env.VITE_N8N_WEBHOOK_URL || process.env.N8N_BASE_URL;
+    const baseUrl = (globalThis as any).process?.env?.VITE_N8N_WEBHOOK_URL || (globalThis as any).process?.env?.N8N_BASE_URL;
     if (!baseUrl) {
       return {
         statusCode: 500,
@@ -28,7 +29,9 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    const target = `${baseUrl.replace(/\/$/, '')}/${endpoint}`;
+    // Conserver la query string (ex: ?key=SESSION_ID)
+    const query = event.rawQuery ? `?${event.rawQuery}` : '';
+    const target = `${baseUrl.replace(/\/$/, '')}/${endpoint}${query}`;
 
     const method = event.httpMethod || 'POST';
     const headers: Record<string, string> = {
@@ -38,8 +41,8 @@ export const handler: Handler = async (event) => {
     };
 
     // Transmet aussi un secret facultatif si défini (X-Webhook-Secret côté n8n)
-    if (process.env.VITE_N8N_WEBHOOK_SECRET) {
-      headers['X-Webhook-Secret'] = process.env.VITE_N8N_WEBHOOK_SECRET;
+    if ((globalThis as any).process?.env?.VITE_N8N_WEBHOOK_SECRET) {
+      headers['X-Webhook-Secret'] = (globalThis as any).process.env.VITE_N8N_WEBHOOK_SECRET as string;
     }
 
     const resp = await fetch(target, {
