@@ -110,7 +110,7 @@ export class WebhookUrlHelper {
    * Vérifie si on est en mode proxy (production)
    */
   static isUsingProxy(): boolean {
-    return import.meta.env.PROD;
+    return this.isProd();
   }
 
   /**
