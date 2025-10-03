@@ -48,6 +48,9 @@ export default function MyComfortApp() {
     doorCode: '', // New field
   });
 
+  // État pour la checkbox "Pas d'e-mail"
+  const [noEmail, setNoEmail] = useState<boolean>(false);
+
   // === Bibliothèque produits ===
   const produitsCatalogue = [
     {
@@ -807,13 +810,41 @@ export default function MyComfortApp() {
             />
           </div>
           <div>
-            <label className='block font-medium mb-1'>Email*</label>
+            <div className='flex items-center justify-between mb-1'>
+              <label className='block font-medium'>Email*</label>
+              <label className='flex items-center gap-2 text-sm text-gray-600 cursor-pointer'>
+                <input
+                  type='checkbox'
+                  checked={noEmail}
+                  onChange={e => {
+                    setNoEmail(e.target.checked);
+                    if (e.target.checked) {
+                      setClient({ ...client, email: '' });
+                    }
+                  }}
+                  className='w-4 h-4 text-[#477A0C] border-gray-300 rounded focus:ring-[#477A0C]'
+                />
+                <span className='text-xs'>Pas d'e-mail</span>
+              </label>
+            </div>
             <input
-              className='border rounded px-3 py-2 w-full'
+              className={`border rounded px-3 py-2 w-full ${
+                noEmail
+                  ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300'
+                  : 'border-gray-300 focus:border-[#477A0C] focus:ring-2 focus:ring-[#477A0C]'
+              }`}
               type='email'
               value={client.email}
               onChange={e => setClient({ ...client, email: e.target.value })}
+              disabled={noEmail}
+              placeholder={noEmail ? 'Pas d\'e-mail' : 'email@exemple.com'}
+              required={!noEmail}
             />
+            {noEmail && (
+              <p className='text-gray-500 text-xs mt-1'>
+                ✅ Aucun e-mail requis pour ce client.
+              </p>
+            )}
           </div>
           <div className='md:col-span-2'>
             <label className='block font-medium mb-1'>SIRET</label>

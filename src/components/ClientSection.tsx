@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from 'lucide-react';
 import { Client } from '../types';
 
@@ -11,6 +11,9 @@ export const ClientSection: React.FC<ClientSectionProps> = ({
   client,
   onUpdate,
 }) => {
+  // État pour la checkbox "Pas d'e-mail"
+  const [noEmail, setNoEmail] = useState<boolean>(false);
+
   const handleInputChange = (field: keyof Client, value: string) => {
     onUpdate({ ...client, [field]: value });
   };
@@ -176,28 +179,56 @@ export const ClientSection: React.FC<ClientSectionProps> = ({
           </div>
 
           <div>
-            <label className='block text-black mb-1 font-bold'>
-              Email <span className='text-red-600'>*</span>
-            </label>
+            <div className='flex items-center justify-between mb-1'>
+              <label className='block text-black font-bold'>
+                Email <span className='text-red-600'>*</span>
+              </label>
+              <label className='flex items-center gap-2 text-sm text-gray-600 cursor-pointer'>
+                <input
+                  type='checkbox'
+                  checked={noEmail}
+                  onChange={e => {
+                    setNoEmail(e.target.checked);
+                    if (e.target.checked) {
+                      handleInputChange('email', '');
+                    }
+                  }}
+                  className='w-4 h-4 text-[#477A0C] border-gray-300 rounded focus:ring-[#477A0C]'
+                />
+                <span className='text-xs'>Pas d'e-mail</span>
+              </label>
+            </div>
             <input
               value={client.email}
               onChange={e => handleInputChange('email', e.target.value)}
               type='email'
-              required
-              className={getFieldStyle(client.email)}
-              placeholder='Email obligatoire'
+              required={!noEmail}
+              disabled={noEmail}
+              className={`w-full border-2 rounded-lg px-4 py-3 focus:ring-2 transition-all bg-white text-black font-semibold ${
+                noEmail
+                  ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed'
+                  : isFieldEmpty(client.email)
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-[#477A0C] focus:border-[#F55D3E]'
+              }`}
+              placeholder={noEmail ? 'Pas d\'e-mail' : 'Email obligatoire'}
             />
-            {isFieldEmpty(client.email) && (
+            {!noEmail && isFieldEmpty(client.email) && (
               <p className='text-red-600 text-xs mt-1 font-semibold'>
                 ⚠️ L'email est obligatoire
               </p>
             )}
-            {client.email &&
+            {!noEmail && client.email &&
               !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email) && (
                 <p className='text-red-600 text-xs mt-1 font-semibold'>
                   ⚠️ Format d'email invalide
                 </p>
               )}
+            {noEmail && (
+              <p className='text-gray-500 text-xs mt-1'>
+                ✅ Aucun e-mail requis pour ce client.
+              </p>
+            )}
           </div>
 
           <div>
