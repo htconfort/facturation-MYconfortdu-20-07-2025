@@ -22,17 +22,30 @@ export const EmailSender: React.FC<EmailSenderProps> = ({
   const [subject, setSubject] = useState(
     `Votre facture MYCONFORT - ${invoice.invoiceNumber}`
   );
-  const [message, setMessage] = useState(
-    `Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`
-  );
+  const [message, setMessage] = useState(() => {
+    const baseMessage = `Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.`;
+    
+    // Ajouter l'adresse des chèques si nécessaire
+    if (invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0) {
+      return baseMessage + `\n\n📮 Vos chèques sont à envoyer à l'adresse suivante :\nMyconfort\n8, rue du Grégal\n66510 Saint-Hippolyte\n\nCordialement,\nL'équipe MYCONFORT`;
+    }
+    
+    return baseMessage + `\n\nCordialement,\nL'équipe MYCONFORT`;
+  });
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     setRecipientEmail(invoice.clientEmail || '');
     setSubject(`Votre facture MYCONFORT - ${invoice.invoiceNumber}`);
-    setMessage(
-      `Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.\n\nCordialement,\nL'équipe MYCONFORT`
-    );
+    
+    const baseMessage = `Bonjour ${invoice.clientName},\n\nVeuillez trouver ci-joint votre facture MYCONFORT n°${invoice.invoiceNumber}.`;
+    
+    // Ajouter l'adresse des chèques si nécessaire
+    if (invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0) {
+      setMessage(baseMessage + `\n\n📮 Vos chèques sont à envoyer à l'adresse suivante :\nMyconfort\n8, rue du Grégal\n66510 Saint-Hippolyte\n\nCordialement,\nL'équipe MYCONFORT`);
+    } else {
+      setMessage(baseMessage + `\n\nCordialement,\nL'équipe MYCONFORT`);
+    }
   }, [invoice]);
 
   const handleSendEmail = async () => {
