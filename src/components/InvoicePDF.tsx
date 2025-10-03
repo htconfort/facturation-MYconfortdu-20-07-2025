@@ -596,13 +596,20 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                     </div>
                   )}
 
-                <div className='bg-white p-2 rounded border mt-2'>
-                  <p className='text-xs' style={{ color: '#080F0F' }}>
-                    Si vous devez envoyer des règlements par chèque. Voici
-                    l'adresse : SAV htconfort 8 rue du gregal 66510 st hippolyte
-                    0661486023
-                  </p>
-                </div>
+                {/* Affichage de l'adresse d'envoi des chèques uniquement si chèques à venir */}
+                {invoice.nombreChequesAVenir && invoice.nombreChequesAVenir > 0 && (
+                  <div className='bg-amber-50 border border-amber-200 rounded p-3 mt-3'>
+                    <p className='text-sm font-semibold text-amber-800 mb-1'>
+                      📮 Adresse d'envoi des chèques
+                    </p>
+                    <p className='text-xs' style={{ color: '#080F0F' }}>
+                      <strong>Vos chèques sont à envoyer à l'adresse suivante :</strong><br/>
+                      Myconfort<br/>
+                      8, rue du Grégal<br/>
+                      66510 Saint-Hippolyte
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

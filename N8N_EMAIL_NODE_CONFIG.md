@@ -39,7 +39,7 @@ Détails de votre facture :
 - Montant restant : {{$json.montant_restant}}€
 - Mode de paiement : {{$json.mode_paiement}}
 
-{{$json.nombre_cheques > 0 ? "📅 Chèques à venir : " + $json.nombre_cheques + " chèque(s) de " + $json.montant_par_cheque + "€ chacun" : ""}}
+{{$json.nombre_cheques > 0 ? "📅 Chèques à venir : " + $json.nombre_cheques + " chèque(s) de " + $json.montant_par_cheque + "€ chacun\n\n📮 Vos chèques sont à envoyer à l'adresse suivante :\nMyconfort\n8, rue du Grégal\n66510 Saint-Hippolyte" : ""}}
 
 Merci de votre confiance.
 
@@ -86,7 +86,14 @@ L'équipe MYCONFORT
             {{$json.nombre_cheques > 0 ? 
                 "<div style='background: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 10px;'>" +
                 "<strong>📅 Chèques à venir :</strong> " + $json.nombre_cheques + " chèque(s) de " + $json.montant_par_cheque + "€ chacun" +
-                "</div>" 
+                "</div>" +
+                "<div style='background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px; border: 1px solid #ffeaa7;'>" +
+                "<strong>📮 Adresse d'envoi des chèques :</strong><br/>" +
+                "<strong>Vos chèques sont à envoyer à l'adresse suivante :</strong><br/>" +
+                "Myconfort<br/>" +
+                "8, rue du Grégal<br/>" +
+                "66510 Saint-Hippolyte" +
+                "</div>"
                 : ""
             }}
         </div>

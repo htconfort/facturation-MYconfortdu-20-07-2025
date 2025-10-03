@@ -297,6 +297,30 @@ export class AdvancedPDFService {
       currentY += 8;
     }
 
+    // ✅ Affichage des détails des chèques à venir
+    if (data.nombreChequesAVenir && data.nombreChequesAVenir > 0 && data.montantRestant) {
+      const montantParCheque = (data.montantRestant / data.nombreChequesAVenir).toFixed(2);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`• ${data.nombreChequesAVenir} chèques de ${montantParCheque}€ chacun`, 25, currentY);
+      currentY += 5;
+      doc.text(`• Montant total des chèques : ${data.montantRestant.toFixed(2)}€`, 25, currentY);
+      currentY += 8;
+      
+      // ✅ Ajout de l'adresse d'envoi des chèques
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('📮 Vos chèques sont à envoyer à l\'adresse suivante :', 25, currentY);
+      currentY += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.text('Myconfort', 25, currentY);
+      currentY += 4;
+      doc.text('8, rue du Grégal', 25, currentY);
+      currentY += 4;
+      doc.text('66510 Saint-Hippolyte', 25, currentY);
+      currentY += 8;
+    }
+
     // Signature client
     doc.setFont('helvetica', 'bold');
     doc.text('Signature client MyCoNfort:', 20, currentY);

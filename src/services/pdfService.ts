@@ -462,7 +462,17 @@ export const PDFService = {
         doc.setFontSize(9);
         doc.text(`• ${invoiceData.nombreChequesAVenir} chèques de ${montantParCheque}€ chacun`, MARGIN + 5, y + 3);
         doc.text(`• Montant total des chèques : ${invoiceData.montantRestant.toFixed(2)}€`, MARGIN + 5, y + 7);
-        y += 10;
+        
+        // ✅ Ajout de l'adresse d'envoi des chèques
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('📮 Vos chèques sont à envoyer à l\'adresse suivante :', MARGIN + 5, y + 11);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Myconfort', MARGIN + 5, y + 15);
+        doc.text('8, rue du Grégal', MARGIN + 5, y + 18);
+        doc.text('66510 Saint-Hippolyte', MARGIN + 5, y + 21);
+        
+        y += 25;
       }
       y += 2;
     }

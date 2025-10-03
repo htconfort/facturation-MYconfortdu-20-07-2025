@@ -385,6 +385,18 @@ export default function StepRecapIpadOptimized({
                         {((totals.total - (paiement.depositAmount || 0)) / paiement.nombreChequesAVenir).toFixed(2)} €
                       </span>
                     </div>
+                    {/* Adresse d'envoi des chèques */}
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs font-semibold text-amber-800 mb-1">
+                        📮 Adresse d'envoi des chèques
+                      </p>
+                      <p className="text-xs text-amber-700">
+                        <strong>Vos chèques sont à envoyer à l'adresse suivante :</strong><br/>
+                        Myconfort<br/>
+                        8, rue du Grégal<br/>
+                        66510 Saint-Hippolyte
+                      </p>
+                    </div>
                   </>
                 )}
                 <div className="flex justify-between pt-1 border-t border-gray-200">
