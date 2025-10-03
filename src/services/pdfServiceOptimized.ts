@@ -131,10 +131,13 @@ export async function generatePdf(invoice: Invoice): Promise<PDFBlob> {
   // Informations entreprise (à droite)
   doc.setFontSize(10);
   const companyInfo = [
-    'MY COMFORT',
-    'Votre partenaire confort',
-    'Tél: 01 23 45 67 89',
-    'contact@mycomfort.fr'
+    'MYCONFORT',
+    'Votre spécialiste literie et confort',
+    '88, avenue des Ternes',
+    '75017 Paris',
+    'Tél: 06 61 48 60 23',
+    'htconfort@gmail.com',
+    'SIRET: 824 313 530 00027'
   ];
 
   let companyY = yPosition;

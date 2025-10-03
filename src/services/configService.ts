@@ -87,11 +87,11 @@ class ConfigService {
       },
 
       company: {
-        name: import.meta.env.VITE_COMPANY_NAME || 'HT CONFORT',
-        phone: import.meta.env.VITE_COMPANY_PHONE || '+33 X XX XX XX XX',
-        email: import.meta.env.VITE_COMPANY_EMAIL || 'contact@htconfort.com',
-        address: import.meta.env.VITE_COMPANY_ADDRESS || 'Adresse à configurer',
-        siret: import.meta.env.VITE_COMPANY_SIRET || 'SIRET à configurer',
+        name: import.meta.env.VITE_COMPANY_NAME || 'MYCONFORT',
+        phone: import.meta.env.VITE_COMPANY_PHONE || '06 61 48 60 23',
+        email: import.meta.env.VITE_COMPANY_EMAIL || 'htconfort@gmail.com',
+        address: import.meta.env.VITE_COMPANY_ADDRESS || '88, avenue des Ternes, 75017 Paris',
+        siret: import.meta.env.VITE_COMPANY_SIRET || '824 313 530 00027',
         iban: import.meta.env.VITE_COMPANY_IBAN || '',
         bic: import.meta.env.VITE_COMPANY_BIC || '',
         bankName: import.meta.env.VITE_COMPANY_BANK || '',

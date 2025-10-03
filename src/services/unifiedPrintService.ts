@@ -430,14 +430,14 @@ export class UnifiedPrintService {
           <!-- En-tête -->
           <div class="header">
             <div class="company-info">
-              <div class="company-name">HT CONFORT</div>
+              <div class="company-name">MYCONFORT</div>
               <div class="company-details">
-                Spécialiste climatisation et chauffage<br>
-                123 Rue de la Climatisation<br>
-                75000 PARIS<br>
-                Tél: 01 23 45 67 89<br>
-                Email: contact@htconfort.fr<br>
-                SIRET: 123 456 789 00012 | TVA: FR12345678901
+                Votre spécialiste literie et confort<br>
+                88, avenue des Ternes<br>
+                75017 Paris<br>
+                Tél: 06 61 48 60 23<br>
+                Email: htconfort@gmail.com<br>
+                SIRET: 824 313 530 00027
               </div>
             </div>
             <div class="invoice-title">

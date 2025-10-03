@@ -27,11 +27,11 @@ export const generatePDF = async (
 
     // Configuration par défaut de l'entreprise
     const companyInfo = options.companyInfo || {
-      name: 'MyComfort',
-      address: '123 Rue de la Paix\n75001 Paris',
-      phone: '01 23 45 67 89',
-      email: 'contact@mycomfort.fr',
-      siret: '123 456 789 00012',
+      name: 'MYCONFORT',
+      address: '88, avenue des Ternes\n75017 Paris',
+      phone: '06 61 48 60 23',
+      email: 'htconfort@gmail.com',
+      siret: '824 313 530 00027',
     };
 
     // Logo de l'entreprise
