@@ -560,6 +560,25 @@ export class UnifiedPrintService {
               <div class="section-header">💳 Mode de règlement:</div>
               <div class="payment-badge">${invoice.paymentMethod}</div>
               
+              ${{
+                // Affichage dédié pour "Chèque à venir"
+              }}
+              ${
+                invoice.paymentMethod &&
+                (invoice.paymentMethod.toLowerCase().includes('chèque') || invoice.paymentMethod.toLowerCase().includes('cheque')) &&
+                invoice.nombreChequesAVenir &&
+                invoice.nombreChequesAVenir > 0
+                  ? `
+                <div class="note-item" style="margin-top: 10px;">
+                  <strong>Chèques à venir:</strong> ${invoice.nombreChequesAVenir}
+                  <span style="margin-left: 8px; color: #14281D;">
+                    (vos chèques sont à envoyer à l'adresse suivante : HT CONFORT, 8 rue du Grégal, 66510 Saint Hippolyte)
+                  </span>
+                </div>
+              `
+                  : ''
+              }
+
               ${
                 invoice.paymentMethod &&
                 invoice.paymentMethod.toLowerCase().includes('virement')
