@@ -433,4 +433,3 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
     </div>
   );
 }
-// Force deployment Sat Oct  4 00:10:56 CEST 2025
