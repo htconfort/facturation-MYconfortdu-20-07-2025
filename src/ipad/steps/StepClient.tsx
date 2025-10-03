@@ -19,6 +19,9 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
   // État pour la checkbox "Pas de digicode"
   const [noDigicode, setNoDigicode] = useState<boolean>(false);
 
+  // État pour la checkbox "Pas d'e-mail"
+  const [noEmail, setNoEmail] = useState<boolean>(false);
+
   useEffect(() => {
     nameRef.current?.focus();
   }, []);
@@ -32,9 +35,10 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
   const requiredFields = {
     name: client.name && client.name.trim().length > 2,
     email:
-      client.email &&
-      client.email.includes('@') &&
-      client.email.trim().length > 0,
+      noEmail ||
+      (client.email &&
+        client.email.includes('@') &&
+        client.email.trim().length > 0),
     phone: client.phone && client.phone.trim().length > 0,
     address: client.address && client.address.trim().length > 0,
     city: client.city && client.city.trim().length > 0,
@@ -132,12 +136,29 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
 
             {/* Email - OBLIGATOIRE */}
             <div>
-              <label className='block text-black font-bold mb-3 text-lg flex items-center justify-between'>
-                <span>
-                  Email: <span className='text-red-600'>*</span>
-                </span>
-                {getValidationIndicator('email')}
-              </label>
+              <div className='flex items-center justify-between mb-3'>
+                <label className='block text-black font-bold text-lg flex items-center'>
+                  <span>
+                    Email: <span className='text-red-600'>*</span>
+                  </span>
+                  {getValidationIndicator('email')}
+                </label>
+                <label className='flex items-center gap-2 text-sm text-black cursor-pointer'>
+                  <input
+                    type='checkbox'
+                    checked={noEmail}
+                    onChange={e => {
+                      setNoEmail(e.target.checked);
+                      if (e.target.checked) {
+                        updateClient({ email: '' });
+                        markAsEdited('email');
+                      }
+                    }}
+                    className='w-4 h-4 text-[#477A0C] border-gray-300 rounded focus:ring-[#477A0C]'
+                  />
+                  <span className='text-xs'>Pas d'e-mail</span>
+                </label>
+              </div>
               <input
                 type='email'
                 inputMode='email'
@@ -146,10 +167,18 @@ export default function StepClient({ onNext, onPrev }: StepProps) {
                   updateClient({ email: e.target.value });
                   markAsEdited('email');
                 }}
-                className={getFieldClass('email')}
-                placeholder='email@exemple.com'
+                disabled={noEmail}
+                className={`${getFieldClass('email')} ${
+                  noEmail ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                }`}
+                placeholder={noEmail ? 'Pas d\'e-mail' : 'email@exemple.com'}
                 autoComplete='email'
               />
+              {noEmail && (
+                <p className='text-gray-500 text-xs mt-1'>
+                  ✅ Aucun e-mail requis pour ce client.
+                </p>
+              )}
             </div>
 
             {/* Téléphone - OBLIGATOIRE */}

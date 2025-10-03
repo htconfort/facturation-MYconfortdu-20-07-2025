@@ -342,12 +342,12 @@ export default function StepRecapIpadOptimized({
                   <span className="text-gray-600">Nom :</span>
                   <span className="font-medium truncate">{client.name || 'Non renseigné'}</span>
                 </div>
-                {client.email && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email :</span>
-                    <span className="font-medium text-xs truncate">{client.email}</span>
-                  </div>
-                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Email :</span>
+                  <span className="font-medium text-xs truncate">
+                    {client.email || 'Pas d\'e-mail'}
+                  </span>
+                </div>
                 {client.phone && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tél :</span>

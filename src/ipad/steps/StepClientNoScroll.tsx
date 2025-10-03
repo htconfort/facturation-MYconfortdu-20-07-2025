@@ -24,6 +24,7 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
   const { client, updateClient } = useInvoiceWizard();
   const nameRef = useRef<HTMLInputElement>(null);
   const [hasAttemptedNext, setHasAttemptedNext] = useState(false);
+  const [noEmail, setNoEmail] = useState<boolean>(false);
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -35,7 +36,7 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
   // Validations
   const validity = {
     name: (client.name?.trim().length || 0) > 2,
-    email: !!client.email?.includes('@'),
+    email: noEmail || !!client.email?.includes('@'),
     phone: (client.phone?.trim().length || 0) > 0,
     address: (client.address?.trim().length || 0) > 0,
     city: (client.city?.trim().length || 0) > 0,
@@ -114,26 +115,50 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
               </div>
 
               {/* Email */}
-              <div className='space-y-0'>
-                <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
-                  <Mail className='w-4 h-4 text-myconfort-green' /> Email{' '}
-                  <span className='text-red-600 font-bold'>*</span>
-                </label>
+              <div className='space-y-2'>
+                <div className='flex items-center justify-between'>
+                  <label className='flex items-center gap-1 text-base font-medium text-myconfort-dark font-manrope'>
+                    <Mail className='w-4 h-4 text-myconfort-green' /> Email{' '}
+                    <span className='text-red-600 font-bold'>*</span>
+                  </label>
+                  <label className='flex items-center gap-2 text-sm text-myconfort-dark cursor-pointer'>
+                    <input
+                      type='checkbox'
+                      checked={noEmail}
+                      onChange={e => {
+                        setNoEmail(e.target.checked);
+                        if (e.target.checked) {
+                          updateField('email', '');
+                        }
+                      }}
+                      className='w-4 h-4 text-myconfort-green border-gray-300 rounded focus:ring-myconfort-green'
+                    />
+                    <span className='text-xs'>Pas d'e-mail</span>
+                  </label>
+                </div>
                 <input
                   type='email'
                   value={client.email || ''}
                   onChange={e => updateField('email', e.target.value)}
+                  disabled={noEmail}
                   className={`w-full px-3 py-2 text-base border-2 rounded-lg font-manrope transition-colors min-h-[40px] focus:outline-none ${
-                    isFieldValid('email')
+                    noEmail
+                      ? 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed'
+                      : isFieldValid('email')
                       ? 'border-gray-200 bg-white text-myconfort-dark hover:border-myconfort-green focus:border-myconfort-green'
                       : 'border-myconfort-coral bg-red-50 text-red-900'
                   }`}
-                  placeholder='example@gmail.com'
-                  required
+                  placeholder={noEmail ? 'Pas d\'e-mail' : 'example@gmail.com'}
+                  required={!noEmail}
                 />
-                {!isFieldValid('email') && (
+                {!isFieldValid('email') && !noEmail && (
                   <p className='text-myconfort-coral text-xs'>
                     Adresse email valide requise.
+                  </p>
+                )}
+                {noEmail && (
+                  <p className='text-gray-500 text-xs'>
+                    ✅ Aucun e-mail requis pour ce client.
                   </p>
                 )}
               </div>
