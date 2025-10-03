@@ -250,7 +250,7 @@ export default function StepRecapIpadOptimized({
     try {
       setIsLoading(true);
       console.log('📧 Début envoi email...', {
-        clientEmail: client.email,
+        clientEmail: client.email || 'Pas d\'email client',
         invoiceNumber: invoice.invoiceNumber
       });
       
@@ -269,9 +269,15 @@ export default function StepRecapIpadOptimized({
       });
       console.log('🔄 PDF converti en base64:', { length: pdfBase64.length });
 
-      await N8nWebhookService.sendInvoiceToN8n(invoice, pdfBase64);
+      // Modifier l'objet invoice pour inclure un email par défaut si nécessaire
+      const invoiceToSend = {
+        ...invoice,
+        clientEmail: client.email || 'pas-d-email@myconfort.fr'
+      };
+
+      await N8nWebhookService.sendInvoiceToN8n(invoiceToSend, pdfBase64);
       console.log('✅ Email envoyé avec succès');
-      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} envoyée par email`]);
+      setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} envoyée par email ${client.email ? `à ${client.email}` : '(sans email client)'}`]);
     } catch (error) {
       console.error('❌ Erreur envoi email:', error);
       setActionHistory(prev => [...prev, `Erreur envoi: ${ (error as any).message || 'Erreur inconnue'}`]);
@@ -286,7 +292,7 @@ export default function StepRecapIpadOptimized({
   const isPdfGenerated = actionHistory.some(action => action.includes('ouvert pour impression'));
 
   // Debug état du bouton email (ne bloque pas le pipeline post-signature)
-  const emailButtonDisabled = isLoading || !client.email;
+  const emailButtonDisabled = isLoading;
   console.log('🔍 Debug bouton email:', {
     isLoading,
     clientEmail: client.email,
@@ -585,10 +591,10 @@ export default function StepRecapIpadOptimized({
                     </>
                   ) : !client.email ? (
                     <>
-                      <span className="text-lg mb-1">❌</span>
+                      <span className="text-lg mb-1">📧</span>
                       <div className="text-center">
-                        <div className="text-sm">Pas d'email</div>
-                        <div className="text-xs opacity-80">Client sans email</div>
+                        <div className="text-sm">Envoyer</div>
+                        <div className="text-xs opacity-80">Sans email client</div>
                       </div>
                     </>
                   ) : (
