@@ -23,6 +23,7 @@ type PdfDraft = {
   products: PdfDraftProduct[];
   montantAcompte: number;
   paymentMethod: string;
+  nombreChequesAVenir?: number;
   invoiceNotes?: string;
   deliveryNotes?: string;
   eventLocation?: string;
@@ -58,6 +59,7 @@ function mapInvoiceToPdfDraft(source: Invoice): PdfDraft {
     products: (source.products || []).map(toDraftProduct),
     montantAcompte: source.montantAcompte || 0,
     paymentMethod: source.paymentMethod || '',
+    nombreChequesAVenir: source.nombreChequesAVenir,
     invoiceNotes: source.invoiceNotes,
     deliveryNotes: source.deliveryNotes,
     eventLocation: source.eventLocation,

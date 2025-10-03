@@ -109,6 +109,20 @@ export class N8nWebhookService {
             ? (montantRestant / invoice.nombreChequesAVenir).toFixed(2)
             : '',
 
+        // ✅ NOUVELLES MENTIONS EMAIL POUR CHÈQUES À VENIR (HTML + texte)
+        cheques_avenir_html:
+          invoice.nombreChequesAVenir &&
+          invoice.nombreChequesAVenir > 0 &&
+          (invoice.paymentMethod || '').toLowerCase().includes('chèque')
+            ? `<div style="margin-top:10px;color:#14281D;">Chèques à venir: <strong>${invoice.nombreChequesAVenir}</strong><br/><span style="font-size:12px;">(vos chèques sont à envoyer à l'adresse suivante : HT CONFORT, 8 rue du Grégal, 66510 Saint Hippolyte)</span></div>`
+            : '',
+        cheques_avenir_texte:
+          invoice.nombreChequesAVenir &&
+          invoice.nombreChequesAVenir > 0 &&
+          (invoice.paymentMethod || '').toLowerCase().includes('chèque')
+            ? `Chèques à venir: ${invoice.nombreChequesAVenir} - vos chèques sont à envoyer à l'adresse suivante : HT CONFORT, 8 rue du Grégal, 66510 Saint Hippolyte`
+            : '',
+
         // ✅ NOUVEAU : GESTION ALMA AVEC WORDING CORRECT
         est_paiement_alma:
           invoice.paymentMethod && invoice.paymentMethod.includes('ALMA'),
