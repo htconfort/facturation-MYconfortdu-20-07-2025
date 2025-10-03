@@ -113,7 +113,7 @@ export const ProductsEditor: React.FC<Props> = ({
                   className='border border-gray-300 rounded-lg px-4 py-3 text-base focus:ring-2 focus:ring-[#477A0C] focus:border-transparent'
                   value={product.name}
                   onChange={e => updateProduct(index, { name: e.target.value })}
-                  placeholder='Ex: Climatisation réversible'
+                  placeholder='Ex: Matelas Bambou 90x200'
                 />
               </label>
 
@@ -128,9 +128,9 @@ export const ProductsEditor: React.FC<Props> = ({
                     updateProduct(index, { category: e.target.value })
                   }
                 >
-                  <option value='Climatisation'>Climatisation</option>
-                  <option value='Chauffage'>Chauffage</option>
-                  <option value='Ventilation'>Ventilation</option>
+                  <option value='Matelas'>Matelas</option>
+                  <option value='Oreiller'>Oreiller</option>
+                  <option value='Couette'>Couette</option>
                   <option value='Maintenance'>Maintenance</option>
                   <option value='Installation'>Installation</option>
                   <option value='Autre'>Autre</option>

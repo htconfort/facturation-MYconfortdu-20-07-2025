@@ -50,7 +50,7 @@ const COMPANY = {
   name: 'MYCONFORT',
   address1: '88 avenue des Ternes',
   address2: '75017 Paris',
-  phone: '+33 6 61 48 60 23',
+  phone: '06 61 48 60 23',
   email: 'htconfort@gmail.com',
   website: 'htconfort.com',
   siret: '824 313 530 00027',

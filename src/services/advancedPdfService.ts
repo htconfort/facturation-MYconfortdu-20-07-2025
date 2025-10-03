@@ -154,14 +154,14 @@ export class AdvancedPDFService {
     doc.setTextColor(...this.COLORS.dark);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('MyCoNfort', 20, 50);
+    doc.text('MYCONFORT', 20, 50);
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text('88 Avenue des Ternes', 20, 56);
     doc.text('75017 Paris, France', 20, 61);
     doc.text('SIRET: 824 313 530 00027', 20, 66);
-    doc.text('Tél: 04 68 50 41 45', 20, 71);
+    doc.text('Tél: 06 61 48 60 23', 20, 71);
 
     // Informations facture (droite)
     doc.setFontSize(12);
@@ -498,7 +498,7 @@ export class AdvancedPDFService {
     doc.setTextColor(0, 0, 0); // Noir
     doc.setFontSize(22); // Taille 22 comme demandé
     doc.setFont('helvetica', 'bold');
-    doc.text('MyCoNfort', 105, pageHeight - 20, { align: 'center' });
+    doc.text('MYCONFORT', 105, pageHeight - 20, { align: 'center' });
 
     doc.setTextColor(0, 0, 0); // Noir pour tout le texte
     doc.setFontSize(10);
@@ -517,13 +517,13 @@ export class AdvancedPDFService {
       { align: 'center' }
     );
     doc.text(
-      '88 Avenue des Ternes, 75017 Paris - Tél: 04 68 50 41 45',
+      '88 Avenue des Ternes, 75017 Paris - Tél: 06 61 48 60 23',
       105,
       pageHeight - 6,
       { align: 'center' }
     );
     doc.text(
-      'Email: myconfort@gmail.com - SIRET: 824 313 530 00027',
+      'Email: htconfort@gmail.com - SIRET: 824 313 530 00027',
       105,
       pageHeight - 2,
       { align: 'center' }

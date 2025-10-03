@@ -68,7 +68,7 @@ export async function generateInvoicePDF(
   doc.setTextColor(0, 0, 0); // Noir
   doc.setFontSize(22); // Taille 22
   doc.setFont('helvetica', 'bold');
-  doc.text('MyCoNfort', 40, 20);
+  doc.text('MYCONFORT', 40, 20);
 
   // Informations facture (en haut à droite)
   doc.setTextColor(20, 40, 29);
@@ -93,8 +93,8 @@ export async function generateInvoicePDF(
   doc.text('88 Avenue des Ternes', 15, 45);
   doc.text('75017 Paris, France', 15, 50);
   doc.text('SIRET: 824 313 530 00027', 15, 55);
-  doc.text('Tél: 04 68 50 41 45', 15, 60);
-  doc.text('Email: myconfort@gmail.com', 15, 65);
+  doc.text('Tél: 06 61 48 60 23', 15, 60);
+  doc.text('Email: htconfort@gmail.com', 15, 65);
 
   // Section client
   doc.setFillColor(242, 239, 226);
