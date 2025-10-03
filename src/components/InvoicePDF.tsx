@@ -122,11 +122,11 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
                   MYCONFORT
                 </p>{' '}
                 {/* Changé de text-sm à text-base */}
-                <p className='font-semibold'>88 Avenue des Ternes</p>
-                <p>75017 Paris, France</p>
+                <p className='font-semibold'>88, avenue des Ternes</p>
+                <p>75017 Paris</p>
                 <p>SIRET: 824 313 530 00027</p>
-                <p>Tél: 04 68 50 41 45</p>
-                <p>Email: myconfort@gmail.com</p>
+                <p>Tél: 06 61 48 60 23</p>
+                <p>Email: htconfort@gmail.com</p>
                 <p>Site web: https://www.htconfort.com</p>
               </div>
             </div>
@@ -672,7 +672,7 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
           <div className='p-4 border-b-2 border-[#477A0C] bg-[#477A0C] text-[#F2EFE2] text-center'>
             <h1 className='text-xl font-bold'>CONDITIONS GÉNÉRALES DE VENTE</h1>
             <p className='text-sm mt-1'>
-              MYCONFORT - 88 Avenue des Ternes, 75017 Paris
+              MYCONFORT - 88, avenue des Ternes, 75017 Paris
             </p>
           </div>
 
@@ -835,10 +835,10 @@ export const InvoicePDF = React.forwardRef<HTMLDivElement, InvoicePDFProps>(
               <span className='text-lg font-bold'>MYCONFORT</span>
             </div>
             <p className='text-sm'>
-              88 Avenue des Ternes, 75017 Paris - Tél: 04 68 50 41 45
+              88, avenue des Ternes, 75017 Paris - Tél: 06 61 48 60 23
             </p>
             <p className='text-sm'>
-              Email: myconfort@gmail.com - SIRET: 824 313 530 00027
+              Email: htconfort@gmail.com - SIRET: 824 313 530 00027
             </p>
           </div>
         </div>

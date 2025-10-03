@@ -87,11 +87,11 @@ export const SimplePDFPreviewModal: React.FC<SimplePDFPreviewModalProps> = ({
                     MYCONFORT
                   </h3>
                   <div className='text-sm text-gray-600 space-y-1'>
-                    <p>88 Avenue des Ternes</p>
-                    <p>75017 Paris, France</p>
+                    <p>88, avenue des Ternes</p>
+                    <p>75017 Paris</p>
                     <p>SIRET: 824 313 530 00027</p>
-                    <p>Tél: 04 68 50 41 45</p>
-                    <p>Email: myconfort@gmail.com</p>
+                    <p>Tél: 06 61 48 60 23</p>
+                    <p>Email: htconfort@gmail.com</p>
                     <p>https://www.htconfort.com</p>
                   </div>
                 </div>

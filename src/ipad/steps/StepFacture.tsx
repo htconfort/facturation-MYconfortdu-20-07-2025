@@ -84,10 +84,10 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
                 SIRET: 824 313 530 00027
               </p>
               <p className='text-black font-semibold text-sm'>
-                Tél: 04 68 50 41 45
+                Tél: 06 61 48 60 23
               </p>
               <p className='text-black font-semibold text-sm'>
-                Email: myconfort@gmail.com
+                Email: htconfort@gmail.com
               </p>
               <p className='text-black font-semibold text-sm'>
                 Site web: https://www.htconfort.com

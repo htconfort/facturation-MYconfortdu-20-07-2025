@@ -26,13 +26,13 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
               <strong>MYCONFORT</strong>
             </h2>
             <p className='text-black font-semibold'>
-              <strong>88 Avenue des Ternes</strong>
+              <strong>88, avenue des Ternes</strong>
             </p>
-            <p className='text-black font-semibold'>75017 Paris, France</p>
+            <p className='text-black font-semibold'>75017 Paris</p>
             <p className='text-black font-semibold'>SIRET: 824 313 530 00027</p>
-            <p className='text-black font-semibold'>Tél: 04 68 50 41 45</p>
+            <p className='text-black font-semibold'>Tél: 06 61 48 60 23</p>
             <p className='text-black font-semibold'>
-              Email: myconfort@gmail.com
+              Email: htconfort@gmail.com
             </p>
             <p className='text-black font-semibold'>
               Site web: https://www.htconfort.com
