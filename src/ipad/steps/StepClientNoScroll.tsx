@@ -133,7 +133,7 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
                       }}
                       className='w-4 h-4 text-myconfort-green border-gray-300 rounded focus:ring-myconfort-green'
                     />
-                    <span className='text-xs'>Pas d'e-mail ✅</span>
+                    <span className='text-xs'>Pas d'e-mail</span>
                   </label>
                 </div>
                 <input
