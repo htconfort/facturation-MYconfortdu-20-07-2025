@@ -227,9 +227,13 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         /foire|salon|exposition/i.test(eventLocation) : 
         false;
       
+      // 🔧 Correction: Forcer la mise à jour même si invoiceNumber est vide
+      const invoiceNumber = data.invoiceNumber !== undefined ? data.invoiceNumber : state.invoiceNumber;
+      const invoiceDate = data.invoiceDate !== undefined ? data.invoiceDate : state.invoiceDate;
+      
       return {
-        invoiceNumber: data.invoiceNumber ?? state.invoiceNumber,
-        invoiceDate: data.invoiceDate ?? state.invoiceDate,
+        invoiceNumber,
+        invoiceDate,
         eventLocation,
         isFairEvent,
       };

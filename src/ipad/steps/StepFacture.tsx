@@ -22,18 +22,20 @@ export default function StepFacture({ onNext, onQuit }: StepProps) {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
 
-    // Générer un nouveau numéro de facture
-    const newInvoiceNumber = generateInvoiceNumber();
-    console.log('🔢 Génération numéro facture StepFacture:', newInvoiceNumber);
-    
-    // Mettre à jour l'état local immédiatement
-    setLocalInvoiceNumber(newInvoiceNumber);
-    setLocalInvoiceDate(today);
-    
-    // Mettre à jour le store
-    setInvoiceData({ 
-      invoiceNumber: newInvoiceNumber,
-      invoiceDate: today 
+    // Générer un nouveau numéro de facture avec la bonne fonction
+    import('../../utils/calculations').then(({ generateInvoiceNumber }) => {
+      const newInvoiceNumber = generateInvoiceNumber();
+      console.log('🔢 Génération numéro facture StepFacture:', newInvoiceNumber);
+      
+      // Mettre à jour l'état local immédiatement
+      setLocalInvoiceNumber(newInvoiceNumber);
+      setLocalInvoiceDate(today);
+      
+      // Mettre à jour le store
+      setInvoiceData({ 
+        invoiceNumber: newInvoiceNumber,
+        invoiceDate: today 
+      });
     });
   }, []); // Exécuter une seule fois au montage
 

@@ -35,6 +35,28 @@ export default function StepRecapIpadOptimized({
     advisorName
   } = useInvoiceWizard();
 
+  // 🔍 Debug: Vérifier le numéro de facture
+  useEffect(() => {
+    console.log('🔍 StepRecap - invoiceNumber:', invoiceNumber);
+    console.log('🔍 StepRecap - invoiceDate:', invoiceDate);
+    console.log('🔍 StepRecap - eventLocation:', eventLocation);
+  }, [invoiceNumber, invoiceDate, eventLocation]);
+
+  // 🔧 Correction: Regénérer le numéro de facture s'il est vide
+  useEffect(() => {
+    if (!invoiceNumber || invoiceNumber.trim() === '') {
+      console.log('⚠️ Numéro de facture vide, regénération...');
+      import('../../utils/calculations').then(({ generateInvoiceNumber }) => {
+        const newInvoiceNumber = generateInvoiceNumber();
+        console.log('🔢 Regénération numéro facture StepRecap:', newInvoiceNumber);
+        
+        // Mettre à jour le store avec le nouveau numéro
+        const { setInvoiceData } = useInvoiceWizard.getState();
+        setInvoiceData({ invoiceNumber: newInvoiceNumber });
+      });
+    }
+  }, [invoiceNumber]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [postSigStatus, setPostSigStatus] = useState<'idle'|'running'|'done'|'error'>('idle');
@@ -280,7 +302,7 @@ export default function StepRecapIpadOptimized({
       <div className="bg-white border-b border-[#477A0C]/20 p-2 flex-shrink-0">
         <div className="text-center">
           <h2 className="text-lg font-bold text-[#477A0C]">
-            📋 Récap Final - {invoiceNumber}
+            📋 Récap Final - {invoiceNumber || 'En cours de génération...'}
           </h2>
         </div>
       </div>
