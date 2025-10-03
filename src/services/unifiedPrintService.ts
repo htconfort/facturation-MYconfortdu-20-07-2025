@@ -560,6 +560,25 @@ export class UnifiedPrintService {
               <div class="section-header">💳 Mode de règlement:</div>
               <div class="payment-badge">${invoice.paymentMethod}</div>
               
+              ${{
+                // Affichage dédié pour "Chèque à venir"
+              }}
+              ${
+                invoice.paymentMethod &&
+                (invoice.paymentMethod.toLowerCase().includes('chèque') || invoice.paymentMethod.toLowerCase().includes('cheque')) &&
+                invoice.nombreChequesAVenir &&
+                invoice.nombreChequesAVenir > 0
+                  ? `
+                <div class="note-item" style="margin-top: 10px;">
+                  <strong>Chèques à venir:</strong> ${invoice.nombreChequesAVenir}
+                  <span style="margin-left: 8px; color: #14281D;">
+                    (vos chèques sont à envoyer à l'adresse suivante : HT CONFORT, 8 rue du Grégal, 66510 Saint Hippolyte)
+                  </span>
+                </div>
+              `
+                  : ''
+              }
+
               ${
                 invoice.paymentMethod &&
                 invoice.paymentMethod.toLowerCase().includes('virement')
@@ -927,13 +946,14 @@ export class UnifiedPrintService {
     }
 
     // Informations de paiement
-    if (draft.paiement?.method) {
+    if (draft.paiement?.method || draft.paymentMethod) {
       doc.setFontSize(10);
       doc.setTextColor(darkColor);
-      doc.text(`Mode de paiement: ${draft.paiement.method}`, margin, yPosition);
+      const paymentMethodText = (draft.paiement?.method || draft.paymentMethod) as string;
+      doc.text(`Mode de paiement: ${paymentMethodText}`, margin, yPosition);
       yPosition += 15;
 
-      if (draft.paiement.depositAmount > 0) {
+      if (draft.paiement?.depositAmount > 0) {
         doc.text(
           `Acompte: ${draft.paiement.depositAmount.toFixed(2)} €`,
           margin,
@@ -942,13 +962,26 @@ export class UnifiedPrintService {
         yPosition += 15;
       }
 
-      if (draft.paiement.remainingAmount > 0) {
+      if (draft.paiement?.remainingAmount > 0) {
         doc.text(
           `Restant dû: ${draft.paiement.remainingAmount.toFixed(2)} €`,
           margin,
           yPosition
         );
         yPosition += 15;
+      }
+
+      // Mention spécifique pour les chèques à venir
+      const nombreCheques = (draft.paiement?.nombreChequesAVenir ?? draft.nombreChequesAVenir ?? 0) as number;
+      const methodLower = (paymentMethodText || '').toLowerCase();
+      const isChequeAvenir = (methodLower.includes('chèque') || methodLower.includes('cheque')) && nombreCheques > 0;
+
+      if (isChequeAvenir) {
+        const mention = `Chèques à venir: ${nombreCheques} (vos chèques sont à envoyer à l'adresse suivante : HT CONFORT, 8 rue du Grégal, 66510 Saint Hippolyte)`;
+        // Gérer le retour à la ligne si nécessaire
+        const wrapped = (doc as any).splitTextToSize(mention, pageWidth - margin * 2);
+        doc.text(wrapped, margin, yPosition);
+        yPosition += 15 + (wrapped.length > 1 ? (wrapped.length - 1) * 12 : 0);
       }
 
       yPosition += 20;
