@@ -58,11 +58,17 @@ export class N8nWebhookService {
         date_creation: new Date().toISOString(),
 
         // ✅ NOUVEAUX CHAMPS POUR DISTINCTION EMAIL/PDF
-        type_document_email: 'Bon de commande', // Ce qui apparaît dans l'email
+        type_document_email: 'Facture', // Ce qui apparaît dans l'email
         type_document_pdf: 'Facture', // Ce qui est dans le PDF en pièce jointe
         numero_bon_commande: invoice.invoiceNumber, // Même numéro pour le bon de commande
-        objet_email: `Bon de commande n° ${invoice.invoiceNumber}`, // Sujet de l'email
-        titre_email: `Votre bon de commande n° ${invoice.invoiceNumber}`, // Titre dans le corps de l'email
+        objet_email: `Facture n° ${invoice.invoiceNumber} - ${invoice.clientName}`, // Sujet de l'email personnalisé
+        titre_email: `Votre facture n° ${invoice.invoiceNumber}`, // Titre dans le corps de l'email
+        
+        // ✅ VARIANTES DE SUJET D'EMAIL
+        sujet_email_variante_1: `Facture MYCONFORT n° ${invoice.invoiceNumber}`,
+        sujet_email_variante_2: `Facture ${invoice.invoiceNumber} - ${invoice.clientName}`,
+        sujet_email_variante_3: `MYCONFORT - Facture n° ${invoice.invoiceNumber} pour ${invoice.clientName}`,
+        sujet_email_variante_4: `Facture ${invoice.invoiceNumber} - ${invoice.clientName} - ${totalAmount.toFixed(2)}€`,
 
         // Invoice metadata - NOMS EXACTS DU COMMIT FONCTIONNEL
         numero_facture: invoice.invoiceNumber,

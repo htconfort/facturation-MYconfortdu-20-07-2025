@@ -27,7 +27,7 @@ Dans le workflow N8N actuel :
 ```json
 {
   "sendTo": "= {{ ... }}",
-  "subject": "MyCoNfort - Facture",
+  "subject": "={{ $json.objet_email }}",
   "message": "={{ $json.body_html }}",
   "options": {
     "attachments": [
@@ -40,6 +40,13 @@ Dans le workflow N8N actuel :
   }
 }
 ```
+
+**Variantes de sujet disponibles :**
+- `{{ $json.objet_email }}` → "Facture n° 2025-1234 - Jean Dupont"
+- `{{ $json.sujet_email_variante_1 }}` → "Facture MYCONFORT n° 2025-1234"
+- `{{ $json.sujet_email_variante_2 }}` → "Facture 2025-1234 - Jean Dupont"
+- `{{ $json.sujet_email_variante_3 }}` → "MYCONFORT - Facture n° 2025-1234 pour Jean Dupont"
+- `{{ $json.sujet_email_variante_4 }}` → "Facture 2025-1234 - Jean Dupont - 150.00€"
 
 ### 2. **Alternative : Utiliser le champ binaire directement**
 
