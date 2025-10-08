@@ -50,9 +50,11 @@ export class N8nWebhookService {
 
       // 2. 📦 STRUCTURE DU PAYLOAD IDENTIQUE AU COMMIT FONCTIONNEL e54c7f9
       const webhookPayload = {
-        // PDF data
+        // PDF data - Format correct pour N8N
         nom_facture: `Facture_MYCONFORT_${invoice.invoiceNumber}`,
         fichier_facture: pdfBase64, // Base64 du PDF
+        facture_pdf: pdfBase64, // Alias pour compatibilité N8N
+        pdf_base64: pdfBase64, // Alias pour compatibilité N8N
         date_creation: new Date().toISOString(),
 
         // ✅ NOUVEAUX CHAMPS POUR DISTINCTION EMAIL/PDF
@@ -374,8 +376,12 @@ export class N8nWebhookService {
         'produits_prix_ht_unitaires (nombre)': `${webhookPayload.produits_prix_ht_unitaires.length} items`,
         nombre_produits: webhookPayload.nombre_produits,
 
-        // PDF
+        // PDF - Vérification multiple
         'fichier_facture (taille)': `${pdfBase64.length} chars`,
+        'facture_pdf (taille)': `${pdfBase64.length} chars`,
+        'pdf_base64 (taille)': `${pdfBase64.length} chars`,
+        'pdf_starts_with': pdfBase64.substring(0, 20),
+        'pdf_ends_with': pdfBase64.substring(pdfBase64.length - 20),
       };
 
       Object.entries(criticalFields).forEach(([field, value]) => {
