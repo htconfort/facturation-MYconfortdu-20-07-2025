@@ -292,35 +292,50 @@ export const InvoicesListModal: React.FC<InvoicesListModalProps> = ({
           </div>
 
           {/* Liste des factures */}
-          <div className='overflow-x-auto'>
-            <table className='w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm'>
+          <div 
+            className='overflow-x-auto overflow-y-visible' 
+            style={{ 
+              maxWidth: '100%', 
+              minWidth: '1200px',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#477A0C #f1f1f1'
+            }}
+          >
+            <table 
+              className='w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm' 
+              style={{ 
+                minWidth: '1200px',
+                tableLayout: 'fixed'
+              }}
+            >
               <thead>
                 <tr className='bg-[#477A0C] text-[#F2EFE2]'>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-left font-bold' style={{ width: '120px' }}>
                     N° Facture
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-left font-bold' style={{ width: '100px' }}>
                     Date
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-left font-bold' style={{ width: '150px' }}>
                     Client
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-left font-bold' style={{ width: '180px' }}>
                     Email
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-left font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-left font-bold' style={{ width: '150px' }}>
                     Lieu d'événement
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-right font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-right font-bold' style={{ width: '120px' }}>
                     Montant TTC
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-center font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-center font-bold' style={{ width: '100px' }}>
                     Statut
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-center font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-center font-bold' style={{ width: '100px' }}>
                     Email
                   </th>
-                  <th className='border border-gray-300 px-4 py-3 text-center font-bold'>
+                  <th className='border border-gray-300 px-4 py-3 text-center font-bold' style={{ width: '200px' }}>
                     Actions
                   </th>
                 </tr>

@@ -5,6 +5,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix pour le scroll horizontal des tableaux en production */
+.overflow-x-auto {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #477A0C #f1f1f1;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #477A0C;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #3A6A0A;
+}
+
 /* Styles pour le template de facture basé sur l'exemple HTML fourni */
 .facture-apercu {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
