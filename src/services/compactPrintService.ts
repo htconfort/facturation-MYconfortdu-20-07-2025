@@ -2,21 +2,20 @@ import { Invoice } from '../types';
 import { formatCurrency, calculateProductTotal } from '../utils/calculations';
 
 export class CompactPrintService {
+  
   static async printInvoice(invoice: Invoice) {
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        alert(
-          "Impossible d'ouvrir la fenêtre d'impression. Veuillez autoriser les pop-ups."
-        );
+        alert('Impossible d\'ouvrir la fenêtre d\'impression. Veuillez autoriser les pop-ups.');
         return;
       }
 
-      const printContent = this.generateCompactPrint(invoice);
+      const printContent = this.generateCompactPrintHTML(invoice);
 
       printWindow.document.write(printContent);
       printWindow.document.close();
-
+      
       // Attendre que le contenu soit chargé puis imprimer
       printWindow.onload = () => {
         setTimeout(() => {
@@ -26,29 +25,485 @@ export class CompactPrintService {
           }, 1000);
         }, 500);
       };
+
     } catch (error) {
       console.error('Erreur impression:', error);
-      alert("Erreur lors de l'impression de la facture");
+      alert('Erreur lors de l\'impression de la facture');
     }
   }
 
-  private static generateCompactPrint(invoice: Invoice): string {
-    const products = invoice.products
-      .map(product => {
-        const totalProduct = calculateProductTotal(
-          product.quantity,
-          product.priceTTC,
-          product.discount,
-          product.discountType
-        );
-        const discountText =
-          product.discount > 0
-            ? product.discountType === 'percent'
-              ? `-${product.discount}%`
-              : `-${formatCurrency(product.discount)}`
-            : '';
+  static generateCompactPrintHTML(invoice: Invoice): string {
+    // Utiliser le format de la facture du 27 septembre
+    return this.generateSeptember27Format(invoice);
+  }
 
-        return `
+  private static generateSeptember27Format(invoice: Invoice): string {
+    const formatDate = (date: string) =>
+      new Date(date).toLocaleDateString("fr-FR", { year: "numeric", month: "2-digit", day: "2-digit" });
+
+    const totalTTC = invoice.products.reduce((sum, product) => {
+      return sum + calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType);
+    }, 0);
+
+    const totalHT = totalTTC / (1 + (invoice.taxRate / 100));
+    const totalTVA = totalTTC - totalHT;
+
+    const totalDiscount = invoice.products.reduce((sum, product) => {
+      const originalTotal = product.priceTTC * product.quantity;
+      const discountedTotal = calculateProductTotal(
+        product.quantity,
+        product.priceTTC,
+        product.discount,
+        product.discountType === 'percentage' ? 'percent' : 'fixed'
+      );
+      return sum + (originalTotal - discountedTotal);
+    }, 0);
+
+    const products = invoice.products.map((product) => {
+      const totalProduct = calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType);
+      const discountText = product.discount > 0 ? 
+        (product.discountType === 'percentage' ? `${product.discount}%` : `${formatCurrency(product.discount)}`) : '-';
+      
+      return `
+        <tr>
+          <td style="background: #f9f9f9; padding: 6px; border: 1px solid #e3e3e3; color: #222;">${product.name}</td>
+          <td style="background: #f9f9f9; padding: 6px; border: 1px solid #e3e3e3; color: #222; text-align: center;">${product.quantity}</td>
+          <td style="background: #f9f9f9; padding: 6px; border: 1px solid #e3e3e3; color: #222; text-align: right;">${formatCurrency(product.priceTTC)}</td>
+          <td style="background: #f9f9f9; padding: 6px; border: 1px solid #e3e3e3; color: #222; text-align: center;">${discountText}</td>
+          <td style="background: #f9f9f9; padding: 6px; border: 1px solid #e3e3e3; color: #222; text-align: right; font-weight: bold;">${formatCurrency(totalProduct)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Facture ${invoice.invoiceNumber}</title>
+        <meta charset="UTF-8">
+        <style>
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+          
+          * {
+            box-sizing: border-box;
+          }
+          
+          body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: white; 
+            font-size: 13px;
+            line-height: 1.2;
+            color: #111;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e5e5e5;
+            padding-bottom: 12px;
+            padding-top: 10px;
+            position: relative;
+            width: 100%;
+            min-height: 60px;
+          }
+          
+          .logo-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 5px;
+            z-index: 10;
+            width: auto;
+            height: auto;
+          }
+          
+          .logo {
+            height: 40px;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+          }
+          
+          .company-info {
+            flex: 0 0 45%;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #222;
+            margin-right: 10%;
+          }
+          
+          .client-info {
+            flex: 0 0 45%;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #222;
+            text-align: right;
+            margin-left: 10%;
+          }
+          
+          .title {
+            font-size: 24px;
+            color: #222;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            margin-bottom: 0;
+          }
+          
+          .invoice-details {
+            margin-top: 3px;
+            margin-bottom: 8px;
+            font-size: 14px;
+          }
+          
+          .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+          }
+          
+          .th {
+            background: #8dbf4b;
+            color: #fff;
+            text-align: left;
+            padding: 6px;
+            border: 1px solid #e3e3e3;
+            font-weight: bold;
+          }
+          
+          .totals {
+            text-align: right;
+            margin-top: 6px;
+          }
+          
+          .total-row {
+            font-weight: bold;
+            font-size: 15px;
+            background: #fff;
+          }
+          
+          .remise {
+            color: #7abd3f;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: right;
+            margin-top: 2px;
+          }
+          
+          .section-title {
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-size: 15px;
+            color: #222;
+          }
+          
+          .signature {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            min-height: 40px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            display: inline-block;
+            padding: 6px;
+            background: #fff;
+          }
+          
+          .cgv {
+            color: #7abd3f;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 22px;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+          }
+          
+          .legal {
+            font-size: 13px;
+            color: #222;
+            margin-top: 4px;
+            font-weight: bold;
+            letter-spacing: 1px;
+          }
+          
+          .note {
+            font-size: 12px;
+            color: #444;
+            font-style: italic;
+            margin-top: 2px;
+          }
+          
+          .page-break {
+            page-break-before: always;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #e5e5e5;
+          }
+          
+          /* Media queries pour iPad et appareils tactiles */
+          @media screen and (max-width: 1024px) {
+            .header {
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: flex-start;
+            }
+            
+            .company-info {
+              flex: 0 0 40%;
+              margin-right: 5%;
+            }
+            
+            .client-info {
+              flex: 0 0 40%;
+              margin-left: 5%;
+              text-align: right;
+            }
+            
+            .logo-container {
+              position: absolute;
+              left: 50%;
+              transform: translateX(-50%);
+              top: 5px;
+              z-index: 10;
+            }
+          }
+          
+          /* Media queries pour impression */
+          @media print {
+            .header {
+              display: flex !important;
+              justify-content: space-between !important;
+              align-items: flex-start !important;
+            }
+            
+            .company-info {
+              flex: 0 0 45% !important;
+              margin-right: 10% !important;
+            }
+            
+            .client-info {
+              flex: 0 0 45% !important;
+              margin-left: 10% !important;
+              text-align: right !important;
+            }
+            
+            .logo-container {
+              position: absolute !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              top: 5px !important;
+              z-index: 10 !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <!-- HEADER -->
+        <div class="header">
+          <!-- LOGO AU CENTRE -->
+          <div class="logo-container">
+            <img src="/HT-Confort_Full_Green.png" alt="HT Confort" class="logo" />
+          </div>
+          
+          <div>
+            <div class="company-info">
+              <strong>MYCONFORT</strong><br />
+              88 avenue des Ternes<br />
+              75017 Paris<br />
+              Tél : +33 6 61 48 60 23<br />
+              Email : htconfort@gmail.com<br />
+              Web : htconfort.com<br />
+              SIRET : 824 313 530 00027<br />
+              IBAN : FR76 1660 7000 1708 1216 3980 964<br />
+              BIC : CCBPFRPPPPG<br />
+            </div>
+          </div>
+          
+          <div class="client-info">
+            <strong>Client</strong><br />
+            ${invoice.clientName}<br />
+            ${invoice.clientAddress}<br />
+            ${invoice.clientPostalCode} ${invoice.clientCity}<br />
+            Tél : ${invoice.clientPhone}<br />
+            Email : ${invoice.clientEmail}
+          </div>
+        </div>
+
+        <!-- FACTURE TITLE -->
+        <div class="title">FACTURE</div>
+        <div class="invoice-details">
+          <strong>Facture n° : ${invoice.invoiceNumber}</strong><br />
+          Date : ${formatDate(invoice.invoiceDate)}
+        </div>
+
+        <!-- TABLEAU PRODUITS -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="th">Désignation</th>
+              <th class="th">Qté</th>
+              <th class="th">PU TTC</th>
+              <th class="th">Remise</th>
+              <th class="th">Total TTC</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products}
+          </tbody>
+        </table>
+
+        <!-- TOTALS -->
+        <div class="totals">
+          <div class="total-row">Total HT&nbsp;&nbsp;&nbsp;${formatCurrency(totalHT)}</div>
+          <div class="total-row">TVA 20%&nbsp;&nbsp;&nbsp;${formatCurrency(totalTVA)}</div>
+          <div class="total-row">Total TTC&nbsp;&nbsp;&nbsp;${formatCurrency(totalTTC)}</div>
+          ${totalDiscount > 0 ? `<div class="remise">Remise totale appliquée&nbsp;&nbsp;&nbsp;- ${formatCurrency(totalDiscount)}</div>` : ''}
+        </div>
+
+        <!-- MODE DE REGLEMENT -->
+        <div class="section-title">Mode de règlement</div>
+        <div>${invoice.paymentMethod || 'Chèque à venir'}</div>
+        <div style="font-weight: bold; font-size: 13px; margin-top: 6px; margin-bottom: 4px;">
+          Merci pour votre confiance
+        </div>
+        <div style="font-size: 12px; margin-top: 0; margin-bottom: 4px;">
+          Paiement par virement : IBAN FR76 1660 7000 1708 1216 3980 964 — BIC CCBPFRPPPPG. Indiquez le n° de facture ${invoice.invoiceNumber} en référence.
+        </div>
+
+        <!-- SIGNATURE -->
+        <div class="section-title">Signature client :</div>
+        <div class="signature">
+          ${invoice.signature ? 
+            `<img src="${invoice.signature}" alt="Signature client" style="max-height: 35px; max-width: 180px;" />` : 
+            '<span style="color: #666; font-style: italic;">Signature requise</span>'
+          }
+        </div>
+        <div style="font-size: 12px; margin-top: 2px; margin-bottom: 3px;">
+          Signé le ${formatDate(invoice.signatureDate || invoice.invoiceDate)}
+        </div>
+
+        <!-- CGV & LEGAL -->
+        <div class="cgv">
+          Conditions générales de vente acceptées par le client
+        </div>
+        <div class="legal">
+          INFORMATION LÉGALE - ARTICLE L224-59
+        </div>
+        <div class="note">
+          « Avant la conclusion de tout contrat entre un consommateur et un professionnel à l'occasion d'une foire, d'un salon [...] le professionnel informe le consommateur qu'il ne dispose pas d'un délai de rétractation. »
+        </div>
+
+        <!-- DEUXIÈME PAGE - CONDITIONS GÉNÉRALES -->
+        <div class="page-break">
+          <h1 style="text-align: center; color: #477A0C; margin-bottom: 15px; font-size: 18px;">
+            CONDITIONS GÉNÉRALES DE VENTE
+          </h1>
+          
+          <div style="font-size: 9px; line-height: 1.3; columns: 2; column-gap: 15px;">
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 1 - Livraison</h3>
+              <p>Une fois la commande expédiée, vous serez contacté par SMS ou mail pour programmer la livraison en fonction de vos disponibilités (à la journée ou demi-journée). Le transporteur livre le produit au pas de porte ou en bas de l'immeuble. Veuillez vérifier que les dimensions du produit permettent son passage dans les escaliers, couloirs et portes. Aucun service d'installation ou de reprise de l'ancienne literie n'est prévu.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 2 - Délais de Livraison</h3>
+              <p>Les délais de livraison sont donnés à titre indicatif et ne constituent pas un engagement ferme. En cas de retard, aucune indemnité ou annulation ne sera acceptée, notamment en cas de force majeure. Nous déclinons toute responsabilité en cas de délai dépassé.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 3 - Risques de Transport</h3>
+              <p>Les marchandises voyagent aux risques du destinataire. En cas d'avarie ou de perte, il appartient au client de faire les réserves nécessaires obligatoire sur le bordereau du transporteur. En cas de non-respect de cette obligation on ne peut pas se retourner contre le transporteur.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 4 - Acceptation des Conditions</h3>
+              <p>Toute livraison implique l'acceptation des présentes conditions. Le transporteur livre à l'adresse indiquée sans monter les étages. Le client est responsable de vérifier et d'accepter les marchandises lors de la livraison.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 5 - Réclamations</h3>
+              <p>Les réclamations concernant la qualité des marchandises doivent être formulées par écrit dans les huit jours suivant la livraison, par lettre recommandée avec accusé de réception.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 6 - Retours</h3>
+              <p>Aucun retour de marchandises ne sera accepté sans notre accord écrit préalable. Cet accord n'implique aucune reconnaissance.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 7 - Tailles des Matelas</h3>
+              <p>Les dimensions des matelas peuvent varier de +/- 5 cm en raison de la thermosensibilité des mousses viscoélastiques. Les tailles standards sont données à titre indicatif et ne constituent pas une obligation contractuelle. Les matelas sur mesure doivent inclure les spécifications exactes du cadre de lit.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 8 - Odeur des Matériaux</h3>
+              <p>Les mousses viscoélastiques naturelles (à base d'huile de ricin) et les matériaux de conditionnement peuvent émettre une légère odeur qui disparaît après déballage. Cela ne constitue pas un défaut.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 9 - Règlements et Remises</h3>
+              <p>Sauf accord express, aucun rabais ou escompte ne sera appliqué pour paiement comptant. La garantie couvre les mousses, mais pas les textiles et accessoires.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 10 - Paiement</h3>
+              <p>Les factures sont payables par chèque, virement, carte bancaire ou espèce à réception.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 11 - Pénalités de Retard</h3>
+              <p>En cas de non-paiement, une majoration de 10% avec un minimum de 300 € sera appliquée, sans préjudice des intérêts de retard. Nous nous réservons le droit de résilier la vente sans sommation.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 12 - Exigibilité en Cas de Non-Paiement</h3>
+              <p>Le non-paiement d'une échéance rend immédiatement exigible le solde de toutes les échéances à venir.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 13 - Livraison Incomplète ou Non-Conforme</h3>
+              <p>En cas de livraison endommagée ou non conforme, mentionnez-le sur le bon de livraison et refusez le produit. Si l'erreur est constatée après le départ du transporteur, contactez-nous sous 72h ouvrables.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 14 - Litiges</h3>
+              <p>Tout litige sera de la compétence exclusive du Tribunal de Commerce de Perpignan ou du tribunal compétent du prestataire.</p>
+            </div>
+            
+            <div style="margin-bottom: 8px; break-inside: avoid;">
+              <h3 style="color: #477A0C; font-size: 10px; margin-bottom: 3px; font-weight: bold;">Art. 15 - Horaires de Livraison</h3>
+              <p>Les livraisons sont effectuées du lundi au vendredi (hors jours fériés). Une personne majeure doit être présente à l'adresse lors de la livraison. Toute modification d'adresse après commande doit être signalée immédiatement à myconfort66@gmail.com.</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 15px; font-size: 8px; font-style: italic;">
+            Les présentes Conditions générales ont été mises à jour le 23 août 2024
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private static generateCompactPrint(invoice: Invoice): string {
+    const products = invoice.products.map((product) => {
+      const totalProduct = calculateProductTotal(product.quantity, product.priceTTC, product.discount, product.discountType);
+      const discountText = product.discount > 0 ? 
+        (product.discountType === 'percent' ? `-${product.discount}%` : `-${formatCurrency(product.discount)}`) : '';
+      
+      return `
         <tr>
           <td>${product.name}</td>
           <td style="text-align: center;">${product.quantity}</td>
@@ -57,8 +512,7 @@ export class CompactPrintService {
           <td style="text-align: right; font-weight: bold;">${formatCurrency(totalProduct)}</td>
         </tr>
       `;
-      })
-      .join('');
+    }).join('');
 
     return `
       <!DOCTYPE html>
@@ -299,37 +753,6 @@ export class CompactPrintService {
             color: #000;
             font-size: 9px;
             margin-top: 4px;
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .signature-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            border-radius: 3px;
-          }
-          
-          .signature-text {
-            color: #666;
-            font-style: italic;
-            font-size: 9px;
-          }
-          }
-
-          /* Styles RIB pour virement bancaire */
-          .rib-section {
-            margin-top: 8px;
-            padding: 6px;
-            background: #e1f5fe;
-            border: 1px solid #2563eb;
-            border-radius: 4px;
-          }
-
-          .rib-info {
-            font-size: 9px;
-            line-height: 1.3;
-            color: #000;
           }
 
           /* Notes compactes */
@@ -544,38 +967,11 @@ export class CompactPrintService {
                 <div>Mode: ${invoice.paymentMethod}</div>
                 ${invoice.montantAcompte > 0 ? `<div>Acompte: ${formatCurrency(invoice.montantAcompte)}</div>` : ''}
                 ${invoice.montantRestant > 0 ? `<div><strong>Reste à payer: ${formatCurrency(invoice.montantRestant)}</strong></div>` : ''}
-                
-                ${
-                  invoice.paymentMethod &&
-                  invoice.paymentMethod.toLowerCase().includes('virement')
-                    ? `
-                <!-- RIB pour Virement Bancaire -->
-                <div class="rib-section">
-                  <h4 style="margin: 8px 0 4px 0; font-size: 11px; font-weight: bold; color: #2563eb;">COORDONNÉES BANCAIRES</h4>
-                  <div class="rib-info">
-                    <div style="font-size: 9px; line-height: 1.3;">
-                      <div><strong>Bénéficiaire:</strong> ${(import.meta as any).env?.VITE_COMPANY_NAME || 'MYCONFORT'}</div>
-                      <div><strong>IBAN:</strong> ${(import.meta as any).env?.VITE_COMPANY_IBAN || 'FR76 1660 7000 1708 1216 3980 964'}</div>
-                      <div><strong>BIC:</strong> ${(import.meta as any).env?.VITE_COMPANY_BIC || 'CCBPFRPPPPG'}</div>
-                      <div><strong>Banque:</strong> ${(import.meta as any).env?.VITE_COMPANY_BANK || 'Banque Populaire du Sud'}</div>
-                      <div style="margin-top: 4px; font-style: italic; color: #666;">
-                        Merci d'indiquer le numéro de facture en référence
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                `
-                    : ''
-                }
               </div>
               <div class="signature-section">
                 <h3>SIGNATURE CLIENT</h3>
                 <div class="signature-box">
-                  ${
-                    invoice.signature && invoice.signature.trim() !== ''
-                      ? `<img src="${invoice.signature}" alt="Signature client" class="signature-image" />`
-                      : '<span class="signature-text">Signature requise</span>'
-                  }
+                  ${invoice.signature ? 'Signé' : 'Signature requise'}
                 </div>
               </div>
             </div>
@@ -595,13 +991,6 @@ export class CompactPrintService {
                 <span>${formatCurrency(invoice.montantTTC)}</span>
               </div>
             </div>
-          </div>
-
-          <!-- Acceptation CGV -->
-          <div style="text-align: center; margin: 15px 0; padding: 8px; background-color: #f8f9fa; border: 1px solid #477A0C; border-radius: 8px;">
-            <p style="margin: 0; color: #477A0C; font-weight: bold; font-size: 14px;">
-              ✓ Conditions générales de vente acceptées par le client
-            </p>
           </div>
 
           <!-- Information légale -->
@@ -628,59 +1017,53 @@ export class CompactPrintService {
             <h3>CONDITIONS GÉNÉRALES DE VENTE</h3>
             <div class="cgv-content">
               <div class="cgv-column">
-                <p><strong>Art. 1 - Loi applicable et rétractation</strong><br>
-                Pas de rétractation en foires/salons (art. L224-59). Pour ventes à distance : 14j sauf produits sur mesure (art. L221-28).</p>
+                <p><strong>Art. 1 - Livraison</strong><br>
+                Une fois la commande expédiée, vous serez contacté par SMS ou mail pour programmer la livraison. Le transporteur livre au pas de porte. Vérifiez les dimensions pour le passage. Aucun service d'installation prévu.</p>
                 
-                <p><strong>Art. 2 - Délais de livraison</strong><br>
-                Délais indicatifs. Aucun retard ne justifie annulation ou indemnisation sauf engagement écrit. Force majeure exonératoire.</p>
+                <p><strong>Art. 2 - Délais de Livraison</strong><br>
+                Délais indicatifs, pas d'engagement ferme. En cas de retard, aucune indemnité. Déclinons toute responsabilité en cas de force majeure.</p>
                 
-                <p><strong>Art. 3 - Transfert des risques</strong><br>
-                Transport aux risques du destinataire. Réserves obligatoires sur bon de livraison et confirmation sous 48h. Sans réserves = accepté.</p>
+                <p><strong>Art. 3 - Risques de Transport</strong><br>
+                Marchandises aux risques du destinataire. Réserves obligatoires sur bordereau transporteur en cas d'avarie.</p>
                 
-                <p><strong>Art. 4 - Acceptation des conditions</strong><br>
-                Toute commande = acceptation CGV. Livraison rez-de-chaussée uniquement, installation à charge du client.</p>
+                <p><strong>Art. 4 - Acceptation</strong><br>
+                Livraison implique acceptation des conditions. Transporteur livre sans monter étages. Client responsable vérification.</p>
                 
-                <p><strong>Art. 5 - Réclamations qualité</strong><br>
-                Réclamations par recommandé AR sous 8 jours après livraison. Passé ce délai = irrecevable.</p>
+                <p><strong>Art. 5 - Réclamations</strong><br>
+                Réclamations qualité par écrit sous 8 jours, lettre recommandée avec AR.</p>
                 
                 <p><strong>Art. 6 - Retours</strong><br>
-                Aucun retour sans accord écrit. Retour aux frais/risques du client, sans reconnaissance de responsabilité.</p>
+                Aucun retour sans accord écrit préalable. Accord n'implique aucune reconnaissance.</p>
                 
-                <p><strong>Art. 7 - Dimensions des produits</strong><br>
-                Tolérance ±5 cm. Pas de non-conformité ni recours pour variation dimensionnelle.</p>
+                <p><strong>Art. 7 - Tailles Matelas</strong><br>
+                Dimensions +/- 5 cm possibles (thermosensibilité mousses). Tailles indicatives. Matelas sur mesure : spécifications exactes requises.</p>
                 
-                <p><strong>Art. 8 - Odeur des matériaux</strong><br>
-                Mousses naturelles : odeur temporaire normale, pas vice caché (C. civ. art. 1604/1641).</p>
+                <p><strong>Art. 8 - Odeur Matériaux</strong><br>
+                Mousses naturelles peuvent émettre légère odeur qui disparaît. Ne constitue pas défaut.</p>
               </div>
               
               <div class="cgv-column">
-                <p><strong>Art. 9 - Garanties</strong><br>
-                Couvrent seulement structure interne (mousses/âme). Exclus : housses, coutils, fermetures. Garantie annulée si mauvais usage.</p>
+                <p><strong>Art. 9 - Règlements</strong><br>
+                Sauf accord express, aucun rabais pour paiement comptant. Garantie mousses, pas textiles/accessoires.</p>
                 
                 <p><strong>Art. 10 - Paiement</strong><br>
-                Paiement comptant à réception (CB, virement, chèque, espèces). Clause réserve propriété (C. civ. art. 2367).</p>
+                Factures payables par chèque, virement, carte bancaire ou espèce à réception.</p>
                 
-                <p><strong>Art. 11 - Retard de paiement</strong><br>
-                Intérêts légaux +10pts. Indemnité 40 € (C. com. L441-10). Majoration +10 % min. 300 €. Suspension/annulation possible.</p>
+                <p><strong>Art. 11 - Pénalités Retard</strong><br>
+                Non-paiement : majoration 10% min. 300€, intérêts de retard. Droit de résiliation sans sommation.</p>
                 
-                <p><strong>Art. 12 - Exigibilité anticipée</strong><br>
-                Non-paiement d'une échéance = exigibilité immédiate du solde total.</p>
+                <p><strong>Art. 12 - Exigibilité</strong><br>
+                Non-paiement échéance rend exigible solde toutes échéances à venir.</p>
                 
-                <p><strong>Art. 13 - Livraison non conforme</strong><br>
-                Colis endommagé : refuser avec réserves. Défaut après réception = signal sous 72h (myconfort66@gmail.com).</p>
+                <p><strong>Art. 13 - Livraison Non-Conforme</strong><br>
+                Livraison endommagée : mentionner sur bon, refuser produit. Erreur constatée après : contact sous 72h ouvrables.</p>
                 
                 <p><strong>Art. 14 - Litiges</strong><br>
-                Tentative amiable obligatoire. À défaut, Tribunal de Commerce de Perpignan compétent.</p>
+                Compétence exclusive Tribunal Commerce Perpignan ou tribunal du prestataire.</p>
                 
-                <p><strong>Art. 15 - Horaires de livraison</strong><br>
-                Livraison lun-ven (hors fériés). Présence majeure obligatoire. Adresse modifiable uniquement par écrit.</p>
-                
-                <p><strong>Art. 16 - Modalités de livraison</strong><br>
-                Rez-de-chaussée uniquement. Client prévenu par email/SMS. Nouvelle présentation facturable en cas d'absence.</p>
+                <p><strong>Art. 15 - Horaires Livraison</strong><br>
+                Lundi-vendredi hors fériés. Personne majeure présente obligatoire. Modification adresse : myconfort66@gmail.com.</p>
               </div>
-            </div>
-            <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #666;">
-              Les présentes Conditions générales ont été mises à jour le 10 septembre 2025
             </div>
           </div>
 

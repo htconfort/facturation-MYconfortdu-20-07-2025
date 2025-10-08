@@ -3,6 +3,7 @@ import { useInvoiceWizard } from '../../store/useInvoiceWizard';
 import { calculateProductTotal } from '../../utils/calculations';
 import { PDFService } from '../../services/pdfService';
 import { UnifiedPrintService } from '../../services/unifiedPrintService';
+import { CompactPrintService } from '../../services/compactPrintService';
 import { N8nWebhookService } from '../../services/n8nWebhookService';
 import { saveInvoice } from '../../utils/storage';
 import type { Invoice } from '../../types';
@@ -214,30 +215,10 @@ export default function StepRecapIpadOptimized({
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      if (isIOS || isMobile) {
-        // iPad/Mobile : Fallback fiable via PDF blob + ouverture nouvelle vue (impression via feuille de partage)
-        console.log('📱 Impression iOS/mobile via PDF fallback...');
-        const pdfBlob = await PDFService.generateInvoicePDF(invoice);
-        const url = URL.createObjectURL(pdfBlob);
-        const win = window.open(url, '_blank');
-        if (!win) {
-          console.warn('⚠️ Impossible d’ouvrir un nouvel onglet. Tentative de téléchargement.');
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `facture-${invoice.invoiceNumber}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        }
-        // Libérer l’URL plus tard
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
-        setActionHistory(prev => [...prev, 'Facture ouverte (PDF iOS/mobile)']);
-      } else {
-        // Desktop : utiliser le service unifié ou la fenêtre d’impression
-        console.log('🖨️ Impression via service unifié (desktop)...');
-        await UnifiedPrintService.printInvoice(invoice);
-        setActionHistory(prev => [...prev, 'Facture ouverte pour impression (Desktop)']);
-      }
+      // Utiliser le service unifié CompactPrintService partout
+      console.log('🖨️ Impression via service unifié CompactPrintService...');
+      await CompactPrintService.printInvoice(invoice);
+      setActionHistory(prev => [...prev, 'Facture ouverte pour impression (Format unifié)']);
     } catch (error: any) {
       console.error('Erreur impression:', error?.message || error);
     } finally {

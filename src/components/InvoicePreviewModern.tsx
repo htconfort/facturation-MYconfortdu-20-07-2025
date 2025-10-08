@@ -168,17 +168,17 @@ export const InvoicePreviewModern = forwardRef<
                 }}
               >
                 <div style={{ marginBottom: '4px' }}>
-                  📍 88, avenue des Ternes
+                  📍 88 Avenue des Ternes
                 </div>
-                <div style={{ marginBottom: '4px' }}>75017 Paris</div>
+                <div style={{ marginBottom: '4px' }}>75017 Paris, France</div>
                 <div style={{ marginBottom: '4px' }}>
                   🏢 SIRET: 824 313 530 00027
                 </div>
                 <div style={{ marginBottom: '4px' }}>
-                  📞 Tél: 06 61 48 60 23
+                  📞 Tél: 04 68 50 41 45
                 </div>
                 <div style={{ marginBottom: '4px' }}>
-                  ✉️ htconfort@gmail.com
+                  ✉️ myconfort@gmail.com
                 </div>
                 <div>🌐 https://www.htconfort.com</div>
               </div>
@@ -1039,9 +1039,9 @@ export const InvoicePreviewModern = forwardRef<
               Votre spécialiste en matelas et literie de qualité
             </div>
             <div style={{ marginBottom: '4px' }}>
-              88, avenue des Ternes, 75017 Paris - Tél: 06 61 48 60 23
+              88 Avenue des Ternes, 75017 Paris - Tél: 04 68 50 41 45
             </div>
-            <div>Email: htconfort@gmail.com - SIRET: 824 313 530 00027</div>
+            <div>Email: myconfort@gmail.com - SIRET: 824 313 530 00027</div>
           </div>
         </footer>
       </div>

@@ -15,7 +15,7 @@ import { GoogleDriveModal } from './components/GoogleDriveModal';
 import { PayloadDebugModal } from './components/PayloadDebugModal';
 import { DebugCenter } from './components/DebugCenter';
 import { SignaturePad } from './components/SignaturePad';
-import { InvoicePreviewModern } from './components/InvoicePreviewModern';
+import { InvoicePreviewCompact } from './components/InvoicePreviewCompact';
 import { Toast } from './components/ui/Toast';
 import { Invoice, Client, ToastType } from './types';
 import { generateInvoiceNumber } from './utils/calculations';
@@ -614,8 +614,8 @@ function MainApp() {
     }
   };
 
-  // 🖨️ IMPRESSION A4 COMPLÈTE - 2 pages (facture + conditions générales)
-  const handlePrintWifi = () => {
+  // 🖨️ IMPRESSION A4 COMPLÈTE - 2 pages (facture + conditions générales) - FORMAT UNIFIÉ
+  const handlePrintWifi = async () => {
     const validation = validateMandatoryFields();
     if (!validation.isValid) {
       showToast(
@@ -633,117 +633,10 @@ function MainApp() {
     );
 
     try {
-      // ✅ CIBLE LA FACTURE COMPLÈTE (2 pages : facture + conditions générales)
-      const element = document.getElementById('invoice-preview-section');
-      if (!element) {
-        showToast('❌ Aperçu de facture non trouvé', 'error');
-        return;
-      }
-
-      console.log('📄 IMPRESSION: Facture complète (2 pages), dimensions:', {
-        width: element.offsetWidth,
-        height: element.offsetHeight,
-      });
-
-      // Sauvegarder le contenu original
-      const originalContent = document.body.innerHTML;
-      const originalTitle = document.title;
-
-      // CSS d'impression A4 PROFESSIONNEL - Vos règles exactes
-      const printStyles = `
-        <style>
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          
-          .page {
-            width: 210mm;      /* Largeur A4 exacte */
-            min-height: 297mm; /* Hauteur A4 exacte */
-            padding: 15mm;     /* Marges uniformes */
-            page-break-after: always;
-            box-sizing: border-box;
-            margin: 0 auto;
-            background: white;
-          }
-          
-          body { 
-            font-family: 'Inter', Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: white; 
-            font-size: 12px; 
-            line-height: 1.4; 
-            color: #2D3748;
-          }
-          
-          /* Respecter les sauts de page originaux */
-          div[style*="pageBreakBefore: 'always'"] {
-            page-break-before: always !important;
-          }
-          
-          /* Conserver les couleurs et styles originaux */
-          .bg-\\[\\#477A0C\\] { background: #477A0C !important; }
-          .bg-\\[\\#F2EFE2\\] { background: #F2EFE2 !important; }
-          .bg-white { background: white !important; }
-          .text-white { color: white !important; }
-          
-          /* Tailles de texte optimisées pour A4 */
-          h1 { font-size: 18px !important; margin: 8px 0 !important; }
-          h2 { font-size: 16px !important; margin: 6px 0 !important; }
-          h3 { font-size: 14px !important; margin: 4px 0 !important; }
-          p { margin: 4px 0 !important; font-size: 11px !important; }
-          
-          table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            margin: 8px 0 !important; 
-            font-size: 10px !important; 
-          }
-          table th, table td { 
-            border: 1px solid #ddd; 
-            padding: 6px !important; 
-            line-height: 1.3; 
-          }
-          table th { 
-            background: #f5f5f5 !important; 
-            font-weight: bold; 
-          }
-          
-          /* Ajustements de mise en page pour A4 */
-          .p-4, .p-6 { padding: 8px !important; }
-          .mb-4, .mb-6 { margin-bottom: 8px !important; }
-          .rounded-xl, .rounded-lg { border-radius: 8px !important; }
-        </style>
-      `;
-
-      // Remplacer le contenu avec wrapper A4 professionnel
-      document.title =
-        'Impression Facture MyConfort - A4 Professionnel (2 pages)';
-
-      // Wrapper le contenu dans une structure A4 professionnelle
-      const wrappedContent = `
-        <div class="page">
-          ${element.outerHTML}
-        </div>
-      `;
-
-      document.body.innerHTML = printStyles + wrappedContent;
-
-      // Lancer l'impression
-      setTimeout(() => {
-        window.print();
-
-        // Restaurer après impression
-        setTimeout(() => {
-          document.body.innerHTML = originalContent;
-          document.title = originalTitle;
-          showToast(
-            '✅ Impression A4 terminée (format professionnel)',
-            'success'
-          );
-        }, 1000);
-      }, 500);
+      // ✅ UTILISER LE MÊME SERVICE UNIFIÉ QUE LE WIZARD IPAD
+      const { CompactPrintService } = await import('./services/compactPrintService');
+      await CompactPrintService.printInvoice(invoice);
+      showToast('✅ Impression A4 terminée (format unifié)', 'success');
     } catch (error) {
       console.error('Erreur impression:', error);
       showToast("❌ Erreur lors de l'impression", 'error');
@@ -1136,7 +1029,7 @@ function MainApp() {
                 className='bg-white rounded-lg overflow-hidden'
               >
                 <div className='transition-all duration-500'>
-                  <InvoicePreviewModern invoice={invoice} />
+                  <InvoicePreviewCompact invoice={invoice} />
                 </div>
               </div>
             </div>

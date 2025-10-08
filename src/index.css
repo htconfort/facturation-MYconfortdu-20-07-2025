@@ -610,11 +610,6 @@
     display: none !important;
   }
   body::before {
-    content: "Utilisez le bouton 'Imprimer (PDF A4)' dans l'application pour une impression correcte.";
-    display: block;
-    text-align: center;
-    padding: 50px;
-    font-size: 18px;
-    color: #333;
+    display: none;
   }
 }
