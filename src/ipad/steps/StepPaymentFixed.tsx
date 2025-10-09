@@ -45,8 +45,8 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   const [showPartialPage, setShowPartialPage] = useState(false);
 
   // Constantes pour le layout
-  const HEADER_H = 60;   // hauteur header (px)
-  const FOOTER_H = 80;   // hauteur footer (px)
+  const HEADER_H = 80;   // hauteur header (px) - augmentée pour plus d'espace
+  const FOOTER_H = 100;  // hauteur footer (px) - augmentée pour plus d'espace
 
   // Total TTC à partir des lignes
   const totalAmount: number = (produits ?? []).reduce(
@@ -232,13 +232,14 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         left: 0,
         right: 0,
         bottom: FOOTER_H,                           // 100px
-        padding: '8px 16px',
-        overflowY: 'scroll',                        // <- FORCE le scroll
+        padding: '16px',
+        overflowY: 'auto',                         // <- Scroll automatique si nécessaire
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        paddingBottom: `calc(${FOOTER_H}px + 16px)`, // espace suffisant
-        boxSizing: 'border-box'
+        paddingBottom: `calc(${FOOTER_H}px + 32px)`, // espace suffisant pour les notes
+        boxSizing: 'border-box',
+        minHeight: 'calc(100vh - 180px)'            // hauteur minimale garantie
       }}>
         {/* Résumé */}
         <div style={{
@@ -592,6 +593,54 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                 onClick={() => setShowPartialPage(true)}
               />
           </div>
+
+          {/* 🆕 Champ de notes générales */}
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '16px',
+            marginTop: '20px',
+            border: '2px solid rgba(71, 122, 12, 0.2)'
+          }}>
+            <label style={{
+              display: 'block',
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#477A0C',
+              marginBottom: '12px'
+            }}>
+              📝 Notes générales (optionnel)
+            </label>
+            <textarea
+              value={paiement?.note || ''}
+              onChange={e => updatePaiement({ note: e.target.value })}
+              rows={4}
+              placeholder="Ajoutez des notes spécifiques pour cette facture..."
+              style={{
+                width: '100%',
+                padding: '16px',
+                border: '2px solid rgba(71, 122, 12, 0.3)',
+                borderRadius: '12px',
+                backgroundColor: '#F9FAFB',
+                resize: 'vertical',
+                fontSize: '16px',
+                fontFamily: 'inherit',
+                outline: 'none',
+                minHeight: '120px',
+                boxSizing: 'border-box'
+              }}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#477A0C'}
+              onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(71, 122, 12, 0.3)'}
+            />
+            <div style={{
+              fontSize: '12px',
+              color: '#6B7280',
+              marginTop: '8px',
+              textAlign: 'right'
+            }}>
+              {paiement?.note?.length || 0} caractères
+            </div>
+          </div>
         </div>
 
         {/* ❌ Supprimé : le faux spacer 100px (inutile grâce au paddingBottom) */}
@@ -937,17 +986,19 @@ function ChequesDetailsPage({
       {/* Contenu scrollable */}
       <div style={{
         position: 'absolute',
-        top: '80px',
+        top: '80px',                     // Header normal
         left: 0,
         right: 0,
-        bottom: '100px',
+        bottom: '140px',                 // Footer plus haut pour laisser de l'espace
         padding: '24px',
-        overflowY: 'scroll',
+        overflowY: 'scroll',             // Force le scroll vertical
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
-        gap: '24px'
+        gap: '24px',
+        paddingBottom: '80px',           // Espace important pour les notes
+        boxSizing: 'border-box'
       }}>
         {/* Tabs 2..10 */}
         <div>
@@ -1141,32 +1192,42 @@ function ChequesDetailsPage({
         <div>
           <label style={{
             display: 'block',
-            fontSize: '14px',
-            fontWeight: '500',
+            fontSize: '16px',
+            fontWeight: '600',
             color: '#B45309',
-            marginBottom: '8px'
+            marginBottom: '12px'
           }}>
-            Notes (optionnel)
+            📝 Notes (optionnel)
           </label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            rows={3}
+            rows={4}
             placeholder="Ex : premier chèque à l'installation, suivants tous les 30 jours…"
             style={{
               width: '100%',
-              padding: '12px 16px',
+              padding: '16px',
               border: '2px solid rgba(245, 158, 11, 0.3)',
               borderRadius: '12px',
               backgroundColor: 'white',
-              resize: 'none',
-              fontSize: '14px',
+              resize: 'vertical',
+              fontSize: '16px',
               fontFamily: 'inherit',
-              outline: 'none'
+              outline: 'none',
+              minHeight: '120px',
+              boxSizing: 'border-box'
             }}
             onFocus={(e) => e.currentTarget.style.borderColor = '#F59E0B'}
             onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.3)'}
           />
+          <div style={{
+            fontSize: '12px',
+            color: '#6B7280',
+            marginTop: '8px',
+            textAlign: 'right'
+          }}>
+            {notes.length} caractères
+          </div>
         </div>
       </div>
 
@@ -1178,11 +1239,13 @@ function ChequesDetailsPage({
         right: 0,
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderTop: '1px solid rgba(245, 158, 11, 0.3)',
-        padding: '16px',
+        padding: '20px',
         display: 'flex',
         justifyContent: 'center',
         gap: '16px',
-        zIndex: 10
+        zIndex: 10,
+        height: '120px',                // Hauteur fixe du footer
+        boxSizing: 'border-box'
       }}>
         <button
           onClick={onBack}
