@@ -59,7 +59,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full min-h-full bg-myconfort-cream flex flex-col'>
+    <div className='w-full bg-myconfort-cream pb-8'>
       {/* Header */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
         <div>
@@ -74,7 +74,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
       </div>
 
       {/* Contenu */}
-      <div className='px-6 py-4 flex-1'>
+      <div className='px-6 py-4'>
         {/* Résumé rapide */}
         <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-4'>
           <div className='grid grid-cols-2 gap-4 text-center'>
@@ -249,7 +249,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
       </div>
 
       {/* Footer */}
-      <div className='bg-myconfort-cream border-t border-myconfort-dark/10 px-6 py-4 flex justify-center gap-4 mt-8'>
+      <div className='bg-myconfort-cream border-t border-myconfort-dark/10 px-6 py-4 flex justify-center gap-4 mt-6'>
         <button
           onClick={onPrev}
           className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'

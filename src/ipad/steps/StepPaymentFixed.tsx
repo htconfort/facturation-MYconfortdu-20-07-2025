@@ -187,11 +187,9 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
 
   return (
     <div style={{ 
-      width: '100%', 
-      minHeight: '100%',
+      width: '100%',
       backgroundColor: '#F2EFE2',
-      display: 'flex',
-      flexDirection: 'column'
+      paddingBottom: '32px'
     }}>
       {/* Header */}
       <div style={{
@@ -219,7 +217,6 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
 
       {/* Contenu */}
       <div style={{
-        flex: 1,
         padding: '16px'
       }}>
         {/* Résumé */}
@@ -636,7 +633,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         display: 'flex',
         justifyContent: 'center',
         gap: '16px',
-        marginTop: '32px'
+        marginTop: '16px'
       }}>
         <button
           onClick={onPrev}
