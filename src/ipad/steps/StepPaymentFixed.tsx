@@ -188,17 +188,14 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   return (
     <div style={{ 
       width: '100%',
-      height: '100%',
       backgroundColor: '#F2EFE2',
-      display: 'flex',
-      flexDirection: 'column'
+      paddingBottom: '80px'
     }}>
       {/* Header */}
       <div style={{
         padding: '8px 16px',
         borderBottom: '1px solid rgba(20, 40, 29, 0.1)',
-        backgroundColor: '#F2EFE2',
-        flexShrink: 0
+        backgroundColor: '#F2EFE2'
       }}>
         <h1 style={{
           fontSize: '24px',
@@ -218,15 +215,9 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* Contenu scrollable */}
+      {/* Contenu */}
       <div style={{
-        flex: 1,
-        minHeight: 0,
-        padding: '16px',
-        paddingBottom: '80px',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        WebkitOverflowScrolling: 'touch'
+        padding: '16px'
       }}>
         {/* Résumé */}
         <div style={{
