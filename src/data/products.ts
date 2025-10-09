@@ -17,7 +17,7 @@ export const productCatalog: ProductCatalog[] = [
   {
     category: 'Matelas',
     name: 'MATELAS BAMBOU 90 x 190',
-    priceTTC: 1110,
+    priceTTC: 1100,
     autoCalculateHT: true,
   },
   {
