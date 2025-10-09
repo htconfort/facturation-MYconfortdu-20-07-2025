@@ -188,19 +188,16 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   return (
     <div style={{ 
       width: '100%', 
-      height: '100vh',
+      minHeight: '100%',
       backgroundColor: '#F2EFE2',
       display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      flexDirection: 'column'
     }}>
-      {/* Header fixe */}
+      {/* Header */}
       <div style={{
         padding: '8px 16px',
         borderBottom: '1px solid rgba(20, 40, 29, 0.1)',
-        backgroundColor: '#F2EFE2',
-        flexShrink: 0,
-        zIndex: 10
+        backgroundColor: '#F2EFE2'
       }}>
         <h1 style={{
           fontSize: '24px',
@@ -220,14 +217,10 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* --- CONTENU SCROLLABLE --- */}
+      {/* Contenu */}
       <div style={{
         flex: 1,
-        padding: '16px',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        WebkitOverflowScrolling: 'touch',
-        paddingBottom: '32px'
+        padding: '16px'
       }}>
         {/* Résumé */}
         <div style={{
@@ -635,7 +628,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         {/* <div style={{ height: '100px' }} /> */}
       </div>
 
-      {/* Footer fixe */}
+      {/* Footer */}
       <div style={{
         backgroundColor: '#F2EFE2',
         borderTop: '1px solid rgba(20, 40, 29, 0.1)',
@@ -643,8 +636,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         display: 'flex',
         justifyContent: 'center',
         gap: '16px',
-        flexShrink: 0,
-        zIndex: 10
+        marginTop: '32px'
       }}>
         <button
           onClick={onPrev}

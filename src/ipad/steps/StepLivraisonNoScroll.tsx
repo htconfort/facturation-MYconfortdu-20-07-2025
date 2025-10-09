@@ -59,8 +59,8 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative'>
-      {/* 🎯 Header simple sans bouton */}
+    <div className='w-full min-h-full bg-myconfort-cream flex flex-col'>
+      {/* Header */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
         <div>
           <h1 className='text-2xl font-bold text-myconfort-dark'>
@@ -73,8 +73,8 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* 🎯 Contenu principal - centré et remonté */}
-      <div className='flex-1 px-6 py-4 flex flex-col justify-start'>
+      {/* Contenu */}
+      <div className='px-6 py-4 flex-1'>
         {/* Résumé rapide */}
         <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-4'>
           <div className='grid grid-cols-2 gap-4 text-center'>
@@ -246,21 +246,18 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
             />
           )}
         </div>
-
-        {/* Espacement optimisé pour éviter que les boutons flottants couvrent le contenu */}
-        <div className='h-32'></div>
       </div>
 
-      {/* 🚀 BOUTONS FLOTTANTS - Dans le cadre iPad, remontés de 2cm */}
-      <div className='absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
+      {/* Footer */}
+      <div className='bg-myconfort-cream border-t border-myconfort-dark/10 px-6 py-4 flex justify-center gap-4 mt-8'>
         <button
           onClick={onPrev}
           className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
         >
           ← Précédent
         </button>
-        <div className='flex flex-col items-center'>
-          <div className='bg-white px-3 py-1 rounded-full shadow-lg mb-1'>
+        <div className='flex flex-col items-center justify-center'>
+          <div className='bg-white px-3 py-1 rounded-full shadow-lg'>
             <div className='text-xs text-gray-500 font-manrope'>Étape 5/7</div>
           </div>
         </div>
