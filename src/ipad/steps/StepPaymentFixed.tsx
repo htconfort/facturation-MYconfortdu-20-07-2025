@@ -789,9 +789,10 @@ function AlmaDetailsPage({
   return (
     <div style={{ 
       width: '100%', 
-      height: '100%', 
+      height: '100vh',
       backgroundColor: '#F2EFE2',
-      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
       overflow: 'hidden'
     }}>
       {/* Header fixe */}
@@ -799,10 +800,7 @@ function AlmaDetailsPage({
         padding: '16px 24px',
         borderBottom: '1px solid rgba(20, 40, 29, 0.1)',
         backgroundColor: '#F2EFE2',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
+        flexShrink: 0,
         zIndex: 10
       }}>
         <div style={{
@@ -834,13 +832,10 @@ function AlmaDetailsPage({
 
       {/* Contenu scrollable */}
       <div style={{
-        position: 'absolute',
-        top: '80px',
-        left: 0,
-        right: 0,
-        bottom: '100px',
+        flex: 1,
+        minHeight: 0,
         padding: '24px',
-        overflowY: 'scroll',
+        overflowY: 'auto',
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch'
       }}>
@@ -903,15 +898,12 @@ function AlmaDetailsPage({
 
       {/* Footer fixe */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         backgroundColor: '#F2EFE2',
         borderTop: '1px solid rgba(20, 40, 29, 0.1)',
         padding: '16px',
         display: 'flex',
         justifyContent: 'center',
+        flexShrink: 0,
         zIndex: 10
       }}>
         <button
