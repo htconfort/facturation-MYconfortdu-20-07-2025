@@ -86,6 +86,7 @@ export interface Invoice {
   deliveryMethod: string;
   deliveryAddress?: string;
   deliveryNotes: string;
+  deliveryDate?: string; // Date de livraison convenue (format YYYY-MM-DD)
 
   // Signature
   signature: string;

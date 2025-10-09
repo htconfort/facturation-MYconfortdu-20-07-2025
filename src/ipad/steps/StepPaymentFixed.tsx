@@ -176,6 +176,7 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
             depositMethod,
             nombreChequesAVenir: data.count,
             note: data.notes,
+            chequeLocation: data.chequeLocation,
           });
           setChequesConfigured(true);
           setShowChequesPage(false);
@@ -472,6 +473,110 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
                 highlight="amber"
                 onClick={() => setShowChequesPage(true)}
               />
+
+              {/* 🆕 Lieu de remise du chèque - visible uniquement si "Chèque à venir" sélectionné */}
+              {selectedMethod === 'Chèque à venir' && (
+                <div style={{
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  borderRadius: '16px',
+                  padding: '16px',
+                  border: '2px solid rgba(245, 158, 11, 0.3)'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#B45309',
+                    marginBottom: '12px'
+                  }}>
+                    Lieu de remise du chèque
+                  </div>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newLocation = paiement?.chequeLocation === 'bureau' ? undefined : 'bureau';
+                        updatePaiement({ chequeLocation: newLocation });
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: paiement?.chequeLocation === 'bureau' ? '2px solid #F59E0B' : '2px solid rgba(245, 158, 11, 0.3)',
+                        backgroundColor: paiement?.chequeLocation === 'bureau' ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={paiement?.chequeLocation === 'bureau'}
+                        readOnly
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          accentColor: '#F59E0B',
+                          cursor: 'pointer',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                      <span style={{
+                        fontSize: '15px',
+                        fontWeight: '500',
+                        color: paiement?.chequeLocation === 'bureau' ? '#B45309' : '#6B7280'
+                      }}>
+                        Au bureau
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newLocation = paiement?.chequeLocation === 'sur_place' ? undefined : 'sur_place';
+                        updatePaiement({ chequeLocation: newLocation });
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: paiement?.chequeLocation === 'sur_place' ? '2px solid #F59E0B' : '2px solid rgba(245, 158, 11, 0.3)',
+                        backgroundColor: paiement?.chequeLocation === 'sur_place' ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={paiement?.chequeLocation === 'sur_place'}
+                        readOnly
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          accentColor: '#F59E0B',
+                          cursor: 'pointer',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                      <span style={{
+                        fontSize: '15px',
+                        fontWeight: '500',
+                        color: paiement?.chequeLocation === 'sur_place' ? '#B45309' : '#6B7280'
+                      }}>
+                        Sur place
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Règlement Partiel - NOUVEAU */}
               <PaymentCard
@@ -777,11 +882,12 @@ function ChequesDetailsPage({
   defaultCount?: number;
   defaultNotes?: string;
   onBack: () => void;
-  onComplete: (data: { count: number; amount: number; notes: string }) => void;
+  onComplete: (data: { count: number; amount: number; notes: string; chequeLocation?: 'bureau' | 'sur_place' }) => void;
 }) {
   const restePay = Math.max(0, totalAmount - acompte);
   const [chequeCount, setChequeCount] = useState<number>(defaultCount);
   const [notes, setNotes] = useState<string>(defaultNotes);
+  const [chequeLocation, setChequeLocation] = useState<'bureau' | 'sur_place' | ''>('');
 
   // Montant par chèque (arrondi inférieur) et reste sur 1er chèque
   const perCheque = Math.floor(restePay / chequeCount);
@@ -939,6 +1045,98 @@ function ChequesDetailsPage({
           </div>
         </div>
 
+        {/* Lieu de remise du chèque */}
+        <div>
+          <label style={{
+            display: 'block',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#B45309',
+            marginBottom: '12px'
+          }}>
+            Lieu de remise du chèque
+          </label>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '12px'
+          }}>
+            <button
+              type="button"
+              onClick={() => setChequeLocation(chequeLocation === 'bureau' ? '' : 'bureau')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '16px',
+                borderRadius: '12px',
+                border: chequeLocation === 'bureau' ? '2px solid #F59E0B' : '2px solid rgba(245, 158, 11, 0.3)',
+                backgroundColor: chequeLocation === 'bureau' ? 'rgba(245, 158, 11, 0.1)' : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={chequeLocation === 'bureau'}
+                readOnly
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  accentColor: '#F59E0B',
+                  cursor: 'pointer',
+                  pointerEvents: 'none'
+                }}
+              />
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '500',
+                color: chequeLocation === 'bureau' ? '#B45309' : '#6B7280'
+              }}>
+                Au bureau
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setChequeLocation(chequeLocation === 'sur_place' ? '' : 'sur_place')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '16px',
+                borderRadius: '12px',
+                border: chequeLocation === 'sur_place' ? '2px solid #F59E0B' : '2px solid rgba(245, 158, 11, 0.3)',
+                backgroundColor: chequeLocation === 'sur_place' ? 'rgba(245, 158, 11, 0.1)' : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={chequeLocation === 'sur_place'}
+                readOnly
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  accentColor: '#F59E0B',
+                  cursor: 'pointer',
+                  pointerEvents: 'none'
+                }}
+              />
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '500',
+                color: chequeLocation === 'sur_place' ? '#B45309' : '#6B7280'
+              }}>
+                Sur place
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Notes */}
         <div>
           <label style={{
@@ -1008,7 +1206,7 @@ function ChequesDetailsPage({
         <button
           onClick={
             isValid
-              ? () => onComplete({ count: chequeCount, amount: perCheque, notes })
+              ? () => onComplete({ count: chequeCount, amount: perCheque, notes, chequeLocation: chequeLocation || undefined })
               : () => {}
           }
           disabled={!isValid}

@@ -63,6 +63,7 @@ interface PaymentData {
   note?: string;
   nombreChequesAVenir?: number;
   nombreFoisAlma?: number; // Nombre de fois pour Alma (2, 3, ou 4)
+  chequeLocation?: 'bureau' | 'sur_place'; // 🆕 Lieu de remise du chèque
   // 💳 Règlement partiel
   partialPayments?: PartialPayment[]; // Liste des paiements partiels
   // 💳 Mollie payment state
@@ -77,6 +78,7 @@ interface LivraisonData {
   deliveryMethod?: string;
   deliveryNotes?: string;
   deliveryAddress?: string;
+  deliveryDate?: string; // Date de livraison convenue (format YYYY-MM-DD)
 }
 
 interface SignatureData {
@@ -354,6 +356,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
         deliveryMethod: invoice.deliveryMethod || '',
         deliveryNotes: invoice.deliveryNotes || '',
         deliveryAddress: invoice.deliveryAddress || '',
+        deliveryDate: invoice.deliveryDate || '',
       },
       signatureDataUrl: invoice.signature || undefined,
       invoiceNotes: invoice.invoiceNotes || '',
@@ -456,6 +459,7 @@ export const useInvoiceWizard = create<WizardState>((set, get) => ({
       deliveryMethod: state.livraison.deliveryMethod || '',
       deliveryAddress: state.livraison.deliveryAddress || '',
       deliveryNotes: state.livraison.deliveryNotes || '',
+      deliveryDate: state.livraison.deliveryDate || '',
 
       // 🎯 CORRECTION: Calculs des totaux globaux manquants
       montantTTC: state.produits.reduce((sum, p) => {

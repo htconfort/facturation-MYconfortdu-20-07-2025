@@ -145,6 +145,7 @@ export default function StepRecapIpadOptimized({
     deliveryMethod: livraison?.deliveryMethod || '',
     deliveryAddress: livraison?.deliveryAddress || '',
     deliveryNotes: livraison?.deliveryNotes || '',
+    deliveryDate: livraison?.deliveryDate || '',
     
     // Signature
     signature: signature?.dataUrl || '',
@@ -412,6 +413,12 @@ export default function StepRecapIpadOptimized({
                   <span className="text-gray-600">Livraison :</span>
                   <span className="font-medium">{livraison?.deliveryMethod || 'Non défini'}</span>
                 </div>
+                {livraison?.deliveryDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Date prévue :</span>
+                    <span className="font-medium">{new Date(livraison.deliveryDate).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                )}
                 {livraison?.deliveryNotes && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Notes :</span>

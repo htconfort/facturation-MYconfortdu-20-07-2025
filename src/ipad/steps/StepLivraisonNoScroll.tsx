@@ -180,6 +180,73 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
           </div>
         </div>
 
+        {/* Date de livraison convenue */}
+        <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
+          <h3 className='text-lg font-semibold text-myconfort-dark mb-4'>
+            📅 Date de livraison convenue
+          </h3>
+
+          <div className='bg-blue-50 rounded-xl p-4 mb-4'>
+            <p className='text-blue-700 text-sm'>
+              Sélectionnez la date de livraison convenue avec le client.
+            </p>
+          </div>
+
+          {/* Onglets de sélection */}
+          <div className='grid grid-cols-2 gap-3 mb-4'>
+            <button
+              type='button'
+              onClick={() => updateLivraison({ deliveryDate: '' })}
+              className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                !livraison.deliveryDate
+                  ? 'border-myconfort-green bg-myconfort-green/10 text-myconfort-green'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-myconfort-green/50'
+              }`}
+            >
+              <input
+                type='checkbox'
+                checked={!livraison.deliveryDate}
+                readOnly
+                className='w-5 h-5 text-myconfort-green border-gray-300 rounded pointer-events-none'
+              />
+              <span className='font-medium text-sm'>Pas de date</span>
+            </button>
+
+            <button
+              type='button'
+              onClick={() => {
+                if (!livraison.deliveryDate) {
+                  updateLivraison({ deliveryDate: new Date().toISOString().split('T')[0] });
+                }
+              }}
+              className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                livraison.deliveryDate
+                  ? 'border-myconfort-green bg-myconfort-green/10 text-myconfort-green'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-myconfort-green/50'
+              }`}
+            >
+              <input
+                type='checkbox'
+                checked={!!livraison.deliveryDate}
+                readOnly
+                className='w-5 h-5 text-myconfort-green border-gray-300 rounded pointer-events-none'
+              />
+              <span className='font-medium text-sm'>Avec date</span>
+            </button>
+          </div>
+
+          {/* Sélecteur de date */}
+          {livraison.deliveryDate !== undefined && livraison.deliveryDate !== '' && (
+            <input
+              type='date'
+              value={livraison.deliveryDate || ''}
+              onChange={e => updateLivraison({ deliveryDate: e.target.value })}
+              className='w-full rounded-xl border-2 border-gray-300 px-4 py-3 text-base focus:border-myconfort-green focus:ring-4 focus:ring-myconfort-green/20 transition-all'
+              min={new Date().toISOString().split('T')[0]}
+            />
+          )}
+        </div>
+
         {/* Espacement optimisé pour éviter que les boutons flottants couvrent le contenu */}
         <div className='h-32'></div>
       </div>

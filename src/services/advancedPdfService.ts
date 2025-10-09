@@ -254,6 +254,16 @@ export class AdvancedPDFService {
       doc.text(data.deliveryMethod, 60, currentY);
       currentY += 8;
     }
+    
+    if (data.deliveryDate) {
+      doc.setTextColor(...this.COLORS.dark);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Date prévue:', 20, currentY);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date(data.deliveryDate).toLocaleDateString('fr-FR'), 60, currentY);
+      currentY += 8;
+    }
   }
 
   // 💳 SECTION PAIEMENT COMME L'EXEMPLE HTML

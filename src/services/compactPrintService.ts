@@ -936,7 +936,8 @@ export class CompactPrintService {
             </div>
             <div class="delivery-info">
               <h3>LIVRAISON :</h3>
-              Mode: Livraison par transporteur France Express CXI<br>
+              Mode: ${invoice.deliveryMethod || 'Livraison par transporteur France Express CXI'}<br>
+              ${invoice.deliveryDate ? `Date prévue: ${new Date(invoice.deliveryDate).toLocaleDateString('fr-FR')}<br>` : ''}
               ${invoice.deliveryNotes ? `Notes: ${invoice.deliveryNotes}` : ''}
             </div>
           </div>

@@ -106,7 +106,13 @@ export class N8nWebhookService {
 
         // NOUVEAUX CHAMPS LIVRAISON - TOUS LES CHAMPS DISPONIBLES
         methode_livraison: invoice.deliveryMethod || '',
+        date_livraison: invoice.deliveryDate || '',
         notes_livraison: invoice.deliveryNotes || '',
+        
+        // 🔍 DEBUG LIVRAISON
+        debug_delivery_method: invoice.deliveryMethod || 'VIDE',
+        debug_delivery_date: invoice.deliveryDate || 'VIDE',
+        debug_delivery_notes: invoice.deliveryNotes || 'VIDE',
 
         // Chèques à venir OU paiements ALMA - CORRESPONDANCE EXACTE AVEC VOTRE JSON N8N
         nombre_cheques: invoice.nombreChequesAVenir || 0,

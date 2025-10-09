@@ -149,6 +149,28 @@ export default function StepLivraison({ onNext, onPrev }: StepProps) {
           </div>
         </section>
 
+        {/* Date de livraison convenue */}
+        <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
+          <h3 className='text-xl font-semibold text-[#477A0C] mb-6'>
+            📅 Date de livraison convenue
+          </h3>
+
+          <div className='bg-blue-50 rounded-xl p-4 mb-4'>
+            <h4 className='font-semibold text-blue-800 mb-2'>💡 Information</h4>
+            <p className='text-blue-700 text-sm'>
+              Sélectionnez la date de livraison convenue avec le client.
+            </p>
+          </div>
+
+          <input
+            type='date'
+            value={livraison.deliveryDate || ''}
+            onChange={e => updateLivraison({ deliveryDate: e.target.value })}
+            className='w-full rounded-xl border-2 border-gray-300 px-6 py-4 text-lg focus:border-[#477A0C] focus:ring-4 focus:ring-[#477A0C]/20 transition-all'
+            min={new Date().toISOString().split('T')[0]}
+          />
+        </section>
+
         {/* Adresse de livraison */}
         <section className='bg-white rounded-2xl shadow-xl p-6 border-2 border-[#477A0C]/20'>
           <h3 className='text-xl font-semibold text-[#477A0C] mb-6'>
