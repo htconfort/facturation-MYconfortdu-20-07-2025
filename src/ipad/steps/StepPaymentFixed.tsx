@@ -189,7 +189,8 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
     <div style={{ 
       width: '100%',
       backgroundColor: '#F2EFE2',
-      paddingBottom: '32px'
+      paddingBottom: '150px',  // Plus d'espace pour forcer le scroll
+      minHeight: '900px'       // Force le contenu à dépasser le cadre de 650px
     }}>
       {/* Header */}
       <div style={{
