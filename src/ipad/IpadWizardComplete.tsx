@@ -54,9 +54,9 @@ export default function IpadWizardComplete() {
   }, [step, hydrated, navigate]);
 
   return (
-    <div data-ui="ipad-wizard-complete" className='relative w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100'>
+    <div data-ui="ipad-wizard-complete" className='relative w-screen min-h-screen overflow-y-auto bg-gradient-to-br from-blue-50 to-indigo-100' style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Wizard principal */}
-      <div className="wizard h-full">
+      <div className="wizard min-h-full">
         <StepsNavigator>
           <WizardSurface
             step={step}
@@ -223,8 +223,8 @@ function WizardSurface({
         </div>
       </div>
 
-      {/* Contenu de l'étape - DOIT avoir min-h-0 + overflow pour que les enfants scrollent ! */}
-      <div className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2' style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Contenu de l'étape - scroll géré par StepsNavigator */}
+      <div className='flex-1 p-2'>
         {renderStep}
       </div>
     </div>

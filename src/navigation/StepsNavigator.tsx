@@ -39,16 +39,16 @@ export default function StepsNavigator({ children }: Props) {
   });
 
   return (
-    <div className='w-full h-screen bg-myconfort-cream flex flex-col overflow-hidden'>
+    <div className='w-full min-h-screen bg-myconfort-cream'>
       {/* Spinner de chargement (mouline) */}
       {isLoading && (
-        <div className='absolute inset-0 flex items-center justify-center z-50 bg-white/80'>
+        <div className='fixed inset-0 flex items-center justify-center z-50 bg-white/80'>
           <div className='animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-myconfort-blue border-opacity-70 shadow-2xl'></div>
         </div>
       )}
 
       {/* Header iPad */}
-      <header className='w-full px-6 py-3 flex items-center justify-between border-b border-myconfort-dark/10 bg-myconfort-cream flex-shrink-0'>
+      <header className='w-full px-6 py-3 flex items-center justify-between border-b border-myconfort-dark/10 bg-myconfort-cream sticky top-0 z-10'>
         <div className='flex items-center gap-4'>
           <h1 className='text-sm font-semibold text-myconfort-dark'>
             iPad Wizard — Étape {Math.min(currentStepIndex + 1, steps.length)}/{steps.length || 0}
@@ -95,8 +95,8 @@ export default function StepsNavigator({ children }: Props) {
         </div>
       )}
 
-      {/* Contenu principal - SCROLL LIBRE comme page d'accueil */}
-      <main className='w-full flex-1 overflow-y-auto overflow-x-hidden' style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Contenu principal */}
+      <main className='w-full pb-24'>
         {children}
       </main>
     </div>
