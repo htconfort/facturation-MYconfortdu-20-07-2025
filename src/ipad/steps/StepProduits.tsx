@@ -170,8 +170,8 @@ export default function StepProduits({
         </p>
       </div>
 
-      {/* 🎯 Contenu principal */}
-      <div className='flex-1 px-4 py-2 flex flex-col pb-24'>
+      {/* 🎯 Contenu principal (scrollable) - min-h-0 est la clé pour le scroll Flexbox ! */}
+      <div className='flex-1 min-h-0 px-4 py-2 overflow-y-auto overflow-x-hidden flex flex-col pb-24' style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Formulaire d'ajout de produit - ultra-compact */}
         <div className='bg-white rounded-lg p-3 border border-myconfort-dark/10 mb-2'>
           <h3 className='text-base font-medium text-myconfort-dark font-manrope mb-2'>
