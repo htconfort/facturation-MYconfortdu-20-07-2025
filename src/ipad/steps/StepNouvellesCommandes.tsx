@@ -25,7 +25,7 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
   };
 
   return (
-    <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative'>
+    <div className='w-full bg-myconfort-cream flex flex-col relative pb-24'>
       {/* Header */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
         <h1 className='text-2xl font-bold text-myconfort-dark'>
@@ -37,7 +37,7 @@ export default function StepNouvellesCommandes({ onPrev }: StepProps) {
       </div>
 
       {/* Contenu principal */}
-      <div className='flex-1 px-6 py-8 flex flex-col justify-center items-center'>
+      <div className='flex-1 px-6 py-8 flex flex-col justify-center items-center min-h-[400px]'>
         {isResetting ? (
           /* État de chargement */
           <div className='text-center space-y-6'>

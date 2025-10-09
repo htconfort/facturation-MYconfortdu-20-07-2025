@@ -65,13 +65,13 @@ export default function StepClientNoScroll({ onNext, onPrev }: StepProps) {
   };
 
   return (
-    <div className='min-h-screen w-full bg-myconfort-cream' style={{
+    <div className='w-full bg-myconfort-cream' style={{
       WebkitTouchCallout: 'none',
       WebkitUserSelect: 'none',
       userSelect: 'none'
     }}>
       {/* Conteneur centré */}
-      <div className='mx-auto w-full max-w-6xl px-4 pt-6 pb-6'>
+      <div className='mx-auto w-full max-w-6xl px-4 pt-6 pb-24'>
         {/* Header */}
         <div className='px-4 py-2 border-b border-myconfort-dark/10 mb-4'>
           <h1 className='text-3xl font-bold text-myconfort-dark font-manrope'>

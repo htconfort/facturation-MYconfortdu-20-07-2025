@@ -43,8 +43,8 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
   };
 
   return (
-    <div className='w-full h-full bg-myconfort-cream flex flex-col overflow-hidden relative p-6'>
-      <div className='flex-1 flex items-center justify-center'>
+    <div className='w-full bg-myconfort-cream flex flex-col relative p-6 pb-24'>
+      <div className='flex-1 flex items-center justify-center min-h-[400px]'>
         {signature?.dataUrl ? (
           <div className='bg-white rounded-xl border-2 border-gray-300 p-6 text-center'>
             <div className='text-lg font-semibold text-myconfort-dark mb-4'>
@@ -81,7 +81,7 @@ export default function StepSignatureNoScroll({ onNext, onPrev }: StepProps) {
       </div>
 
       {/* Footer navigation */}
-      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4'>
+      <div className='flex justify-center gap-4 mt-8'>
         <button
           onClick={onPrev}
           className='px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl min-h-[56px] min-w-[120px]'

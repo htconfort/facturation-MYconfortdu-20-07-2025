@@ -284,10 +284,10 @@ export default function StepRecapIpadOptimized({
   });
 
   return (
-    <div className="h-full flex flex-col bg-[#F2EFE2] overflow-hidden">
+    <div className="w-full flex flex-col bg-[#F2EFE2] pb-24">
       
       {/* Header ultra-compact */}
-      <div className="bg-white border-b border-[#477A0C]/20 p-2 flex-shrink-0">
+      <div className="bg-white border-b border-[#477A0C]/20 p-2">
         <div className="text-center">
           <h2 className="text-lg font-bold text-[#477A0C]">
             📋 Récap Final - {invoiceNumber || 'En cours de génération...'}
@@ -296,8 +296,8 @@ export default function StepRecapIpadOptimized({
       </div>
 
       {/* CONTENU PRINCIPAL - GRILLE 3 COLONNES - TOUT VISIBLE */}
-      <div className="flex-1 p-3 overflow-hidden">
-        <div className="h-full grid grid-cols-3 gap-3">
+      <div className="flex-1 p-3">
+        <div className="grid grid-cols-3 gap-3">
           
           {/* COLONNE 1: Infos Facture + Client */}
           <div className="space-y-3 overflow-hidden">
