@@ -952,7 +952,7 @@ function ChequesDetailsPage({
       height: '100%', 
       backgroundColor: '#F2EFE2',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'auto'  // Permet le scroll sur iPad
     }}>
       {/* Header fixe */}
       <div style={{
@@ -985,11 +985,8 @@ function ChequesDetailsPage({
 
       {/* Contenu scrollable */}
       <div style={{
-        position: 'absolute',
-        top: '80px',                     // Header normal
-        left: 0,
-        right: 0,
-        bottom: '140px',                 // Footer plus haut pour laisser de l'espace
+        marginTop: '80px',               // Espace pour le header
+        marginBottom: '140px',           // Espace pour le footer
         padding: '24px',
         overflowY: 'scroll',             // Force le scroll vertical
         overflowX: 'hidden',
@@ -998,7 +995,8 @@ function ChequesDetailsPage({
         flexDirection: 'column',
         gap: '24px',
         paddingBottom: '80px',           // Espace important pour les notes
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        minHeight: 'calc(100vh - 220px)' // Hauteur minimale garantie
       }}>
         {/* Tabs 2..10 */}
         <div>
