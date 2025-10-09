@@ -59,9 +59,9 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full bg-myconfort-cream pb-24'>
+    <div className='w-full h-full bg-myconfort-cream flex flex-col'>
       {/* Header */}
-      <div className='px-6 py-4 border-b border-myconfort-dark/10'>
+      <div className='px-6 py-4 border-b border-myconfort-dark/10 flex-shrink-0'>
         <div>
           <h1 className='text-2xl font-bold text-myconfort-dark'>
             🚚 Modalités de Livraison
@@ -73,8 +73,8 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
         </div>
       </div>
 
-      {/* Contenu */}
-      <div className='px-6 py-4'>
+      {/* Contenu scrollable */}
+      <div className='flex-1 min-h-0 px-6 py-4 pb-24 overflow-y-auto overflow-x-hidden' style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Résumé rapide */}
         <div className='bg-myconfort-green/10 p-4 rounded-xl border border-myconfort-green/30 mb-4'>
           <div className='grid grid-cols-2 gap-4 text-center'>
