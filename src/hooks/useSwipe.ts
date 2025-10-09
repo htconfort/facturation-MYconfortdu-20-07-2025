@@ -50,8 +50,21 @@ export function useSwipe({
 
     const onMove = (e: TouchEvent) => {
       if (!active.current) return;
-      if (preventScrollOnX && (axis === 'x' || axis === 'both'))
-        e.preventDefault();
+      
+      // Seulement bloquer si le mouvement est principalement horizontal
+      if (preventScrollOnX && (axis === 'x' || axis === 'both')) {
+        const t = e.touches?.[0];
+        if (!t) return;
+        
+        const dx = Math.abs(t.clientX - startX.current);
+        const dy = Math.abs(t.clientY - startY.current);
+        
+        // Ne bloquer que si le mouvement horizontal domine
+        if (dx > dy && dx > 10) {
+          e.preventDefault(); // Bloque le scroll horizontal uniquement
+        }
+        // Sinon, laisse le scroll vertical fonctionner naturellement
+      }
     };
 
     const onEnd = (e: TouchEvent) => {
