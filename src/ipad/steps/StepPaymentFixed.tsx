@@ -188,24 +188,19 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
   return (
     <div style={{ 
       width: '100%', 
-      height: '100svh',             // <- au lieu de 100%
+      height: '100vh',
       backgroundColor: '#F2EFE2',
-      position: 'relative',
-      overflow: 'visible',           // <- NE PAS bloquer le scroll interne
-      WebkitTapHighlightColor: 'transparent'
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
       {/* Header fixe */}
       <div style={{
         padding: '8px 16px',
         borderBottom: '1px solid rgba(20, 40, 29, 0.1)',
         backgroundColor: '#F2EFE2',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        height: HEADER_H,            // <-- fige la hauteur pour calc précis
-        boxSizing: 'border-box'
+        flexShrink: 0,
+        zIndex: 10
       }}>
         <h1 style={{
           fontSize: '24px',
@@ -225,21 +220,14 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         </p>
       </div>
 
-      {/* --- CONTENU SCROLLABLE (calé entre header et footer) --- */}
+      {/* --- CONTENU SCROLLABLE --- */}
       <div style={{
-        position: 'absolute',
-        top: HEADER_H,                              // 80px
-        left: 0,
-        right: 0,
-        bottom: FOOTER_H,                           // 100px
+        flex: 1,
         padding: '16px',
-        overflowY: 'auto',                         // <- Scroll automatique si nécessaire
+        overflowY: 'auto',
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
-        overscrollBehavior: 'contain',
-        paddingBottom: `calc(${FOOTER_H}px + 32px)`, // espace suffisant pour les notes
-        boxSizing: 'border-box',
-        minHeight: 'calc(100vh - 180px)'            // hauteur minimale garantie
+        paddingBottom: '32px'
       }}>
         {/* Résumé */}
         <div style={{
@@ -647,23 +635,66 @@ export default function StepPaymentFixed({ onNext, onPrev }: StepProps) {
         {/* <div style={{ height: '100px' }} /> */}
       </div>
 
-      {/* Footer fixe aligné Step 3 */}
-      <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex gap-4'>
+      {/* Footer fixe */}
+      <div style={{
+        backgroundColor: '#F2EFE2',
+        borderTop: '1px solid rgba(20, 40, 29, 0.1)',
+        padding: '16px',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        flexShrink: 0,
+        zIndex: 10
+      }}>
         <button
           onClick={onPrev}
-          className='px-6 py-3 rounded-full bg-white border-2 border-gray-300 text-base font-medium font-manrope text-myconfort-dark hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl'
+          style={{
+            padding: '12px 24px',
+            borderRadius: '25px',
+            backgroundColor: 'white',
+            border: '2px solid #D1D5DB',
+            fontSize: '16px',
+            fontWeight: '500',
+            color: '#14281D',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s'
+          }}
         >
           ← Précédent
         </button>
-        <div className='flex flex-col items-center'>
-          <div className='bg-white px-3 py-1 rounded-full shadow-lg mb-1'>
-            <div className='text-xs text-gray-500 font-manrope'>Étape 4/7</div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '4px 12px',
+            borderRadius: '25px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            fontSize: '12px',
+            color: '#6B7280'
+          }}>
+            Étape 4/7
           </div>
         </div>
         <button
           onClick={isValidPayment ? onNext : () => {}}
           disabled={!isValidPayment}
-          className={`px-6 py-3 rounded-full text-base font-medium font-manrope transition-all shadow-lg hover:shadow-xl ${isValidPayment ? 'bg-myconfort-green text-white hover:bg-myconfort-green/90' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          style={{
+            padding: '12px 24px',
+            borderRadius: '25px',
+            backgroundColor: isValidPayment ? '#477A0C' : '#D1D5DB',
+            color: isValidPayment ? 'white' : '#6B7280',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: isValidPayment ? 'pointer' : 'not-allowed',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s'
+          }}
           title={!isValidPayment && selectedMethod === 'Chèque à venir' && !chequesConfigured ? 'Configurer les chèques (1x..10x)' : ''}
         >
           Suivant →
