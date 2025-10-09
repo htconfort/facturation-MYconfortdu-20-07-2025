@@ -949,20 +949,18 @@ function ChequesDetailsPage({
   return (
     <div style={{ 
       width: '100%', 
-      height: '100%', 
+      height: '100vh',                  // Hauteur viewport complète
       backgroundColor: '#F2EFE2',
-      position: 'relative',
-      overflow: 'auto'  // Permet le scroll sur iPad
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'                 // Pas de scroll sur le conteneur principal
     }}>
       {/* Header fixe */}
       <div style={{
         padding: '16px 24px',
         borderBottom: '1px solid rgba(245, 158, 11, 0.3)',
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
+        flexShrink: 0,                   // Ne pas rétrécir
         zIndex: 10
       }}>
         <h1 style={{
@@ -985,18 +983,15 @@ function ChequesDetailsPage({
 
       {/* Contenu scrollable */}
       <div style={{
-        marginTop: '80px',               // Espace pour le header
-        marginBottom: '140px',           // Espace pour le footer
+        flex: 1,                         // Prend tout l'espace disponible
         padding: '24px',
-        overflowY: 'scroll',             // Force le scroll vertical
+        overflowY: 'auto',               // Scroll automatique
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
         gap: '24px',
-        paddingBottom: '80px',           // Espace important pour les notes
-        boxSizing: 'border-box',
-        minHeight: 'calc(100vh - 220px)' // Hauteur minimale garantie
+        paddingBottom: '120px'           // Espace pour le footer
       }}>
         {/* Tabs 2..10 */}
         <div>
@@ -1231,19 +1226,14 @@ function ChequesDetailsPage({
 
       {/* Footer fixe */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderTop: '1px solid rgba(245, 158, 11, 0.3)',
         padding: '20px',
         display: 'flex',
         justifyContent: 'center',
         gap: '16px',
-        zIndex: 10,
-        height: '120px',                // Hauteur fixe du footer
-        boxSizing: 'border-box'
+        flexShrink: 0,                   // Ne pas rétrécir
+        zIndex: 10
       }}>
         <button
           onClick={onBack}
