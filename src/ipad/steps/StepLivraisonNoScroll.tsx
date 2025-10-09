@@ -59,7 +59,7 @@ export default function StepLivraisonNoScroll({ onNext, onPrev }: StepProps) {
   }
 
   return (
-    <div className='w-full bg-myconfort-cream pb-32' style={{ minHeight: '900px' }}>
+    <div className='w-full bg-myconfort-cream pb-24'>
       {/* Header */}
       <div className='px-6 py-4 border-b border-myconfort-dark/10'>
         <div>
