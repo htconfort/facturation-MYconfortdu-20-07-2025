@@ -173,7 +173,7 @@ export default function StepRecapIpadOptimized({
         setPostSigStatus('running');
         console.log('POSTSIG:start', { invoiceNumber, hasSignature: true });
         // Sauvegarde locale sûre
-        saveInvoice(invoice);
+        await saveInvoice(invoice);
         console.log('POSTSIG:saved');
         // Génération PDF (optimisation signature journale en interne)
         console.log('POSTSIG:optimized (via PDFService)');
@@ -197,7 +197,7 @@ export default function StepRecapIpadOptimized({
   const handleSaveInvoice = async () => {
     try {
       setIsLoading(true);
-      saveInvoice(invoice);
+      await saveInvoice(invoice);
       setActionHistory(prev => [...prev, `Facture ${invoice.invoiceNumber} enregistrée`]);
     } catch (error) {
       console.error('Erreur sauvegarde:', error);

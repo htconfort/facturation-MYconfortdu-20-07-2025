@@ -1,4 +1,5 @@
 import { Client, Invoice } from '../types';
+import { invoiceService } from './supabaseService';
 
 export const saveClients = (clients: Client[]): void => {
   localStorage.setItem('myconfortClients', JSON.stringify(clients));
@@ -47,7 +48,8 @@ export const loadInvoices = (): Invoice[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-export const saveInvoice = (invoice: Invoice): void => {
+export const saveInvoice = async (invoice: Invoice): Promise<void> => {
+  // 1. Sauvegarde locale (localStorage) - toujours en premier pour garantie immédiate
   const invoices = loadInvoices();
   const existingIndex = invoices.findIndex(
     inv => inv.invoiceNumber === invoice.invoiceNumber
@@ -68,6 +70,18 @@ export const saveInvoice = (invoice: Invoice): void => {
   }
 
   saveInvoices(invoices);
+  
+  // 2. Sauvegarde Supabase (asynchrone) - pour persistance permanente
+  try {
+    // TODO: Adapter le format Invoice de l'app vers le format Supabase
+    // Pour l'instant, on sauvegarde juste dans localStorage
+    // La migration complète vers Supabase nécessite un mapping des champs
+    console.log('📝 Facture sauvegardée dans localStorage:', invoice.invoiceNumber);
+    console.log('⚠️ Sauvegarde Supabase: À implémenter (mapping Invoice → InvoiceInsert)');
+  } catch (error) {
+    console.error('❌ Erreur sauvegarde Supabase (non bloquant):', error);
+    // Ne pas bloquer si Supabase échoue - localStorage est la sauvegarde principale
+  }
 };
 
 export const deleteInvoice = (invoiceNumber: string): void => {
