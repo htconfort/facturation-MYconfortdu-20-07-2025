@@ -350,8 +350,8 @@ export const ProductsListModal: React.FC<ProductsListModalProps> = ({
                     </h3>
                   </div>
 
-                  <div className='overflow-x-auto'>
-                    <table className='w-full'>
+                  <div className='overflow-x-auto' style={{ minWidth: '900px' }}>
+                    <table className='w-full' style={{ minWidth: '900px' }}>
                       <thead>
                         <tr className='bg-gray-50 border-b border-gray-300'>
                           <th className='px-4 py-3 text-left font-bold text-black'>

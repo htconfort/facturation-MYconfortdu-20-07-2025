@@ -26,8 +26,8 @@ export const ClientListModal: React.FC<ClientListModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title='Liste des Clients'>
-      <div className='overflow-x-auto'>
-        <table className='w-full border-collapse'>
+      <div className='overflow-x-auto' style={{ minWidth: '800px' }}>
+        <table className='w-full border-collapse' style={{ minWidth: '800px' }}>
           <thead>
             <tr className='bg-[#477A0C] text-[#F2EFE2]'>
               <th className='border px-4 py-2 text-left font-bold'>Nom</th>

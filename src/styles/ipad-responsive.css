@@ -2,6 +2,66 @@
    RESPONSIVE IPAD OPTIMISÉ AVEC SCALE DYNAMIQUE
    =============================================== */
 
+/* Scroll latéral pour les tableaux sur iPad */
+@media (max-width: 1024px) and (min-width: 769px) {
+  /* Onglet facture */
+  .overflow-x-auto {
+    overflow-x: auto !important;
+    overflow-y: visible;
+  }
+
+  /* Onglet clients */
+  .overflow-x-auto {
+    overflow-x: auto !important;
+  }
+
+  /* Onglet produits */
+  .overflow-x-auto {
+    overflow-x: auto !important;
+  }
+
+  /* Largeur minimale pour permettre le scroll */
+  table {
+    min-width: 800px;
+  }
+
+  /* Scroll personnalisé pour iPad */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #477A0C 0%, #5A8F0F 100%);
+    border-radius: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #3B6B08 0%, #4A7F0C 100%);
+  }
+}
+
+/* Responsive pour petits écrans */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    overflow-x: auto !important;
+  }
+
+  table {
+    min-width: 700px;
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+}
+
 /* Variables pour les dimensions iPad */
 :root {
   --ipad-portrait-width: 768px;
