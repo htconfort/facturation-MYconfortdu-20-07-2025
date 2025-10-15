@@ -78,7 +78,7 @@ export default defineConfig(({ command }) => ({
     server: {
         proxy: {
             '/api/n8n': {
-                target: 'https://n8n.srv765811.hstgr.cloud',
+                target: 'https://n8n.myconfort.fr',
                 changeOrigin: true,
                 rewrite: function (path) { return path.replace(/^\/api\/n8n/, ''); },
                 secure: true,

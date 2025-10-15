@@ -27,7 +27,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
   onError,
 }) => {
   const [webhookUrl, setWebhookUrl] = useState(
-    'https://n8n.srv765811.hstgr.cloud/webhook-test/facture-myconfort'
+    'https://n8n.myconfort.fr/webhook-test/facture-myconfort'
   );
   const [folderId, setFolderId] = useState('1hZsPW8TeZ6s3AlLesb1oLQNbI3aJY3p-');
   const [isSaving, setIsSaving] = useState(false);
@@ -201,7 +201,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                 type='text'
                 value={webhookUrl}
                 onChange={e => setWebhookUrl(e.target.value)}
-                placeholder='https://n8n.srv765811.hstgr.cloud/webhook-test/facture-myconfort'
+                placeholder='https://n8n.myconfort.fr/webhook-test/facture-myconfort'
                 className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black'
                 required
               />

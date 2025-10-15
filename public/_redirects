@@ -1,5 +1,5 @@
 # Redirection pour l'API N8N (DOIT ÊTRE AVANT LA RÈGLE SPA)
-/api/n8n/*  https://n8n.srv765811.hstgr.cloud/:splat  200
+/api/n8n/*  https://n8n.myconfort.fr/:splat  200
 
 # Redirection pour Single Page Application
 /*    /index.html   200

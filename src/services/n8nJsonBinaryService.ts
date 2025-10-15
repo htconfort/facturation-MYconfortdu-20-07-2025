@@ -12,7 +12,7 @@ import { N8nBlueprintAdapter } from './n8nBlueprintAdapter';
  */
 export class N8nJsonBinaryService {
   private static readonly WEBHOOK_URL =
-    'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle';
+    'https://n8n.myconfort.fr/webhook/facture-universelle';
   private static readonly TIMEOUT_MS = 30000;
 
   /**

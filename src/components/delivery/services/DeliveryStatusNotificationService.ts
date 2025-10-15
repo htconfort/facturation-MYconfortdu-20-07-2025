@@ -3,7 +3,7 @@ import { DeliveryStatus } from '../DeliveryStatusSelector';
 // Service pour notifier les changements vers N8N
 export class DeliveryStatusNotificationService {
   private static webhookUrl =
-    'https://n8n.srv765811.hstgr.cloud/webhook/sync/status-update';
+    'https://n8n.myconfort.fr/webhook/sync/status-update';
 
   static async notifyStatusChange(
     invoiceNumber: string,

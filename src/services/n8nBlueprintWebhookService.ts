@@ -8,12 +8,12 @@ import { N8nBlueprintAdapter } from './n8nBlueprintAdapter';
  * Ce service utilise votre blueprint "Workflow Facture Universel"
  * et envoie les données exactement dans le format attendu par N8N.
  *
- * URL de votre webhook : https://n8n.srv765811.hstgr.cloud/webhook/...
+ * URL de votre webhook : https://n8n.myconfort.fr/webhook/...
  */
 export class N8nBlueprintWebhookService {
   // 🎯 URL de votre webhook N8N (corrigée après scan - cette URL est ACTIVE)
   private static readonly WEBHOOK_URL =
-    'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle';
+    'https://n8n.myconfort.fr/webhook/facture-universelle';
   private static readonly TIMEOUT_MS = 30000; // 30 secondes
 
   /**

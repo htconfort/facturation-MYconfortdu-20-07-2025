@@ -82,7 +82,7 @@ class ConfigService {
       n8n: {
         webhookUrl:
           import.meta.env.VITE_N8N_WEBHOOK_URL ||
-          'https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle',
+          'https://n8n.myconfort.fr/webhook/facture-universelle',
         secret: import.meta.env.VITE_N8N_WEBHOOK_SECRET,
       },
 

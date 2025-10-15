@@ -432,7 +432,7 @@ export const DebugCenter: React.FC<DebugCenterProps> = ({
                 <div className='text-sm text-gray-600 space-y-1'>
                   <p>
                     <strong>URL:</strong>{' '}
-                    https://n8n.srv765811.hstgr.cloud/webhook/facture-universelle
+                    https://n8n.myconfort.fr/webhook/facture-universelle
                   </p>
                   <p>
                     <strong>Méthode:</strong> POST
